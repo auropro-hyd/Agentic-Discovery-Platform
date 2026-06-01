@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic Input Set — Demand Planning & Distribution</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #1a1a1e; color: #f0f0f2;
+    padding: 40px; line-height: 1.6;
+  }
+  .page { max-width: 1000px; margin: 0 auto; }
+
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .meta { font-size: 12px; opacity: 0.5; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; opacity: 0.65; margin-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; }
+
+  /* FINDINGS LEGEND */
+  .legend {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .legend-item {
+    border-radius: 6px; padding: 8px 14px; font-size: 12px; line-height: 1.5;
+  }
+  .leg-f1 { background: rgba(255,100,80,0.12);  border-left: 3px solid rgba(255,100,80,0.5); }
+  .leg-f2 { background: rgba(255,140,0,0.12);   border-left: 3px solid rgba(255,140,0,0.5); }
+  .leg-f3 { background: rgba(255,180,0,0.10);   border-left: 3px solid rgba(255,180,0,0.45); }
+  .leg-f4 { background: rgba(80,200,120,0.10);  border-left: 3px solid rgba(80,200,120,0.4); }
+  .leg-title { font-weight: 700; font-size: 11px; margin-bottom: 2px; }
+  .leg-body { font-size: 11px; opacity: 0.75; }
+
+  /* CATEGORY SECTION */
+  .category { margin-bottom: 32px; }
+  .cat-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .cat-badge {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; border-radius: 4px; padding: 3px 9px;
+  }
+  .cat-title { font-size: 14px; font-weight: 700; }
+  .cat-sub { font-size: 12px; opacity: 0.55; margin-left: auto; }
+
+  .cb-struct  { background: rgba(80,140,255,0.2);  color: #5090ff; }
+  .cb-semi    { background: rgba(160,100,255,0.2); color: #b088ff; }
+  .cb-sys     { background: rgba(80,200,180,0.2);  color: #50c8b8; }
+  .cb-unstruct{ background: rgba(255,180,0,0.2);   color: #f5c842; }
+  .cb-comp    { background: rgba(255,140,0,0.2);   color: #ff9040; }
+
+  /* DOC CARDS */
+  .doc-grid { display: flex; flex-direction: column; gap: 8px; }
+  .doc-card {
+    border-radius: 8px; padding: 14px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 12px;
+    align-items: start;
+  }
+  .doc-num {
+    font-size: 13px; font-weight: 800; opacity: 0.3;
+    padding-top: 1px;
+  }
+  .doc-body { }
+  .doc-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .doc-format { font-size: 11px; opacity: 0.5; margin-bottom: 6px; }
+  .doc-desc { font-size: 12px; opacity: 0.8; line-height: 1.65; margin-bottom: 8px; }
+  .doc-seeds { display: flex; flex-wrap: wrap; gap: 5px; }
+  .seed-tag {
+    border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  .s-f1 { background: rgba(255,100,80,0.18);  color: #ff7070; }
+  .s-f2 { background: rgba(255,140,0,0.18);   color: #ff9040; }
+  .s-f3 { background: rgba(255,180,0,0.15);   color: #f5c842; }
+  .s-f4 { background: rgba(80,200,120,0.15);  color: #50c878; }
+  .s-cl { background: rgba(160,100,255,0.15); color: #b088ff; }
+
+  .doc-meta { text-align: right; flex-shrink: 0; }
+  .doc-size { font-size: 11px; opacity: 0.45; margin-bottom: 4px; white-space: nowrap; }
+  .conf-badge {
+    font-size: 10px; font-weight: 700; border-radius: 4px;
+    padding: 2px 8px; white-space: nowrap;
+  }
+  .conf-grn { background: rgba(80,200,120,0.15); color: #50c878; }
+  .conf-amb { background: rgba(255,180,0,0.15);  color: #f5c842; }
+  .conf-red { background: rgba(255,100,80,0.15); color: #ff7070; }
+
+  /* ENGINEERING NOTES */
+  .eng-note {
+    border-radius: 5px; padding: 6px 10px; margin-top: 6px;
+    background: rgba(255,255,255,0.04); border-left: 2px solid rgba(255,255,255,0.15);
+    font-size: 11px; opacity: 0.75; line-height: 1.6;
+  }
+  .en-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.6; margin-bottom: 2px; }
+
+  /* SUMMARY TABLE */
+  .summary-table {
+    width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 24px;
+  }
+  .summary-table th {
+    text-align: left; padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.5;
+  }
+  .summary-table td {
+    padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
+    vertical-align: top;
+  }
+  .summary-table tr:last-child td { border-bottom: none; }
+
+  hr { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 32px 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Synthetic Input Set — Demand Planning & Distribution</h1>
+  <div class="meta">12 artefacts · 5 input categories · 3 pre-engineered findings + 1 cross-domain pattern</div>
+  <div class="subtitle">Every document is designed to contribute to at least one finding. The findings are only surfaced when the platform reads multiple inputs together — no single document reveals a finding on its own.</div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item leg-f1">
+      <div class="leg-title">🔴 Finding 1 — Forecast Ownership Conflict</div>
+      <div class="leg-body">3 systems, same SKUs, same period, no reconciliation. High-severity. Blocks analysis.</div>
+    </div>
+    <div class="legend-item leg-f2">
+      <div class="leg-title">🔴 Finding 2 — S&OP Governance Gap</div>
+      <div class="leg-body">Documented process contradicts actual system behaviour. 34% override rate. High-severity.</div>
+    </div>
+    <div class="legend-item leg-f3">
+      <div class="leg-title">🟡 Finding 3 — DC Allocation Model Unverified</div>
+      <div class="leg-body">Referenced in docs, no system evidence. Possible TSA dependency. Low-severity, amber.</div>
+    </div>
+    <div class="legend-item leg-f4">
+      <div class="leg-title">🟢 Cross-Domain — Forecast Miss → O2C Impact</div>
+      <div class="leg-body">Demand underrun >15% → fulfilment drops 12–15 days later. Detected across WMS + O2C signals.</div>
+    </div>
+  </div>
+
+  <!-- ── STRUCTURED DOCUMENTS ─────────────────────── -->
+  <div class="category">
+    <div class="cat-header">
+      <span class="cat-badge cb-struct">Structured</span>
+      <span class="cat-title">Process Documents, SOPs, Policies</span>
+      <span class="cat-sub">5 documents</span>
+    </div>
+    <div class="doc-grid">
+
+      <div class="doc-card">
+        <div class="doc-num">01</div>
+        <div class="doc-body">
+          <div class="doc-name">Demand Planning Policy — Opella Europe</div>
+          <div class="doc-format">PDF · 5 pages · Formal policy document</div>
+          <div class="doc-desc">Describes Opella Europe's demand forecasting methodology: 18-month rolling horizon, monthly revision cycle, statistical baseline + commercial input model. Explicitly states SAP IBP as the demand planning system. Defines Commercial Planning as the accountable function for forecast accuracy. No mention of a regional model or local market tool.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            States SAP IBP as the single planning system → contradiction with system signals (docs 08, 09) which show two additional forecast data sources. States Commercial accountability → contradiction with system audit trail (doc 08) showing Operations overrides.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 seed</span>
+            <span class="seed-tag s-f2">Finding 2 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~5 pages</div>
+          <div class="conf-badge conf-amb">Amber after cross-ref</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">02</div>
+        <div class="doc-body">
+          <div class="doc-name">S&OP Process Document — Opella Europe</div>
+          <div class="doc-format">PDF · 7 pages · Process SOP</div>
+          <div class="doc-desc">Documents the monthly S&OP cycle in full: pre-S&OP demand review (Week 1), Commercial planning meeting (Week 2), Operations alignment meeting (Week 3), Executive S&OP (Week 4). Defines inputs, outputs, and decision rights at each step. Commercial Planning holds final forecast approval. Operations provides capacity constraint input only. No escalation or override path documented.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            Explicitly documents Commercial as the final approval authority with no Operations override path → direct contradiction with the 34% override rate visible in the SAP IBP audit trail (doc 08).
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f2">Finding 2 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~7 pages</div>
+          <div class="conf-badge conf-amb">Amber after cross-ref</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">03</div>
+        <div class="doc-body">
+          <div class="doc-name">S&OP RACI Matrix — Opella Europe</div>
+          <div class="doc-format">PDF · 1 page · RACI table</div>
+          <div class="doc-desc">Single-page RACI covering the S&OP process. Key assignments: Demand Forecast (Accountable: Commercial Planning VP; Responsible: Demand Planning Manager; Consulted: Operations Director; Informed: CFO). Final Forecast Approval (Accountable: Commercial Planning VP). Forecast Override (not listed as a process step — no RACI row exists for it).</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            Absence of a "Forecast Override" row in the RACI is the signal — the platform should flag that an undocumented action (override) exists in system evidence but has no RACI owner. This absence is as important as what's present.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f2">Finding 2 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~1 page</div>
+          <div class="conf-badge conf-red">Conflicts with system evidence</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">04</div>
+        <div class="doc-body">
+          <div class="doc-name">Distribution Operations Runbook — Opella Europe</div>
+          <div class="doc-format">PDF · 6 pages · Operations runbook</div>
+          <div class="doc-desc">Covers DC receiving, put-away, pick & pack, dispatch, and market allocation. Section 4.2 "DC-to-Market Inventory Allocation" explicitly states: "Allocation decisions are made using the DC Allocation Model, which calculates optimal distribution quantities by market based on demand signals and DC stock levels." No system name, vendor, or access details provided for the DC Allocation Model.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            "DC Allocation Model" is referenced as an active tool but no system evidence will be provided for it across any input. Platform will flag as amber: tool referenced in documentation with no system signal, TSA status unknown. Do not include any system export or log for this tool.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f3">Finding 3 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~6 pages</div>
+          <div class="conf-badge conf-amb">Amber — no system evidence</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">05</div>
+        <div class="doc-body">
+          <div class="doc-name">Supply Chain Application Landscape Overview</div>
+          <div class="doc-format">PDF · 3 pages · System inventory document</div>
+          <div class="doc-desc">Summarises the supply chain application portfolio post-carve-out. Listed systems: SAP IBP (demand & supply planning), SAP S/4HANA (ERP, inventory, procurement), WMS (warehouse management — vendor unnamed), TMS (transport management — vendor unnamed), SAP BW/4HANA (reporting & analytics). Demand planning section references SAP IBP only — no mention of any regional model or local market forecasting tool.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            Omitting the regional forecast model and local market tool from the official system inventory is intentional. The platform detects the gap when it cross-references this document against the actual system exports in docs 09 and 10.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 seed</span>
+            <span class="seed-tag s-f3">Finding 3 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~3 pages</div>
+          <div class="conf-badge conf-amb">Amber — incomplete inventory</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SEMI-STRUCTURED ───────────────────────────── -->
+  <div class="category">
+    <div class="cat-header">
+      <span class="cat-badge cb-semi">Semi-Structured</span>
+      <span class="cat-title">Meeting Transcripts & Review Notes</span>
+      <span class="cat-sub">2 documents</span>
+    </div>
+    <div class="doc-grid">
+
+      <div class="doc-card">
+        <div class="doc-num">06</div>
+        <div class="doc-body">
+          <div class="doc-name">S&OP Monthly Review Transcript — March 2026</div>
+          <div class="doc-format">Text document · ~2,400 words · Meeting transcript</div>
+          <div class="doc-desc">Formatted transcript of the Week 3 Operations alignment meeting. Participants: Commercial Planning VP, Demand Planning Manager, Operations Director, Supply Chain Analyst. Key moments: (1) Operations Director challenges the Commercial forecast for France — "the regional model is showing 18% above what IBP has"; (2) Commercial Planning VP defers, Operations Director revises the number; (3) no formal sign-off process visible — decision made verbally. Ends with action: "Demand Planner to update IBP with revised figure."</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            "The regional model" surfaces for the first time in an informal conversational reference — not a formal document. This is how real shadow systems appear in evidence. The override happens verbally with no documented approval, consistent with the 34% system-level pattern. Both Finding 1 and Finding 2 are seeded here through natural conversation, not explicit statement.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 seed</span>
+            <span class="seed-tag s-f2">Finding 2 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~2,400 words</div>
+          <div class="conf-badge conf-amb">Amber — informal evidence</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">07</div>
+        <div class="doc-body">
+          <div class="doc-name">Regional Demand Review Notes — Europe Q1 2026</div>
+          <div class="doc-format">Text document · ~800 words · Meeting notes</div>
+          <div class="doc-desc">Notes from the European Commercial team's quarterly demand review. References include: "adjusted the IBP numbers in our local planning tool before uploading"; "IBP still runs on Sanofi's forecasting logic — not calibrated for our promotional calendar"; "we've been maintaining our own model since the carve-out because IBP doesn't reflect pharmacy channel dynamics." Three different analysts from France, Germany, and Benelux each reference local adjustments to IBP figures.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            This is the clearest evidence of the local market tool and the motivation behind it. "Adjusted the IBP numbers in our local planning tool" confirms the tool exists and is actively used. The pharma-vs-FMCH friction is explicit here — adds business context to Finding 1 beyond just a data conflict.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~800 words</div>
+          <div class="conf-badge conf-amb">Amber — informal evidence</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SYSTEM-LEVEL SIGNALS ──────────────────────── -->
+  <div class="category">
+    <div class="cat-header">
+      <span class="cat-badge cb-sys">System Signals</span>
+      <span class="cat-title">Audit Logs, Exports & Event Data</span>
+      <span class="cat-sub">3 documents</span>
+    </div>
+    <div class="doc-grid">
+
+      <div class="doc-card">
+        <div class="doc-num">08</div>
+        <div class="doc-body">
+          <div class="doc-name">SAP IBP Audit Log — European Demand Forecasts</div>
+          <div class="doc-format">CSV · 847 records · 12 months (Apr 2025 – Mar 2026)</div>
+          <div class="doc-desc">Forecast record log from SAP IBP. Fields: SKU, market, forecast_version, forecast_qty, created_by, created_date, last_modified_by, last_modified_date, modification_type. Covers Allegra (allergy), Doliprane (pain), Dulcolax (digestive), Buscopan (digestive) across FR, DE, BE, NL, IT, ES, UK. Key signal: 34% of records show last_modified_by as an Operations user with modification_type = "manual_override" — no approval_reference field populated for these records.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            This is the primary evidence for Finding 2. The 34% override rate is visible in the data. Cross-referenced against docs 02 and 03 (SOP + RACI), the platform surfaces the contradiction: overrides happen at scale with no documented process. Also: forecast_qty values for shared SKUs differ from docs 09 and 10, seeding Finding 1.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 seed</span>
+            <span class="seed-tag s-f2">Finding 2 evidence</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">847 rows</div>
+          <div class="conf-badge conf-red">Contradicts process docs</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">09</div>
+        <div class="doc-body">
+          <div class="doc-name">Regional Forecast Model Export — Europe</div>
+          <div class="doc-format">CSV · 203 records · 12 months (Apr 2025 – Mar 2026)</div>
+          <div class="doc-desc">Export from the regional forecast model maintained by the European Commercial team. Fields: SKU, market, forecast_qty, adjusted_qty, adjustment_reason, analyst, export_date. Covers same SKU/market combinations as doc 08 for FR, DE, BE, NL only. forecast_qty values differ from IBP for 71% of shared SKU-market combinations. adjustment_reason field contains free-text entries: "pharmacy channel uplift", "promo impact", "IBP baseline too conservative".</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            Confirmed second forecast data source. Numbers diverge from IBP. System not listed in the official application landscape (doc 05) — platform flags the discrepancy. The free-text adjustment_reason fields add narrative richness and confirm the pharma-vs-FMCH friction from doc 07.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 evidence</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">203 rows</div>
+          <div class="conf-badge conf-red">Undocumented system</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">10</div>
+        <div class="doc-body">
+          <div class="doc-name">WMS Distribution Event Log — Opella European DCs</div>
+          <div class="doc-format">JSON · ~1,200 events · 12 months (Apr 2025 – Mar 2026)</div>
+          <div class="doc-desc">Warehouse management system event log covering two European DCs (France, Germany). Event types: inbound_receipt, putaway_complete, pick_request, dispatch_confirmed, stockout_event, replenishment_triggered. Includes fulfilment_rate per SKU-market-week. Key signal: fulfilment_rate drops below 85% in 8 SKU-market combinations in the 12–15 day window following specific demand plan underrun events identified in doc 08.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            Primary evidence for the cross-domain pattern. The 12–15 day lag between forecast underrun (in doc 08) and fulfilment drop (in this log) is detectable by correlating timestamps across both inputs. No single document reveals the pattern — it only emerges from cross-source analysis. Also: no events from a "DC Allocation Model" system appear in this log, reinforcing Finding 3.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f3">Finding 3 confirmation</span>
+            <span class="seed-tag s-f4">Cross-domain evidence</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~1,200 events</div>
+          <div class="conf-badge conf-grn">Verified — system signal</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── UNSTRUCTURED ──────────────────────────────── -->
+  <div class="category">
+    <div class="cat-header">
+      <span class="cat-badge cb-unstruct">Unstructured</span>
+      <span class="cat-title">Exception Logs & Informal Records</span>
+      <span class="cat-sub">1 document</span>
+    </div>
+    <div class="doc-grid">
+
+      <div class="doc-card">
+        <div class="doc-num">11</div>
+        <div class="doc-body">
+          <div class="doc-name">S&OP Exception & Escalation Log — Operations</div>
+          <div class="doc-format">Text/CSV · 38 entries · 12 months (Apr 2025 – Mar 2026)</div>
+          <div class="doc-desc">Informally maintained log by the Operations team of instances where the demand forecast was revised post-Commercial approval. Columns: date, market, SKU_group, reason_for_revision, revised_by, commercial_notified (Y/N). 38 entries over 12 months. commercial_notified = N in 29 of 38 entries. reason_for_revision entries: "capacity constraint not reflected in commercial forecast", "IBP baseline unreliable for seasonal SKU", "regional model showed materially different number".</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            This is the Operations team's own record of the override pattern — corroborating the system evidence in doc 08 from a different angle. "commercial_notified = N in 76% of cases" combined with the SAP IBP audit trail creates an undeniable picture of undocumented, systematic governance divergence. The informal format is intentional — it's the kind of workaround document that only appears in real discovery.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f2">Finding 2 evidence</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">38 entries</div>
+          <div class="conf-badge conf-red">Contradicts RACI</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── COMPARATIVE ───────────────────────────────── -->
+  <div class="category">
+    <div class="cat-header">
+      <span class="cat-badge cb-comp">Comparative</span>
+      <span class="cat-title">Inherited vs. Current / Cross-Team Perspectives</span>
+      <span class="cat-sub">1 document</span>
+    </div>
+    <div class="doc-grid">
+
+      <div class="doc-card">
+        <div class="doc-num">12</div>
+        <div class="doc-body">
+          <div class="doc-name">Inherited Demand Planning SOP — Sanofi Consumer Healthcare (2023)</div>
+          <div class="doc-format">PDF · 8 pages · Legacy SOP (pre-carve-out)</div>
+          <div class="doc-desc">The Sanofi Consumer Healthcare demand planning SOP from 2023 — the document Opella's current process was derived from. References SAP APO (Advanced Planner and Optimiser) as the planning system, batch-cycle GMP-grade review cadence, Sanofi CHC central planning team as approval authority. Explicitly designed for pharma-regulated manufacturing cycles (12-week frozen horizon, monthly review only). No accommodation for promotional uplifts, pharmacy channel dynamics, or consumer goods sell-out signals.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            Provides the "before" picture. The platform cross-references this against Opella's current docs (01–11) and surfaces the inherited mismatch: Opella's current process is a lightly adapted version of a pharma SOP, not a purpose-built FMCH demand planning process. Adds strategic context to all three findings — they are symptoms of an inherited architecture, not isolated operational failures.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 context</span>
+            <span class="seed-tag s-f2">Finding 2 context</span>
+            <span class="seed-tag s-cl">Strategic context</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~8 pages</div>
+          <div class="conf-badge conf-amb">Historical — pre-carve-out</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- SUMMARY TABLE -->
+  <h2 style="font-size:15px;font-weight:700;margin-bottom:12px;">Input Set Summary</h2>
+  <table class="summary-table">
+    <tr>
+      <th>#</th>
+      <th>Document</th>
+      <th>Type</th>
+      <th>Format</th>
+      <th>Seeds</th>
+      <th>Confidence Output</th>
+    </tr>
+    <tr><td>01</td><td>Demand Planning Policy</td><td>Structured</td><td>PDF, 5pp</td><td>F1, F2</td><td>Amber (contradicted by system signals)</td></tr>
+    <tr><td>02</td><td>S&OP Process Document</td><td>Structured</td><td>PDF, 7pp</td><td>F2</td><td>Amber (contradicted by system audit)</td></tr>
+    <tr><td>03</td><td>S&OP RACI Matrix</td><td>Structured</td><td>PDF, 1pp</td><td>F2</td><td>Red (override row absent, system shows otherwise)</td></tr>
+    <tr><td>04</td><td>Distribution Operations Runbook</td><td>Structured</td><td>PDF, 6pp</td><td>F3</td><td>Amber (DC Allocation Model unverified)</td></tr>
+    <tr><td>05</td><td>Supply Chain Application Landscape</td><td>Structured</td><td>PDF, 3pp</td><td>F1, F3</td><td>Amber (incomplete — 2 systems missing)</td></tr>
+    <tr><td>06</td><td>S&OP Meeting Transcript — Mar 2026</td><td>Semi-structured</td><td>Text, ~2,400w</td><td>F1, F2</td><td>Amber (informal, partial evidence)</td></tr>
+    <tr><td>07</td><td>Regional Demand Review Notes — Q1 2026</td><td>Semi-structured</td><td>Text, ~800w</td><td>F1</td><td>Amber (informal, confirms local tool)</td></tr>
+    <tr><td>08</td><td>SAP IBP Audit Log</td><td>System signal</td><td>CSV, 847 rows</td><td>F1, F2</td><td>Red (contradicts RACI + process docs)</td></tr>
+    <tr><td>09</td><td>Regional Forecast Model Export</td><td>System signal</td><td>CSV, 203 rows</td><td>F1</td><td>Red (undocumented system, divergent data)</td></tr>
+    <tr><td>10</td><td>WMS Distribution Event Log</td><td>System signal</td><td>JSON, ~1,200 events</td><td>F3, Cross-domain</td><td>Green (verified system signal)</td></tr>
+    <tr><td>11</td><td>S&OP Exception & Escalation Log</td><td>Unstructured</td><td>Text/CSV, 38 entries</td><td>F2</td><td>Red (contradicts RACI, corroborates audit trail)</td></tr>
+    <tr><td>12</td><td>Inherited Sanofi Demand Planning SOP</td><td>Comparative</td><td>PDF, 8pp</td><td>F1, F2, Strategic context</td><td>Historical (pre-carve-out baseline)</td></tr>
+  </table>
+
+  <div style="margin-top:20px;padding:14px 16px;background:rgba(255,255,255,0.04);border-radius:8px;border:1px dashed rgba(255,255,255,0.12);font-size:12px;line-height:1.7;">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;opacity:0.5;margin-bottom:6px;">Design principle</div>
+    No single document reveals a finding. Every finding requires cross-referencing at least two inputs — ideally from different categories (a process document contradicted by a system signal, an informal log corroborating a formal audit trail). This makes the platform's multi-source synthesis the demonstration, not just the document reading.
+  </div>
+
+</div>
+</body>
+</html>

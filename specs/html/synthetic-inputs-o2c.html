@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Synthetic Input Set — Order-to-Cash</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #1a1a1e; color: #f0f0f2;
+    padding: 40px; line-height: 1.6;
+  }
+  .page { max-width: 1000px; margin: 0 auto; }
+
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .meta { font-size: 12px; opacity: 0.5; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; opacity: 0.65; margin-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; }
+
+  .legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+  .legend-item { border-radius: 6px; padding: 8px 14px; font-size: 12px; line-height: 1.5; }
+  .leg-f1 { background: rgba(255,100,80,0.12);  border-left: 3px solid rgba(255,100,80,0.5); }
+  .leg-f2 { background: rgba(255,140,0,0.12);   border-left: 3px solid rgba(255,140,0,0.5); }
+  .leg-f3 { background: rgba(255,180,0,0.10);   border-left: 3px solid rgba(255,180,0,0.45); }
+  .leg-f4 { background: rgba(80,200,120,0.10);  border-left: 3px solid rgba(80,200,120,0.4); }
+  .leg-title { font-weight: 700; font-size: 11px; margin-bottom: 2px; }
+  .leg-body { font-size: 11px; opacity: 0.75; }
+
+  .category { margin-bottom: 32px; }
+  .cat-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .cat-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-radius: 4px; padding: 3px 9px; }
+  .cat-title { font-size: 14px; font-weight: 700; }
+  .cat-sub { font-size: 12px; opacity: 0.55; margin-left: auto; }
+
+  .cb-struct   { background: rgba(80,140,255,0.2);  color: #5090ff; }
+  .cb-semi     { background: rgba(160,100,255,0.2); color: #b088ff; }
+  .cb-sys      { background: rgba(80,200,180,0.2);  color: #50c8b8; }
+  .cb-unstruct { background: rgba(255,180,0,0.2);   color: #f5c842; }
+  .cb-comp     { background: rgba(255,140,0,0.2);   color: #ff9040; }
+
+  .doc-grid { display: flex; flex-direction: column; gap: 8px; }
+  .doc-card {
+    border-radius: 8px; padding: 14px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 12px; align-items: start;
+  }
+  .doc-num { font-size: 13px; font-weight: 800; opacity: 0.3; padding-top: 1px; }
+  .doc-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .doc-format { font-size: 11px; opacity: 0.5; margin-bottom: 6px; }
+  .doc-desc { font-size: 12px; opacity: 0.8; line-height: 1.65; margin-bottom: 8px; }
+
+  .eng-note {
+    border-radius: 5px; padding: 6px 10px; margin-top: 6px;
+    background: rgba(255,255,255,0.04); border-left: 2px solid rgba(255,255,255,0.15);
+    font-size: 11px; opacity: 0.75; line-height: 1.6;
+  }
+  .en-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.6; margin-bottom: 2px; }
+
+  .doc-seeds { display: flex; flex-wrap: wrap; gap: 5px; }
+  .seed-tag { border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
+  .s-f1 { background: rgba(255,100,80,0.18);  color: #ff7070; }
+  .s-f2 { background: rgba(255,140,0,0.18);   color: #ff9040; }
+  .s-f3 { background: rgba(255,180,0,0.15);   color: #f5c842; }
+  .s-f4 { background: rgba(80,200,120,0.15);  color: #50c878; }
+  .s-cl { background: rgba(160,100,255,0.15); color: #b088ff; }
+
+  .doc-meta { text-align: right; flex-shrink: 0; }
+  .doc-size { font-size: 11px; opacity: 0.45; margin-bottom: 4px; white-space: nowrap; }
+  .conf-badge { font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
+  .conf-grn { background: rgba(80,200,120,0.15);  color: #50c878; }
+  .conf-amb { background: rgba(255,180,0,0.15);   color: #f5c842; }
+  .conf-red { background: rgba(255,100,80,0.15);  color: #ff7070; }
+  .conf-hist{ background: rgba(255,255,255,0.1);  color: rgba(255,255,255,0.5); }
+
+  .summary-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  .summary-table th { text-align: left; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.5; }
+  .summary-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: top; }
+  .summary-table tr:last-child td { border-bottom: none; }
+
+  hr { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 32px 0; }
+
+  .design-note {
+    margin-top: 20px; padding: 14px 16px;
+    background: rgba(255,255,255,0.04); border-radius: 8px;
+    border: 1px dashed rgba(255,255,255,0.12);
+    font-size: 12px; line-height: 1.7;
+  }
+  .dn-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.5; margin-bottom: 6px; }
+
+  .cross-ref-box {
+    margin-top: 20px; padding: 14px 16px;
+    background: rgba(80,200,120,0.06); border-radius: 8px;
+    border: 1px solid rgba(80,200,120,0.2);
+    font-size: 12px; line-height: 1.7;
+  }
+  .cr-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #50c878; margin-bottom: 8px; }
+  .cr-row { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 6px; }
+  .cr-docs { font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; min-width: 80px; opacity: 0.7; margin-top: 1px; }
+  .cr-finding { font-size: 12px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Synthetic Input Set — Order-to-Cash</h1>
+  <div class="meta">12 artefacts · 5 input categories · 3 pre-engineered findings + 1 cross-domain pattern</div>
+  <div class="subtitle">
+    Secondary domain. Connected to the Demand Planning primary via the cross-domain escalation pattern.<br>
+    Same design principle: no single document reveals a finding — every finding requires cross-referencing at least two inputs from different categories.
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item leg-f1">
+      <div class="leg-title">🔴 Finding 1 — Customer Master Data: No Single Source of Truth</div>
+      <div class="leg-body">Same retail/pharmacy accounts in 3 systems with conflicting credit limits and payment terms. High-severity.</div>
+    </div>
+    <div class="legend-item leg-f2">
+      <div class="leg-title">🔴 Finding 2 — Undocumented EDI Order Flow</div>
+      <div class="leg-body">67% of order volume runs through retail EDI. No SOP, no RACI, no documented owner. High-severity.</div>
+    </div>
+    <div class="legend-item leg-f3">
+      <div class="leg-title">🟡 Finding 3 — TSA-Exposed EDI Integrations</div>
+      <div class="leg-body">6 of 14 EDI connections established by Sanofi Shared Services. Ownership at carve-out unconfirmed. Low-severity, amber.</div>
+    </div>
+    <div class="legend-item leg-f4">
+      <div class="leg-title">🟢 Cross-Domain — Forecast Miss → O2C Escalation Spike</div>
+      <div class="leg-body">Demand underrun in primary domain → customer service escalations spike 12–15 days later. Links back to Demand Planning input set.</div>
+    </div>
+  </div>
+
+  <!-- ── STRUCTURED ─────────────────────────────────── -->
+  <div class="category">
+    <div class="cat-header">
+      <span class="cat-badge cb-struct">Structured</span>
+      <span class="cat-title">Process Documents, SOPs, Policies, Registers</span>
+      <span class="cat-sub">5 documents</span>
+    </div>
+    <div class="doc-grid">
+
+      <div class="doc-card">
+        <div class="doc-num">01</div>
+        <div class="doc-body">
+          <div class="doc-name">Order Management SOP — Opella Europe</div>
+          <div class="doc-format">PDF · 6 pages · Process SOP</div>
+          <div class="doc-desc">Documents the end-to-end O2C process for Opella Europe. Covers: customer PO receipt (manual or fax), credit check against customer master, order confirmation, warehouse pick instruction, dispatch confirmation, invoice generation, AR posting. Process steps are written for the specialty pharma distributor model: low-volume, high-value, manually reviewed orders. No mention of EDI, automated order receipt, retail channel, or high-velocity replenishment orders.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            The complete absence of EDI from a 6-page O2C SOP — in a business where 67% of orders arrive via EDI — is the primary signal for Finding 2. The platform detects not what's present but what's missing, by cross-referencing the SOP coverage against the actual order flow in doc 10.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f2">Finding 2 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~6 pages</div>
+          <div class="conf-badge conf-amb">Amber — incomplete coverage</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">02</div>
+        <div class="doc-body">
+          <div class="doc-name">Credit Management Policy — Opella Europe</div>
+          <div class="doc-format">PDF · 4 pages · Financial policy</div>
+          <div class="doc-desc">Defines credit limit setting methodology, payment term standards by customer tier (Tier 1: major retail chains, Tier 2: regional distributors, Tier 3: independents), credit review frequency (annual for T1, biannual for T2/T3), and escalation path for credit holds. Policy references "the customer credit system" as the source of record for all credit decisions — no system name, vendor, or instance specified. Payment terms stated as: T1 = Net 30, T2 = Net 45, T3 = Net 60.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            "The customer credit system" without a named system is intentional ambiguity that sets up Finding 1. When the platform reads this alongside the SAP S/4HANA export (doc 08) and SAP CRM export (doc 09), it cannot determine which system the policy refers to — because both contain credit limits, and they differ.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~4 pages</div>
+          <div class="conf-badge conf-amb">Amber — system unspecified</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">03</div>
+        <div class="doc-body">
+          <div class="doc-name">O2C Process RACI — Opella Europe</div>
+          <div class="doc-format">PDF · 1 page · RACI table</div>
+          <div class="doc-desc">RACI covering the documented O2C process steps. Key assignments: Order Receipt (Responsible: Customer Service; Accountable: Sales Operations VP), Credit Approval (Responsible: Credit Team; Accountable: CFO), Order Fulfilment (Responsible: Warehouse Ops; Accountable: Supply Chain Director), Invoice Generation (Responsible: Finance Ops; Accountable: CFO), AR Management (Responsible: Finance Ops; Accountable: CFO). No RACI row exists for EDI order processing, EDI dispute resolution, or automated order receipt.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            Same structural signal as the S&OP RACI in the demand planning set — the absence of a process step is as informative as its presence. 67% of order volume has no RACI owner. Platform flags: high-volume process path with no documented accountability.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f2">Finding 2 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~1 page</div>
+          <div class="conf-badge conf-red">Incomplete — EDI unowned</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">04</div>
+        <div class="doc-body">
+          <div class="doc-name">EDI Integration Register — Opella Europe</div>
+          <div class="doc-format">PDF · 3 pages · Integration inventory</div>
+          <div class="doc-desc">Register of all active EDI integrations for European order flows. 14 entries covering Carrefour (FR, ES), Boots (UK), dm (DE, AT), Walmart (UK), Leclerc (FR), Lidl (DE), Tesco (UK), Plus (NL), Coop (IT), and three regional pharmacy chains. Columns: partner, market, message_type (ORDERS/ORDRSP/DESADV/INVOIC), established_date, established_by, TSA_status. For 8 connections: established_by = "Opella Digital", TSA_status = "Opella-owned". For 6 connections: established_by = "Sanofi Shared Services", TSA_status = "See TSA Schedule Annex C". No Annex C is included in the input set.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            "See TSA Schedule Annex C" with no Annex C provided is the engineering mechanism for Finding 3. The platform flags: 6 integrations reference a TSA document that was not provided and cannot be verified. The 6 Sanofi-established connections are real TSA exposure — not a fabrication. This is the kind of artefact that shows up in real carve-outs.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f3">Finding 3 seed</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~3 pages</div>
+          <div class="conf-badge conf-amb">Amber — TSA status unresolved</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">05</div>
+        <div class="doc-body">
+          <div class="doc-name">Retail Customer Onboarding Guide — Opella Europe</div>
+          <div class="doc-format">PDF · 4 pages · Process guide</div>
+          <div class="doc-desc">Step-by-step guide for onboarding new retail and pharmacy customers. Steps: NDA and commercial agreement signing, credit application review, customer setup in "our systems" (no named system), EDI capability assessment (separate optional track), account activation. Credit setup section directs the credit team to "create the customer record and set credit limit per the Credit Management Policy." Does not specify which system to use. EDI setup is described as optional and handled separately by the Digital team.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            "Create the customer record in our systems" without naming the system is the second instance (alongside doc 02) of ambiguous system reference that seeds Finding 1. Combined with the system exports (docs 08, 09) showing the same customers in two systems with different data, the platform infers that customer setup creates parallel records by default — not by design.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 seed</span>
+            <span class="seed-tag s-f2">Finding 2 context</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~4 pages</div>
+          <div class="conf-badge conf-amb">Amber — system unspecified</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SEMI-STRUCTURED ─────────────────────────────── -->
+  <div class="category">
+    <div class="cat-header">
+      <span class="cat-badge cb-semi">Semi-Structured</span>
+      <span class="cat-title">Meeting Notes & Review Records</span>
+      <span class="cat-sub">2 documents</span>
+    </div>
+    <div class="doc-grid">
+
+      <div class="doc-card">
+        <div class="doc-num">06</div>
+        <div class="doc-body">
+          <div class="doc-name">Customer Service Escalation Log — Opella Europe 2025</div>
+          <div class="doc-format">CSV · 142 entries · Jan – Dec 2025</div>
+          <div class="doc-desc">Log of customer escalations handled by the Opella Europe customer service team. Fields: date, customer_name, market, escalation_type, root_cause, resolution_time_days, notes. Escalation types include: stockout complaint, order not received, invoice dispute, EDI order error, credit hold dispute. 34 entries flagged as EDI-related: root_cause = "EDI order not processed — manual intervention required." 19 stockout complaints cluster in two periods (Apr–May 2025, Oct–Nov 2025) correlating with known demand forecast underruns. Notes field contains free text: "customer threatened to delist Doliprane", "third time this quarter for Carrefour FR."</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            Primary evidence for the cross-domain pattern: the Apr–May and Oct–Nov clusters map to the WMS fulfilment drops in the demand planning input set (doc 10 there). The 34 EDI error entries support Finding 2 — EDI is breaking and being manually fixed by CS, which has no process ownership for it. "Third time this quarter" entries show the problem is systemic, not isolated.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f2">Finding 2 evidence</span>
+            <span class="seed-tag s-f4">Cross-domain evidence</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">142 rows</div>
+          <div class="conf-badge conf-amb">Amber — informal record</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">07</div>
+        <div class="doc-body">
+          <div class="doc-name">Accounts Receivable Review Notes — Q4 2025</div>
+          <div class="doc-format">Text document · ~600 words · Meeting notes</div>
+          <div class="doc-desc">Notes from the Opella Europe AR team's Q4 review. Discussion items include: ageing analysis, disputed invoices, credit limit utilisation. Key passages: "Carrefour France is showing two different credit limits depending on which system you look at — CRM has €2.4M, ERP has €1.8M. The credit team has been approving orders against CRM because it's higher, but the ERP limit is what was agreed at onboarding." Also: "Boots UK payment terms in CRM say Net 30 but ERP shows Net 45 — we've been invoicing on Net 30 and they've been paying on Net 45."</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            This is the most direct evidence for Finding 1 — explicitly names two systems (CRM vs. ERP), names specific accounts (Carrefour FR, Boots UK), and quantifies the discrepancy (€2.4M vs €1.8M credit limit). Combined with docs 08 and 09, the platform has three-source confirmation. The Boots payment terms discrepancy adds a second dimension to the conflict beyond credit limits.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 evidence</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~600 words</div>
+          <div class="conf-badge conf-red">Contradicts system records</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SYSTEM SIGNALS ─────────────────────────────── -->
+  <div class="category">
+    <div class="cat-header">
+      <span class="cat-badge cb-sys">System Signals</span>
+      <span class="cat-title">Exports, Logs & Transaction Data</span>
+      <span class="cat-sub">3 documents</span>
+    </div>
+    <div class="doc-grid">
+
+      <div class="doc-card">
+        <div class="doc-num">08</div>
+        <div class="doc-body">
+          <div class="doc-name">SAP S/4HANA Customer Master Export — Opella Europe</div>
+          <div class="doc-format">CSV · 340 records · Snapshot Mar 2026</div>
+          <div class="doc-desc">Full customer master extract from the SAP S/4HANA ERP system. Fields: customer_id, customer_name, market, customer_tier, credit_limit_EUR, payment_terms_days, account_manager, last_updated, created_by. Covers all 340 active Opella Europe customers. For the top 10 retail accounts (Carrefour FR/ES, Boots UK, dm DE/AT, Walmart UK, Leclerc FR), credit limits range from €800K–€1.8M and payment terms are Net 45–60. created_by field for 6 of these accounts shows "migrated from Sanofi legacy system — 2024-05-01."</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            The "migrated from Sanofi legacy system" tag on 6 major accounts explains the divergence — these records were migrated at carve-out and never reconciled with the CRM. Credit limits differ from doc 09 for the same accounts. Payment terms differ for Boots UK specifically (Net 45 here vs. Net 30 in CRM — matching the AR notes in doc 07 exactly).
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 evidence</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">340 rows</div>
+          <div class="conf-badge conf-red">Conflicts with CRM export</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">09</div>
+        <div class="doc-body">
+          <div class="doc-name">SAP CRM Customer Export — Opella Europe</div>
+          <div class="doc-format">CSV · 318 records · Snapshot Mar 2026</div>
+          <div class="doc-desc">Customer master extract from the SAP CRM system. Fields: crm_customer_id, customer_name, market, tier, credit_limit_EUR, payment_terms_days, account_owner, last_modified, source. 318 records — 22 fewer than the ERP export. For the same top 10 retail accounts: credit limits are uniformly higher than the ERP (Carrefour FR: €2.4M in CRM vs. €1.8M in ERP; dm DE: €1.6M vs. €1.1M). Payment terms for Boots UK: Net 30 in CRM vs. Net 45 in ERP. source field for 8 major accounts: "manually updated by account manager post-carve-out."</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            22 records in ERP but not in CRM suggests customers were created in one system and never synced. Higher credit limits in CRM (manually updated by account managers) vs. lower limits in ERP (migrated from Sanofi) creates both a data integrity risk and an audit exposure — orders may be approved against a credit limit that was informally inflated. The platform should flag this combination as high-severity.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 evidence</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">318 rows</div>
+          <div class="conf-badge conf-red">Conflicts with ERP export</div>
+        </div>
+      </div>
+
+      <div class="doc-card">
+        <div class="doc-num">10</div>
+        <div class="doc-body">
+          <div class="doc-name">Order Flow Analysis Export — Opella Europe 2025</div>
+          <div class="doc-format">CSV · 8,420 order records · Jan – Dec 2025</div>
+          <div class="doc-desc">Full order record extract for 2025. Fields: order_id, customer_name, market, order_channel (EDI / manual / email / fax), order_date, order_value_EUR, fulfilment_status, processing_time_hours. Channel split: EDI = 67.3%, manual = 21.4%, email = 9.1%, fax = 2.2%. EDI orders have average processing_time of 1.2 hours. Manual orders average 18.4 hours. For EDI orders: sla_met field shows 94% on-time when the EDI connection is stable, dropping to 61% during the two EDI error clusters in Apr–May and Oct–Nov 2025.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            The 67% EDI split is the definitive evidence for Finding 2 — cross-referenced against doc 01 (SOP covering only manual/distributor flow) and doc 03 (RACI with no EDI owner), the platform surfaces the undocumented flow at scale. The fulfilment rate drop in Apr–May and Oct–Nov aligns with the demand planning WMS event log clusters, completing the cross-domain pattern evidence.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f2">Finding 2 evidence</span>
+            <span class="seed-tag s-f4">Cross-domain confirmation</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">8,420 rows</div>
+          <div class="conf-badge conf-grn">Verified — system signal</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── UNSTRUCTURED ───────────────────────────────── -->
+  <div class="category">
+    <div class="cat-header">
+      <span class="cat-badge cb-unstruct">Unstructured</span>
+      <span class="cat-title">Workaround Documentation & Informal Records</span>
+      <span class="cat-sub">1 document</span>
+    </div>
+    <div class="doc-grid">
+
+      <div class="doc-card">
+        <div class="doc-num">11</div>
+        <div class="doc-body">
+          <div class="doc-name">EDI Dispute Resolution — Customer Service Working Notes</div>
+          <div class="doc-format">Text document · ~1,100 words · Informal working notes</div>
+          <div class="doc-desc">Informal notes maintained by the customer service team lead documenting how EDI order errors are resolved in practice. Written as a "how-we-actually-do-it" guide for new CS team members. Covers: how to identify an EDI order that hasn't been picked up by the OMS, how to manually re-enter the order, who to call in the Digital team when the EDI connection drops, what to tell the customer while waiting. Includes a note: "For the 6 older connections (Carrefour FR, Boots UK, dm, Leclerc, Lidl, Coop) — if there's an outage, contact Sanofi IT helpdesk on [number]. Opella Digital doesn't manage these yet."</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            "Contact Sanofi IT helpdesk" is the clearest evidence for Finding 3 — an operational workaround that reveals the 6 TSA-exposed connections are still managed by Sanofi at the helpdesk level. This is exactly the kind of informal knowledge that never appears in formal documentation but defines how the business actually runs. The CS team lead wrote it down; no one escalated it. The platform surfaces it.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f2">Finding 2 evidence</span>
+            <span class="seed-tag s-f3">Finding 3 confirmation</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~1,100 words</div>
+          <div class="conf-badge conf-red">Confirms TSA dependency</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── COMPARATIVE ────────────────────────────────── -->
+  <div class="category">
+    <div class="cat-header">
+      <span class="cat-badge cb-comp">Comparative</span>
+      <span class="cat-title">Inherited vs. Current Process</span>
+      <span class="cat-sub">1 document</span>
+    </div>
+    <div class="doc-grid">
+
+      <div class="doc-card">
+        <div class="doc-num">12</div>
+        <div class="doc-body">
+          <div class="doc-name">Inherited O2C Process SOP — Sanofi Consumer Healthcare (2023)</div>
+          <div class="doc-format">PDF · 9 pages · Legacy SOP (pre-carve-out)</div>
+          <div class="doc-desc">The Sanofi Consumer Healthcare O2C SOP from 2023, the document Opella's current process was derived from. Covers the Sanofi CHC order flow: primarily hospital and pharmacy distributor-focused, GPO and tender contracts, centralised credit management through Sanofi shared services, high-value low-volume order profile. EDI is mentioned as "available for select strategic accounts" — not a primary channel. Customer master data managed in Sanofi's central SAP CRM, maintained by a dedicated MDM team. No retail chain EDI integrations, no promotional order management, no consumer goods channel dynamics.</div>
+          <div class="eng-note">
+            <div class="en-label">Engineering note</div>
+            Provides the same "before" function as doc 12 in the demand planning set. Opella's O2C SOP (doc 01) is structurally a light adaptation of this document — the pharma distributor model is still the frame. Cross-referencing shows the inherited architecture explains all three findings: customer master ambiguity came from the Sanofi MDM model, undocumented EDI is the channel that grew post-carve-out without process coverage, and TSA-exposed integrations are the Sanofi-built EDI connections that were never formally transferred.
+          </div>
+          <div class="doc-seeds">
+            <span class="seed-tag s-f1">Finding 1 context</span>
+            <span class="seed-tag s-f2">Finding 2 context</span>
+            <span class="seed-tag s-f3">Finding 3 context</span>
+            <span class="seed-tag s-cl">Strategic context</span>
+          </div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-size">~9 pages</div>
+          <div class="conf-badge conf-hist">Historical — pre-carve-out</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- CROSS-REFERENCE MAP -->
+  <div class="cross-ref-box">
+    <div class="cr-label">How the findings surface — cross-reference map</div>
+    <div class="cr-row">
+      <div class="cr-docs">01 + 03 + 10</div>
+      <div class="cr-finding">🔴 <strong>Finding 2:</strong> SOP covers manual flow only (doc 01) · RACI has no EDI row (doc 03) · 67% of orders are EDI (doc 10). Three-source confirmation that 67% of order volume is running undocumented.</div>
+    </div>
+    <div class="cr-row">
+      <div class="cr-docs">07 + 08 + 09</div>
+      <div class="cr-finding">🔴 <strong>Finding 1:</strong> AR notes name the discrepancy (doc 07) · ERP export shows lower limits / Net 45 (doc 08) · CRM export shows higher limits / Net 30 (doc 09). Named accounts, quantified conflict, two-system evidence.</div>
+    </div>
+    <div class="cr-row">
+      <div class="cr-docs">04 + 11</div>
+      <div class="cr-finding">🟡 <strong>Finding 3:</strong> EDI register names 6 Sanofi-established connections with unresolved TSA status (doc 04) · CS working notes confirm "contact Sanofi IT" for those same connections (doc 11). Operational evidence that TSA dependency is live, not theoretical.</div>
+    </div>
+    <div class="cr-row">
+      <div class="cr-docs">06 + 10 + DP:10</div>
+      <div class="cr-finding">🟢 <strong>Cross-domain:</strong> Escalation log clusters (doc 06) align with order fulfilment drops (doc 10) which align with WMS fulfilment drops in the Demand Planning input set (DP doc 10). Three-source cross-domain pattern — only detectable by reading both input sets together.</div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- SUMMARY TABLE -->
+  <h2 style="font-size:15px;font-weight:700;margin-bottom:12px;">Input Set Summary</h2>
+  <table class="summary-table">
+    <tr>
+      <th>#</th><th>Document</th><th>Type</th><th>Format</th><th>Seeds</th><th>Confidence Output</th>
+    </tr>
+    <tr><td>01</td><td>Order Management SOP</td><td>Structured</td><td>PDF, 6pp</td><td>F2</td><td>Amber — incomplete, EDI absent</td></tr>
+    <tr><td>02</td><td>Credit Management Policy</td><td>Structured</td><td>PDF, 4pp</td><td>F1</td><td>Amber — system unspecified</td></tr>
+    <tr><td>03</td><td>O2C Process RACI</td><td>Structured</td><td>PDF, 1pp</td><td>F2</td><td>Red — EDI process unowned</td></tr>
+    <tr><td>04</td><td>EDI Integration Register</td><td>Structured</td><td>PDF, 3pp</td><td>F3</td><td>Amber — 6 connections TSA-unresolved</td></tr>
+    <tr><td>05</td><td>Retail Customer Onboarding Guide</td><td>Structured</td><td>PDF, 4pp</td><td>F1, F2</td><td>Amber — system unspecified</td></tr>
+    <tr><td>06</td><td>Customer Service Escalation Log</td><td>Semi-structured</td><td>CSV, 142 rows</td><td>F2, Cross-domain</td><td>Amber — informal record</td></tr>
+    <tr><td>07</td><td>AR Review Meeting Notes — Q4 2025</td><td>Semi-structured</td><td>Text, ~600w</td><td>F1</td><td>Red — names the system conflict</td></tr>
+    <tr><td>08</td><td>SAP S/4HANA Customer Master Export</td><td>System signal</td><td>CSV, 340 rows</td><td>F1</td><td>Red — conflicts with CRM</td></tr>
+    <tr><td>09</td><td>SAP CRM Customer Export</td><td>System signal</td><td>CSV, 318 rows</td><td>F1</td><td>Red — conflicts with ERP</td></tr>
+    <tr><td>10</td><td>Order Flow Analysis Export</td><td>System signal</td><td>CSV, 8,420 rows</td><td>F2, Cross-domain</td><td>Green — verified system signal</td></tr>
+    <tr><td>11</td><td>EDI Dispute Resolution Working Notes</td><td>Unstructured</td><td>Text, ~1,100w</td><td>F2, F3</td><td>Red — confirms TSA dependency operationally</td></tr>
+    <tr><td>12</td><td>Inherited Sanofi CHC O2C SOP</td><td>Comparative</td><td>PDF, 9pp</td><td>F1, F2, F3, Context</td><td>Historical — pre-carve-out baseline</td></tr>
+  </table>
+
+  <div class="design-note">
+    <div class="dn-label">Design principle</div>
+    The most important document in the O2C set is doc 11 — the CS team lead's working notes. It is informal, unpolished, and written for internal use. It is also the only document in either input set that contains a direct reference to Sanofi IT ("contact Sanofi IT helpdesk"). Real informal knowledge — the kind that only surfaces in actual discovery — is more valuable as evidence than any formal SOP. The platform reading it alongside doc 04 is the demonstration.
+  </div>
+
+</div>
+</body>
+</html>

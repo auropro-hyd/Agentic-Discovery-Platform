@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Demo Script — Option A: Order-to-Cash</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #1a1a1e;
+    color: #f0f0f2;
+    padding: 40px;
+    line-height: 1.6;
+  }
+  .page { max-width: 860px; margin: 0 auto; }
+
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .meta { font-size: 12px; opacity: 0.5; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; opacity: 0.65; margin-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; }
+
+  /* PRINCIPLE BOX */
+  .principle-box {
+    border-radius: 8px; padding: 14px 18px; margin-bottom: 28px;
+    background: rgba(124,106,247,0.08); border: 1px solid rgba(124,106,247,0.2);
+    font-size: 12px;
+  }
+  .pb-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #a99af7; margin-bottom: 8px; }
+  .pb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .pb-col-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.55; margin-bottom: 6px; }
+  .pb-col ul { padding-left: 15px; }
+  .pb-col li { margin-bottom: 3px; font-size: 12px; line-height: 1.6; }
+
+  /* TIMELINE */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-row { display: grid; grid-template-columns: 90px 22px 1fr; gap: 0 12px; align-items: stretch; }
+  .tl-time { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); text-align: right; padding-top: 15px; padding-right: 4px; white-space: nowrap; }
+  .tl-spine { display: flex; flex-direction: column; align-items: center; }
+  .tl-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; margin-top: 17px; }
+  .tl-line { width: 2px; flex: 1; background: rgba(255,255,255,0.09); margin-top: 3px; }
+  .tl-row:last-child .tl-line { display: none; }
+  .tl-card { border-radius: 8px; padding: 15px 17px; margin-bottom: 10px; font-size: 12px; }
+  .tl-title { font-weight: 700; font-size: 13px; margin-bottom: 10px; }
+
+  /* ELEMENTS */
+  .say-box {
+    border-radius: 6px; padding: 10px 14px; margin-top: 8px;
+    background: rgba(124,106,247,0.1); border-left: 3px solid rgba(124,106,247,0.45);
+    font-style: italic; font-size: 12px; line-height: 1.7;
+  }
+  .say-label { font-size: 10px; font-weight: 700; font-style: normal; text-transform: uppercase; letter-spacing: 0.8px; color: #a99af7; margin-bottom: 5px; }
+
+  .screen-box {
+    border-radius: 6px; padding: 9px 13px; margin-top: 8px;
+    background: rgba(255,255,255,0.05); border-left: 3px solid rgba(255,255,255,0.16);
+    font-size: 11px; line-height: 1.65;
+  }
+  .sc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.55; margin-bottom: 4px; }
+
+  .finding {
+    border-radius: 6px; padding: 9px 13px; margin-top: 6px;
+    font-size: 12px; line-height: 1.65;
+  }
+  .f-red  { background: rgba(255,100,80,0.12);  border-left: 3px solid rgba(255,100,80,0.5); }
+  .f-amb  { background: rgba(255,180,0,0.10);   border-left: 3px solid rgba(255,180,0,0.45); }
+  .f-grn  { background: rgba(80,200,120,0.10);  border-left: 3px solid rgba(80,200,120,0.4); }
+  .f-title { font-weight: 700; margin-bottom: 4px; }
+  .f-body { opacity: 0.82; }
+
+  .dont-say {
+    border-radius: 6px; padding: 8px 12px; margin-top: 7px;
+    background: rgba(255,100,80,0.07); border-left: 3px solid rgba(255,100,80,0.3);
+    font-size: 11px; line-height: 1.6;
+  }
+  .ds-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #ff7070; margin-bottom: 3px; }
+
+  .beats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+  .beat { border-radius: 4px; padding: 3px 9px; font-size: 11px; background: rgba(255,255,255,0.08); }
+
+  /* Card colours */
+  .c1 { background: rgba(80,140,255,0.09); }
+  .c2 { background: rgba(160,100,255,0.09); }
+  .c3 { background: rgba(245,200,66,0.07); }
+  .c4 { background: rgba(255,100,80,0.09); }
+  .c5 { background: rgba(80,200,120,0.09); }
+  .c6 { background: rgba(80,200,180,0.09); }
+  .c7 { background: rgba(124,106,247,0.09); }
+  .c8 { background: rgba(255,255,255,0.04); }
+
+  /* Dot colours */
+  .d1 { background: #5090ff; }
+  .d2 { background: #b088ff; }
+  .d3 { background: #f5c842; }
+  .d4 { background: #ff7070; }
+  .d5 { background: #50c878; }
+  .d6 { background: #50c8b8; }
+  .d7 { background: #a99af7; }
+  .d8 { background: rgba(255,255,255,0.3); }
+
+  /* BACKUP + LINK */
+  .link-box {
+    margin-top: 16px; border-radius: 8px; padding: 12px 16px;
+    background: rgba(80,140,255,0.07); border: 1px solid rgba(80,140,255,0.2);
+    font-size: 12px; line-height: 1.7;
+  }
+  .lb-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #5090ff; margin-bottom: 5px; }
+
+  .backup-note {
+    margin-top: 12px; border-radius: 8px; padding: 12px 16px;
+    background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.14);
+    font-size: 12px; line-height: 1.65;
+  }
+  .bn-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.5; margin-bottom: 5px; }
+
+  .section-divider {
+    border: none; border-top: 1px solid rgba(255,255,255,0.08);
+    margin: 28px 0;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Demo Script — Option A: Order-to-Cash</h1>
+  <div class="meta">Domain: O2C secondary · 20 min demo · 25 min discussion · Pre-compiled output on standby</div>
+  <div class="subtitle">
+    Use when: the primary Demand Planning demo is not possible, the audience is finance or commercial-led, or the meeting pivots to O2C during discussion.<br>
+    Connection to primary: O2C is the downstream consequence of demand planning failure. If the primary demo ran, the O2C findings deepen the story rather than repeat it.
+  </div>
+
+  <!-- PRINCIPLE -->
+  <div class="principle-box">
+    <div class="pb-label">Guiding principle — same as primary script</div>
+    <div class="pb-grid">
+      <div class="pb-col">
+        <div class="pb-col-title">Never say</div>
+        <ul>
+          <li>Pipeline, agents, blocks</li>
+          <li>Knowledge Graph</li>
+          <li>Evidence Synthesis</li>
+          <li>Gap detected / gap resolved</li>
+          <li>Nodes and edges</li>
+          <li>Technical architecture</li>
+        </ul>
+      </div>
+      <div class="pb-col">
+        <div class="pb-col-title">Say instead</div>
+        <ul>
+          <li>The platform is reading your landscape</li>
+          <li>Your operational map</li>
+          <li>Here's what it found</li>
+          <li>A finding that needs a quick answer</li>
+          <li>How your processes connect</li>
+          <li>What your business actually looks like</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="timeline">
+
+    <!-- 1: SETUP -->
+    <div class="tl-row">
+      <div class="tl-time">0:00 – 2:00</div>
+      <div class="tl-spine"><div class="tl-dot d1"></div><div class="tl-line"></div></div>
+      <div class="tl-card c1">
+        <div class="tl-title">The Setup (2 min) — Name the mismatch, not the technology</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Sanofi's Order-to-Cash process was built for selling to hospital distributors and pharmacy chains under GPO contracts. That was the business. Opella's business is Doliprane at Carrefour, Allegra on Amazon, Dulcolax through Boots. The channel has fundamentally changed. The question is whether your systems and your processes have changed with it — or whether you're running a consumer healthcare company on infrastructure designed for a different business entirely."
+        </div>
+        <div class="screen-box">
+          <div class="sc-label">On screen</div>
+          Platform open. 10 business-readable document names visible: "Order Management SOP — Opella Europe", "Customer Master Data Policy", "Credit Management Process", "SAP Order Fulfilment Export", "EDI Integration Register", "Customer Service Escalation Log — 2025", "Accounts Receivable Ageing Report", "Retail Channel Onboarding Guide", "Distributor Agreement Template", "O2C Process RACI". Nothing has run.
+        </div>
+        <div class="dont-say">
+          <div class="ds-label">Don't say</div>
+          Don't frame this as a technology gap. Frame it as a business identity gap — the systems describe a company Opella used to be.
+        </div>
+      </div>
+    </div>
+
+    <!-- 2: DISCOVERY RUNS -->
+    <div class="tl-row">
+      <div class="tl-time">2:00 – 7:30</div>
+      <div class="tl-spine"><div class="tl-dot d2"></div><div class="tl-line"></div></div>
+      <div class="tl-card c2">
+        <div class="tl-title">Discovery Runs (5.5 min) — Let the mismatch surface</div>
+        <div class="say-box">
+          <div class="say-label">Say as it runs</div>
+          "It's reading your order management documentation, your customer records, your system exports, your escalation logs — everything at once. It's building a picture of how orders actually move through your business, who owns each step, which systems are involved, and where the handoffs are. Watch what it finds."
+        </div>
+        <div class="screen-box">
+          <div class="sc-label">On screen — discovery feed (business language only)</div>
+          Status messages: "Reading order management documentation... Mapping customer ownership across systems... Cross-referencing documented process against actual order flow... Comparing credit management records with fulfilment data... Analysing EDI integration register against system evidence..."
+          Then a findings panel begins populating.
+        </div>
+        <div class="say-box" style="margin-top:8px;">
+          <div class="say-label">Say as findings appear</div>
+          "There — your first finding. The same retail and pharmacy customers appear in multiple systems with different credit limits and different payment terms. Not a data quality issue — an ownership question. Which record is the one your credit team actually uses when an order comes in? And here's the one that matters more..."
+        </div>
+
+        <div class="finding f-red" style="margin-top:10px;">
+          <div class="f-title">🔴 Finding 1 — Customer Master Data: No Single Source of Truth</div>
+          <div class="f-body">Major retail and pharmacy customers — including accounts representing over 40% of European revenue — exist in multiple systems with conflicting credit limits, payment terms, and contact records. Three systems contain customer master data. No documented owner. Credit decisions are being made against different records depending on who processes the order.</div>
+        </div>
+
+        <div class="finding f-red" style="margin-top:6px;">
+          <div class="f-title">🔴 Finding 2 — Your Documented Process Describes a Business You No Longer Operate</div>
+          <div class="f-body">The Order Management SOP describes an order flow built for specialty pharma distributors: manual PO receipt, credit review, picking instruction, dispatch confirmation. System evidence shows 67% of Opella's actual order volume now arrives through retail EDI — automated, high-velocity, no manual touchpoints. The EDI flow is not documented. No SOP covers it. No RACI assigns ownership. It is running undocumented at scale.</div>
+        </div>
+
+        <div class="finding f-amb" style="margin-top:6px;">
+          <div class="f-title">🟡 Finding 3 — TSA-Exposed EDI Integrations: Unverified Ownership</div>
+          <div class="f-body">14 EDI connections to major retail and pharmacy chains (Carrefour, Boots, dm, Walmart) are listed in the integration register. 6 were established under Sanofi Shared Services. No documentation of transfer to Opella at carve-out. These integrations may still be operating under Sanofi TSA — a dependency that has not been mapped and carries a TSA exit risk.</div>
+        </div>
+
+        <div class="beats">
+          <span class="beat">Pause after Finding 2 — it lands hardest</span>
+          <span class="beat">"67% of your order volume is running undocumented" is the line</span>
+          <span class="beat">Finding 3 amber — "flagged, not blocking, but a TSA risk you need to own"</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3: CLARIFICATION -->
+    <div class="tl-row">
+      <div class="tl-time">7:30 – 10:00</div>
+      <div class="tl-spine"><div class="tl-dot d3"></div><div class="tl-line"></div></div>
+      <div class="tl-card c3">
+        <div class="tl-title">One Finding Needs Input (2.5 min) — Targeted, not a workshop</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Finding 1 — the customer master data conflict — needs a quick call with whoever owns your customer data governance. Not a workshop. The platform has already done the work: it's looked at all three systems and ranked which one has the most complete and most recently updated records. We confirm the answer and proceed."
+        </div>
+        <div class="screen-box">
+          <div class="sc-label">On screen</div>
+          Finding 1 expanded. Evidence: record counts per system, last-update timestamps, credit limit comparison for top 10 accounts. Three candidate answers ranked by evidence: (1) SAP CRM is authoritative — other systems are stale copies from Sanofi integration; (2) AR system holds the live credit decisions — CRM is for reference only; (3) No single system is authoritative — parallel updates have diverged. AuroPro selects option 1. Finding updates: "Resolved — SAP CRM confirmed as customer master system of record."
+        </div>
+        <div class="say-box" style="margin-top:8px;">
+          <div class="say-label">Say after resolution</div>
+          "Finding 2 — the undocumented EDI flow — we've flagged for the Operations lead to document. That's not a quick call, that's a process documentation sprint. But it doesn't hold up the rest of the analysis. It stays in the output as a priority action. Finding 3 — the TSA-exposed integrations — goes to your Digital and Legal teams. They need to know about this before TSA exit planning goes any further."
+        </div>
+        <div class="dont-say">
+          <div class="ds-label">Don't say</div>
+          Don't call this "gap resolution." Don't mention a Copilot. Say "a finding that needed a quick answer." The mechanics are invisible.
+        </div>
+      </div>
+    </div>
+
+    <!-- 4: THE MAP -->
+    <div class="tl-row">
+      <div class="tl-time">10:00 – 15:00</div>
+      <div class="tl-spine"><div class="tl-dot d4"></div><div class="tl-line"></div></div>
+      <div class="tl-card c4">
+        <div class="tl-title">Your O2C Landscape (5 min) — Show what it actually looks like</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Here's your Order-to-Cash landscape as it actually operates — not as the SOP describes it. Two flows running in parallel. The documented flow: specialty distributor, manual, low volume. The actual flow: retail EDI, automated, 67% of your orders — undocumented, unowned, and partly dependent on Sanofi infrastructure you may not control."
+        </div>
+        <div class="screen-box">
+          <div class="sc-label">On screen</div>
+          Domain map with two clearly labelled flow paths: "Documented O2C (33% of volume)" and "Actual O2C — Retail EDI (67% of volume)". Handoff chain for each: Customer Order → Credit Check → Order Fulfilment → Invoice → Cash Collection. Confidence indicators: documented flow is amber (process exists, system evidence partial), EDI flow is red (no SOP, no RACI, TSA-exposed integrations flagged).
+        </div>
+        <div class="say-box" style="margin-top:8px;">
+          <div class="say-label">Say — connection to Demand Planning</div>
+          "And this connects back to what we saw in demand planning. When the demand forecast underruns — Allegra in allergy season, Doliprane during flu — the first place it shows up is here. Orders come in, stock isn't available, the retail EDI flow breaks down, and your customer service escalation queue spikes. The platform found that pattern in your escalation logs — 12 to 15 days after a forecast miss, your O2C team is dealing with the fallout."
+        </div>
+        <div class="finding f-grn" style="margin-top:8px;">
+          <div class="f-title">🟢 Cross-Domain Pattern: Demand miss → O2C escalation spike</div>
+          <div class="f-body">Customer service escalations spike 12–15 days after significant demand forecast underruns in European markets. Pattern confirmed across Q1 and Q3 2025. Retail EDI orders are the primary affected channel. Root cause: insufficient stock in DC, not an O2C process failure — but the O2C team absorbs the impact.</div>
+        </div>
+        <div class="beats" style="margin-top:10px;">
+          <span class="beat">Pause on the two-flow map — let it sink in</span>
+          <span class="beat">"67% of your orders are running without a documented process"</span>
+          <span class="beat">The demand planning link closes the story if primary demo ran</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5: ROADMAP -->
+    <div class="tl-row">
+      <div class="tl-time">15:00 – 18:30</div>
+      <div class="tl-spine"><div class="tl-dot d5"></div><div class="tl-line"></div></div>
+      <div class="tl-card c5">
+        <div class="tl-title">What To Do About It (3.5 min) — Three priorities, no more</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Three priorities from the O2C analysis. In sequence — because the second depends on the first."
+        </div>
+        <div class="screen-box">
+          <div class="sc-label">On screen — Transformation Roadmap</div>
+          <strong>Now (0–6 months):</strong> Declare SAP CRM as customer master system of record. Retire stale copies in other systems. Audit 6 TSA-exposed EDI integrations — confirm ownership status before TSA exit planning proceeds. This is a TSA blocker if it's not resolved.<br><br>
+          <strong>Next (6–18 months):</strong> Document and formally own the retail EDI order flow. Assign RACI. Close the gap between what your SOP says and what your operations do. This is a compliance and audit exposure until it's resolved.<br><br>
+          <strong>Later (18+ months):</strong> Automate credit decisioning for retail EDI channel — rules-based approvals for known accounts, exception queue for new or risky accounts. Eliminate manual credit reviews for 67% of order volume.
+        </div>
+        <div class="dont-say" style="margin-top:8px;">
+          <div class="ds-label">Don't say</div>
+          Three priorities only. Don't walk through the full report. The rest is for the discussion. If you show everything now, there's nothing to explore.
+        </div>
+      </div>
+    </div>
+
+    <!-- 6: CLOSE -->
+    <div class="tl-row">
+      <div class="tl-time">18:30 – 20:00</div>
+      <div class="tl-spine"><div class="tl-dot d6"></div><div class="tl-line"></div></div>
+      <div class="tl-card c6">
+        <div class="tl-title">The Offer (90 sec) — Hard close, no qualifications</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Everything you just saw ran on synthetic data structured like Opella's post-carve-out O2C landscape. In the pilot, this runs on your actual documents, your system exports, your real EDI register. What took two months to discover manually — if anyone had been looking — took 12 minutes. Your transformation team reviews the findings. Two weeks. One domain. A roadmap your board can act on."
+        </div>
+        <div class="beats">
+          <span class="beat">Stop after "act on"</span>
+          <span class="beat">Don't qualify the offer</span>
+          <span class="beat">Hand the floor back — silence is fine</span>
+          <span class="beat">Close signal: "Can we run this on our real O2C landscape?"</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7: DISCUSSION -->
+    <div class="tl-row">
+      <div class="tl-time">20:00 – 45:00</div>
+      <div class="tl-spine"><div class="tl-dot d7"></div><div class="tl-line"></div></div>
+      <div class="tl-card c7">
+        <div class="tl-title">Discussion & Next Steps (25 min)</div>
+        Full report on screen. Navigate wherever the audience wants to go deeper. Have pilot terms and domain shortlist ready.
+        <div class="beats" style="margin-top:8px;">
+          <span class="beat">Expected: "Is the EDI TSA exposure finding real?"</span>
+          <span class="beat">Expected: "How did you find the undocumented EDI flow?"</span>
+          <span class="beat">Expected: "What data do you need from us for the pilot?"</span>
+          <span class="beat">Expected: "Can we see the demand planning connection?"</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- WHEN TO USE THIS SCRIPT -->
+  <div class="link-box">
+    <div class="lb-label">When to use this script vs. the primary (Demand Planning)</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;">
+      <tr>
+        <th style="text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;opacity:0.55;">Situation</th>
+        <th style="text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;opacity:0.55;">Use</th>
+      </tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Primary audience is Head of Strategy + Transformation</td><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Demand Planning (primary)</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Audience includes CFO or Head of Finance</td><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">O2C (this script) — cash flow and credit exposure lands harder</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Live synthesis fails during primary demo</td><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Switch to pre-compiled output — either domain</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Audience asks "can you show us the O2C side?" during discussion</td><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Navigate directly to O2C section in the full report — no need to re-run</td></tr>
+      <tr><td style="padding:7px 10px;">Second meeting with a different stakeholder group</td><td style="padding:7px 10px;">O2C script as standalone demo — full 20 min</td></tr>
+    </table>
+  </div>
+
+  <!-- BACKUP -->
+  <div class="backup-note">
+    <div class="bn-label">Technical fallback — silent, not in the room</div>
+    If live discovery stalls, switch to pre-compiled output without breaking narrative: "Let me show you the complete picture from a run we prepared — same documents, same process." Jump directly to the two-flow O2C landscape map. Three findings pre-populated. Roadmap intact. The business story lands — the live run is sacrificed, the findings are not.
+  </div>
+
+</div>
+</body>
+</html>

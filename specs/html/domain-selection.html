@@ -1,0 +1,207 @@
+<h2>Which Domain for the Demo?</h2>
+<p class="subtitle">Opella lens: newly independent FMCH company, pharma-grade inherited infrastructure, trying to move at consumer-goods speed. Which domain dramatises that tension most sharply for a Head of Strategy?</p>
+
+<style>
+  .domain-grid { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
+  .domain-card {
+    border-radius: 10px;
+    padding: 20px 22px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .domain-card:hover { transform: translateY(-1px); }
+  .domain-card.selected { border-color: #7c6af7 !important; }
+
+  .dc-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+  .dc-letter {
+    font-size: 20px; font-weight: 800;
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .dc-meta { flex: 1; }
+  .dc-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .dc-tagline { font-size: 12px; opacity: 0.6; }
+
+  .rec-badge {
+    display: inline-block;
+    background: rgba(124,106,247,0.25); color: #a99af7;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    border-radius: 4px; padding: 2px 8px; margin-left: 10px; vertical-align: middle;
+  }
+  .warn-badge {
+    display: inline-block;
+    background: rgba(255,180,0,0.2); color: #f5c842;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    border-radius: 4px; padding: 2px 8px; margin-left: 10px; vertical-align: middle;
+  }
+
+  .dc-body { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .dc-col { font-size: 12px; line-height: 1.7; }
+  .dc-col-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    opacity: 0.55; margin-bottom: 5px;
+  }
+  .dc-col ul { padding-left: 15px; margin: 0; }
+  .dc-col li { margin-bottom: 2px; }
+
+  .signal-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .signal-chip {
+    border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600;
+  }
+  .sig-hi  { background: rgba(80,200,120,0.15); color: #50c878; }
+  .sig-mid { background: rgba(255,180,0,0.15);  color: #f5c842; }
+  .sig-lo  { background: rgba(255,100,80,0.12); color: #ff7070; }
+
+  .da { background: linear-gradient(135deg,#1a3a5c,#1e4a78); border-color: rgba(80,140,255,0.2); }
+  .db { background: linear-gradient(135deg,#2d1a4a,#3d2060); border-color: rgba(160,100,255,0.2); }
+  .dc { background: linear-gradient(135deg,#1a3d2e,#1e4f38); border-color: rgba(80,200,120,0.2); }
+
+  .dc-letter-a { background: rgba(80,140,255,0.2); color: #5090ff; }
+  .dc-letter-b { background: rgba(160,100,255,0.2); color: #b088ff; }
+  .dc-letter-c { background: rgba(80,200,120,0.2); color: #50c878; }
+
+  .opella-insight {
+    border-radius: 6px; padding: 9px 12px; margin-top: 10px;
+    font-size: 12px; line-height: 1.6;
+    background: rgba(255,255,255,0.06); border-left: 3px solid rgba(255,255,255,0.2);
+  }
+  .oi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.6; margin-bottom: 3px; }
+</style>
+
+<div class="domain-grid">
+
+  <!-- ORDER-TO-CASH -->
+  <div class="option domain-card da" data-choice="a" onclick="toggleSelect(this)">
+    <div class="dc-header">
+      <div class="dc-letter dc-letter-a">A</div>
+      <div class="dc-meta">
+        <div class="dc-title">Order-to-Cash (O2C)</div>
+        <div class="dc-tagline">Customer order → fulfilment → invoice → cash collection across pharmacy, retail, distributor, e-commerce</div>
+      </div>
+    </div>
+    <div class="dc-body">
+      <div class="dc-col">
+        <div class="dc-col-label">What the platform surfaces</div>
+        <ul>
+          <li>Customer master data inherited from Sanofi — shared vs. Opella-specific records unclear</li>
+          <li>Credit management and AR systems: Sanofi's SAP vs. standalone need</li>
+          <li>Channel complexity: pharmacy, grocery, e-commerce, distributor each with different order flows</li>
+          <li>Country-specific invoicing and tax compliance requirements</li>
+          <li>EDI integrations with major retail chains — inherited, owned, or TSA-managed?</li>
+        </ul>
+      </div>
+      <div class="dc-col">
+        <div class="dc-col-label">Opella-specific tension</div>
+        <ul>
+          <li>Sanofi's O2C was pharma-focused: prescription channel, GPO contracts, specialty distributors</li>
+          <li>Opella's O2C is consumer-focused: retail velocity, promotional pricing, shelf availability</li>
+          <li>The mismatch between what was inherited and what FMCH requires is immediately visible</li>
+          <li>TSA exit means every inherited Sanofi O2C system is a countdown clock</li>
+        </ul>
+      </div>
+    </div>
+    <div class="signal-row">
+      <span class="signal-chip sig-hi">Strong audience resonance</span>
+      <span class="signal-chip sig-hi">Clear TSA exit urgency</span>
+      <span class="signal-chip sig-mid">Good cross-system complexity</span>
+      <span class="signal-chip sig-mid">Medium differentiation from generic demo</span>
+    </div>
+    <div class="opella-insight">
+      <div class="oi-label">The story</div>
+      "Your O2C process was designed for pharma channels. Now you're selling Doliprane at Carrefour and Allegra through Amazon. The handoffs, the systems, the data — none of it was built for this. Here's what that actually looks like."
+    </div>
+  </div>
+
+  <!-- PROCURE-TO-PAY -->
+  <div class="option domain-card db" data-choice="b" onclick="toggleSelect(this)">
+    <div class="dc-header">
+      <div class="dc-letter dc-letter-b">B</div>
+      <div class="dc-meta">
+        <div class="dc-title">Procure-to-Pay (P2P)</div>
+        <div class="dc-tagline">Purchase requisition → PO → goods receipt → supplier invoice → payment across direct and indirect procurement</div>
+      </div>
+    </div>
+    <div class="dc-body">
+      <div class="dc-col">
+        <div class="dc-col-label">What the platform surfaces</div>
+        <ul>
+          <li>Procurement systems likely still under TSA from Sanofi (Ariba, Coupa, or similar)</li>
+          <li>Supplier master data: which are Opella-only vs. shared Sanofi suppliers?</li>
+          <li>13 manufacturing sites each with local procurement variations</li>
+          <li>Indirect procurement (IT, marketing, facilities) heavily fragmented post-carve-out</li>
+          <li>Contract management: who owns supplier contracts now that Sanofi has separated?</li>
+        </ul>
+      </div>
+      <div class="dc-col">
+        <div class="dc-col-label">Opella-specific tension</div>
+        <ul>
+          <li>Every TSA procurement system is a liability — time-limited access to Sanofi's stack</li>
+          <li>Manufacturing procurement (APIs, packaging) is GMP-regulated — compliance complexity</li>
+          <li>New CD&R ownership likely means procurement efficiency is a top-3 value creation lever</li>
+          <li>But this is inherently back-office — harder to make viscerally urgent for a strategy audience</li>
+        </ul>
+      </div>
+    </div>
+    <div class="signal-row">
+      <span class="signal-chip sig-mid">TSA exit driver</span>
+      <span class="signal-chip sig-mid">CD&R value creation angle</span>
+      <span class="signal-chip sig-lo">Lower audience resonance</span>
+      <span class="signal-chip sig-lo">Back-office feel — hard to dramatise</span>
+    </div>
+    <div class="opella-insight">
+      <div class="oi-label">The problem with P2P for this demo</div>
+      A Head of Strategy understands P2P matters, but it doesn't create a "lean forward" moment. It's compliance and cost reduction — important, but not the story that makes them say "we need this now." Save this for a follow-on domain sprint, not the opening demo.
+    </div>
+  </div>
+
+  <!-- DEMAND PLANNING + DISTRIBUTION -->
+  <div class="option domain-card dc" data-choice="c" onclick="toggleSelect(this)">
+    <div class="dc-header">
+      <div class="dc-letter dc-letter-c">C</div>
+      <div class="dc-meta">
+        <div class="dc-title">Demand Planning & Distribution Management <span class="rec-badge">Recommended</span></div>
+        <div class="dc-tagline">Demand sensing → S&OP → production planning → DC distribution → pharmacy/retail last mile, 38 countries, ~100 brands, seasonal peaks</div>
+      </div>
+    </div>
+    <div class="dc-body">
+      <div class="dc-col">
+        <div class="dc-col-label">What the platform surfaces</div>
+        <ul>
+          <li>Demand planning tools inherited from Sanofi — pharma-grade (SAP IBP or equivalent), wrong fit for FMCH speed</li>
+          <li>S&OP process: Commercial forecasts vs. Operations capacity vs. Finance targets — three teams, three systems, no single source of truth</li>
+          <li>Regional distribution variation: EU centralised DC vs. North America direct-to-retailer vs. APAC distributor model</li>
+          <li>Seasonal demand spikes: Allegra in spring, Doliprane/Dulcolax year-round, cold remedies in winter — demand signal latency visible in system evidence</li>
+          <li>Serialisation/traceability: pharma-grade requirements (Sanofi legacy) vs. FMCH actual regulatory need country by country</li>
+        </ul>
+      </div>
+      <div class="dc-col">
+        <div class="dc-col-label">Opella-specific tension</div>
+        <ul>
+          <li>Sanofi's supply chain was built for batch pharmaceutical manufacturing — long cycles, strict GMP, heavy compliance tooling</li>
+          <li>Opella needs FMCH-speed: promotional surges, shelf-fill velocity, retailer service level agreements</li>
+          <li>100 brands × 38 countries × seasonal patterns = complexity that no human team can map manually</li>
+          <li>A stockout of Allegra in allergy season or Doliprane during a flu wave = direct brand and revenue damage — the audience feels this</li>
+          <li>CD&R will want working capital efficiency: inventory turns, days-in-DC, demand accuracy — all traceable to this domain</li>
+        </ul>
+      </div>
+    </div>
+    <div class="signal-row">
+      <span class="signal-chip sig-hi">Highest audience resonance</span>
+      <span class="signal-chip sig-hi">Most Opella-specific</span>
+      <span class="signal-chip sig-hi">Rich cross-system complexity</span>
+      <span class="signal-chip sig-hi">Emotional urgency (stockouts = brand damage)</span>
+      <span class="signal-chip sig-hi">CD&R value creation angle built-in</span>
+    </div>
+    <div class="opella-insight">
+      <div class="oi-label">The story</div>
+      "You have 100 brands, 38 countries, seasonal demand spikes, and a supply chain built by a pharma company. Right now, Commercial forecasts in one system, Operations plans in another, and Finance reconciles in a spreadsheet. No one has a complete picture of where Allegra is going to stock out next spring — until it does. Here's what that looks like when the machine reads it all at once."
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:20px;padding:14px 16px;background:rgba(255,255,255,0.04);border-radius:8px;border:1px solid rgba(255,255,255,0.1);font-size:12px;line-height:1.7;">
+  <strong>My recommendation: C — but thread O2C as the downstream handoff.</strong><br>
+  Demand Planning & Distribution is where Opella's inherited pharma complexity vs. FMCH reality is most visible and most emotionally urgent for a strategy audience. O2C appears as the <em>downstream consequence</em> — when demand planning fails, O2C breaks. Showing that cross-domain link in the demo makes it feel like a real landscape, not an isolated process.
+</div>

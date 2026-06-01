@@ -1,0 +1,294 @@
+<h2>Demo Script v2 — Business-First</h2>
+<p class="subtitle">The platform is invisible. The business problem is the protagonist. No blocks, no agents, no architecture — just what the audience discovers about their own landscape.</p>
+
+<style>
+  .timeline { display: flex; flex-direction: column; gap: 0; margin-top: 20px; }
+  .tl-row { display: grid; grid-template-columns: 90px 24px 1fr; gap: 0 10px; align-items: stretch; }
+  .tl-time { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.45); text-align: right; padding-top: 14px; padding-right: 6px; white-space: nowrap; }
+  .tl-spine { display: flex; flex-direction: column; align-items: center; }
+  .tl-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; margin-top: 16px; z-index: 1; }
+  .tl-line { width: 2px; flex: 1; background: rgba(255,255,255,0.1); margin-top: 3px; }
+  .tl-row:last-child .tl-line { display: none; }
+  .tl-card { border-radius: 8px; padding: 14px 16px; margin-bottom: 8px; font-size: 12px; line-height: 1.7; }
+  .tl-card-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+
+  .say-box {
+    border-radius: 6px; padding: 10px 14px; margin-top: 8px;
+    background: rgba(124,106,247,0.1); border-left: 3px solid rgba(124,106,247,0.4);
+    font-size: 12px; font-style: italic; line-height: 1.7;
+  }
+  .say-label { font-size: 10px; font-weight: 700; font-style: normal; text-transform: uppercase; letter-spacing: 0.8px; color: #a99af7; margin-bottom: 5px; }
+
+  .screen-state {
+    border-radius: 6px; padding: 9px 12px; margin-top: 8px; font-size: 11px;
+    background: rgba(255,255,255,0.05); border-left: 3px solid rgba(255,255,255,0.18);
+    line-height: 1.65;
+  }
+  .ss-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.55; margin-bottom: 4px; }
+
+  .finding-box {
+    border-radius: 6px; padding: 9px 12px; margin-top: 6px; font-size: 12px; line-height: 1.65;
+  }
+  .finding-red  { background: rgba(255,100,80,0.12);  border-left: 3px solid rgba(255,100,80,0.5); }
+  .finding-amb  { background: rgba(255,180,0,0.10);   border-left: 3px solid rgba(255,180,0,0.45); }
+  .finding-grn  { background: rgba(80,200,120,0.10);  border-left: 3px solid rgba(80,200,120,0.4); }
+  .f-label { font-weight: 700; font-size: 11px; margin-bottom: 3px; }
+  .f-sub { font-size: 11px; opacity: 0.75; line-height: 1.6; }
+
+  .dont-say {
+    border-radius: 6px; padding: 8px 12px; margin-top: 6px;
+    background: rgba(255,100,80,0.07); border-left: 3px solid rgba(255,100,80,0.3);
+    font-size: 11px; line-height: 1.6; opacity: 0.85;
+  }
+  .ds-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #ff7070; margin-bottom: 3px; }
+
+  .beat-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .beat-chip { border-radius: 4px; padding: 3px 9px; font-size: 11px; background: rgba(255,255,255,0.08); }
+
+  .dot-1 { background: #5090ff; }
+  .dot-2 { background: #b088ff; }
+  .dot-3 { background: #f5c842; }
+  .dot-4 { background: #ff7070; }
+  .dot-5 { background: #50c878; }
+  .dot-6 { background: #50c8b8; }
+  .dot-7 { background: rgba(255,255,255,0.3); }
+
+  .c1 { background: rgba(80,140,255,0.09); }
+  .c2 { background: rgba(160,100,255,0.09); }
+  .c3 { background: rgba(245,200,66,0.07); }
+  .c4 { background: rgba(255,100,80,0.09); }
+  .c5 { background: rgba(80,200,120,0.09); }
+  .c6 { background: rgba(80,200,180,0.09); }
+  .c7 { background: rgba(255,255,255,0.04); }
+
+  .backup-note {
+    margin-top: 20px; border-radius: 8px; padding: 12px 16px;
+    background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.15);
+    font-size: 12px; line-height: 1.65;
+  }
+  .bn-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.55; margin-bottom: 5px; }
+
+  .principle-box {
+    border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;
+    background: rgba(124,106,247,0.08); border: 1px solid rgba(124,106,247,0.2);
+    font-size: 12px; line-height: 1.7;
+  }
+  .pb-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #a99af7; margin-bottom: 6px; }
+  .pb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pb-col ul { padding-left: 14px; margin: 0; }
+  .pb-col li { margin-bottom: 3px; }
+</style>
+
+<!-- GUIDING PRINCIPLE -->
+<div class="principle-box">
+  <div class="pb-label">Guiding principle for this demo</div>
+  <div class="pb-row">
+    <div class="pb-col">
+      <strong style="font-size:11px;opacity:0.7;text-transform:uppercase;letter-spacing:0.8px;">Never say</strong>
+      <ul style="margin-top:5px;">
+        <li>Block 1, Block 2, Block 3...</li>
+        <li>Knowledge Graph</li>
+        <li>Evidence Synthesis Agent</li>
+        <li>Pipeline is running</li>
+        <li>High-severity gap detected</li>
+        <li>Nodes and edges</li>
+        <li>Parallel agents</li>
+      </ul>
+    </div>
+    <div class="pb-col">
+      <strong style="font-size:11px;opacity:0.7;text-transform:uppercase;letter-spacing:0.8px;">Say instead</strong>
+      <ul style="margin-top:5px;">
+        <li>The platform is reading your landscape</li>
+        <li>Your operational map</li>
+        <li>Here's what it found</li>
+        <li>The discovery is running</li>
+        <li>A finding that needs your input</li>
+        <li>How your processes connect</li>
+        <li>It's working through everything at once</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="timeline">
+
+  <!-- 1: SETUP -->
+  <div class="tl-row">
+    <div class="tl-time">0:00 – 2:00</div>
+    <div class="tl-spine"><div class="tl-dot dot-1"></div><div class="tl-line"></div></div>
+    <div class="tl-card c1">
+      <div class="tl-card-title">The Setup (2 min) — Name the cost, not the solution</div>
+      <div class="say-box">
+        <div class="say-label">Say</div>
+        "You have 1,000+ applications inherited from Sanofi, spread across 38 countries, touching every part of how Opella runs. Your transformation team needs to know what to keep, what to consolidate, what's at risk — and they need to build a credible plan for the board. Traditionally that discovery takes three months of your best people's time. We're going to show you what that picture looks like, and where the risks are, in the time it takes to have this conversation."
+      </div>
+      <div class="screen-state">
+        <div class="ss-label">On screen</div>
+        Platform open. A list of 12 business-readable document names — no technical labels. "Demand Planning Policy — Opella Europe", "S&OP Monthly Review Transcript — March 2026", "Distribution Operations Guide", "SAP System Export — European Forecasts" etc. Nothing has run. Audience sees what went in.
+      </div>
+      <div class="dont-say">
+        <div class="ds-label">Don't say</div>
+        Don't explain what the platform does before it does it. Don't mention agents, AI, or architecture. Let the run speak.
+      </div>
+    </div>
+  </div>
+
+  <!-- 2: DISCOVERY RUNS -->
+  <div class="tl-row">
+    <div class="tl-time">2:00 – 7:00</div>
+    <div class="tl-spine"><div class="tl-dot dot-2"></div><div class="tl-line"></div></div>
+    <div class="tl-card c2">
+      <div class="tl-card-title">Discovery Runs (5 min) — Let the complexity surface</div>
+      <div class="say-box">
+        <div class="say-label">Say as it runs</div>
+        "It's reading everything simultaneously — the process documents, the system exports, the meeting transcripts. It's building a picture of who owns what, which systems are involved, and how the process actually moves between teams. Watch what it finds."
+      </div>
+      <div class="screen-state">
+        <div class="ss-label">On screen — what the audience sees (business language only)</div>
+        A live discovery feed — not a pipeline diagram. Status messages read like findings, not steps: "Reading demand planning documentation... Mapping forecast system ownership... Cross-referencing documented process against system records... Comparing Commercial Planning records with Operations records..." Then a findings panel begins populating.
+      </div>
+      <div class="say-box" style="margin-top:8px;">
+        <div class="say-label">Say as findings appear</div>
+        "There — it's already found something. Three of your systems all contain European demand forecasts, and they don't agree with each other. That's not a data quality issue — that's an ownership question your landscape hasn't answered. And here..."
+      </div>
+      <div class="finding-box finding-red">
+        <div class="f-label">🔴 Finding 1 — Demand Forecast Ownership</div>
+        <div class="f-sub">3 systems hold European demand forecast data for the same SKUs and time period. Numbers do not reconcile. No documented source of truth. Risk: planning decisions are being made on unverified data.</div>
+      </div>
+      <div class="finding-box finding-red" style="margin-top:5px;">
+        <div class="f-label">🔴 Finding 2 — S&OP Governance Gap</div>
+        <div class="f-sub">Your S&OP process states Commercial Planning approves the final forecast. Your system records show Operations overrode it in 34% of cycles last year — without a documented sign-off. Your process documentation and your actual operations are describing two different companies.</div>
+      </div>
+      <div class="finding-box finding-amb" style="margin-top:5px;">
+        <div class="f-label">🟡 Finding 3 — DC Allocation Model: Unverified</div>
+        <div class="f-sub">Your Distribution Operations Guide references a "DC Allocation Model" as the tool that decides inventory allocation to markets. No system evidence found. Could be an active tool, a spreadsheet, or something still running on Sanofi infrastructure under TSA. Flagged for follow-up.</div>
+      </div>
+      <div class="beat-row">
+        <span class="beat-chip">Let the audience react to each finding</span>
+        <span class="beat-chip">Don't rush past Finding 2 — the governance gap lands hardest</span>
+        <span class="beat-chip">Finding 3 amber — explicitly say "this one we flagged, we're not blocking on it"</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3: CLARIFICATION -->
+  <div class="tl-row">
+    <div class="tl-time">7:00 – 10:00</div>
+    <div class="tl-spine"><div class="tl-dot dot-3"></div><div class="tl-line"></div></div>
+    <div class="tl-card c3">
+      <div class="tl-card-title">One Finding Needs Input (3 min) — Show targeted clarification, not a workshop</div>
+      <div class="say-box">
+        <div class="say-label">Say</div>
+        "Finding 1 — the three forecast systems — needs a quick call before we can finalise the analysis. Not a workshop. A 15-minute conversation with whoever owns demand planning. The platform has already done the work: it's ranked the evidence and given us three possible answers. We pick the most likely one and proceed."
+      </div>
+      <div class="screen-state">
+        <div class="ss-label">On screen</div>
+        Finding 1 expanded. Evidence summary: system record counts, date ranges, SKU-level examples where the three systems disagree. Three candidate answers, ranked by evidence weight: (1) SAP IBP is authoritative — other systems are shadow copies; (2) Regional model runs in parallel by design for local adjustments; (3) Integration failure — systems should sync but data pipeline is broken. AuroPro selects option 1. Finding updates: "Resolved — SAP IBP confirmed as system of record. Regional model flagged for decommission review."
+      </div>
+      <div class="say-box" style="margin-top:8px;">
+        <div class="say-label">Say after resolution</div>
+        "That's it. One targeted question, answered in 60 seconds. Finding 2 — the governance gap — we've flagged for a quick call with the Commercial Planning lead. It won't hold up the rest of the analysis. It stays visible as something to resolve, but the discovery continues."
+      </div>
+      <div class="dont-say" style="margin-top:8px;">
+        <div class="ds-label">Don't say</div>
+        Don't call this a "Discovery Copilot." Don't say "gap resolution workflow." Say "a finding that needs a quick answer before we proceed."
+      </div>
+    </div>
+  </div>
+
+  <!-- 4: THE MAP -->
+  <div class="tl-row">
+    <div class="tl-time">10:00 – 15:00</div>
+    <div class="tl-spine"><div class="tl-dot dot-4"></div><div class="tl-line"></div></div>
+    <div class="tl-card c4">
+      <div class="tl-card-title">Your Operational Map (5 min) — Show how the business connects</div>
+      <div class="say-box">
+        <div class="say-label">Say</div>
+        "Now here's something your team has never seen as a single picture. This is how demand planning, distribution, and order fulfilment connect in your landscape — which teams hand off to which, which systems are involved at each step, and where the ownership boundaries are."
+      </div>
+      <div class="screen-state">
+        <div class="ss-label">On screen</div>
+        A business-readable domain map — not a technical diagram. Three labelled areas: "Demand Planning", "Distribution Management", "Order Fulfilment". Arrows show handoff chains with plain-language labels: "Forecast approved → Production instructed → DC allocated → Orders dispatched." Each area shows the systems involved. Confidence indicators on each area: green (verified), amber (partial evidence).
+      </div>
+      <div class="say-box" style="margin-top:8px;">
+        <div class="say-label">Say — O2C downstream link</div>
+        "And here's the part no one puts together manually. When your demand forecast undershoots by more than 15% in a European market, your customers feel it 12 to 15 days later — in delayed orders and stockouts. The platform found that by reading the distribution logs and the order fulfilment records together. It's not a coincidence. It's a systemic pattern that's been hiding in your data."
+      </div>
+      <div class="finding-box finding-grn" style="margin-top:8px;">
+        <div class="f-label">🟢 Cross-Domain Pattern: Forecast miss → Customer impact</div>
+        <div class="f-sub">When European demand forecast underruns by &gt;15%, order fulfilment rate drops 12–15 days later. Detected across 8 SKUs in 2025. O2C audit trail confirms pattern. This is a traceable, repeatable consequence — not an isolated incident.</div>
+      </div>
+      <div class="beat-row">
+        <span class="beat-chip">Pause here — let this land</span>
+        <span class="beat-chip">"No one told it to look for this connection"</span>
+        <span class="beat-chip">This is the moment the audience leans forward</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5: THE ROADMAP -->
+  <div class="tl-row">
+    <div class="tl-time">15:00 – 18:30</div>
+    <div class="tl-spine"><div class="tl-dot dot-5"></div><div class="tl-line"></div></div>
+    <div class="tl-card c5">
+      <div class="tl-card-title">What To Do About It (3.5 min) — The transformation roadmap</div>
+      <div class="say-box">
+        <div class="say-label">Say</div>
+        "The platform doesn't just describe the problem — it tells you what to do next and in what order. Three priorities for your demand planning domain."
+      </div>
+      <div class="screen-state">
+        <div class="ss-label">On screen — Transformation Roadmap, three priorities only</div>
+        <strong>Now (0–6 months):</strong> Declare SAP IBP as demand forecast system of record. Decommission or subordinate regional model. Resolve DC Allocation Model ownership — is it on Sanofi TSA? <br><br>
+        <strong>Next (6–18 months):</strong> Formalise S&OP override governance — documented escalation path, system-enforced sign-off. Consolidate demand planning stack to one source of truth across regions.<br><br>
+        <strong>Later (18+ months):</strong> Agentic demand sensing — AI-assisted forecast adjustment for seasonal peaks (Allegra spring, cold/flu winter). Automated stockout early-warning tied to O2C fulfilment signals.
+      </div>
+      <div class="dont-say" style="margin-top:8px;">
+        <div class="ds-label">Don't say</div>
+        Don't walk through the full report. Three priorities only. The rest lives in the report for the discussion. If you show everything now, there's nothing to discuss.
+      </div>
+    </div>
+  </div>
+
+  <!-- 6: CLOSE -->
+  <div class="tl-row">
+    <div class="tl-time">18:30 – 20:00</div>
+    <div class="tl-spine"><div class="tl-dot dot-6"></div><div class="tl-line"></div></div>
+    <div class="tl-card c6">
+      <div class="tl-card-title">The Offer (90 sec) — Hard close, no qualifications</div>
+      <div class="say-box">
+        <div class="say-label">Say</div>
+        "Everything you just saw ran on synthetic data built to look like Opella's post-carve-out landscape. In the pilot, this runs on one real domain of your actual landscape — your documents, your system exports, your telemetry. Your transformation team's job is to review the findings and validate the roadmap. Not produce it. Two weeks. One domain. A plan your board can act on."
+      </div>
+      <div class="beat-row">
+        <span class="beat-chip">Stop talking after "act on"</span>
+        <span class="beat-chip">Don't ask "what do you think?"</span>
+        <span class="beat-chip">Hand the floor back — silence is fine</span>
+        <span class="beat-chip">Close signal: "Can we run this on one of our real domains?"</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7: DISCUSSION -->
+  <div class="tl-row">
+    <div class="tl-time">20:00 – 45:00</div>
+    <div class="tl-spine"><div class="tl-dot dot-7"></div><div class="tl-line"></div></div>
+    <div class="tl-card c7">
+      <div class="tl-card-title">Discussion & Next Steps (25 min)</div>
+      Full report open on screen. Navigate wherever they want to go deeper. Have pilot domain shortlist and engagement terms ready.
+      <div class="beat-row" style="margin-top:8px;">
+        <span class="beat-chip">Expected: "Is the DC Allocation Model finding real?"</span>
+        <span class="beat-chip">Expected: "How long does the pilot take?"</span>
+        <span class="beat-chip">Expected: "What data do you need from us?"</span>
+        <span class="beat-chip">Expected: "Can we see the O2C section?"</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="backup-note">
+  <div class="bn-label">Technical fallback — silent, not in the room</div>
+  If live discovery stalls during ingestion or analysis, switch to pre-compiled output without breaking narrative: "Let me show you the complete picture from a run we prepared earlier — same documents, same process." Jump directly to the operational map. Three findings are pre-populated. All roadmap content is intact. The audience sees the business output — the live run is sacrificed, the story is not.
+</div>
+
+<p style="font-size:12px;opacity:0.5;margin-top:16px;">Confirm this structure — then we move to Section 2: the synthetic input set.</p>
