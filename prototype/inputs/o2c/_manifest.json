@@ -1,0 +1,10 @@
+{
+  "domain": "o2c",
+  "domain_label": "Order-to-Cash",
+  "suppress_client": true,
+  "note": "GENERIC ENGINE: by default the platform shows NO client name unless one is detected from the documents; nothing is hardcoded. For this demo we set suppress_client=true so the real client is never named on screen even though it appears in the docs (the detected name is then also scrubbed from doc-name citations and guarded against leaks). For a real engagement, omit suppress_client to auto-detect, or set an explicit \"client\". domain_label + effort numbers are optional.",
+  "effort_comparison": {
+    "traditional": { "duration": "8-12 weeks", "stakeholders": "15-20", "hours_each": "4-8 hrs" },
+    "platform":    { "duration": "2-3 weeks", "touchpoints": "2 SME review sessions" }
+  }
+}

@@ -1,1 +1,24 @@
+# ── OS / editor noise ─────────────────────────────────────────────
 .DS_Store
+*.swp
+
+# ── secrets (never commit) ────────────────────────────────────────
+.env
+prototype/.env
+
+# ── Claude / tooling local state ──────────────────────────────────
+.claude/
+
+# ── Python runtime ────────────────────────────────────────────────
+__pycache__/
+*.pyc
+.pytest_cache/
+prototype/.venv/
+
+# ── prototype runtime cache (regenerated; noisy) ──────────────────
+prototype/.cache/
+
+# NOTE: out/, golden/, shared_context/, and the input documents ARE committed (by request) as a
+# reference/handoff bundle. They contain the engagement org name in raw/internal layers — this repo
+# is treated as private reference. Only secrets (.env), the LLM response cache, the venv, and OS
+# noise are excluded.

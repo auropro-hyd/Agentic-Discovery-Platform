@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Demo Script — Order-to-Cash (Rebuilt)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #1a1a1e; color: #f0f0f2; padding: 40px; line-height: 1.6;
+  }
+  .page { max-width: 880px; margin: 0 auto; }
+
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .meta { font-size: 12px; opacity: 0.5; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; opacity: 0.65; margin-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px; }
+
+  /* ── PRINCIPLE BOX */
+  .principle-box {
+    border-radius: 8px; padding: 14px 18px; margin-bottom: 28px;
+    background: rgba(124,106,247,0.08); border: 1px solid rgba(124,106,247,0.2); font-size: 12px;
+  }
+  .pb-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #a99af7; margin-bottom: 8px; }
+  .pb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .pb-col-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.55; margin-bottom: 6px; }
+  .pb-col ul { padding-left: 15px; }
+  .pb-col li { margin-bottom: 3px; font-size: 12px; line-height: 1.6; }
+
+  /* ── TIMELINE */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-row { display: grid; grid-template-columns: 90px 22px 1fr; gap: 0 12px; align-items: stretch; }
+  .tl-time { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); text-align: right; padding-top: 15px; padding-right: 4px; white-space: nowrap; }
+  .tl-spine { display: flex; flex-direction: column; align-items: center; }
+  .tl-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; margin-top: 17px; }
+  .tl-line { width: 2px; flex: 1; background: rgba(255,255,255,0.09); margin-top: 3px; }
+  .tl-row:last-child .tl-line { display: none; }
+  .tl-card { border-radius: 8px; padding: 15px 17px; margin-bottom: 10px; font-size: 12px; }
+  .tl-title { font-weight: 700; font-size: 13px; margin-bottom: 10px; }
+
+  /* ── STANDARD ELEMENTS */
+  .say-box {
+    border-radius: 6px; padding: 10px 14px; margin-top: 8px;
+    background: rgba(124,106,247,0.1); border-left: 3px solid rgba(124,106,247,0.45);
+    font-style: italic; font-size: 12px; line-height: 1.7;
+  }
+  .say-label { font-size: 10px; font-weight: 700; font-style: normal; text-transform: uppercase; letter-spacing: 0.8px; color: #a99af7; margin-bottom: 5px; }
+
+  .screen-box {
+    border-radius: 6px; padding: 9px 13px; margin-top: 8px;
+    background: rgba(255,255,255,0.05); border-left: 3px solid rgba(255,255,255,0.16);
+    font-size: 11px; line-height: 1.65;
+  }
+  .sc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.55; margin-bottom: 4px; }
+
+  .finding { border-radius: 6px; padding: 9px 13px; margin-top: 6px; font-size: 12px; line-height: 1.65; }
+  .f-red  { background: rgba(255,100,80,0.12);  border-left: 3px solid rgba(255,100,80,0.5); }
+  .f-amb  { background: rgba(255,180,0,0.10);   border-left: 3px solid rgba(255,180,0,0.45); }
+  .f-grn  { background: rgba(80,200,120,0.10);  border-left: 3px solid rgba(80,200,120,0.4); }
+  .f-title { font-weight: 700; margin-bottom: 4px; }
+  .f-body  { opacity: 0.82; }
+
+  .dont-say {
+    border-radius: 6px; padding: 8px 12px; margin-top: 7px;
+    background: rgba(255,100,80,0.07); border-left: 3px solid rgba(255,100,80,0.3);
+    font-size: 11px; line-height: 1.6;
+  }
+  .ds-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #ff7070; margin-bottom: 3px; }
+
+  .beats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+  .beat { border-radius: 4px; padding: 3px 9px; font-size: 11px; background: rgba(255,255,255,0.08); }
+
+  /* ── CARD COLORS */
+  .c1 { background: rgba(80,140,255,0.09); }
+  .c2 { background: rgba(160,100,255,0.09); }
+  .c3 { background: rgba(245,200,66,0.07); }
+  .c4 { background: rgba(255,100,80,0.09); }
+  .c5 { background: rgba(80,200,120,0.09); }
+  .c6 { background: rgba(80,200,180,0.09); }
+  .c7 { background: rgba(124,106,247,0.09); }
+  .c8 { background: rgba(255,255,255,0.04); }
+
+  /* ── DOT COLORS */
+  .d1 { background: #5090ff; }
+  .d2 { background: #b088ff; }
+  .d3 { background: #f5c842; }
+  .d4 { background: #ff7070; }
+  .d5 { background: #50c878; }
+  .d6 { background: #50c8b8; }
+  .d7 { background: #a99af7; }
+  .d8 { background: rgba(255,255,255,0.3); }
+
+  /* ── OUTPUT SUITE DIVIDER ROW */
+  .output-suite-divider {
+    display: grid; grid-template-columns: 90px 22px 1fr; gap: 0 12px;
+    margin: 0 0 4px;
+  }
+  .osd-spine { display: flex; flex-direction: column; align-items: center; }
+  .osd-line  { width: 2px; height: 28px; background: rgba(255,255,255,0.09); }
+  .osd-body  {
+    border-radius: 5px; padding: 5px 14px; margin: 4px 0;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09);
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+    color: rgba(255,255,255,0.4); text-align: center; align-self: center;
+  }
+
+  /* ── DELIVERABLE TAG */
+  .deliv-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    border-radius: 4px; padding: 3px 10px; margin-bottom: 10px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+  }
+
+  /* ── OPPORTUNITY BLOCKS (Portfolio section) */
+  .opp { margin-bottom: 20px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.09); }
+  .opp:last-child { margin-bottom: 0; }
+  .opp-header {
+    padding: 14px 18px 12px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .opp-num   { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.4; margin-bottom: 3px; }
+  .opp-title { font-size: 15px; font-weight: 700; }
+  .opp-badges{ display: flex; gap: 6px; align-items: center; flex-wrap: wrap; flex-shrink: 0; }
+  .badge     { border-radius: 5px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+  .opp-body  { padding: 0 18px 18px; }
+
+  /* Impact bar */
+  .impact-bar { border-radius: 8px; padding: 12px 16px; margin-bottom: 14px; display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+  .impact-figure { font-size: 22px; font-weight: 800; white-space: nowrap; }
+  .impact-desc   { font-size: 11px; line-height: 1.65; opacity: 0.82; }
+  .impact-source { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; opacity: 0.5; margin-top: 4px; }
+
+  /* Process grid */
+  .process-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .process-col  { border-radius: 8px; padding: 11px 13px; }
+  .proc-label   { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 7px; }
+  .proc-steps   { display: flex; flex-direction: column; gap: 4px; }
+  .step {
+    border-radius: 4px; padding: 5px 9px; font-size: 11px; line-height: 1.5;
+    display: flex; gap: 7px; align-items: flex-start;
+  }
+  .step-num   { font-size: 10px; font-weight: 800; opacity: 0.45; padding-top: 1px; flex-shrink: 0; }
+  .step-gap   { background: rgba(255,100,80,0.12);  border-left: 2px solid rgba(255,100,80,0.4); }
+  .step-ok    { background: rgba(255,255,255,0.04); }
+  .step-new   { background: rgba(80,200,120,0.10);  border-left: 2px solid rgba(80,200,120,0.35); }
+  .step-auto  { background: rgba(80,140,255,0.10);  border-left: 2px solid rgba(80,140,255,0.35); }
+  .step-agent { background: rgba(124,106,247,0.12); border-left: 2px solid rgba(124,106,247,0.4); }
+
+  /* Intervention */
+  .intervention { border-radius: 8px; padding: 11px 14px; font-size: 11px; line-height: 1.7; margin-bottom: 12px; }
+  .int-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.5; margin-bottom: 5px; }
+
+  /* Source tags */
+  .sources { display: flex; gap: 5px; flex-wrap: wrap; }
+  .src-tag { border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(255,255,255,0.06); opacity: 0.7; }
+
+  /* Opportunity color variants */
+  .h1 { background: rgba(255,100,80,0.1); }
+  .h2 { background: rgba(80,140,255,0.1); }
+  .h3 { background: rgba(124,106,247,0.1); }
+  .ib1 { background: rgba(255,100,80,0.1); }
+  .ib2 { background: rgba(80,140,255,0.1); }
+  .ib3 { background: rgba(124,106,247,0.1); }
+  .if1 { color: #ff9090; }
+  .if2 { color: #90b8ff; }
+  .if3 { color: #c4bbff; }
+  .ba-before { background: rgba(255,100,80,0.06);  border: 1px solid rgba(255,100,80,0.15); }
+  .ba-after  { background: rgba(80,200,120,0.06);  border: 1px solid rgba(80,200,120,0.15); }
+  .pl1 { color: #ff7070; }
+  .pl2 { color: #50c878; }
+  .itv1 { background: rgba(255,180,0,0.07);    border: 1px solid rgba(255,180,0,0.2); }
+  .itv2 { background: rgba(80,140,255,0.07);   border: 1px solid rgba(80,140,255,0.2); }
+  .itv3 { background: rgba(124,106,247,0.08);  border: 1px solid rgba(124,106,247,0.22); }
+
+  /* Badge variants */
+  .b-hitl     { background: rgba(255,180,0,0.18);   color: #f5c842; }
+  .b-auto     { background: rgba(80,140,255,0.2);    color: #90b8ff; }
+  .b-agent    { background: rgba(124,106,247,0.22);  color: #c4bbff; }
+  .b-pri1     { background: rgba(255,100,80,0.18);   color: #ff7070; }
+  .b-parallel { background: rgba(80,140,255,0.15);   color: #90b8ff; }
+  .b-seq      { background: rgba(80,200,120,0.15);   color: #50c878; }
+
+  /* ── RECOMMENDATION TABLE */
+  .rec-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  .rec-table th { text-align: left; padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.5; }
+  .rec-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); vertical-align: top; line-height: 1.5; }
+  .rec-table tr:last-child td { border-bottom: none; }
+
+  /* ── PAIN ITEMS */
+  .pain-item { border-radius: 8px; padding: 11px 14px; margin-top: 8px; }
+  .pi-header { display: flex; align-items: center; gap: 12px; margin-bottom: 5px; }
+  .pi-impact { font-size: 18px; font-weight: 800; white-space: nowrap; }
+  .pi-title  { font-size: 12px; font-weight: 700; }
+  .pi-body   { font-size: 11px; line-height: 1.65; opacity: 0.82; }
+  .pi-feas   { font-size: 10px; margin-top: 5px; opacity: 0.6; }
+
+  /* ── ROADMAP COLUMNS */
+  .roadmap-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .rm-col  { border-radius: 8px; padding: 12px 14px; }
+  .rm-now  { background: rgba(255,100,80,0.07);  border: 1px solid rgba(255,100,80,0.18); }
+  .rm-next { background: rgba(80,140,255,0.07);  border: 1px solid rgba(80,140,255,0.18); }
+  .rm-later{ background: rgba(124,106,247,0.07); border: 1px solid rgba(124,106,247,0.18); }
+  .rm-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .rm-now  .rm-label { color: #ff7070; }
+  .rm-next .rm-label { color: #90b8ff; }
+  .rm-later .rm-label{ color: #c4bbff; }
+  .rm-item { font-size: 11px; line-height: 1.6; padding: 5px 8px; border-radius: 5px; margin-bottom: 5px; }
+  .rm-now  .rm-item  { background: rgba(255,100,80,0.08); }
+  .rm-next .rm-item  { background: rgba(80,140,255,0.08); }
+  .rm-later .rm-item { background: rgba(124,106,247,0.08); }
+  .rm-item:last-child { margin-bottom: 0; }
+  .rm-dep { font-size: 10px; opacity: 0.6; margin-top: 3px; }
+
+  /* ── ARTEFACT TILES */
+  .artefact-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .art-tile { border-radius: 6px; padding: 9px 11px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); font-size: 11px; line-height: 1.5; }
+  .art-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; opacity: 0.5; margin-bottom: 3px; }
+
+  /* ── MISC */
+  .link-box {
+    margin-top: 16px; border-radius: 8px; padding: 12px 16px;
+    background: rgba(80,140,255,0.07); border: 1px solid rgba(80,140,255,0.2);
+    font-size: 12px; line-height: 1.7;
+  }
+  .lb-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #5090ff; margin-bottom: 5px; }
+
+  .backup-note {
+    margin-top: 12px; border-radius: 8px; padding: 12px 16px;
+    background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.14);
+    font-size: 12px; line-height: 1.65;
+  }
+  .bn-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.5; margin-bottom: 5px; }
+
+  .section-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 28px 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Demo Script — Order-to-Cash</h1>
+  <div class="meta">Domain: O2C secondary · 20 min demo · 25 min discussion · Rebuilt 2026-06-01 · Guide: demo-script-o2c-guide.md</div>
+  <div class="subtitle">
+    Use when: the primary Demand Planning demo is not possible, the audience is finance or commercial-led, or the meeting pivots to O2C during discussion.<br>
+    The output suite is the centrepiece — discovery is the setup. The AI Opportunity Portfolio is the main event. Everything else is context.
+  </div>
+
+  <!-- PRINCIPLE BOX -->
+  <div class="principle-box">
+    <div class="pb-label">Guiding principle — same as primary script</div>
+    <div class="pb-grid">
+      <div class="pb-col">
+        <div class="pb-col-title">Never say</div>
+        <ul>
+          <li>Pipeline, agents, blocks</li>
+          <li>Knowledge Graph</li>
+          <li>Evidence Synthesis</li>
+          <li>Gap detected / gap resolved</li>
+          <li>Nodes and edges</li>
+          <li>Technical architecture</li>
+        </ul>
+      </div>
+      <div class="pb-col">
+        <div class="pb-col-title">Say instead</div>
+        <ul>
+          <li>The platform is reading your landscape</li>
+          <li>Your operational map</li>
+          <li>Here's what it found</li>
+          <li>A finding that needs a quick answer</li>
+          <li>How your processes connect</li>
+          <li>What your business actually looks like</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="timeline">
+
+    <!-- ── 1: SETUP ── 0:00–1:30 -->
+    <div class="tl-row">
+      <div class="tl-time">0:00 – 1:30</div>
+      <div class="tl-spine"><div class="tl-dot d1"></div><div class="tl-line"></div></div>
+      <div class="tl-card c1">
+        <div class="tl-title">The Setup (1.5 min) — Name the mismatch, not the technology</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Sanofi's Order-to-Cash was built for hospital distributors and pharmacy chains on GPO contracts. That was the business. Opella's business is Doliprane at Carrefour, Allegra on Amazon, Dulcolax through Boots. The channel has changed fundamentally. The question is whether your systems and your processes have changed with it — or whether you're running a consumer healthcare company on infrastructure designed for a different company entirely. We'll let the platform show you."
+        </div>
+        <div class="screen-box">
+          <div class="sc-label">On screen</div>
+          Platform open. 12 input documents visible — business-readable names across five categories: process documentation, policy, system exports, integration records, operational logs. Nothing has run.
+        </div>
+        <div class="dont-say">
+          <div class="ds-label">Don't say</div>
+          Don't explain what the platform does or how it works. Don't mention synthetic inputs. "We'll let the platform show you" is the bridge — then click run.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 2: DISCOVERY RUNS ── 1:30–5:00 -->
+    <div class="tl-row">
+      <div class="tl-time">1:30 – 5:00</div>
+      <div class="tl-spine"><div class="tl-dot d2"></div><div class="tl-line"></div></div>
+      <div class="tl-card c2">
+        <div class="tl-title">Discovery Runs (3.5 min) — Let the mismatch surface</div>
+        <div class="say-box">
+          <div class="say-label">Say as it runs</div>
+          "It's reading your order management documentation, your customer records, your system exports, your escalation logs — building a picture of how orders actually move through your business, who owns each step, which systems are involved, where the handoffs break down. We intentionally left some gaps in these documents. Watch what it finds."
+        </div>
+        <div class="screen-box">
+          <div class="sc-label">On screen — discovery feed (business language only)</div>
+          Status messages: "Reading order management documentation… Mapping customer ownership across systems… Cross-referencing documented process against actual order flow… Comparing credit management records with fulfilment data… Analysing EDI integration register against system evidence…" Then findings panel begins populating.
+        </div>
+
+        <div class="finding f-red" style="margin-top:10px;">
+          <div class="f-title">🔴 Finding 1 — Customer Master Data: No Single Source of Truth</div>
+          <div class="f-body">Major retail and pharmacy customers — including accounts representing over 40% of European revenue — exist in multiple systems with conflicting credit limits, payment terms, and contact records. Credit decisions are being made against different records depending on who processes the order.</div>
+        </div>
+
+        <div class="finding f-red" style="margin-top:6px;">
+          <div class="f-title">🔴 Finding 2 — 67% of Your Order Volume Is Running Without Governance</div>
+          <div class="f-body">Your Order Management SOP describes a process for specialty pharma distributors: manual PO receipt, credit review, picking instruction, dispatch confirmation. System evidence shows 67% of your actual orders now arrive through retail EDI — automated, high-velocity, no manual touchpoints. This flow has no SOP, no RACI, no assigned owner. It is running at scale, undocumented.</div>
+        </div>
+
+        <div class="finding f-amb" style="margin-top:6px;">
+          <div class="f-title">🟡 Finding 3 — 6 EDI Integrations with Unverified Ownership</div>
+          <div class="f-body">14 EDI connections to Carrefour, Boots, dm, and Leclerc are listed in the integration register. 6 were established under Sanofi Shared Services. No documentation of transfer to Opella at carve-out. These may still be operating under Sanofi TSA — an exposure that has not been mapped before today.</div>
+        </div>
+
+        <div class="beats">
+          <span class="beat">Pause after Finding 2 — let "67%" land</span>
+          <span class="beat">"Running without governance" — not "undocumented"</span>
+          <span class="beat">Finding 3 is amber — "flagged, not blocking, but a TSA risk you need to own"</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 3: GAP RESOLUTION ── 5:00–8:00 -->
+    <div class="tl-row">
+      <div class="tl-time">5:00 – 8:00</div>
+      <div class="tl-spine"><div class="tl-dot d3"></div><div class="tl-line"></div></div>
+      <div class="tl-card c3">
+        <div class="tl-title">Three Findings, Three Resolutions (3 min) — Fast, targeted, no workshop</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Finding 1 needs one quick answer — whoever owns your customer data governance. The platform has already done the work: it's compared all three systems and ranked which has the most complete, most recently updated records. We confirm the answer and proceed."
+        </div>
+        <div class="screen-box">
+          <div class="sc-label">On screen — Finding 1 resolution</div>
+          Three candidate answers ranked by evidence: (1) SAP CRM is authoritative — other systems are stale copies from Sanofi integration; (2) AR system holds live credit decisions — CRM is reference only; (3) No single system is authoritative — parallel updates have diverged. Select option 1. Finding updates: "Resolved — SAP CRM confirmed as customer master system of record."
+        </div>
+        <div class="say-box" style="margin-top:8px;">
+          <div class="say-label">Say after resolution</div>
+          "Finding 2 — the undocumented EDI flow — stays in the output as a priority action. That's a process documentation sprint, not a quick call. Finding 3 — the TSA-exposed connections — goes to Digital and Legal. They need to know about this before TSA exit planning goes any further."
+        </div>
+        <div class="dont-say">
+          <div class="ds-label">Don't say</div>
+          Don't call this "gap resolution." Don't mention a Copilot or agent. Say "a finding that needed a quick answer." The mechanics are invisible.
+        </div>
+        <div class="beats" style="margin-top:8px;">
+          <span class="beat">Total time here: ~2 min</span>
+          <span class="beat">Don't linger — the output suite is what they came to see</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── OUTPUT SUITE DIVIDER ── -->
+    <div class="output-suite-divider">
+      <div></div>
+      <div class="osd-spine"><div class="osd-line"></div></div>
+      <div class="osd-body">▼ &nbsp;&nbsp; Output Suite — 6 Deliverables &nbsp;&nbsp; ▼</div>
+    </div>
+
+    <!-- ── 4: CURRENT STATE ASSESSMENT ── 8:00–9:30 -->
+    <div class="tl-row">
+      <div class="tl-time">8:00 – 9:30</div>
+      <div class="tl-spine"><div class="tl-dot d4"></div><div class="tl-line"></div></div>
+      <div class="tl-card c4">
+        <div class="tl-title">Current State Assessment (1.5 min) — Deliverable 1 of 6</div>
+        <div class="deliv-tag">① &nbsp; Current State Assessment</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Here's Deliverable 1 — the Current State Assessment. Three panels: what your process boundaries look like today, which systems are involved and how they connect, and who owns what. This is the operational map the platform built from your documents."
+        </div>
+        <div class="screen-box">
+          <div class="sc-label">On screen — three assessment panels</div>
+          <strong>Panel A — Domain Map:</strong> Two O2C flows side by side. "Documented O2C — Specialty Distributor (33% of volume)" and "Actual O2C — Retail EDI (67% of volume)." Confidence indicators: documented flow amber (process exists, system evidence partial), EDI flow red (no SOP, no RACI, 6 TSA-flagged connections).<br><br>
+          <strong>Panel B — System Context:</strong> Five systems mapped: SAP ERP (order fulfilment), SAP CRM (customer master — confirmed SoT after Finding 1 resolution), OMS (order management), EDI Gateway (14 connections, 6 TSA-flagged), AR System. Each system shows owning team and integration dependencies.<br><br>
+          <strong>Panel C — Ownership Map:</strong> RACI per process step. Credit review: Finance owns for manual orders. EDI credit review: blank — no owner. EDI exception handling: CS team (de facto, not by design). TSA-exposed integrations: owner unverified.
+        </div>
+        <div class="say-box" style="margin-top:8px;">
+          <div class="say-label">Say — cross-domain note (if primary demo ran)</div>
+          "And here — a pattern the platform found across domains. When the demand forecast underruns, your O2C escalation queue spikes 12 to 15 days later. Your customer service team is absorbing a demand planning failure. It's in the map."
+        </div>
+        <div class="beats">
+          <span class="beat">Name the three panels — don't walk through all of them</span>
+          <span class="beat">The two-flow domain map is the key visual — pause on it briefly</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 5: PAIN POINTS & OPPORTUNITY REPORT ── 9:30–11:00 -->
+    <div class="tl-row">
+      <div class="tl-time">9:30 – 11:00</div>
+      <div class="tl-spine"><div class="tl-dot d5"></div><div class="tl-line"></div></div>
+      <div class="tl-card c5">
+        <div class="tl-title">Pain Points & Opportunity Report (1.5 min) — Deliverable 2 of 6</div>
+        <div class="deliv-tag">② &nbsp; Pain Points & Opportunity Report</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Deliverable 2 — every finding quantified. Not a list of issues — a prioritised set of pain points with the business impact figure and a feasibility read on each. The numbers come directly from the source documents the platform read."
+        </div>
+
+        <div class="pain-item" style="background:rgba(255,100,80,0.08);border:1px solid rgba(255,100,80,0.2);">
+          <div class="pi-header">
+            <div class="pi-impact" style="color:#ff9090;">€600K+</div>
+            <div class="pi-title">Customer master conflict — uninstructed credit over-exposure</div>
+          </div>
+          <div class="pi-body">Carrefour FR: €2.4M credit limit in CRM vs €1.8M agreed limit in ERP — €600K of uninstructed exposure. Boots UK: Net 30 invoiced, Net 45 paid — 15-day payment gap on every invoice cycle. 22 accounts with unresolved credit status across systems.</div>
+          <div class="pi-feas">Feasibility: targeted HITL session — one day to resolve 22 accounts with ranked evidence. Immediate risk reduction.</div>
+        </div>
+
+        <div class="pain-item" style="background:rgba(80,140,255,0.07);border:1px solid rgba(80,140,255,0.18);margin-top:6px;">
+          <div class="pi-header">
+            <div class="pi-impact" style="color:#90b8ff;">34 incidents/yr</div>
+            <div class="pi-title">EDI exception chaos — CS team absorbing an operational burden they don't own</div>
+          </div>
+          <div class="pi-body">34 manual CS interventions per year on EDI failures. SLA drops 94% → 61% during error clusters. ~370 retail orders miss delivery commitment per cluster event. Carrefour FR threatened Doliprane delisting — documented in escalation log.</div>
+          <div class="pi-feas">Feasibility: automation pipeline — no intelligence required, pure routing and alerting. Independent of Opportunity 1 — can run in parallel from day 1.</div>
+        </div>
+
+        <div class="pain-item" style="background:rgba(255,180,0,0.07);border:1px solid rgba(255,180,0,0.2);margin-top:6px;">
+          <div class="pi-header">
+            <div class="pi-impact" style="color:#f5c842;">6 of 14 EDI</div>
+            <div class="pi-title">TSA-exposed integrations — unverified ownership from carve-out</div>
+          </div>
+          <div class="pi-body">6 major retail EDI connections established under Sanofi Shared Services. No transfer documentation at carve-out. CS working notes reference "Sanofi IT helpdesk" as the contact for connection failures — this is the clearest evidence the connections were never transferred.</div>
+          <div class="pi-feas">Feasibility: Legal/Digital action — not an AI opportunity. Flagged for TSA exit planning. Required before Opportunity 2 can own its connection map.</div>
+        </div>
+
+        <div class="pain-item" style="background:rgba(124,106,247,0.07);border:1px solid rgba(124,106,247,0.2);margin-top:6px;">
+          <div class="pi-header">
+            <div class="pi-impact" style="color:#c4bbff;">5,665 orders/yr</div>
+            <div class="pi-title">No credit check on 67% of O2C volume — EDI channel exempt by omission, not design</div>
+          </div>
+          <div class="pi-body">Credit policy exists for all customer tiers — but covers manual and email orders only. EDI channel (67% of volume, 1.2h avg processing) has no credit gate. O2C RACI has no row for EDI credit review. Zero audit trail for credit exposure on the majority order flow.</div>
+          <div class="pi-feas">Feasibility: AI agent — rules-based, high coverage. Requires Opportunity 1 (reconciled customer master) to complete first.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 6: TRANSFORMATION RECOMMENDATION ── 11:00–12:00 -->
+    <div class="tl-row">
+      <div class="tl-time">11:00 – 12:00</div>
+      <div class="tl-spine"><div class="tl-dot d6"></div><div class="tl-line"></div></div>
+      <div class="tl-card c6">
+        <div class="tl-title">Transformation Recommendation (1 min) — Deliverable 3 of 6</div>
+        <div class="deliv-tag">③ &nbsp; Transformation Recommendation</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Deliverable 3 — for each AI opportunity, the right type of intervention. Not a generic prescription. Each recommendation is derived from the nature of the finding. This is the bridge to the portfolio."
+        </div>
+        <table class="rec-table">
+          <tr>
+            <th>Opportunity</th>
+            <th>Intervention Type</th>
+            <th>Why</th>
+            <th>Sequence</th>
+          </tr>
+          <tr>
+            <td><strong>Customer master reconciliation</strong></td>
+            <td><span class="badge b-hitl">HITL Workflow</span></td>
+            <td>Human judgment required — only the credit team can declare which record is authoritative</td>
+            <td style="color:#ff7070;font-weight:700;font-size:11px;">Start immediately</td>
+          </tr>
+          <tr>
+            <td><strong>EDI exception pipeline</strong></td>
+            <td><span class="badge b-auto">Automation Pipeline</span></td>
+            <td>No intelligence needed — routing, alerting, ownership mapping. Pure process fix.</td>
+            <td style="color:#90b8ff;font-weight:700;font-size:11px;">Run in parallel</td>
+          </tr>
+          <tr>
+            <td><strong>EDI credit decisioning</strong></td>
+            <td><span class="badge b-agent">AI Agent</span></td>
+            <td>Rules-based decisions at scale — 5,665 orders/yr, policy exists, execution is missing</td>
+            <td style="color:#c4bbff;font-weight:700;font-size:11px;">After Opp 1</td>
+          </tr>
+        </table>
+        <div class="beats" style="margin-top:10px;">
+          <span class="beat">One sentence only — "here's the intervention type for each, and why"</span>
+          <span class="beat">Move immediately to the portfolio — that's where the detail lives</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 7: AI OPPORTUNITY PORTFOLIO ── 12:00–16:00 (PRIMARY — 4 min) -->
+    <div class="tl-row">
+      <div class="tl-time">12:00 – 16:00</div>
+      <div class="tl-spine"><div class="tl-dot d7"></div><div class="tl-line"></div></div>
+      <div class="tl-card c7">
+        <div class="tl-title">AI Opportunity Portfolio (4 min) — Deliverable 4 of 6 — Primary Output</div>
+        <div class="deliv-tag" style="background:rgba(124,106,247,0.15);color:#c4bbff;">④ &nbsp; AI Opportunity Portfolio &nbsp;·&nbsp; This is the centrepiece</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Here's your AI Opportunity Portfolio. Three opportunities, fully documented — each one derived directly from what we just found. Not a generic prescription. Each shows you the process as it works today, the process as it should work, what the intervention does, and the business impact tied back to the source documents it came from."
+        </div>
+
+        <!-- ── OPPORTUNITY 1 ── -->
+        <div class="opp" style="margin-top:14px;">
+          <div class="opp-header h1">
+            <div>
+              <div class="opp-num">Opportunity 1</div>
+              <div class="opp-title">Customer Master Data Reconciliation</div>
+            </div>
+            <div class="opp-badges">
+              <span class="badge b-hitl">HITL Workflow</span>
+              <span class="badge b-pri1">Resolve First</span>
+            </div>
+          </div>
+          <div class="opp-body">
+            <div class="impact-bar ib1">
+              <div class="impact-figure if1">€600K+</div>
+              <div>
+                <div class="impact-desc">Uninstructed credit over-exposure — Carrefour FR €2.4M CRM vs €1.8M ERP agreed limit. Boots UK invoiced on Net 30, paying on Net 45 — 15-day payment gap on every invoice cycle. 22 accounts with unresolved credit status across systems.</div>
+                <div class="impact-source">Derived from: Doc 07 (AR Review Notes) · Doc 08 (SAP ERP Export) · Doc 09 (SAP CRM Export)</div>
+              </div>
+            </div>
+
+            <div class="process-grid">
+              <div class="process-col ba-before">
+                <div class="proc-label pl1">Current State</div>
+                <div class="proc-steps">
+                  <div class="step step-ok"><span class="step-num">1</span>Retail customer onboarded — record created in "our systems" (system not named in onboarding guide)</div>
+                  <div class="step step-gap"><span class="step-num">2</span>Same customer exists in SAP ERP (migrated from Sanofi) and SAP CRM (updated by account manager) — different credit limits and payment terms in each</div>
+                  <div class="step step-gap"><span class="step-num">3</span>Credit team approves incoming orders against CRM limit (higher) — ERP agreed limit ignored</div>
+                  <div class="step step-gap"><span class="step-num">4</span>Finance invoices on CRM payment terms — customer pays on ERP terms — payment dispute raised</div>
+                  <div class="step step-gap"><span class="step-num">5</span>AR team identifies discrepancy in quarterly review — no process exists to resolve it</div>
+                </div>
+              </div>
+              <div class="process-col ba-after">
+                <div class="proc-label pl2">Future State</div>
+                <div class="proc-steps">
+                  <div class="step step-new"><span class="step-num">1</span>HITL workflow surfaces discrepancies per account — AI ranks resolution options by evidence strength (last updated, data source, revenue tier)</div>
+                  <div class="step step-new"><span class="step-num">2</span>Credit team confirms authoritative record per account — one session, platform does the evidence work</div>
+                  <div class="step step-new"><span class="step-num">3</span>SAP CRM confirmed as system of record — ERP and CRM reconciled, stale copies retired</div>
+                  <div class="step step-new"><span class="step-num">4</span>All credit approvals and invoice generation read from a single source — payment terms consistent across systems</div>
+                  <div class="step step-new"><span class="step-num">5</span>Audit trail per credit decision — no informal limit inflation by account managers</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="intervention itv1">
+              <div class="int-label">Intervention — HITL Workflow</div>
+              AI surfaces the discrepancy, the evidence, and ranked resolution options. The credit team makes the call. The platform writes the confirmed record as the authoritative master. One targeted session replaces quarterly firefighting. This is also the prerequisite for Opportunity 3 — the credit decisioning agent cannot function on conflicting limits from two systems.
+            </div>
+
+            <div class="sources">
+              <span class="src-tag">Doc 07 — AR Review Notes Q4 2025</span>
+              <span class="src-tag">Doc 08 — SAP S/4HANA Customer Master Export</span>
+              <span class="src-tag">Doc 09 — SAP CRM Customer Export</span>
+              <span class="src-tag">Doc 02 — Credit Management Policy</span>
+              <span class="src-tag">Doc 05 — Retail Customer Onboarding Guide</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── OPPORTUNITY 2 ── -->
+        <div class="opp">
+          <div class="opp-header h2">
+            <div>
+              <div class="opp-num">Opportunity 2</div>
+              <div class="opp-title">EDI Order Exception Resolution Pipeline</div>
+            </div>
+            <div class="opp-badges">
+              <span class="badge b-auto">Automation Pipeline</span>
+              <span class="badge b-parallel">Run in Parallel</span>
+            </div>
+          </div>
+          <div class="opp-body">
+            <div class="impact-bar ib2">
+              <div class="impact-figure if2">34 incidents/yr</div>
+              <div>
+                <div class="impact-desc">Manual CS interventions on EDI failures. SLA drops 94% → 61% during error clusters — ~370 retail orders miss delivery commitment per cluster event. Carrefour FR threatened Doliprane delisting. CS team absorbing operational burden of a process they have no ownership of.</div>
+                <div class="impact-source">Derived from: Doc 06 (CS Escalation Log) · Doc 10 (Order Flow Export) · Doc 11 (CS Working Notes)</div>
+              </div>
+            </div>
+
+            <div class="process-grid">
+              <div class="process-col ba-before">
+                <div class="proc-label pl1">Current State</div>
+                <div class="proc-steps">
+                  <div class="step step-ok"><span class="step-num">1</span>Retail EDI order arrives from Carrefour / Boots / dm / Leclerc via EDI connection</div>
+                  <div class="step step-gap"><span class="step-num">2</span>EDI connection fails — order not picked up by OMS. No automated alert exists.</div>
+                  <div class="step step-gap"><span class="step-num">3</span>Customer contacts CS team to chase order. CS identifies the failure manually.</div>
+                  <div class="step step-gap"><span class="step-num">4</span>CS re-enters order manually into OMS. Calls Digital team for fix. For 6 Sanofi-managed connections: calls Sanofi IT helpdesk.</div>
+                  <div class="step step-gap"><span class="step-num">5</span>Resolution: multiple days. SLA breached. Escalation logged. "Third time this quarter for Carrefour FR."</div>
+                </div>
+              </div>
+              <div class="process-col ba-after">
+                <div class="proc-label pl2">Future State</div>
+                <div class="proc-steps">
+                  <div class="step step-auto"><span class="step-num">1</span>Retail EDI order arrives. Failure detected automatically at message level — no customer contact required.</div>
+                  <div class="step step-auto"><span class="step-num">2</span>Failed order auto-routed to processing queue — pre-filled from EDI message data. No re-keying by CS.</div>
+                  <div class="step step-auto"><span class="step-num">3</span>Digital team alerted automatically with connection status and failure type. Opella Digital or Sanofi IT notified per connection ownership map.</div>
+                  <div class="step step-new"><span class="step-num">4</span>CS informed of status — not responsible for resolution. Customer contacted proactively with ETA before they escalate.</div>
+                  <div class="step step-new"><span class="step-num">5</span>Resolution: hours, not days. SLA impact contained. Escalation pattern broken.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="intervention itv2">
+              <div class="int-label">Intervention — Automation Pipeline</div>
+              Automated detection at the EDI message layer, not the customer complaint layer. Pre-filled routing queue removes manual re-entry. Owner-aware alerting — the pipeline knows whether to contact Opella Digital or Sanofi IT based on the connection ownership map. CS team exits the EDI operations loop entirely.
+            </div>
+
+            <div class="sources">
+              <span class="src-tag">Doc 06 — CS Escalation Log 2025</span>
+              <span class="src-tag">Doc 10 — Order Flow Analysis Export</span>
+              <span class="src-tag">Doc 11 — EDI Dispute Resolution Working Notes</span>
+              <span class="src-tag">Doc 04 — EDI Integration Register</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── OPPORTUNITY 3 ── -->
+        <div class="opp">
+          <div class="opp-header h3">
+            <div>
+              <div class="opp-num">Opportunity 3</div>
+              <div class="opp-title">AI Credit Decisioning Agent — Retail EDI Channel</div>
+            </div>
+            <div class="opp-badges">
+              <span class="badge b-agent">AI Agent</span>
+              <span class="badge b-seq">Requires Opp 1 First</span>
+            </div>
+          </div>
+          <div class="opp-body">
+            <div class="impact-bar ib3">
+              <div class="impact-figure if3">5,665 orders/yr</div>
+              <div>
+                <div class="impact-desc">Retail EDI orders processed annually with no credit check — 67.3% of total O2C volume. Credit policy exists for all customer tiers but has no coverage for the EDI channel. Zero audit trail for credit exposure on the majority order flow. No RACI owner for EDI credit decisions.</div>
+                <div class="impact-source">Derived from: Doc 02 (Credit Management Policy) · Doc 03 (O2C RACI) · Doc 10 (Order Flow Export)</div>
+              </div>
+            </div>
+
+            <div class="process-grid">
+              <div class="process-col ba-before">
+                <div class="proc-label pl1">Current State</div>
+                <div class="proc-steps">
+                  <div class="step step-ok"><span class="step-num">1</span>Manual/email orders: credit checked against customer master per Credit Management Policy before fulfilment</div>
+                  <div class="step step-gap"><span class="step-num">2</span>EDI orders (67% of volume): arrive automated at 1.2h avg — no credit check in the flow. Policy not applied.</div>
+                  <div class="step step-gap"><span class="step-num">3</span>O2C RACI has no row for EDI credit review — no owner, no escalation path, no audit record</div>
+                  <div class="step step-gap"><span class="step-num">4</span>Over-limit or risky EDI orders fulfilled without review. Exposure unquantified. Discovery only in AR ageing report.</div>
+                </div>
+              </div>
+              <div class="process-col ba-after">
+                <div class="proc-label pl2">Future State</div>
+                <div class="proc-steps">
+                  <div class="step step-agent"><span class="step-num">1</span>EDI order arrives — AI agent reads order value, customer identity, channel tier against reconciled customer master (Opp 1 output)</div>
+                  <div class="step step-agent"><span class="step-num">2</span>Known Tier 1/2 accounts within agreed credit limit: auto-approved. Fulfilment proceeds. Audit record written.</div>
+                  <div class="step step-agent"><span class="step-num">3</span>New accounts, over-limit orders, or flagged risk: surfaced to credit team exception queue with evidence and recommended decision</div>
+                  <div class="step step-new"><span class="step-num">4</span>Credit team reviews exceptions only — not routine approvals. 100% of EDI volume now covered by credit policy.</div>
+                  <div class="step step-new"><span class="step-num">5</span>Full audit trail per EDI order credit decision. No blind spot in AR exposure.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="intervention itv3">
+              <div class="int-label">Intervention — AI Agent</div>
+              Rules-based credit agent operating on the reconciled customer master from Opportunity 1. Auto-approves routine EDI orders, surfaces exceptions to the credit team with pre-ranked recommendations. Credit team workload shifts from routine approvals to exception handling only. <strong>Prerequisite: Opportunity 1 must complete first</strong> — the agent cannot function on conflicting credit limits from two systems.
+            </div>
+
+            <div class="sources">
+              <span class="src-tag">Doc 02 — Credit Management Policy</span>
+              <span class="src-tag">Doc 03 — O2C Process RACI</span>
+              <span class="src-tag">Doc 10 — Order Flow Analysis Export</span>
+              <span class="src-tag">Doc 08 — SAP ERP Export</span>
+              <span class="src-tag">Doc 09 — SAP CRM Export</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="beats" style="margin-top:12px;">
+          <span class="beat">~1 min per opportunity — walk all three</span>
+          <span class="beat">Before/after process is the key visual — show the transformation</span>
+          <span class="beat">Impact figure anchors the CFO audience — let it sit</span>
+          <span class="beat">Source tags prove derivation — "this is computed, not planted"</span>
+          <span class="beat">On Opp 3: "This one requires Opportunity 1 complete first — and that's by design"</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 8: TRANSFORMATION ROADMAP ── 16:00–17:00 -->
+    <div class="tl-row">
+      <div class="tl-time">16:00 – 17:00</div>
+      <div class="tl-spine"><div class="tl-dot d8"></div><div class="tl-line"></div></div>
+      <div class="tl-card c8">
+        <div class="tl-title">Transformation Roadmap (1 min) — Deliverable 5 of 6</div>
+        <div class="deliv-tag">⑤ &nbsp; Transformation Roadmap</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "The roadmap shows you how to sequence it. Opportunity 1 unblocks everything — it's the prerequisite for the credit agent. Opportunity 2 is independent and can run from day one. The sequencing comes from the dependency the platform identified — not from us."
+        </div>
+        <div class="roadmap-grid">
+          <div class="rm-col rm-now">
+            <div class="rm-label">Now · 0–6 months</div>
+            <div class="rm-item"><strong>Opp 1 — Customer Master Reconciliation</strong><div class="rm-dep">HITL session · prerequisite for Opp 3</div></div>
+            <div class="rm-item"><strong>TSA Integration Audit</strong><div class="rm-dep">Legal + Digital · prerequisite for Opp 2 ownership map</div></div>
+          </div>
+          <div class="rm-col rm-next">
+            <div class="rm-label">Next · 0–12 months (parallel)</div>
+            <div class="rm-item"><strong>Opp 2 — EDI Exception Pipeline</strong><div class="rm-dep">Independent · no dependency on Opp 1 · start immediately</div></div>
+            <div class="rm-item"><strong>EDI SOP + RACI Documentation</strong><div class="rm-dep">Process documentation sprint · compliance closure</div></div>
+          </div>
+          <div class="rm-col rm-later">
+            <div class="rm-label">Later · 6–18 months</div>
+            <div class="rm-item"><strong>Opp 3 — AI Credit Decisioning Agent</strong><div class="rm-dep">Requires Opp 1 complete · reconciled customer master is the data foundation</div></div>
+          </div>
+        </div>
+        <div class="beats" style="margin-top:10px;">
+          <span class="beat">One sentence on sequencing — "Opp 1 is the foundation, Opp 2 runs in parallel, Opp 3 follows"</span>
+          <span class="beat">The roadmap shows mature thinking — it complements the portfolio, doesn't compete with it</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 9: SUPPORTING ARTEFACTS ── 17:00–17:30 -->
+    <div class="tl-row">
+      <div class="tl-time">17:00 – 17:30</div>
+      <div class="tl-spine"><div class="tl-dot d6"></div><div class="tl-line"></div></div>
+      <div class="tl-card c8">
+        <div class="tl-title">Supporting Artefacts (30 sec) — Deliverable 6 of 6</div>
+        <div class="deliv-tag">⑥ &nbsp; Supporting Artefacts</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Everything that went into this is navigable. Process maps, data flows, application dependency charts, the input documents the platform read, the evidence trail behind each finding. Your team can drill into any of it."
+        </div>
+        <div class="artefact-grid">
+          <div class="art-tile"><div class="art-label">Process Map</div>Current O2C flow — two channels, documented vs. actual</div>
+          <div class="art-tile"><div class="art-label">Data Flow Diagram</div>Customer master across SAP ERP, SAP CRM, and AR system</div>
+          <div class="art-tile"><div class="art-label">Application Dependency Chart</div>14 EDI connections · 6 TSA-flagged highlighted</div>
+          <div class="art-tile"><div class="art-label">Decision Rationale</div>Evidence trail for each finding and resolution</div>
+          <div class="art-tile"><div class="art-label">Source Documents</div>12 input artefacts — navigable and searchable</div>
+          <div class="art-tile"><div class="art-label">RACI Analysis</div>Process ownership map with ownership gaps highlighted</div>
+        </div>
+        <div class="beats" style="margin-top:10px;">
+          <span class="beat">Don't walk through artefacts — name them and move on</span>
+          <span class="beat">If asked "how did you find X?" during discussion — open the evidence trail here</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 10: THE OFFER ── 17:30–20:00 -->
+    <div class="tl-row">
+      <div class="tl-time">17:30 – 20:00</div>
+      <div class="tl-spine"><div class="tl-dot d1"></div><div class="tl-line"></div></div>
+      <div class="tl-card c6">
+        <div class="tl-title">The Offer (2.5 min) — Hard close, no qualifications</div>
+        <div class="say-box">
+          <div class="say-label">Say</div>
+          "Everything you just saw ran on synthetic data structured like Opella's post-carve-out O2C landscape. In the pilot, this runs on your actual documents, your system exports, your real EDI register. What took two months to discover manually — if anyone had been looking — took 12 minutes on screen. Your transformation team reviews the complete output suite. The AI Opportunity Portfolio. The roadmap. The artefacts. Two weeks. One domain. A board-ready business case for three interventions that touch 67% of your order volume and over €600,000 in credit exposure you didn't know was there."
+        </div>
+        <div class="beats">
+          <span class="beat">Stop after "you didn't know was there"</span>
+          <span class="beat">Don't qualify the offer</span>
+          <span class="beat">Hand the floor back — silence is fine</span>
+          <span class="beat">Close signal: "Can we run this on our real O2C landscape?"</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 11: DISCUSSION ── 20:00–45:00 -->
+    <div class="tl-row">
+      <div class="tl-time">20:00 – 45:00</div>
+      <div class="tl-spine"><div class="tl-dot d7"></div><div class="tl-line"></div></div>
+      <div class="tl-card c7">
+        <div class="tl-title">Discussion & Next Steps (25 min)</div>
+        Full output suite on screen. Navigate wherever the audience wants to go deeper. Have pilot terms and domain shortlist ready.
+        <div class="beats" style="margin-top:8px;">
+          <span class="beat">Expected: "Is the €600K exposure figure real?"</span>
+          <span class="beat">Expected: "How did you find the undocumented EDI flow?"</span>
+          <span class="beat">Expected: "Is the TSA finding based on the actual integration register?"</span>
+          <span class="beat">Expected: "What data do we give you for the pilot?"</span>
+          <span class="beat">Expected: "Can we see the demand planning connection?"</span>
+        </div>
+
+        <div class="backup-note" style="margin-top:12px;">
+          <div class="bn-label">When "Is the €600K exposure figure real?" comes up</div>
+          Navigate to Opportunity 1 sources. Open Doc 07 (AR Review Notes) — Carrefour FR discrepancy is named explicitly. Open Doc 08 (SAP ERP) — €1.8M limit confirmed. Open Doc 09 (SAP CRM) — €2.4M limit confirmed. Delta = €600K. "The platform read all three and computed the gap. This is what the documents say."
+        </div>
+
+        <div class="backup-note" style="margin-top:8px;">
+          <div class="bn-label">When "How did you find the undocumented EDI flow?" comes up</div>
+          Open Doc 10 (Order Flow Export) — 67.3% of 8,420 orders arrive via EDI. Open Doc 01 (Order Management SOP) — EDI flow is absent from the documented process. "The SOP describes one business. The data shows another. The platform found the mismatch between the two."
+        </div>
+
+        <div class="backup-note" style="margin-top:8px;">
+          <div class="bn-label">When "What data do we give you for the pilot?" comes up</div>
+          Same categories as these 12 inputs: your live SAP ERP and CRM customer exports, your actual EDI integration register, your CS escalation log, your order flow data, your credit management policy, your O2C process documentation. Your team collates. We run the platform on it. Two weeks.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /timeline -->
+
+  <hr class="section-divider">
+
+  <!-- WHEN TO USE -->
+  <div class="link-box">
+    <div class="lb-label">When to use this script vs. the primary (Demand Planning)</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;">
+      <tr>
+        <th style="text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;opacity:0.55;">Situation</th>
+        <th style="text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:10px;text-transform:uppercase;letter-spacing:0.8px;opacity:0.55;">Use</th>
+      </tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Primary audience is Head of Strategy + Transformation</td><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Demand Planning (primary)</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Audience includes CFO or Head of Finance</td><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">O2C (this script) — cash flow and credit exposure lands harder</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Live synthesis fails during primary demo</td><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Switch to pre-compiled output — navigate to AI Opportunity Portfolio directly</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Audience asks "can you show us the O2C side?" during discussion</td><td style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.06);">Navigate to O2C section in the full output suite — no need to re-run</td></tr>
+      <tr><td style="padding:7px 10px;">Second meeting with a different stakeholder group</td><td style="padding:7px 10px;">O2C script as standalone demo — full 20 min</td></tr>
+    </table>
+  </div>
+
+  <!-- FALLBACK -->
+  <div class="backup-note">
+    <div class="bn-label">Technical fallback — silent, not in the room</div>
+    If live discovery stalls, switch to pre-compiled output without breaking narrative: "Let me show you the complete output suite from a run we prepared — same documents, same process." Jump directly to the AI Opportunity Portfolio. Three opportunities pre-populated. The portfolio is the story. The live run is sacrificed. The findings are not.
+  </div>
+
+  <!-- REFERENCES -->
+  <div class="backup-note" style="margin-top:8px;border-color:rgba(80,140,255,0.2);">
+    <div class="bn-label" style="color:#5090ff;">References &amp; related files</div>
+    <strong>Supporting guide:</strong> <code>docs/superpowers/specs/html/demo-script-o2c-guide.md</code><br>
+    <strong>Design spec:</strong> <code>docs/superpowers/specs/2026-06-01-o2c-tactical-output-design.md</code><br>
+    <strong>Synthetic inputs:</strong> <code>docs/superpowers/specs/html/synthetic-inputs-o2c.html</code><br>
+    <strong>Platform design doc:</strong> <code>Agentic Discovery Platform/Opella - Autonomous Discovery Platform.md</code><br>
+    <strong>Implementation plan:</strong> <code>docs/superpowers/plans/2026-06-01-o2c-synthetic-inputs-generation.md</code>
+  </div>
+
+</div>
+</body>
+</html>

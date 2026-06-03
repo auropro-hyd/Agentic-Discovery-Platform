@@ -1,8 +1,8 @@
 # Steelman External Review — Opella Demo Script & Synthetic Inputs
 
-**Date:** 2026-05-31  
-**Method:** Independent subagent cold read (office-hours Phase 3.5 protocol)  
-**Reviewer role simulated:** Opella Head of Strategy (primary audience)  
+**Date:** 2026-05-31
+**Method:** Independent subagent cold read (office-hours Phase 3.5 protocol)
+**Reviewer role simulated:** Opella Head of Strategy (primary audience)
 **Scope:** Both demo scenarios — Demand Planning (primary) + O2C (secondary)
 
 ---

@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pain Points &amp; Opportunities</title>
+<link rel="stylesheet" href="assets/report.css"></head><body>
+<div class="layout">
+<nav class="sidebar">
+  <h1>Order-to-Cash Discovery</h1>
+  <div class="sub">Discovery assessment</div>
+  <a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='active' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
+</nav>
+<main class="content">
+<h1>Pain Points &amp; Opportunities</h1>
+<p class='lede'>The issues found in the discovery, ranked by business impact, each mapped to a recommended opportunity.</p>
+<div class='card'>
+<h3>Credit limits disagree between the two systems of record, with the largest accounts running on unauthorised relationship-system limits</h3>
+<p>The credit limits held in the central order-management system and the customer-relationship system disagree for 267 accounts, with an aggregate difference of €30,675,000. Several of the largest retail accounts operate to the higher relationship-system limit; one major account carries a relationship-system limit €600,000 above its order-management limit. Payment terms also disagree for 228 accounts. Because the two systems hold different figures, the true credit exposure for the largest accounts cannot be read from any single system.</p>
+<p><span class='metric'>267 accounts carry disagreeing credit limits across the two systems</span> &nbsp; <span class='metric'>€30,675,000 aggregate difference in credit limits</span> &nbsp; <span class='metric'>228 accounts carry disagreeing payment terms</span> &nbsp; <span class='metric'>one major account operates €600,000 above its order-management limit</span></p>
+<p><strong>Root cause:</strong> Credit limits and payment terms are maintained in two systems without a single authoritative source or a reconciliation control, and the credit policy&#x27;s written-approval and separation-of-duties controls are bypassed when the relationship-system limit is used.</p>
+<p><strong>Pattern:</strong> Divergent dual master data with no reconciliation, allowing the higher of two figures to govern in practice.</p>
+<p><strong>Addressed by:</strong> OPP1 (see the Opportunity Portfolio)</p>
+<p class='prov'>Where this comes from: your Credit Management Policy Europe and your Accounts Receivable Review Notes Q4 2025</p>
+</div>
+<div class='card'>
+<h3>The largest order channel has no formal procedure and no assigned accountability</h3>
+<p>The electronic ordering channel carries 67.3% of order volume and €59,711,399.53 of order value, and is the leading cause of escalations, yet it is explicitly excluded from the order-management procedure and the accountability matrix. There is no Accountable owner; orders not processed in this channel account for 34 escalations, or 23.9% of all escalations. Process ownership, escalation authority, and controls for the majority of the business rest on a single specialist&#x27;s informal notes.</p>
+<p><span class='metric'>67.3% of order volume flows through the electronic channel</span> &nbsp; <span class='metric'>€59,711,399.53 of order value flows through the electronic channel</span> &nbsp; <span class='metric'>34 escalations relate to electronic orders not processed</span> &nbsp; <span class='metric'>these represent 23.9% of all escalations</span></p>
+<p><strong>Root cause:</strong> The formal procedure and accountability matrix were written around manual channels and never extended to the electronic channel, leaving ownership Not assigned.</p>
+<p><strong>Pattern:</strong> Majority-volume process governed by undocumented, person-dependent knowledge rather than an authoritative procedure.</p>
+<p><strong>Addressed by:</strong> OPP3 (see the Opportunity Portfolio)</p>
+<p class='prov'>Where this comes from: your Order Management SOP Europe, your O2C Process RACI Europe and your EDI Dispute Resolution CS Working Notes</p>
+</div>
+<div class='card'>
+<h3>Electronic orders are failing to fulfil at scale in the channel with no procedure</h3>
+<p>1,196 electronic orders worth €12,362,493.74 failed to fulfil — the largest concentration of the 1,667 total unfulfilled orders worth €17,377,801.40. The failure mode of orders not transmitted or processed is the top driver of customer escalations and has prompted customers to threaten delisting products. The combination of high failure volume and absent accountability turns an operational shortfall into a direct revenue and relationship risk.</p>
+<p><span class='metric'>1,196 electronic orders were not fulfilled</span> &nbsp; <span class='metric'>€12,362,493.74 of electronic order value was not fulfilled</span> &nbsp; <span class='metric'>1,667 orders were not fulfilled in total</span> &nbsp; <span class='metric'>€17,377,801.40 of order value was not fulfilled in total</span></p>
+<p><strong>Root cause:</strong> Order failures in the electronic channel are not systematically caught or owned, because the channel lacks both a formal procedure and an Accountable owner to monitor and resolve transmission and processing breakdowns.</p>
+<p><strong>Pattern:</strong> Silent fulfilment failures accumulating in an unmonitored, unowned high-volume channel.</p>
+<p><strong>Addressed by:</strong> OPP2 (see the Opportunity Portfolio)</p>
+<p class='prov'>Where this comes from: your Order Management SOP Europe and your EDI Dispute Resolution CS Working Notes</p>
+</div>
+</main></div></body></html>

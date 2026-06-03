@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Opportunity Portfolio — Acme Manufacturing</title>
+<link rel="stylesheet" href="assets/report.css"></head><body>
+<div class="layout">
+<nav class="sidebar">
+  <h1>Acme Manufacturing</h1>
+  <div class="sub">Procure-to-Pay Discovery</div>
+  <a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='active' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
+</nav>
+<main class="content">
+<h1>AI Opportunity Portfolio</h1>
+<p class='lede'>The recommended interventions in full — what the problem is, how the process changes, and what it delivers.</p>
+<div class='card'>
+<h3>Enforced second approval above the threshold<span class='pattern'>HITL Workflow</span></h3>
+<p>Build the policy&#x27;s second-approval requirement directly into the order approval step so that no order above EUR 50,000 can be committed until a second approver has signed off.</p>
+<div class='ba-grid'>
+<div class='col before'><h4>Before</h4><div class='step'><strong>1. Raise purchase order</strong><div class='who'>Buyer</div><div>Buyer raises an order; the largest single order seen was EUR 120,000.</div></div>
+<div class='step'><strong>2. Single approval and commit</strong><div class='who'>Approver</div><div>Order is committed after a single approval, even above the threshold. 7 orders worth EUR 557,000 followed this path.</div></div></div>
+<div class='col after'><h4>After</h4><div class='step'><strong>1. Raise purchase order</strong><div class='who'>Buyer</div><div>Buyer raises an order and the committed amount is checked against the EUR 50,000 threshold.</div></div>
+<div class='step'><strong>2. First approval</strong><div class='who'>Approver</div><div>First approver reviews and approves the order.</div></div>
+<div class='step'><strong>3. Mandatory second approval above threshold</strong><div class='who'>Second approver</div><div>Orders above the threshold are routed to a second approver and cannot be committed until that approval is given.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Enforcing the second approval at the point of commitment brings the company&#x27;s largest orders back under control. It directly addresses the EUR 557,000 of spend, across 7 orders and 91.9% of total value, that was committed on a single approval.
+ <span class='metric'>EUR 557,000 of committed spend</span> &nbsp; <span class='metric'>7 orders</span> &nbsp; <span class='metric'>91.9% of total value</span>
+</p>
+<p><strong>How it's delivered.</strong> Embed the approval threshold and second-approver routing into the order approval step, with a hard stop preventing commitment until the second sign-off is recorded.</p>
+<p><strong>Connects:</strong> Purchase order records, Approval routing</p>
+<p><strong>Success looks like:</strong></p><ul><li>No orders above the threshold committed on a single approval</li><li>All orders above EUR 50,000 carry a recorded second approval</li></ul>
+<p><strong>Dependencies:</strong> Independent — can start immediately. Prerequisite for the AI Credit Decisioning step.</p>
+<p><strong>Risks:</strong></p><ul><li>Approver availability could slow commitments if no delegation is in place</li></ul>
+<p class='prov'>Where this comes from: your Procurement Policy and your Purchase Order Export</p>
+</div>
+<div class='card'>
+<h3>Order-first control before supplier commitment<span class='pattern'>Automation Pipeline</span></h3>
+<p>Require that a valid purchase order exists before any commitment can be made to a supplier, closing the path that lets spend happen before an order is raised.</p>
+<div class='ba-grid'>
+<div class='col before'><h4>Before</h4><div class='step'><strong>1. Commit to supplier</strong><div class='who'>Buyer</div><div>Buyer commits to a supplier before an order exists. 3 orders worth EUR 216,000, or 25.0% of orders, followed this path, all on a single approval.</div></div>
+<div class='step'><strong>2. Document order afterwards</strong><div class='who'>Buyer</div><div>An order is recorded after the commitment has already been made.</div></div></div>
+<div class='col after'><h4>After</h4><div class='step'><strong>1. Raise and validate order</strong><div class='who'>Buyer</div><div>A purchase order is raised and validated before any supplier commitment can proceed.</div></div>
+<div class='step'><strong>2. Commit only against an existing order</strong><div class='who'>Buyer</div><div>Supplier commitment is blocked unless a valid order already exists, removing the EUR 216,000 order-after-commit path.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Requiring an order before commitment restores budget control and three-way matching. It addresses the EUR 216,000, across 3 orders and 25.0% of orders, committed before any order existed. Because all of this value also carries the single-approval issue, the EUR 216,000 also benefits from the enforced second approval.
+ <span class='metric'>EUR 216,000</span> &nbsp; <span class='metric'>3 orders</span> &nbsp; <span class='metric'>25.0% of orders</span> &nbsp; <span class='metric'>EUR 216,000 also on single approval</span>
+</p>
+<p><strong>How it's delivered.</strong> Add an order-exists validation as a precondition to supplier commitment, building on the enforced approval step so commitments cannot proceed without both a valid order and the required approvals.</p>
+<p><strong>Connects:</strong> Purchase order records, Supplier commitment step</p>
+<p><strong>Success looks like:</strong></p><ul><li>No supplier commitments made before a valid order exists</li><li>Three-way matching possible on all orders</li></ul>
+<p><strong>Dependencies:</strong> Requires Customer Master Reconciliation first. Prerequisite for the AI Credit Decisioning step.</p>
+<p><strong>Risks:</strong></p><ul><li>Urgent purchases may need a controlled fast-track exception path</li></ul>
+<p class='prov'>Where this comes from: your Procurement Policy and your Purchase Order Export</p>
+</div>
+<div class='card'>
+<h3>Named owner and monitoring for procurement controls<span class='pattern'>AI Agent</span></h3>
+<p>Assign an accountable owner for the approval and order-first controls, supported by ongoing monitoring that surfaces concentrated non-compliance such as the pattern seen in one buyer.</p>
+<div class='ba-grid'>
+<div class='col before'><h4>Before</h4><div class='step'><strong>1. No monitoring</strong><div class='who'>Not assigned</div><div>No one is assigned to monitor adherence, so concentrated non-compliance of 2 orders worth EUR 149,000, or 24.6% of value, goes undetected.</div></div>
+<div class='step'><strong>2. No remediation</strong><div class='who'>Not assigned</div><div>Repeat behaviour persists with no exception or remediation process.</div></div></div>
+<div class='col after'><h4>After</h4><div class='step'><strong>1. Assign control owner</strong><div class='who'>Control owner</div><div>A named owner is accountable for the approval and order-first controls and for granting exceptions.</div></div>
+<div class='step'><strong>2. Continuous monitoring and alerting</strong><div class='who'>Control owner</div><div>Order activity is monitored continuously, surfacing concentrations such as the EUR 149,000 in one buyer for timely review.</div></div>
+<div class='step'><strong>3. Remediate and document exceptions</strong><div class='who'>Control owner</div><div>Flagged cases are reviewed, remediated, and any exceptions documented.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> A named owner with continuous monitoring catches concentrated non-compliance before it persists. It targets the 2 orders worth EUR 149,000, or 24.6% of value, concentrated in one buyer, and provides the oversight layer that makes the enforced controls durable.
+ <span class='metric'>2 orders from one buyer</span> &nbsp; <span class='metric'>EUR 149,000</span> &nbsp; <span class='metric'>24.6% of value</span>
+</p>
+<p><strong>How it's delivered.</strong> Define accountability for the controls in the policy, then stand up continuous monitoring that watches order activity against the enforced approval and order-first rules and alerts the owner to concentrations and exceptions.</p>
+<p><strong>Connects:</strong> Purchase order records, Monitoring and alerting</p>
+<p><strong>Success looks like:</strong></p><ul><li>Every control has a named accountable owner</li><li>Concentrated non-compliance surfaced and remediated within a defined window</li></ul>
+<p><strong>Dependencies:</strong> Requires Customer Master Reconciliation first.</p>
+<p><strong>Risks:</strong></p><ul><li>Monitoring is only as effective as the enforced controls it watches</li></ul>
+<p class='prov'>Where this comes from: your Procurement Policy and your Purchase Order Export</p>
+</div>
+</main></div></body></html>

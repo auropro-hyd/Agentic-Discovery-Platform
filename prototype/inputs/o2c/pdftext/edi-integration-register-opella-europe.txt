@@ -1,0 +1,256 @@
+   INTERNAL - RESTRICTED
+Opella
+Consumer Healthcare
+TECHNICAL REFERENCE
+EDI Integration Register
+Technical Reference  |  Opella Digital  |  Version 1.1
+Document Reference OPS-EU-IT-REG-001
+Version 1.1
+Effective Date 15 September 2025
+Review Date 15 December 2025
+Document Owner Head of Opella Digital, Europe
+Process Owner EDI Integration Lead (J. Okafor)
+Document Status APPROVED
+Classification INTERNAL - RESTRICTED
+   Opella  |  OPS-EU-IT-REG-001  |  INTERNAL - RESTRICTED  |  Version 1.1  |  Effective 15 September 2025
+Opella  |  OPS-EU-IT-REG-001  |  INTERNAL - RESTRICTED
+Document Control
+Document Information
+  Field   Details
+Document Title EDI Integration Register - Opella Europe
+Document Reference OPS-EU-IT-REG-001
+Process Area IT / Digital / EDI
+Maintained By Opella Digital (James Okafor, EDI Integration Lead)
+Document Owner Head of Opella Digital, Europe
+Process Owner EDI Integration Lead (J. Okafor)
+Version 1.1
+Last Updated 15 September 2025
+Next Review 15 December 2025 (quarterly)
+Classification INTERNAL - RESTRICTED
+  IMPORTANT - Restricted Distribution
+This document contains details of active trading partner integrations and
+TSA governance status. Distribution is restricted to: Opella Digital,
+CS Team Lead, Finance Director, and TSA Programme Office. Do not circulate
+to customers, external partners, or non-Opella personnel.
+Version History
+  Version   Date   Author   Summary
+1.1 15 Sep 2025 J. Okafor Updated connection status: Tesco UK and Mercadona confirmed fully
+transitioned to Opella Digital management. Boots UK new connection
+added (went live 01 Aug 2025). TSA status column clarified.
+Connections 9-14 remain Sanofi Shared Services managed.
+1.0 01 May 2025 J. Okafor Initial register at Opella operational independence. Reflects EDI
+landscape at April 2025 carve-out. 8 connections under Opella Digital
+management, 6 under Sanofi Shared Services TSA.
+Version 1.1  |  Effective: 15 September 2025  |  Head of Opella Digital, Europe  |  Page 2
+Opella  |  OPS-EU-IT-REG-001  |  INTERNAL - RESTRICTED
+Version 1.1  |  Effective: 15 September 2025  |  Head of Opella Digital, Europe  |  Page 3
+Table of Contents
+Document Control 2
+1.   Purpose and Scope 4
+2.   Architecture Overview 4
+3.   Active Connections Register 6
+4.   TSA-Managed Connections - Transition Status 8
+5.   Support and Incident Management 9
+6.   Register Maintenance and Governance 9
+Opella  |  OPS-EU-IT-REG-001  |  INTERNAL - RESTRICTED
+1.   Purpose and Scope
+1.1   Purpose
+This register documents all active Electronic Data Interchange (EDI) connections between Opella Europe and
+its retail and pharmacy trading partners. It records the connection configuration, managing entity, operational
+status, and TSA governance status for each connection.
+The register provides the authoritative reference for:
+- Identifying the management responsibility for each EDI connection.
+- Understanding which connections remain subject to the Sanofi Transition Services Agreement (TSA) and
+where to direct operational queries.
+- Tracking the migration timeline for TSA-managed connections.
+- Supporting incident management and customer escalation handling.
+1.2   Scope
+The register covers all EDI connections between Opella Europe and external trading partners, including
+connections that are currently managed by Sanofi Shared Services under the TSA. It does not cover:
+- Web portal or API-based order integrations (documented separately).
+- Internal system integrations between Opella entities.
+- EDI connections in markets outside the Opella Europe commercial region.
+- Connections in setup or testing phase (not yet live in production).
+1.3   Relationship to Other Documents
+This register is referenced in the Order Management SOP (OPS-EU-CS-SOP-001, Section 1.3) and the EDI
+Dispute Resolution Working Notes (OPS-EU-IT-WN-001). Operational queries regarding specific connections
+should be directed per the contact information in Section 5.
+2.   Architecture Overview
+2.1   EDI Platform
+Opella Digital manages active EDI connections through the Opella Europe EDI platform (IBM Sterling B2B
+Integrator, hosted on Opella private cloud, Frankfurt). All Opella Digital-managed connections in this register are
+routed through this platform.
+Connections managed by Sanofi Shared Services remain on the Sanofi EDI platform (SAP Integration Suite,
+managed by Sanofi Global IT) under the terms of the TSA. These connections will be migrated to the Opella
+platform per the migration schedule in Section 4.
+2.2   Message Types in Use
+  EDI Message   Standard   Description
+ORDERS EDIFACT D96A Inbound purchase order from trading partner.
+Version 1.1  |  Effective: 15 September 2025  |  Head of Opella Digital, Europe  |  Page 4
+Opella  |  OPS-EU-IT-REG-001  |  INTERNAL - RESTRICTED
+ORDRSP EDIFACT D96A Outbound order acknowledgement/confirmation.
+DESADV EDIFACT D96A Outbound advance ship notice (ASN).
+INVOIC EDIFACT D96A Outbound invoice.
+Version 1.1  |  Effective: 15 September 2025  |  Head of Opella Digital, Europe  |  Page 5
+Opella  |  OPS-EU-IT-REG-001  |  INTERNAL - RESTRICTED
+3.   Active Connections Register
+All 14 active production EDI connections as of the document update date are listed below. Connections are
+categorised by managing entity: 8 under Opella Digital management (connections 1-8) and 6 remaining under
+Sanofi Shared Services management under TSA terms (connections 9-14).
+  #   Customer   Ctry   Message Types   Status   Managed By   TSA Status
+1 Tesco UK UK ORDERS / ORDRSP /
+DESADV / INVOIC
+Live Opella Digital N/A -
+Opella
+owned
+2 Mercadona ES ORDERS / ORDRSP Live Opella Digital N/A -
+Opella
+owned
+3 REWE Group DE ORDERS / ORDRSP Live Opella Digital N/A -
+Opella
+owned
+4 Boots UK (new) UK ORDERS / ORDRSP Live (since 01
+Aug 2025)
+Opella Digital N/A -
+Opella
+owned
+5 Alliance Healthcare EU ORDERS / DESADV Live Opella Digital N/A -
+Opella
+owned
+6 Rite Aid Europe EU ORDERS / ORDRSP Live Opella Digital N/A -
+Opella
+owned
+7 Aldi Europe EU ORDERS Live Opella Digital N/A -
+Opella
+owned
+8 Coop Group (new) EU ORDERS / ORDRSP /
+INVOIC
+Live Opella Digital N/A -
+Opella
+owned
+9 Carrefour France FR ORDERS / ORDRSP /
+INVOIC
+Live Sanofi Shared
+Services
+See TSA
+Schedule
+Annex C
+1
+0
+Boots UK (legacy) UK ORDERS / ORDRSP /
+INVOIC
+Live Sanofi Shared
+Services
+See TSA
+Schedule
+Annex C
+1
+1
+dm (Drogerie Markt) DE ORDERS / ORDRSP Live Sanofi Shared
+Services
+See TSA
+Schedule
+Annex C
+Version 1.1  |  Effective: 15 September 2025  |  Head of Opella Digital, Europe  |  Page 6
+Opella  |  OPS-EU-IT-REG-001  |  INTERNAL - RESTRICTED
+1
+2
+E.Leclerc FR ORDERS / ORDRSP /
+DESADV
+Live Sanofi Shared
+Services
+See TSA
+Schedule
+Annex C
+1
+3
+Lidl Europe EU ORDERS / ORDRSP Live Sanofi Shared
+Services
+See TSA
+Schedule
+Annex C
+1
+4
+Coop Group (legacy) EU ORDERS / INVOIC Live Sanofi Shared
+Services
+See TSA
+Schedule
+Annex C
+Version 1.1  |  Effective: 15 September 2025  |  Head of Opella Digital, Europe  |  Page 7
+Opella  |  OPS-EU-IT-REG-001  |  INTERNAL - RESTRICTED
+4.   TSA-Managed Connections - Transition Status
+4.1   TSA Governance
+Connections 9-14 in Section 3 are operated by Sanofi Shared Services under the terms of the Transition
+Services Agreement (TSA) between Opella and Sanofi. Under the TSA, Sanofi continues to provide EDI
+connectivity services for these six trading partners until each connection is formally transferred to Opella Digital
+management.
+The specific service terms, SLAs, handover process, and migration timeline for these connections are defined in
+TSA Schedule Annex C. TSA Schedule Annex C is a separate controlled document held by the Opella TSA
+Programme Office and is not reproduced in this register.
+  TSA SCHEDULE ANNEX C
+The terms governing connections 9-14 are set out in TSA Schedule Annex C.
+For questions about SLAs, incident response, or migration timelines for
+TSA-managed connections, contact the Opella TSA Programme Office.
+DO NOT contact Sanofi IT directly for operational issues on these connections
+without first notifying the TSA Programme Office - all contact with Sanofi
+Shared Services must be managed through the TSA governance framework.
+4.2   TSA Connection Migration Overview
+  Connection  Customer   Target Migration Quarter  Migration Lead   Status
+9 Carrefour France Q4 2025 J. Okafor Technical scoping in progress.
+10 Boots UK (legacy) Q1 2026 J. Okafor Decommission pending: Boots UK new
+connection (#4) already live.
+11 dm (Drogerie Markt) Q1 2026 J. Okafor Pre-scoping. Awaiting Sanofi handover
+documentation.
+12 E.Leclerc Q2 2026 TBD Not yet scoped. Volume complexity requires
+dedicated resource.
+13 Lidl Europe Q2 2026 TBD Not yet scoped. Multi-country routing
+requires review.
+14 Coop Group (legacy) Q3 2026 TBD Planned decommission: Coop new
+connection (#8) already live.
+Migration targets are indicative and subject to TSA Programme Office confirmation. All targets for connections
+12-14 are provisional pending technical scoping. The Opella Digital team will update this section quarterly as
+part of the standard register review.
+Version 1.1  |  Effective: 15 September 2025  |  Head of Opella Digital, Europe  |  Page 8
+Opella  |  OPS-EU-IT-REG-001  |  INTERNAL - RESTRICTED
+5.   Support and Incident Management
+5.1   Opella Digital-Managed Connections (1-8)
+For connections managed by Opella Digital (connections 1-8), all incidents and operational queries must be
+directed to:
+  Contact   Details   Hours
+EDI Integration Lead James Okafor  -  james.okafor@opella.com  -  +44 7700
+900 123
+Mon-Fri 08:00-18:00 CET
+Opella Digital IT Helpdesk helpdesk.digital@opella.com  -  ticket portal:
+jira.opella.com/edi
+Mon-Fri 08:00-20:00 CET
+  Priority   Definition   Response SLA   Resolution SLA
+P1 - Critical Connection fully down; orders not transmitting for
+accounts with daily order volume > EUR 500K.
+30 minutes 4 business hours
+P2 - High Connection degraded; intermittent failures or
+message errors affecting order processing for any
+active connection.
+2 business hours 1 business day
+P3 - Normal Non-critical issues: mapping queries, test
+message failures, minor configuration requests.
+1 business day 5 business days
+5.2   TSA-Managed Connections (9-14)
+For connections managed by Sanofi Shared Services (connections 9-14), incident and support escalation must
+follow the TSA governance process. CS Representatives and CS Team Lead must NOT contact Sanofi IT
+directly. All incidents must be reported to the Opella Digital team, who will escalate through the TSA framework.
+- First contact: Opella Digital (J. Okafor)  -  who will determine whether the issue is Opella-side or
+Sanofi-side and escalate accordingly.
+- For Sanofi-side issues: Opella Digital submits a TSA incident ticket to Sanofi Shared Services EDI
+support. SLAs are governed by TSA Schedule Annex C.
+- Escalation for unresolved TSA incidents: Opella TSA Programme Office.
+6.   Register Maintenance and Governance
+This register is reviewed quarterly by Opella Digital. Changes to connection status, management ownership, or
+TSA classification must be notified to the EDI Integration Lead within five business days of the change taking
+effect. The following types of change trigger an immediate (unscheduled) update:
+- Addition or decommission of a production connection.
+- Transfer of a connection from TSA to Opella Digital management.
+- Material change to a connection's message types or technical configuration.
+Version 1.1  |  Effective: 15 September 2025  |  Head of Opella Digital, Europe  |  Page 9
+Opella  |  OPS-EU-IT-REG-001  |  INTERNAL - RESTRICTED
+- Change to the TSA migration target date for connections 9-14.
+Version 1.1  |  Effective: 15 September 2025  |  Head of Opella Digital, Europe  |  Page 10

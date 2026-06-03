@@ -1,8 +1,8 @@
 # Demo Script & Synthetic Input Artefacts — Opella Discovery Demo
 
-**Date:** 2026-05-31  
-**Engagement:** AuroPro Autonomous Discovery Platform — Opella  
-**Audience:** Opella Head of Strategy  
+**Date:** 2026-05-31
+**Engagement:** AuroPro Autonomous Discovery Platform — Opella
+**Audience:** Opella Head of Strategy
 **Format:** 45-minute meeting (20 min demo + 25 min discussion)
 
 **Visual references (HTML):**
@@ -57,7 +57,7 @@ The platform is invisible. The business problem is the protagonist.
 
 ### 4.1 The Setup (0:00–2:00)
 
-**Say:**  
+**Say:**
 *"You have 1,000+ applications inherited from Sanofi, spread across 38 countries, touching every part of how Opella runs. Your transformation team needs to know what to keep, what to consolidate, what's at risk — and they need to build a credible plan for the board. Traditionally that discovery takes three months of your best people's time. We're going to show you what that picture looks like, and where the risks are, in the time it takes to have this conversation."*
 
 **On screen:** Platform open. 12 business-readable document names visible — no technical labels. Nothing has run. Audience sees what went in.
@@ -68,14 +68,14 @@ The platform is invisible. The business problem is the protagonist.
 
 ### 4.2 Discovery Runs (2:00–7:00)
 
-**Say as it runs:**  
+**Say as it runs:**
 *"It's reading everything simultaneously — the process documents, the system exports, the meeting transcripts. It's building a picture of who owns what, which systems are involved, and how the process actually moves between teams. Watch what it finds."*
 
-**On screen:** Live discovery feed with business-language status messages:  
-*"Reading demand planning documentation… Mapping forecast system ownership… Cross-referencing documented process against system records… Comparing Commercial Planning records with Operations records…"*  
+**On screen:** Live discovery feed with business-language status messages:
+*"Reading demand planning documentation… Mapping forecast system ownership… Cross-referencing documented process against system records… Comparing Commercial Planning records with Operations records…"*
 Then a findings panel begins populating.
 
-**As findings appear, say:**  
+**As findings appear, say:**
 *"There — it's already found something. Three of your systems all contain European demand forecasts, and they don't agree with each other. That's not a data quality issue — that's an ownership question your landscape hasn't answered."*
 
 **Findings that surface:**
@@ -95,7 +95,7 @@ Then a findings panel begins populating.
 
 ### 4.3 One Finding Needs Input (7:00–10:00)
 
-**Say:**  
+**Say:**
 *"Finding 1 — the three forecast systems — needs a quick call before we can finalise the analysis. Not a workshop. A 15-minute conversation with whoever owns demand planning. The platform has already done the work: it's ranked the evidence and given us three possible answers. We pick the most likely one and proceed."*
 
 **On screen:** Finding 1 expanded. Three candidate answers, ranked by evidence weight:
@@ -105,19 +105,19 @@ Then a findings panel begins populating.
 
 AuroPro selects option 1. Finding updates: *"Resolved — SAP IBP confirmed as system of record. Regional model flagged for decommission review."*
 
-**After resolution, say:**  
+**After resolution, say:**
 *"That's it. One targeted question, answered in 60 seconds. Finding 2 — the governance gap — we've flagged for a quick call with the Commercial Planning lead. It won't hold up the rest of the analysis. It stays visible as something to resolve, but the discovery continues."*
 
 ---
 
 ### 4.4 Your Operational Map (10:00–15:00)
 
-**Say:**  
+**Say:**
 *"Now here's something your team has never seen as a single picture. This is how demand planning, distribution, and order fulfilment connect in your landscape — which teams hand off to which, which systems are involved at each step, and where the ownership boundaries are."*
 
 **On screen:** Business-readable domain map. Three areas: *Demand Planning*, *Distribution Management*, *Order Fulfilment*. Arrows show plain-language handoff chains. Confidence indicators on each area.
 
-**Say — O2C downstream link:**  
+**Say — O2C downstream link:**
 *"And here's the part no one puts together manually. When your demand forecast undershoots by more than 15% in a European market, your customers feel it 12 to 15 days later — in delayed orders and stockouts. The platform found that by reading the distribution logs and the order fulfilment records together. It's not a coincidence. It's a systemic pattern that's been hiding in your data."*
 
 | Pattern | Confidence | Detail |
@@ -130,7 +130,7 @@ AuroPro selects option 1. Finding updates: *"Resolved — SAP IBP confirmed as s
 
 ### 4.5 What To Do About It (15:00–18:30)
 
-**Say:**  
+**Say:**
 *"The platform doesn't just describe the problem — it tells you what to do next and in what order. Three priorities for your demand planning domain."*
 
 **On screen — Transformation Roadmap (three priorities only):**
@@ -154,7 +154,7 @@ AuroPro selects option 1. Finding updates: *"Resolved — SAP IBP confirmed as s
 
 ### 4.6 The Offer (18:30–20:00)
 
-**Say:**  
+**Say:**
 *"Everything you just saw ran on synthetic data built to look like Opella's post-carve-out landscape. In the pilot, this runs on one real domain of your actual landscape — your documents, your system exports, your telemetry. Your transformation team's job is to review the findings and validate the roadmap. Not produce it. Two weeks. One domain. A plan your board can act on."*
 
 **Stop talking after "act on."** Hand the floor back. Silence is fine.

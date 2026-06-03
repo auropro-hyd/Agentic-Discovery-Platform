@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>O2C Report Suite — High Level</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #1a1a1e; color: #f0f0f2;
+    padding: 48px 52px; line-height: 1.6;
+  }
+  .page { max-width: 1020px; margin: 0 auto; }
+
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .meta { font-size: 12px; opacity: 0.45; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; opacity: 0.6; margin-bottom: 36px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+
+  /* ── SUITE OVERVIEW ───────────────── */
+  .suite-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.4; margin-bottom: 14px; }
+  .suite-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 44px; }
+  .suite-card {
+    border-radius: 9px; padding: 16px 17px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    cursor: default;
+  }
+  .suite-card.primary { background: rgba(124,106,247,0.1); border-color: rgba(124,106,247,0.3); }
+  .sc-num { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.4; margin-bottom: 5px; }
+  .sc-title { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+  .sc-desc { font-size: 11px; opacity: 0.55; line-height: 1.6; margin-bottom: 10px; }
+  .sc-sections { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sc-sec { font-size: 10px; border-radius: 3px; padding: 2px 7px; background: rgba(255,255,255,0.07); opacity: 0.7; }
+  .sc-tag { display: inline-block; font-size: 10px; font-weight: 700; border-radius: 3px; padding: 2px 7px; margin-bottom: 8px; }
+
+  /* ── SECTION DIVIDER ──────────────── */
+  .section-divider {
+    border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 40px 0;
+  }
+  .section-heading { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .section-subheading { font-size: 12px; opacity: 0.5; margin-bottom: 28px; }
+
+  /* ── REPORT MOCKUP ────────────────── */
+  .report-mockup {
+    border-radius: 12px; border: 1px solid rgba(255,255,255,0.09);
+    overflow: hidden; background: #111114;
+  }
+  .rm-topbar {
+    background: #0d0d10; border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 11px 18px; display: flex; align-items: center; gap: 12px;
+  }
+  .rm-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .rm-title { font-size: 11px; opacity: 0.45; margin-left: 4px; }
+
+  .rm-body { display: grid; grid-template-columns: 200px 1fr; min-height: 520px; }
+
+  /* Sidebar */
+  .rm-sidebar {
+    background: rgba(0,0,0,0.3); border-right: 1px solid rgba(255,255,255,0.06);
+    padding: 20px 0;
+  }
+  .rm-sb-brand { padding: 0 16px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 14px; }
+  .rm-sb-brand-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #a99af7; }
+  .rm-sb-brand-sub { font-size: 10px; opacity: 0.4; margin-top: 2px; }
+  .rm-sb-section { padding: 0 10px; margin-bottom: 6px; }
+  .rm-sb-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.9px; opacity: 0.3; padding: 0 6px; margin-bottom: 4px; }
+  .rm-sb-item { padding: 6px 8px; border-radius: 5px; font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+  .rm-sb-item.active { background: rgba(124,106,247,0.15); color: #c4bbff; }
+  .rm-sb-num { font-weight: 700; opacity: 0.45; font-size: 10px; }
+  .rm-sb-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 10px 14px; }
+
+  /* Content area */
+  .rm-content { padding: 28px 32px; overflow: hidden; }
+
+  /* Report header */
+  .rc-tag { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; background: rgba(80,140,255,0.15); color: #90b8ff; border-radius: 4px; padding: 2px 9px; margin-bottom: 10px; }
+  .rc-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .rc-sub { font-size: 12px; opacity: 0.45; margin-bottom: 16px; }
+  .rc-meta { display: flex; gap: 20px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 22px; }
+  .rc-meta-item { font-size: 11px; }
+  .rc-meta-label { opacity: 0.4; margin-right: 4px; }
+
+  /* Content blocks — placeholders showing structure */
+  .block { margin-bottom: 20px; }
+  .block-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.35; margin-bottom: 8px; }
+  .block-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+
+  /* Context strip */
+  .context-strip { border-radius: 8px; padding: 13px 16px; background: rgba(124,106,247,0.07); border: 1px solid rgba(124,106,247,0.18); margin-bottom: 16px; font-size: 12px; line-height: 1.7; opacity: 0.85; }
+
+  /* Stat row */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-box { border-radius: 7px; padding: 12px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); }
+  .stat-val { font-size: 20px; font-weight: 800; color: #a99af7; margin-bottom: 2px; }
+  .stat-lbl { font-size: 10px; opacity: 0.45; line-height: 1.4; }
+
+  /* Two-col process */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .col-box { border-radius: 8px; padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); }
+  .col-title { font-size: 11px; font-weight: 700; opacity: 0.55; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.7px; }
+  .ph-line { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.06); margin-bottom: 7px; }
+  .ph-line.w90 { width: 90%; }
+  .ph-line.w75 { width: 75%; }
+  .ph-line.w60 { width: 60%; }
+  .ph-line.w80 { width: 80%; }
+  .ph-line.w50 { width: 50%; }
+  .ph-step { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px; }
+  .ph-step-num { width: 18px; height: 18px; border-radius: 50%; background: rgba(124,106,247,0.2); border: 1px solid rgba(124,106,247,0.35); font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #a99af7; }
+  .ph-step-lines { flex: 1; padding-top: 2px; }
+
+  /* Process flow */
+  .process-flow { display: flex; align-items: center; gap: 0; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+  .pf-node { border-radius: 7px; padding: 10px 13px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-size: 11px; text-align: center; min-width: 100px; flex-shrink: 0; }
+  .pf-node-role { font-size: 9px; opacity: 0.45; margin-top: 3px; }
+  .pf-arrow { font-size: 16px; opacity: 0.25; padding: 0 4px; flex-shrink: 0; }
+
+  /* Table */
+  .mini-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .mini-table th { text-align: left; padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 9px; text-transform: uppercase; letter-spacing: 0.7px; opacity: 0.4; }
+  .mini-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); opacity: 0.7; }
+
+  /* Systems */
+  .sys-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 14px; }
+  .sys-box { border-radius: 7px; padding: 11px 13px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); }
+  .sys-name { font-size: 11px; font-weight: 700; margin-bottom: 3px; }
+  .sys-desc { font-size: 10px; opacity: 0.5; line-height: 1.5; }
+
+  /* Notice box */
+  .notice { border-radius: 8px; padding: 12px 15px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.12); font-size: 11px; line-height: 1.65; opacity: 0.7; margin-top: 8px; }
+
+  /* Report status pills */
+  .report-pills { display: flex; gap: 8px; margin-bottom: 36px; flex-wrap: wrap; }
+  .rp { border-radius: 6px; padding: 8px 14px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>O2C Domain Discovery — Report Suite</h1>
+  <div class="meta">Opella Europe · Order-to-Cash · 6 client deliverables · Post-copilot resolution</div>
+  <div class="subtitle">Six separate reports generated after the discovery copilot has surfaced and resolved all findings. Each report is a standalone client deliverable. The current state reports are factual documentation — not diagnostic. Findings, recommendations, and opportunities are in separate reports.</div>
+
+  <!-- ── SUITE OVERVIEW ──────── -->
+  <div class="suite-label">Report Suite — 6 Deliverables</div>
+  <div class="suite-grid">
+
+    <div class="suite-card" style="border-color:rgba(80,140,255,0.3);background:rgba(80,140,255,0.07);">
+      <div class="sc-num">Report 01</div>
+      <div class="sc-tag" style="background:rgba(80,140,255,0.18);color:#90b8ff;">Current State</div>
+      <div class="sc-title">Current State Assessment</div>
+      <div class="sc-desc">Factual documentation of Opella's O2C landscape — processes, ownership, systems, and how they connect. No gaps, no findings. The "as-is" picture.</div>
+      <div class="sc-sections">
+        <span class="sc-sec">Domain Overview</span>
+        <span class="sc-sec">Process Flows</span>
+        <span class="sc-sec">Ownership Map</span>
+        <span class="sc-sec">System Inventory</span>
+        <span class="sc-sec">Process Interconnections</span>
+      </div>
+    </div>
+
+    <div class="suite-card" style="border-color:rgba(255,100,80,0.3);background:rgba(255,100,80,0.07);">
+      <div class="sc-num">Report 02</div>
+      <div class="sc-tag" style="background:rgba(255,100,80,0.18);color:#ff9090;">Findings</div>
+      <div class="sc-title">Pain Points &amp; Opportunity Report</div>
+      <div class="sc-desc">Validated findings from the discovery run. Business impact framing and feasibility notes per finding. Cross-domain patterns included.</div>
+      <div class="sc-sections">
+        <span class="sc-sec">Finding 1 — Customer Master</span>
+        <span class="sc-sec">Finding 2 — EDI Flow</span>
+        <span class="sc-sec">Finding 3 — TSA Exposure</span>
+        <span class="sc-sec">Cross-Domain Pattern</span>
+      </div>
+    </div>
+
+    <div class="suite-card" style="border-color:rgba(255,180,0,0.3);background:rgba(255,180,0,0.06);">
+      <div class="sc-num">Report 03</div>
+      <div class="sc-tag" style="background:rgba(255,180,0,0.18);color:#f5c842;">Recommendation</div>
+      <div class="sc-title">Transformation Recommendation</div>
+      <div class="sc-desc">Intervention type per opportunity with rationale. Applies the platform taxonomy: Modernisation · Automation · AI Agent · HITL.</div>
+      <div class="sc-sections">
+        <span class="sc-sec">Intervention Types</span>
+        <span class="sc-sec">Rationale per Opp</span>
+        <span class="sc-sec">Alternatives Considered</span>
+        <span class="sc-sec">Dependencies</span>
+      </div>
+    </div>
+
+    <div class="suite-card primary">
+      <div class="sc-num">Report 04</div>
+      <div class="sc-tag" style="background:rgba(124,106,247,0.25);color:#c4bbff;">✦ Primary Output</div>
+      <div class="sc-title">AI Opportunity Portfolio</div>
+      <div class="sc-desc">Full documentation per opportunity — current state process, future state process, business impact, intervention rationale. The primary client deliverable.</div>
+      <div class="sc-sections">
+        <span class="sc-sec">Opportunity 1 — HITL</span>
+        <span class="sc-sec">Opportunity 2 — Automation</span>
+        <span class="sc-sec">Opportunity 3 — AI Agent</span>
+        <span class="sc-sec">Sequencing Logic</span>
+      </div>
+    </div>
+
+    <div class="suite-card" style="border-color:rgba(80,200,120,0.25);background:rgba(80,200,120,0.06);">
+      <div class="sc-num">Report 05</div>
+      <div class="sc-tag" style="background:rgba(80,200,120,0.18);color:#50c878;">Strategic</div>
+      <div class="sc-title">Transformation Roadmap</div>
+      <div class="sc-desc">Phased delivery plan with dependencies, risk flags, and success measures. Now / Next / Later with explicit sequencing rationale.</div>
+      <div class="sc-sections">
+        <span class="sc-sec">Phase 1 — Now</span>
+        <span class="sc-sec">Phase 2 — Next</span>
+        <span class="sc-sec">Phase 3 — Later</span>
+        <span class="sc-sec">Risk Flags</span>
+        <span class="sc-sec">Success Measures</span>
+      </div>
+    </div>
+
+    <div class="suite-card" style="border-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);">
+      <div class="sc-num">Report 06</div>
+      <div class="sc-tag" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);">Supporting</div>
+      <div class="sc-title">Supporting Artefacts</div>
+      <div class="sc-desc">Process maps, data flow diagrams, system dependency charts, and decision rationale. Evidence layer behind every recommendation.</div>
+      <div class="sc-sections">
+        <span class="sc-sec">Domain Map</span>
+        <span class="sc-sec">EDI Dependency Chart</span>
+        <span class="sc-sec">System Data Flow</span>
+        <span class="sc-sec">Process Diagrams</span>
+        <span class="sc-sec">Decision Rationale</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── REPORT 01 MOCKUP ──────── -->
+  <hr class="section-divider">
+  <div class="section-heading">Report 01 — Current State Assessment (High-Level Mockup)</div>
+  <div class="section-subheading">Factual documentation of the O2C landscape. No findings, no gap language. Clean client-facing "as-is" picture.</div>
+
+  <div class="report-mockup">
+    <!-- Top bar -->
+    <div class="rm-topbar">
+      <div class="rm-dot" style="background:#ff5f57;"></div>
+      <div class="rm-dot" style="background:#febc2e;"></div>
+      <div class="rm-dot" style="background:#28c840;"></div>
+      <div class="rm-title">Current State Assessment — O2C · Opella Europe · AuroPro Discovery Platform</div>
+    </div>
+
+    <div class="rm-body">
+      <!-- Sidebar -->
+      <div class="rm-sidebar">
+        <div class="rm-sb-brand">
+          <div class="rm-sb-brand-name">AuroPro</div>
+          <div class="rm-sb-brand-sub">Report 01 of 06</div>
+        </div>
+        <div class="rm-sb-section">
+          <div class="rm-sb-label">Current State</div>
+          <div class="rm-sb-item active"><span class="rm-sb-num">1.1</span>Domain Overview</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">1.2</span>Process Landscape</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">1.3</span>Order Channel Map</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">1.4</span>Process Flows</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">1.5</span>Ownership &amp; RACI</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">1.6</span>System Inventory</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">1.7</span>System Interconnections</div>
+        </div>
+        <div class="rm-sb-divider"></div>
+        <div class="rm-sb-section">
+          <div class="rm-sb-label">Reports</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">02</span>Pain Points</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">03</span>Recommendation</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">04</span>Opportunity Portfolio</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">05</span>Roadmap</div>
+          <div class="rm-sb-item"><span class="rm-sb-num">06</span>Artefacts</div>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div class="rm-content">
+
+        <div class="rc-tag">Report 01 — Current State Assessment</div>
+        <div class="rc-title">Order-to-Cash — Opella Europe</div>
+        <div class="rc-sub">Domain discovery · 12 input artefacts analysed · June 2026</div>
+        <div class="rc-meta">
+          <div class="rc-meta-item"><span class="rc-meta-label">Domain</span>Order-to-Cash</div>
+          <div class="rc-meta-item"><span class="rc-meta-label">Scope</span>Opella Europe</div>
+          <div class="rc-meta-item"><span class="rc-meta-label">Channels</span>Retail EDI · Manual · Email · Fax</div>
+          <div class="rc-meta-item"><span class="rc-meta-label">Systems</span>SAP ERP · SAP CRM · OMS · EDI Network</div>
+        </div>
+
+        <!-- 1.1 Domain Overview -->
+        <div class="block">
+          <div class="block-label">1.1 Domain Overview</div>
+          <div class="context-strip">
+            Opella Europe's Order-to-Cash domain covers the end-to-end process from customer order receipt through to cash collection across European markets. The domain spans two primary order channels — retail EDI (high-volume, automated) and manual/traditional (lower volume, distributor-led) — and involves four core systems: SAP S/4HANA for transactional processing, SAP CRM for customer relationship and credit management, an Order Management System for order processing, and a 14-connection EDI network serving major retail and pharmacy chains.
+          </div>
+          <div class="stat-row">
+            <div class="stat-box">
+              <div class="stat-val">8,420</div>
+              <div class="stat-lbl">Orders processed in 2025</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">14</div>
+              <div class="stat-lbl">Active EDI retail connections</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">340</div>
+              <div class="stat-lbl">Active European customers</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">4</div>
+              <div class="stat-lbl">Core systems in scope</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1.2 Process Landscape (abbreviated) -->
+        <div class="block">
+          <div class="block-label">1.2 Order Channel Map</div>
+          <div class="process-flow">
+            <div class="pf-node">Customer Order<div class="pf-node-role">Retail EDI · Manual</div></div>
+            <div class="pf-arrow">→</div>
+            <div class="pf-node">Credit Review<div class="pf-node-role">Credit Team / SAP CRM</div></div>
+            <div class="pf-arrow">→</div>
+            <div class="pf-node">Order Processing<div class="pf-node-role">OMS</div></div>
+            <div class="pf-arrow">→</div>
+            <div class="pf-node">Warehouse Fulfilment<div class="pf-node-role">Warehouse Ops</div></div>
+            <div class="pf-arrow">→</div>
+            <div class="pf-node">Invoice &amp; Dispatch<div class="pf-node-role">Finance Ops</div></div>
+            <div class="pf-arrow">→</div>
+            <div class="pf-node">Cash Collection<div class="pf-node-role">AR Team</div></div>
+          </div>
+        </div>
+
+        <!-- 1.3 Process Flows — placeholder layout -->
+        <div class="block">
+          <div class="block-label">1.4 Process Flows — Retail EDI &amp; Manual Channel</div>
+          <div class="two-col">
+            <div class="col-box">
+              <div class="col-title">Retail EDI Channel — 67% of volume</div>
+              <div class="ph-step">
+                <div class="ph-step-num">1</div>
+                <div class="ph-step-lines"><div class="ph-line w90"></div><div class="ph-line w75"></div></div>
+              </div>
+              <div class="ph-step">
+                <div class="ph-step-num">2</div>
+                <div class="ph-step-lines"><div class="ph-line w80"></div><div class="ph-line w60"></div></div>
+              </div>
+              <div class="ph-step">
+                <div class="ph-step-num">3</div>
+                <div class="ph-step-lines"><div class="ph-line w90"></div><div class="ph-line w50"></div></div>
+              </div>
+              <div class="ph-step">
+                <div class="ph-step-num">4</div>
+                <div class="ph-step-lines"><div class="ph-line w75"></div><div class="ph-line w60"></div></div>
+              </div>
+              <div class="ph-step">
+                <div class="ph-step-num">5</div>
+                <div class="ph-step-lines"><div class="ph-line w80"></div></div>
+              </div>
+            </div>
+            <div class="col-box">
+              <div class="col-title">Manual / Distributor Channel — 33% of volume</div>
+              <div class="ph-step">
+                <div class="ph-step-num">1</div>
+                <div class="ph-step-lines"><div class="ph-line w90"></div><div class="ph-line w75"></div></div>
+              </div>
+              <div class="ph-step">
+                <div class="ph-step-num">2</div>
+                <div class="ph-step-lines"><div class="ph-line w80"></div><div class="ph-line w60"></div></div>
+              </div>
+              <div class="ph-step">
+                <div class="ph-step-num">3</div>
+                <div class="ph-step-lines"><div class="ph-line w90"></div><div class="ph-line w50"></div></div>
+              </div>
+              <div class="ph-step">
+                <div class="ph-step-num">4</div>
+                <div class="ph-step-lines"><div class="ph-line w75"></div><div class="ph-line w60"></div></div>
+              </div>
+              <div class="ph-step">
+                <div class="ph-step-num">5</div>
+                <div class="ph-step-lines"><div class="ph-line w80"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1.5 Ownership -->
+        <div class="block">
+          <div class="block-label">1.5 Ownership &amp; RACI — key process steps</div>
+          <table class="mini-table">
+            <tr><th>Process Step</th><th>Responsible</th><th>Accountable</th><th>Consulted</th></tr>
+            <tr><td>Order Receipt — Manual</td><td>Customer Service</td><td>Sales Operations VP</td><td>Sales</td></tr>
+            <tr><td>Credit Approval</td><td>Credit Team</td><td>CFO</td><td>Sales Operations</td></tr>
+            <tr><td>Order Processing — OMS</td><td>Customer Service</td><td>Sales Operations VP</td><td>Digital</td></tr>
+            <tr><td>EDI Connection Management</td><td>Opella Digital</td><td>CIO</td><td>CS Team</td></tr>
+            <tr><td>Warehouse Fulfilment</td><td>Warehouse Ops</td><td>Supply Chain Director</td><td>Demand Planning</td></tr>
+            <tr><td>Invoice Generation</td><td>Finance Ops</td><td>CFO</td><td>Sales</td></tr>
+            <tr><td>AR &amp; Cash Collection</td><td>Finance Ops</td><td>CFO</td><td>Credit Team</td></tr>
+          </table>
+        </div>
+
+        <!-- 1.6 Systems -->
+        <div class="block">
+          <div class="block-label">1.6 System Inventory</div>
+          <div class="sys-row">
+            <div class="sys-box">
+              <div class="sys-name">SAP S/4HANA (ERP)</div>
+              <div class="sys-desc">Core transactional system. Customer master records, order processing, AR posting. 340 active European customer records.</div>
+            </div>
+            <div class="sys-box">
+              <div class="sys-name">SAP CRM</div>
+              <div class="sys-desc">Customer relationship and credit management. Credit limit management, payment terms, account manager assignments. 318 customer records.</div>
+            </div>
+            <div class="sys-box">
+              <div class="sys-name">Order Management System</div>
+              <div class="sys-desc">Processes incoming orders from all channels. Interfaces with EDI network for automated retail orders and SAP ERP for fulfilment.</div>
+            </div>
+            <div class="sys-box">
+              <div class="sys-name">EDI Network (14 connections)</div>
+              <div class="sys-desc">Automated order exchange with major retail and pharmacy chains. Partners include Carrefour, Boots, dm, Walmart, Leclerc, Lidl, Tesco, and others.</div>
+            </div>
+            <div class="sys-box">
+              <div class="sys-name">AR System</div>
+              <div class="sys-desc">Accounts receivable management. Invoice tracking, payment matching, ageing analysis, credit limit utilisation reporting.</div>
+            </div>
+            <div class="sys-box">
+              <div class="sys-name">Warehouse Management</div>
+              <div class="sys-desc">Manages pick, pack, and dispatch instructions from OMS. Interfaces with DC stock management and third-party logistics providers.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="notice">
+          <strong>Sections 1.3 and 1.7</strong> (Order Channel Map and System Interconnections) are rendered as visual diagrams in the full report. Placeholder layouts shown here represent the structural intent — detail to be specified in the implementation plan.
+        </div>
+
+      </div><!-- /rm-content -->
+    </div><!-- /rm-body -->
+  </div><!-- /report-mockup -->
+
+</div>
+</body>
+</html>

@@ -1,0 +1,286 @@
+   INTERNAL
+Opella
+Consumer Healthcare
+PROCESS GUIDE
+Retail Customer Onboarding Guide
+Process Guide  |  Opella Europe  |  Commercial Operations
+Document Reference OPS-EU-CS-GUIDE-001
+Version 1.2
+Effective Date 01 May 2025
+Review Date 01 May 2026
+Document Owner VP Commercial Operations, Europe
+Process Owner Customer Service Team Lead, Europe
+Document Status APPROVED
+Classification INTERNAL
+   Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL  |  Version 1.2  |  Effective 01 May 2025
+Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL
+Document Control
+Document Information
+  Field   Details
+Document Title Retail Customer Onboarding Guide - Opella Europe
+Document Reference OPS-EU-CS-GUIDE-001
+Process Area Customer Service / Commercial Operations
+Audience Account Managers, Customer Service Team, Credit Control
+Document Owner VP Commercial Operations, Europe
+Process Owner Customer Service Team Lead, Europe
+Version 1.2
+Effective Date 01 May 2025
+Review Date 01 May 2026
+Classification INTERNAL
+Version History
+  Version   Date   Author   Notes
+1.2 01 May 2025 A. Kovacs Section 5 (System Account Setup) updated to clarify process for
+accounts transitioning from Sanofi. New checklist in Appendix A. EDI
+setup timelines updated (Section 6).
+1.1 15 Jan 2025 A. Kovacs Interim update: credit assessment requirements aligned to Credit
+Management Policy OPS-EU-FIN-POL-002 v1.2.
+1.0 01 Nov 2024 A. Kovacs Initial Opella guide. Adapted from Sanofi account setup documentation.
+Version 1.2  |  Effective: 01 May 2025  |  VP Commercial Operations, Europe  |  Page 2
+Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL
+Version 1.2  |  Effective: 01 May 2025  |  VP Commercial Operations, Europe  |  Page 3
+Table of Contents
+Document Control 2
+1.   Introduction 4
+2.   Onboarding Stages Overview 4
+3.   Stage 1 - Commercial Agreement and KYC 6
+4.   Stage 2 - Credit Assessment and Limit Setting 6
+5.   Stage 3 - System Account Setup 7
+6.   Stage 4 - EDI and Electronic Trading Setup 9
+7.   Stage 5 - First Order Hypercare 9
+8.   Stage 6 - Account Activation Confirmation 10
+Appendix A:   New Account Onboarding Checklist 11
+Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL
+1.   Introduction
+This guide describes the end-to-end process for onboarding a new retail or pharmacy customer to Opella
+Europe. It covers every stage from initial commercial agreement through to first live order, and provides the
+Account Manager and Customer Service team with a single reference for what needs to happen, in what
+sequence, and who is responsible at each stage.
+A new customer is not ready to place orders until all stages in this guide are complete. Placing an order before
+onboarding is complete creates risk: the customer may not have a credit limit set, the system record may be
+incomplete, and the order confirmation process may not function correctly. The CS Team Lead must confirm
+account readiness before the Account Manager communicates a go-live date to the customer.
+1.1   Audience
+- Account Managers: responsible for initiating the process, providing commercial information, and
+coordinating customer-side requirements.
+- Customer Service Team Lead: responsible for system account setup and CS team readiness.
+- Credit Controller: responsible for credit assessment and initial limit setting.
+- Opella Digital: responsible for EDI setup (where applicable).
+1.2   New Account vs. Migrated Account
+This guide applies to two distinct scenarios. The process is similar in both cases, but there are important
+differences in the system setup and credit assessment steps:
+  Scenario   Description   Key Differences
+New Account A customer with no prior trading history with
+Opella or Sanofi.
+Full credit assessment required. No
+pre-existing system record. Longer
+onboarding timeline (typically 3-4 weeks).
+Migrated /
+Transitioning Account
+A customer previously served by Sanofi that is
+transitioning to direct Opella trading.
+Credit assessment may reference Sanofi
+trading history. System record may already
+exist but must be reviewed and updated.
+EDI connection may already be live (but
+may be TSA-managed).
+2.   Onboarding Stages Overview
+A new retail or pharmacy account must complete the following stages before it is ready to place its first live
+order. The CS Team Lead tracks progress against these stages using the checklist in Appendix A.
+  Stage   Activity   Lead   Typical Duration
+1 Commercial Agreement and KYC Account Manager 1-2 weeks
+2 Credit Application and Assessment Credit Controller 3-5 business days
+3 System Account Setup CS Team Lead 1-2 business days
+Version 1.2  |  Effective: 01 May 2025  |  VP Commercial Operations, Europe  |  Page 4
+Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL
+4 EDI / Electronic Trading Setup (if applicable) Opella Digital 4-6 weeks (may run parallel to
+stages 1-3)
+5 First Order Hypercare CS Representative
+(supervised by CS TL)
+First 3 orders
+6 Account Activation CS Team Lead 1 business day
+  SEQUENCING NOTE
+Stages 1, 2, and 3 must be completed in sequence. Stage 4 (EDI setup)
+can run in parallel with stages 1-3 and does not gate the account going
+live  -  the account can begin trading on manual/email orders while EDI
+setup completes. Stage 5 begins with the first live order.
+Version 1.2  |  Effective: 01 May 2025  |  VP Commercial Operations, Europe  |  Page 5
+Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL
+3.   Stage 1 - Commercial Agreement and KYC
+3.1   Commercial Agreement Prerequisites
+Before the onboarding process starts, the Account Manager must confirm that the following are in place:
+- A signed commercial agreement (framework agreement, terms of trade, or purchase order terms)
+accepted by both parties.
+- Agreed price list reference applicable to the account.
+- Agreed account tier (Tier 1, 2, or 3 per Credit Management Policy OPS-EU-FIN-POL-002) and indicative
+credit limit expectation.
+- Agreed standard payment terms (or Finance Director approval for any deviation from standard terms).
+- Designated order contact and invoice contact at the customer.
+- Confirmed delivery address(es) and any specific delivery requirements.
+3.2   Know Your Customer (KYC) Requirements
+Opella's legal and compliance requirements mandate KYC screening for all new trading accounts. The Account
+Manager initiates KYC screening by submitting the customer's legal entity details (registered name, company
+number, registered address, VAT number) to Finance/Compliance.
+KYC clearance is a prerequisite for credit assessment (Stage 2) and system account creation (Stage 3).
+Onboarding may not proceed until KYC clearance is confirmed in writing by Finance/Compliance.
+4.   Stage 2 - Credit Assessment and Limit Setting
+The Account Manager submits the Credit Application Form to the Credit Controller once KYC clearance is
+confirmed. The full credit assessment process is governed by the Credit Management Policy
+(OPS-EU-FIN-POL-002, Section 3).
+The Account Manager should indicate the commercial context for the requested credit limit: expected annual
+order value, typical order size and frequency, and any commitments made to the customer about credit terms.
+The Credit Controller will use this information as context but the final limit is set independently under the Credit
+Management Policy.
+  FOR MIGRATED / TRANSITIONING ACCOUNTS
+If the customer previously traded with Sanofi, the Credit Controller may
+request the Sanofi trading record as a reference. This information may
+be available from the Sanofi TSA. However, the Opella credit limit is
+set independently under Opella governance. The Sanofi credit limit does
+not automatically apply to the Opella account.
+Account Managers must NOT advise customers that their previous Sanofi
+credit limit will carry over to Opella without written Credit Controller
+confirmation.
+Version 1.2  |  Effective: 01 May 2025  |  VP Commercial Operations, Europe  |  Page 6
+Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL
+5.   Stage 3 - System Account Setup
+5.1   Account Creation Responsibility
+The CS Team Lead is responsible for creating and configuring the new customer account in our systems.
+Account creation must not be delegated to a CS Representative for new accounts. The CS Team Lead must
+personally verify that all mandatory fields are correctly populated before the account is made available for order
+entry.
+5.2   Account Creation Process
+1. Receive written confirmation from the Credit Controller of the approved credit limit and agreed payment
+terms. Do not create the account without this confirmation.
+2. Create the customer record in our systems, populating all mandatory fields as listed in Section 5.3. The
+account must be created in all systems that are used for customer management and order processing.
+Ensure consistency of data across all systems.
+3. Attach the signed commercial agreement and the Credit Controller's credit approval to the account
+record.
+4. Configure the account's price list, payment terms, MOQ settings, and delivery address(es) to match the
+agreed commercial terms.
+5. Flag the account as 'New - Hypercare' to trigger the additional validation checks in Section 7 for the first
+three orders.
+6. Notify the Account Manager and CS team that the account is created and ready for order entry. Confirm
+the account number and any relevant notes for the CS team.
+5.3   Mandatory Account Fields
+  Field   Source   Notes
+Customer Legal Name KYC documentation Must match legal entity exactly.
+Customer Trading Name Commercial Agreement If different from legal name.
+SAP Account Number System-generated Confirm correct number range for account type.
+Company Registration Number KYC documentation
+VAT Registration Number KYC documentation Required for invoice compliance.
+Account Tier Credit Controller Tier 1 / 2 / 3 per Credit Management Policy.
+Credit Limit Credit Controller written
+approval
+Enter exactly as stated in Credit Controller
+approval. Do not adjust.
+Payment Terms Credit Controller / Commercial
+Agreement
+Must match agreed terms. Finance Director
+approval needed for deviations.
+Price List Reference Account Manager Confirm correct price list version.
+Primary Delivery Address Commercial Agreement Verify postcode and country code formatting.
+Order Contact Name & Email Account Manager Used for order confirmation dispatch.
+Version 1.2  |  Effective: 01 May 2025  |  VP Commercial Operations, Europe  |  Page 7
+Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL
+Invoice Contact Name & Email Account Manager May differ from order contact.
+5.4   Migrated / Transitioning Account Setup
+For customers that were previously served by Sanofi and have a pre-existing record in our systems from the
+carve-out migration, the CS Team Lead must review the existing record rather than creating a new one. A
+duplicate record must not be created.
+The CS Team Lead must verify that all fields in the existing record are accurate and up to date, paying
+particular attention to: credit limit (must reflect the Opella-approved limit, not the inherited Sanofi figure),
+payment terms (may have been updated for the Opella commercial relationship), and delivery addresses
+(confirm these are still valid for the Opella supply point). Any discrepancies must be corrected before the
+account is activated for Opella order entry.
+Version 1.2  |  Effective: 01 May 2025  |  VP Commercial Operations, Europe  |  Page 8
+Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL
+6.   Stage 4 - EDI and Electronic Trading Setup
+Stage 4 applies only to accounts that require EDI connectivity. If the account will trade via manual and email
+channels only, Stage 4 is not required and the onboarding moves directly to Stage 5 (Hypercare).
+EDI setup is managed by Opella Digital. The Account Manager notifies Opella Digital as early as possible in the
+onboarding process  -  EDI setup typically requires 4 to 6 weeks from the date technical scoping is agreed.
+Delays in notifying Opella Digital will delay the go-live date.
+6.1   EDI Scoping Requirements
+The Account Manager must provide Opella Digital with the following:
+- Customer's EDI provider or VAN (Value Added Network) name and contact.
+- Required message types (ORDERS, ORDRSP, INVOIC, DESADV).
+- Communication protocol (AS2, SFTP, or VAN routing).
+- Customer's GLN (Global Location Number) and buyer/supplier codes.
+- Expected go-live date and any customer-side testing requirements.
+- For migrated accounts: current EDI connection details (if any), including whether the connection is
+currently managed by Sanofi Shared Services under the TSA (see EDI Integration Register
+OPS-EU-IT-REG-001).
+6.2   EDI Testing
+Before an EDI connection goes live, Opella Digital must complete a minimum of three successful end-to-end
+test cycles for each message type in scope. Test results must be confirmed in writing by both Opella Digital and
+the customer's EDI team before live orders are accepted via EDI.
+The Account Manager is responsible for coordinating the customer's participation in EDI testing. Opella Digital
+will not sign off an EDI connection as live-ready without confirmed test results from the customer side.
+7.   Stage 5 - First Order Hypercare
+Hypercare applies to the first three orders placed by any new account. The CS Representative processes these
+orders with additional validation steps, supervised by the CS Team Lead.
+  Hypercare Validation Step   When   Standard Process
+Confirm order details directly with the customer's
+designated order contact before processing (in
+addition to standard receipt procedure).
+Before SAP order
+entry.
+No (standard process accepts
+written order as received).
+Confirm delivery address against account record AND
+against the customer's confirmation.
+At order entry. No (standard process checks SAP
+record only).
+Credit Controller verbal confirmation that credit limit is
+sufficient before order entry (in addition to standard
+SAP check).
+Before SAP order
+entry.
+No (standard process uses SAP
+check only).
+Version 1.2  |  Effective: 01 May 2025  |  VP Commercial Operations, Europe  |  Page 9
+Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL
+CS Team Lead personal review of the order
+confirmation before issue.
+Before issue of
+confirmation.
+No (standard process: CS Rep
+issues directly).
+After three successful orders with no errors or customer queries, the CS Team Lead removes the 'Hypercare'
+flag from the account and it moves to standard processing. The CS Team Lead must document the transition in
+the account record.
+8.   Stage 6 - Account Activation Confirmation
+Once Stages 1-5 are complete, the CS Team Lead confirms account activation by sending a written
+confirmation to the Account Manager. The confirmation must include:
+- SAP account number.
+- Confirmed credit limit and payment terms.
+- Order channels available (manual, email, EDI if applicable).
+- CS Representative assigned as the primary contact for the account.
+- Any account-specific notes relevant to order processing.
+The Account Manager may then communicate the go-live date and account details to the customer. The
+Account Manager must not communicate go-live to the customer before receiving the CS Team Lead's written
+activation confirmation.
+Version 1.2  |  Effective: 01 May 2025  |  VP Commercial Operations, Europe  |  Page 10
+Opella  |  OPS-EU-CS-GUIDE-001  |  INTERNAL
+Appendix A:   New Account Onboarding Checklist
+This checklist is used by the CS Team Lead to track onboarding progress. It must be completed and filed before
+account activation is confirmed.
+  #   Item   Responsibility   Complete
+1.1 Signed commercial agreement received and filed. Account Manager
+1.2 Agreed price list version confirmed. Account Manager
+1.3 KYC clearance received from Finance/Compliance. Finance/Compliance
+2.1 Credit Application Form submitted to Credit Controller. Account Manager
+2.2 Credit assessment completed and limit confirmed in writing. Credit Controller
+3.1 Customer record created / reviewed in all systems. CS Team Lead
+3.2 Credit limit set exactly per Credit Controller approval. CS Team Lead
+3.3 Payment terms, price list, MOQ, delivery address
+configured.
+CS Team Lead
+3.4 Account flagged as 'New - Hypercare' in system. CS Team Lead
+4.1 EDI scoping information submitted to Opella Digital (if
+applicable).
+Account Manager N/A if no EDI
+4.2 EDI testing completed and signed off (if applicable). Opella Digital N/A if no EDI
+5.1 First 3 orders processed under hypercare with no issues. CS Rep / CS TL
+6.1 Account activation confirmation sent to Account Manager. CS Team Lead
+Version 1.2  |  Effective: 01 May 2025  |  VP Commercial Operations, Europe  |  Page 11

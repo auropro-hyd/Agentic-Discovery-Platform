@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformation Recommendation</title>
+<link rel="stylesheet" href="assets/report.css"></head><body>
+<div class="layout">
+<nav class="sidebar">
+  <h1>Order-to-Cash Discovery</h1>
+  <div class="sub">Discovery assessment</div>
+  <a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='active' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
+</nav>
+<main class="content">
+<h1>Transformation Recommendation</h1>
+<p class='lede'>Which opportunities to pursue, in what order, by value and feasibility.</p>
+<h2>Value vs. feasibility</h2>
+<div class='matrix'>
+<div class='quad do_first'><h4>Do First</h4><span class='chip'>Establish a single source of truth for customer credit standing</span><span class='chip'>Formalise ownership and procedure for the electronic order channel</span></div>
+<div class='quad plan_for'><h4>Plan For</h4><span class='chip'>Automated monitoring and recovery of failed electronic orders</span></div>
+<div class='quad consider'><h4>Consider</h4><span class=prov>—</span></div>
+<div class='quad deprioritise'><h4>Deprioritise</h4><span class=prov>—</span></div>
+</div>
+<h2>Opportunity ratings</h2><table><thead><tr><th>Opportunity</th><th>Pattern</th><th>Value</th><th>Feasibility</th><th>Sequence</th></tr></thead><tbody>
+<tr><td>Establish a single source of truth for customer credit standing</td><td>Automation Pipeline</td><td>High</td><td>High</td><td>Can start now</td></tr>
+<tr><td>Formalise ownership and procedure for the electronic order channel</td><td>HITL Workflow</td><td>High</td><td>High</td><td>Can start now</td></tr>
+<tr><td>Automated monitoring and recovery of failed electronic orders</td><td>Automation Pipeline</td><td>High</td><td>Medium</td><td>Requires Customer Master Reconciliation first</td></tr>
+</tbody></table>
+<h2>Sequencing rationale</h2><p>Two foundational moves can begin immediately and independently: establishing a single authoritative source for credit standing (OPP1) and formalising ownership of the electronic channel (OPP2). Automated detection and recovery of failed electronic orders (OPP3) depends on OPP2, because alerts need a confirmed accountable owner and documented procedure to route into; building monitoring before ownership exists would leave failures detected but unowned. OPP3 is therefore scheduled after OPP2.</p>
+<p><strong>Dependencies:</strong> OPP3 depends on OPP2. OPP1 has no dependencies and runs in parallel.</p>
+<h2>Strategic readiness</h2><p>The organisation already holds the data and documents needed to act: the two customer-data systems, the credit policy, the procedure and accountability matrix, and the order-flow analysis. The principal readiness constraint is governance rather than technology — assigning ownership and applying existing approval controls — which makes the foundational moves achievable quickly. The recovery automation requires modest build effort and benefits from the ownership groundwork laid first.</p>
+</main></div></body></html>

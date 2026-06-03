@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pain Points &amp; Opportunities — Acme Manufacturing</title>
+<link rel="stylesheet" href="assets/report.css"></head><body>
+<div class="layout">
+<nav class="sidebar">
+  <h1>Acme Manufacturing</h1>
+  <div class="sub">Procure-to-Pay Discovery</div>
+  <a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='active' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
+</nav>
+<main class="content">
+<h1>Pain Points &amp; Opportunities</h1>
+<p class='lede'>The issues found in the discovery, ranked by business impact, each mapped to a recommended opportunity.</p>
+<div class='card'>
+<h3>Largest orders committed without the required second approval</h3>
+<p>Every purchase order above the EUR 50,000 dual-approval threshold received only a single approval. This accounts for 7 orders representing EUR 557,000 of committed spend, which is 91.9% of the total value reviewed.</p>
+<p><span class='metric'>7 orders received only a single approval</span> &nbsp; <span class='metric'>EUR 557,000 of committed spend</span> &nbsp; <span class='metric'>91.9% of total value reviewed</span></p>
+<p><strong>Root cause:</strong> The approval threshold exists in the policy but is not enforced at the point an order is committed, so a second approval can be skipped without anything stopping the commitment.</p>
+<p><strong>Pattern:</strong> Control defined in policy but not enforced in the working process.</p>
+<p><strong>Addressed by:</strong> OPP1 (see the Opportunity Portfolio)</p>
+<p class='prov'>Where this comes from: your Procurement Policy and your Purchase Order Export</p>
+</div>
+<div class='card'>
+<h3>Spend committed to suppliers before any purchase order exists</h3>
+<p>Spend banned by policy occurs on 25.0% of orders, worth EUR 216,000, where commitments were made to suppliers before a purchase order existed. All 3 of these orders also received only a single approval, with the full EUR 216,000 affected by both issues at once.</p>
+<p><span class='metric'>3 orders committed before a purchase order existed</span> &nbsp; <span class='metric'>25.0% of orders</span> &nbsp; <span class='metric'>EUR 216,000 committed without a prior order</span></p>
+<p><strong>Root cause:</strong> The policy rule requiring an order before any supplier commitment is not built into the working process, so buyers can commit first and document later.</p>
+<p><strong>Pattern:</strong> Sequencing control bypassed, compounding with the missing second approval on the same orders.</p>
+<p><strong>Addressed by:</strong> OPP3 (see the Opportunity Portfolio)</p>
+<p class='prov'>Where this comes from: your Procurement Policy and your Purchase Order Export</p>
+</div>
+<div class='card'>
+<h3>Repeat non-compliance concentrated in one buyer, with no owner</h3>
+<p>Repeat non-compliance is concentrated in a single buyer, accounting for 2 orders worth EUR 149,000, which is 24.6% of value. No document assigns anyone to own, monitor, or grant exceptions to the control, so the pattern goes undetected and unremediated.</p>
+<p><span class='metric'>2 orders from a single buyer</span> &nbsp; <span class='metric'>EUR 149,000 concentrated in one buyer</span> &nbsp; <span class='metric'>24.6% of value</span></p>
+<p><strong>Root cause:</strong> No accountable owner is assigned for monitoring control adherence, so concentrated non-compliance is never surfaced or addressed.</p>
+<p><strong>Pattern:</strong> Unowned control with no monitoring, allowing repeat behaviour to persist.</p>
+<p><strong>Addressed by:</strong> OPP2 (see the Opportunity Portfolio)</p>
+<p class='prov'>Where this comes from: your Purchase Order Export and your Procurement Policy</p>
+</div>
+</main></div></body></html>

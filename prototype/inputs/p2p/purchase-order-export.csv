@@ -1,0 +1,13 @@
+po_id,supplier,category,amount_eur,raised_by,approval_status,po_before_order
+PO-1001,Steelco,Raw Materials,72000,buyer_a,single_approval_only,yes
+PO-1002,BoltWorks,Components,18000,buyer_b,approved,yes
+PO-1003,Steelco,Raw Materials,95000,buyer_a,single_approval_only,yes
+PO-1004,LubriCorp,Consumables,4200,buyer_c,approved,yes
+PO-1005,Steelco,Raw Materials,61000,buyer_a,single_approval_only,no
+PO-1006,PackRight,Packaging,8800,buyer_b,approved,yes
+PO-1007,BoltWorks,Components,120000,buyer_d,single_approval_only,yes
+PO-1008,LubriCorp,Consumables,3100,buyer_c,approved,yes
+PO-1009,Steelco,Raw Materials,88000,buyer_a,single_approval_only,no
+PO-1010,PackRight,Packaging,15000,buyer_b,approved,yes
+PO-1011,BoltWorks,Components,67000,buyer_d,single_approval_only,no
+PO-1012,Steelco,Raw Materials,54000,buyer_a,single_approval_only,yes

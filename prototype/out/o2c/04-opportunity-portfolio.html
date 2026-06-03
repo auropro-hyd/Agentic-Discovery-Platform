@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Opportunity Portfolio</title>
+<link rel="stylesheet" href="assets/report.css"></head><body>
+<div class="layout">
+<nav class="sidebar">
+  <h1>Order-to-Cash Discovery</h1>
+  <div class="sub">Discovery assessment</div>
+  <a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='active' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
+</nav>
+<main class="content">
+<h1>AI Opportunity Portfolio</h1>
+<p class='lede'>The recommended interventions in full — what the problem is, how the process changes, and what it delivers.</p>
+<div class='card'>
+<h3>Establish a single source of truth for customer credit standing<span class='pattern'>Automation Pipeline</span></h3>
+<p>Designate the central order-management system as the authoritative source for credit limits and payment terms, and introduce an automated reconciliation that flags and routes any disagreement between the two systems for review and written approval before it can take effect.</p>
+<div class='ba-grid'>
+<div class='col before'><h4>Before</h4><div class='step'><strong>1. Dual maintenance</strong><div class='who'>Order-management and credit functions · Central order-management system and customer-relationship system</div><div>Credit limits and payment terms are entered and edited in both systems independently, with no reconciliation.</div></div>
+<div class='step'><strong>2. Order validated against whichever limit applies</strong><div class='who'>Credit function · Both systems</div><div>Orders are validated against the limit in use, which for some large accounts is the higher relationship-system figure, bypassing written approval.</div></div></div>
+<div class='col after'><h4>After</h4><div class='step'><strong>1. Authoritative source designated</strong><div class='who'>Credit function · Central order-management system</div><div>The order-management system holds the approved credit limit and payment terms as the single source of truth.</div></div>
+<div class='step'><strong>2. Automated reconciliation and approval routing</strong><div class='who'>Credit function with automated reconciliation · Both systems</div><div>Any disagreement between the two systems is automatically detected and routed for written approval under the policy&#x27;s separation-of-duties controls before any change governs orders.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Reconciling the two systems brings the 267 accounts with disagreeing credit limits and the 228 with disagreeing payment terms under a single authoritative figure, so the aggregate €30,675,000 difference is resolved and credit exposure on the largest accounts becomes assessable and policy-compliant.
+ <span class='metric'>267 accounts brought to a single authoritative credit limit</span> &nbsp; <span class='metric'>€30,675,000 aggregate credit-limit difference resolved</span> &nbsp; <span class='metric'>228 accounts brought to consistent payment terms</span>
+</p>
+<p><strong>How it's delivered.</strong> Confirm the authoritative system, run a one-time reconciliation of the disagreeing accounts through the policy&#x27;s approval controls, then stand up an ongoing automated comparison that prevents unapproved divergence going forward.</p>
+<p><strong>Connects:</strong> Central order-management system, Customer-relationship system</p>
+<p><strong>Success looks like:</strong></p><ul><li>Number of accounts with disagreeing credit limits reduced toward zero</li><li>All credit-limit changes carry written approval under policy</li><li>Aggregate credit-limit difference eliminated</li></ul>
+<p><strong>Dependencies:</strong> Independent — can start immediately.</p>
+<p><strong>Risks:</strong></p><ul><li>Resolving overstated limits may tighten credit headroom for some large accounts and require commercial conversations</li></ul>
+<p class='prov'>Where this comes from: your Credit Management Policy Europe and your Accounts Receivable Review Notes Q4 2025</p>
+</div>
+<div class='card'>
+<h3>Formalise ownership and procedure for the electronic order channel<span class='pattern'>HITL Workflow</span></h3>
+<p>Bring the electronic channel into the formal procedure and accountability matrix: assign a named Accountable owner, document the end-to-end handling and escalation steps, and replace the single specialist&#x27;s informal notes with an authoritative, controlled procedure.</p>
+<div class='ba-grid'>
+<div class='col before'><h4>Before</h4><div class='step'><strong>1. Channel excluded from procedure</strong><div class='who'>Order-management function · Electronic ordering channel</div><div>The electronic channel, carrying 67.3% of volume, is excluded from the procedure and accountability matrix with no Accountable owner.</div></div>
+<div class='step'><strong>2. Disputes handled by informal notes</strong><div class='who'>Single customer-service specialist · Customer-service handling</div><div>Escalations are resolved using one person&#x27;s informal working notes.</div></div></div>
+<div class='col after'><h4>After</h4><div class='step'><strong>1. Accountable owner assigned</strong><div class='who'>Order-management leadership · Electronic ordering channel</div><div>A named owner is made Accountable for the electronic channel within the accountability matrix.</div></div>
+<div class='step'><strong>2. Authoritative procedure and escalation path</strong><div class='who'>Order-management and customer-service functions · Electronic ordering channel and customer-service handling</div><div>The procedure is extended to cover the electronic channel end to end, with a documented escalation path replacing the informal notes.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Bringing the channel that carries 67.3% of volume and €59,711,399.53 of order value under formal ownership gives escalation authority and controls to the majority of the business, and provides a documented basis for tackling the 34 order-not-processed escalations that make up 23.9% of all escalations.
+ <span class='metric'>€59,711,399.53 of order value brought under formal accountability</span> &nbsp; <span class='metric'>67.3% of order volume gains an authoritative procedure</span> &nbsp; <span class='metric'>34 order-not-processed escalations gain a documented owner and path</span>
+</p>
+<p><strong>How it's delivered.</strong> Capture the specialist&#x27;s working knowledge into a formal procedure, assign an Accountable owner in the matrix, define escalation authority, and socialise the procedure across order-management and customer-service teams.</p>
+<p><strong>Connects:</strong> Electronic ordering channel, Customer-service handling</p>
+<p><strong>Success looks like:</strong></p><ul><li>Electronic channel has a named Accountable owner in the matrix</li><li>Documented procedure replaces informal notes</li><li>Reduction in order-not-processed escalations</li></ul>
+<p><strong>Dependencies:</strong> Independent — can start immediately. Prerequisite for the AI Credit Decisioning step.</p>
+<p><strong>Risks:</strong></p><ul><li>Knowledge concentrated in one individual may be incompletely captured if that person is unavailable</li></ul>
+<p class='prov'>Where this comes from: your Order Management SOP Europe, your O2C Process RACI Europe and your EDI Dispute Resolution CS Working Notes</p>
+</div>
+<div class='card'>
+<h3>Automated monitoring and recovery of failed electronic orders<span class='pattern'>Automation Pipeline</span></h3>
+<p>Introduce automated detection of electronic orders that fail to transmit or process, with alerts routed to the newly accountable owner for prompt recovery, so failures are caught before customers escalate or threaten delisting.</p>
+<div class='ba-grid'>
+<div class='col before'><h4>Before</h4><div class='step'><strong>1. Failures surface via customer complaints</strong><div class='who'>Customer-service function · Customer-service handling</div><div>Failed orders are typically discovered when customers escalate, by which point relationships are already strained.</div></div>
+<div class='step'><strong>2. No systematic recovery</strong><div class='who'>Order-management function · Central order-management system</div><div>1,196 electronic orders worth €12,362,493.74 went unfulfilled without a systematic catch-and-recover step.</div></div></div>
+<div class='col after'><h4>After</h4><div class='step'><strong>1. Automated failure detection</strong><div class='who'>Automated monitoring · Electronic ordering channel and central order-management system</div><div>Electronic orders that fail to transmit or process are detected automatically and flagged in real time.</div></div>
+<div class='step'><strong>2. Owner-led recovery</strong><div class='who'>Accountable electronic-channel owner · Customer-service handling</div><div>Alerts route to the accountable owner who drives recovery before the customer is affected.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Catching failures proactively targets the 1,196 unfulfilled electronic orders worth €12,362,493.74 — the bulk of the 1,667 total unfulfilled orders worth €17,377,801.40 — protecting revenue and the customer relationships at risk of delisting.
+ <span class='metric'>1,196 unfulfilled electronic orders targeted for recovery</span> &nbsp; <span class='metric'>€12,362,493.74 of electronic order value at stake</span> &nbsp; <span class='metric'>€17,377,801.40 total unfulfilled value across all channels</span>
+</p>
+<p><strong>How it's delivered.</strong> Define what a failed order looks like, build automated detection against electronic-channel transmissions, and route alerts to the accountable owner with a documented recovery procedure — building on the ownership established in OPP2.</p>
+<p><strong>Connects:</strong> Electronic ordering channel, Central order-management system, Customer-service handling</p>
+<p><strong>Success looks like:</strong></p><ul><li>Failed electronic orders detected before customer escalation</li><li>Reduction in unfulfilled electronic order count and value</li><li>Reduction in delisting threats</li></ul>
+<p><strong>Dependencies:</strong> Requires Customer Master Reconciliation first.</p>
+<p><strong>Risks:</strong></p><ul><li>Without a confirmed owner from OPP2, alerts have no destination and recovery stalls</li></ul>
+<p class='prov'>Where this comes from: your Order Flow Analysis Export 2025 and your EDI Dispute Resolution CS Working Notes</p>
+</div>
+</main></div></body></html>

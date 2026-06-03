@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Value vs Feasibility Matrix</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #1a1a1e; color: #f0f0f2;
+    padding: 40px 48px; line-height: 1.6;
+  }
+  .page { max-width: 900px; margin: 0 auto; }
+
+  .report-tag { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: rgba(255,180,0,0.15); color: #f5c842; border-radius: 4px; padding: 2px 9px; margin-bottom: 10px; }
+  h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; opacity: 0.5; margin-bottom: 32px; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+
+  /* ── MATRIX ─────────────────────── */
+  .matrix-wrap {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    grid-template-rows: 1fr 32px;
+    gap: 0;
+    height: 480px;
+    margin-bottom: 32px;
+  }
+
+  /* Y-axis label */
+  .y-axis {
+    grid-column: 1; grid-row: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .y-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; opacity: 0.45;
+    display: flex; align-items: center; gap: 28px;
+  }
+  .axis-arrow { font-size: 14px; opacity: 0.5; }
+
+  /* X-axis label */
+  .x-axis {
+    grid-column: 2; grid-row: 2;
+    display: flex; align-items: center; justify-content: center;
+    gap: 0;
+  }
+  .x-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; opacity: 0.45;
+    display: flex; align-items: center; gap: 28px;
+  }
+
+  /* Matrix grid */
+  .matrix {
+    grid-column: 2; grid-row: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Quadrants */
+  .quad {
+    padding: 18px 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .q-tl { background: rgba(255,180,0,0.06);  border-right: 1px solid rgba(255,255,255,0.07); border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .q-tr { background: rgba(80,200,120,0.07); border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .q-bl { background: rgba(255,255,255,0.02); border-right: 1px solid rgba(255,255,255,0.07); }
+  .q-br { background: rgba(80,140,255,0.05); }
+
+  .quad-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; margin-bottom: 6px; opacity: 0.5;
+  }
+  .q-tr .quad-label { color: #50c878; opacity: 0.8; }
+  .q-tl .quad-label { color: #f5c842; opacity: 0.75; }
+  .q-br .quad-label { color: #90b8ff; opacity: 0.75; }
+  .q-bl .quad-label { opacity: 0.35; }
+
+  .quad-desc {
+    font-size: 11px; opacity: 0.45; line-height: 1.55; margin-bottom: 12px;
+  }
+
+  /* Opportunity bubbles */
+  .opp-bubbles { display: flex; flex-direction: column; gap: 8px; flex: 1; justify-content: center; }
+  .opp-bubble {
+    border-radius: 7px; padding: 9px 12px;
+    display: flex; align-items: flex-start; gap: 9px;
+  }
+  .ob-icon {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; flex-shrink: 0;
+  }
+  .ob-body {}
+  .ob-title { font-size: 11px; font-weight: 700; line-height: 1.4; margin-bottom: 2px; }
+  .ob-type  { font-size: 10px; opacity: 0.55; }
+
+  /* Opp colours */
+  .ob1 { background: rgba(255,100,80,0.12); }
+  .ob1 .ob-icon { background: rgba(255,100,80,0.25); color: #ff7070; }
+
+  .ob2 { background: rgba(80,140,255,0.12); }
+  .ob2 .ob-icon { background: rgba(80,140,255,0.25); color: #90b8ff; }
+
+  .ob3 { background: rgba(124,106,247,0.12); }
+  .ob3 .ob-icon { background: rgba(124,106,247,0.25); color: #c4bbff; }
+
+  .ob4 { background: rgba(80,200,180,0.1); }
+  .ob4 .ob-icon { background: rgba(80,200,180,0.22); color: #50c8b8; }
+
+  .ob-empty { opacity: 0.25; font-size: 11px; font-style: italic; margin-top: auto; }
+
+  /* ── DETAIL TABLE ──────────────── */
+  .detail-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.4; margin-bottom: 14px; }
+  .detail-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .detail-table th {
+    text-align: left; padding: 9px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.09);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; opacity: 0.45;
+  }
+  .detail-table td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: top; }
+
+  .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .score-bar { height: 6px; border-radius: 3px; }
+  .score-val { font-size: 10px; font-weight: 700; opacity: 0.6; white-space: nowrap; }
+
+  .badge { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: 700; }
+  .b-hitl  { background: rgba(255,180,0,0.18);   color: #f5c842; }
+  .b-auto  { background: rgba(80,140,255,0.2);    color: #90b8ff; }
+  .b-agent { background: rgba(124,106,247,0.22);  color: #c4bbff; }
+  .b-mod   { background: rgba(80,200,180,0.18);   color: #50c8b8; }
+
+  .quad-tag { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: 700; }
+  .qt-do   { background: rgba(80,200,120,0.18);  color: #50c878; }
+  .qt-plan { background: rgba(255,180,0,0.15);   color: #f5c842; }
+  .qt-cons { background: rgba(80,140,255,0.15);  color: #90b8ff; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="report-tag">Report 03 — Transformation Recommendation</div>
+  <h1>Value vs. Feasibility Matrix</h1>
+  <div class="subtitle">Each opportunity plotted by business value (impact if delivered) and feasibility (effort, complexity, dependency). Position determines sequencing priority and resourcing approach.</div>
+
+  <!-- ── MATRIX ── -->
+  <div class="matrix-wrap">
+
+    <!-- Y axis -->
+    <div class="y-axis">
+      <div class="y-label">
+        <span class="axis-arrow">↑</span>
+        <span>Value</span>
+      </div>
+    </div>
+
+    <!-- Matrix -->
+    <div class="matrix">
+
+      <!-- Top-left: High Value, Low Feasibility -->
+      <div class="quad q-tl">
+        <div class="quad-label">↑ High Value · Low Feasibility →</div>
+        <div class="quad-desc">Strategic bets. High return but complex. Plan carefully — sequence after foundations are in place.</div>
+        <div class="opp-bubbles">
+          <div class="opp-bubble ob3">
+            <div class="ob-icon">3</div>
+            <div class="ob-body">
+              <div class="ob-title">AI Credit Decisioning Agent</div>
+              <div class="ob-type">AI Agent · Requires Opp 1 complete</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top-right: High Value, High Feasibility -->
+      <div class="quad q-tr">
+        <div class="quad-label">↑ High Value · High Feasibility ← Do First</div>
+        <div class="quad-desc">Maximum return at lowest delivery risk. These go first — they also unblock everything else.</div>
+        <div class="opp-bubbles">
+          <div class="opp-bubble ob1">
+            <div class="ob-icon">1</div>
+            <div class="ob-body">
+              <div class="ob-title">Customer Master Reconciliation</div>
+              <div class="ob-type">HITL Workflow · One targeted session</div>
+            </div>
+          </div>
+          <div class="opp-bubble ob2">
+            <div class="ob-icon">2</div>
+            <div class="ob-body">
+              <div class="ob-title">EDI Exception Pipeline</div>
+              <div class="ob-type">Automation · Deterministic rules</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom-left: Low Value, Low Feasibility -->
+      <div class="quad q-bl">
+        <div class="quad-label">↓ Low Value · Low Feasibility</div>
+        <div class="quad-desc">Deprioritise. Not in scope for this engagement.</div>
+        <div class="opp-bubbles">
+          <div class="ob-empty">No opportunities in this quadrant</div>
+        </div>
+      </div>
+
+      <!-- Bottom-right: Low Value, High Feasibility -->
+      <div class="quad q-br">
+        <div class="quad-label">↓ Low Value · High Feasibility →</div>
+        <div class="quad-desc">Low effort but moderate return. Worth doing — but not at the expense of higher-value work.</div>
+        <div class="opp-bubbles">
+          <div class="opp-bubble ob4">
+            <div class="ob-icon">T</div>
+            <div class="ob-body">
+              <div class="ob-title">TSA Connection Ownership Transfer</div>
+              <div class="ob-type">Modernisation · Legal + contractual action</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /matrix -->
+
+    <!-- X axis -->
+    <div class="x-axis">
+      <div class="x-label">
+        <span>Low</span>
+        <span class="axis-arrow">——————————————————— Feasibility ———————————————————→</span>
+        <span>High</span>
+      </div>
+    </div>
+
+  </div><!-- /matrix-wrap -->
+
+  <!-- ── DETAIL TABLE ── -->
+  <div class="detail-label">Opportunity Ratings — Value &amp; Feasibility</div>
+  <table class="detail-table">
+    <tr>
+      <th>#</th>
+      <th>Opportunity</th>
+      <th>Type</th>
+      <th>Value</th>
+      <th>Feasibility</th>
+      <th>Quadrant</th>
+    </tr>
+
+    <tr>
+      <td style="font-weight:800;opacity:0.5;">1</td>
+      <td>
+        <div style="font-weight:700;">Customer Master Reconciliation</div>
+        <div style="font-size:11px;opacity:0.5;margin-top:2px;">€600K+ credit exposure resolved. Prerequisite for Opp 3. Foundation for all downstream credit decisions.</div>
+      </td>
+      <td><span class="badge b-hitl">HITL</span></td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:80px;background:rgba(80,200,120,0.5);"></div>
+          <span class="score-val">High</span>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:80px;background:rgba(80,200,120,0.5);"></div>
+          <span class="score-val">High</span>
+        </div>
+        <div style="font-size:10px;opacity:0.45;margin-top:3px;">One session. No new tech. Human-led.</div>
+      </td>
+      <td><span class="quad-tag qt-do">Do First</span></td>
+    </tr>
+
+    <tr>
+      <td style="font-weight:800;opacity:0.5;">2</td>
+      <td>
+        <div style="font-weight:700;">EDI Order Exception Pipeline</div>
+        <div style="font-size:11px;opacity:0.5;margin-top:2px;">Eliminates 34 manual CS incidents/year. Removes SLA risk and delisting exposure. Independent — runs in parallel.</div>
+      </td>
+      <td><span class="badge b-auto">Automation</span></td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:72px;background:rgba(80,200,120,0.5);"></div>
+          <span class="score-val">High</span>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:76px;background:rgba(80,200,120,0.5);"></div>
+          <span class="score-val">High</span>
+        </div>
+        <div style="font-size:10px;opacity:0.45;margin-top:3px;">Deterministic rules. Standard automation.</div>
+      </td>
+      <td><span class="quad-tag qt-do">Do First</span></td>
+    </tr>
+
+    <tr>
+      <td style="font-weight:800;opacity:0.5;">3</td>
+      <td>
+        <div style="font-weight:700;">AI Credit Decisioning Agent</div>
+        <div style="font-size:11px;opacity:0.5;margin-top:2px;">Closes 67% credit coverage gap across 5,665 EDI orders/year. Highest long-term value in the portfolio — but sequenced after Opp 1.</div>
+      </td>
+      <td><span class="badge b-agent">AI Agent</span></td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:88px;background:rgba(124,106,247,0.6);"></div>
+          <span class="score-val">Very High</span>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:42px;background:rgba(255,180,0,0.55);"></div>
+          <span class="score-val">Medium</span>
+        </div>
+        <div style="font-size:10px;opacity:0.45;margin-top:3px;">Depends on Opp 1. Multi-month build.</div>
+      </td>
+      <td><span class="quad-tag qt-plan">Plan For</span></td>
+    </tr>
+
+    <tr>
+      <td style="font-weight:800;opacity:0.5;">T</td>
+      <td>
+        <div style="font-weight:700;">TSA Connection Ownership Transfer</div>
+        <div style="font-size:11px;opacity:0.5;margin-top:2px;">Resolves TSA dependency on 6 Sanofi-managed EDI connections. Risk mitigation — enables Opp 2 to operate fully autonomously.</div>
+      </td>
+      <td><span class="badge b-mod">Modernisation</span></td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:40px;background:rgba(80,200,180,0.5);"></div>
+          <span class="score-val">Medium</span>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:52px;background:rgba(80,200,180,0.5);"></div>
+          <span class="score-val">Medium</span>
+        </div>
+        <div style="font-size:10px;opacity:0.45;margin-top:3px;">Legal + contractual. No tech build.</div>
+      </td>
+      <td><span class="quad-tag qt-cons">Consider</span></td>
+    </tr>
+
+  </table>
+
+</div>
+</body>
+</html>

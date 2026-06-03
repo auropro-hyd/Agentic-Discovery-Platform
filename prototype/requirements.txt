@@ -1,0 +1,5 @@
+# Dependencies are managed with uv via pyproject.toml.
+#   uv sync          # install everything (runtime + dev: pytest, pyrefly)
+#   uv run pytest    # run tests in the managed env
+#
+# This file is kept only as a pointer. The source of truth is pyproject.toml.
