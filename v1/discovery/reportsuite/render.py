@@ -291,8 +291,14 @@ def r04(s: SynthesisContent, meta) -> str:
                  f"</span></h3>")
         h.append(f"<p>{esc(o.overview)}</p>")
         h.append("<div class='ba-grid'>")
-        h.append("<div class='col before'><h4>Before</h4>" + _steps(o.before_process) + "</div>")
-        h.append("<div class='col after'><h4>After</h4>" + _steps(o.after_process) + "</div>")
+        h.append("<div class='col before'><div class='ba-tag'>Today</div>"
+                 + _steps(o.before_process) + "</div>")
+        h.append("<div class='ba-arrow' aria-hidden='true'>"
+                 "<svg viewBox='0 0 28 28'><path d='M4 14h16M15 8l6 6-6 6' fill='none' "
+                 "stroke='var(--accent)' stroke-width='2.4' stroke-linecap='round' "
+                 "stroke-linejoin='round'/></svg></div>")
+        h.append("<div class='col after'><div class='ba-tag after'>With the change</div>"
+                 + _steps(o.after_process) + "</div>")
         h.append("</div>")
         bi = o.business_impact
         h.append("<p><strong>Business impact.</strong> " + esc(bi.narrative))

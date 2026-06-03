@@ -54,10 +54,18 @@ th{ background:#eef2f3; font-weight:600; color:var(--accent-deep); }
 .pattern{ display:inline-block; font-size:.72rem; letter-spacing:.04em; text-transform:uppercase;
           color:var(--accent); border:1px solid var(--accent); border-radius:20px;
           padding:.1rem .6rem; margin-left:.5rem; vertical-align:middle; }
-.ba-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1rem 0; }
-.ba-grid .col h4{ margin:.2rem 0 .5rem; font-size:.95rem; }
-.ba-grid .before{ border-left:3px solid #c9d2dd; padding-left:.9rem; }
-.ba-grid .after{ border-left:3px solid var(--accent); padding-left:.9rem; }
+.ba-grid{ display:grid; grid-template-columns:1fr 36px 1fr; align-items:stretch; gap:.7rem;
+          margin:1.1rem 0; }
+.ba-grid .col{ border:1px solid var(--line); border-radius:10px; padding:.8rem .9rem; }
+.ba-grid .before{ background:#f7f8fa; }
+.ba-grid .after{ background:var(--accent-soft); border-color:#bfdde2; }
+.ba-tag{ display:inline-block; font-size:.68rem; font-weight:700; text-transform:uppercase;
+         letter-spacing:.04em; padding:.12rem .5rem; border-radius:20px; margin-bottom:.5rem;
+         background:#e3e8ee; color:var(--muted); }
+.ba-tag.after{ background:var(--accent); color:#fff; }
+.ba-arrow{ display:flex; align-items:center; justify-content:center; }
+.ba-arrow svg{ width:28px; height:28px; }
+@media print{ .ba-arrow svg{ width:22px; height:22px; } }
 .step{ margin:.5rem 0; }
 .step .who{ color:var(--muted); font-size:.82rem; }
 .failpoint{ color:#8a5a00; background:#fdf4e3; border-radius:5px; padding:.05rem .35rem;
@@ -181,7 +189,8 @@ table.usecase th{ font-size:.82rem; }
 .cover .cbrand svg{ width:30px; height:30px; }
 
 @media (max-width:760px){ .layout{ flex-direction:column; } .sidebar{ width:100%; height:auto;
-   position:static; } .ba-grid,.matrix,.two-col,.opp-cards{ grid-template-columns:1fr; }
+   position:static; } .matrix,.two-col,.opp-cards{ grid-template-columns:1fr; }
+   .ba-grid{ grid-template-columns:1fr; } .ba-arrow{ transform:rotate(90deg); }
    .content{ padding:1.5rem; } }
 """
 
