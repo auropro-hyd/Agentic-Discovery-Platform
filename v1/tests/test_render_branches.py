@@ -14,11 +14,12 @@ sys.path.insert(0, str(ROOT))
 from discovery import models as m  # noqa: E402
 from discovery import registry  # noqa: E402
 from discovery.reportsuite.render import (  # noqa: E402
-    REPORTS, _Doc, _cite, _cite_links, _clipw, _ev_quote, _first_sentence, _fmt_compact, _fmt_money,
-    _mini_stats, _metric, _opp_horizon, _pain_point_card, _principles, _rating_cell, _rec_actions,
-    _rec_card, _scrub_names, _secnum_chips, _seq_order, _severity, _stat_icon, context_map_svg,
-    data_flow_svg, dependency_map_svg, donut_svg, impact_bars_svg, process_flow_svg, render_charts,
-    render_suite, roadmap_timeline_svg, root_cause_svg, stat_tiles, value_bar_svg, value_matrix_svg,
+    REPORTS, _Doc, _cite, _cite_links, _clipw, _data_table, _ev_quote, _first_sentence,
+    _fmt_compact, _fmt_money, _level_badge, _mini_stats, _metric, _opp_horizon, _pain_point_card,
+    _principles, _rating_cell, _rec_actions, _rec_card, _scrub_names, _secnum_chips, _seq_order,
+    _severity, _stat_icon, _tables_titled, context_map_svg, data_flow_svg, dependency_map_svg,
+    donut_svg, impact_bars_svg, process_flow_svg, render_charts, render_suite, roadmap_timeline_svg,
+    root_cause_svg, stat_tiles, value_bar_svg, value_matrix_svg,
 )
 
 
@@ -128,9 +129,22 @@ def test_doc_toc_matches_sections_and_empty_toc():
 
 # ---- grounded component renderers ----
 def test_severity_thresholds():
+    # falls back to impact rank when no explicit severity
     assert _severity(1)[0] == "b-high"
     assert _severity(2)[0] == "b-med"
     assert _severity(3)[0] == "b-pat"        # neutral, not green (would clash in a pain context)
+    # an explicit grounded severity overrides the rank
+    assert _severity(3, "high")[0] == "b-high"
+    assert _severity(1, "medium")[0] == "b-med"
+    assert _severity(1, "lower")[0] == "b-pat"
+
+
+def test_is_high():
+    from discovery.reportsuite.render import _is_high
+    assert _is_high(m.PainPoint(id="P", title="t", impact_rank=2, severity="high")) is True
+    assert _is_high(m.PainPoint(id="P", title="t", impact_rank=2, severity="medium")) is False
+    assert _is_high(m.PainPoint(id="P", title="t", impact_rank=1)) is True   # rank fallback
+    assert _is_high(m.PainPoint(id="P", title="t", impact_rank=3)) is False
 
 
 def test_mini_stats_units_and_empty():
@@ -149,6 +163,57 @@ def test_ev_quote_present_and_absent():
     assert _ev_quote([m.SourceRef(doc_id="order-management-sop")]) == ""   # no quote -> nothing
     q = _ev_quote([m.SourceRef(doc_id="order-management-sop", quote="a verbatim line")])
     assert "ev-quote" in q and "a verbatim line" in q and "Order Management SOP" in q
+
+
+def test_data_table_empty_and_populated():
+    assert _data_table(None) == ""
+    assert _data_table(m.DataTable(title="T", rows=[])) == ""        # no rows -> ''
+    t = m.DataTable(title="Channel mix", columns=["Channel", "Orders"],
+                    rows=[["EDI", "5,667"], ["Email", "767"]],
+                    caption="Counted from the order export.", note="A footnote.",
+                    sources=[m.SourceRef(doc_id="order-flow-analysis-export-2025")])
+    html = _data_table(t)
+    assert "Channel mix" in html and "5,667" in html and "<th>Channel</th>" in html
+    assert "Counted from the order export." in html and "A footnote." in html and "Source:" in html
+    # a table with no caption/note/sources still renders the grid
+    bare = _data_table(m.DataTable(title="Bare", columns=["A"], rows=[["1"]]))
+    assert "<table>" in bare and "Source:" not in bare
+    # show_title=False omits the table's own heading (a section heading already names it)
+    no_title = _data_table(m.DataTable(title="Systems in scope", columns=["A"], rows=[["1"]]),
+                           show_title=False)
+    assert "<h4>" not in no_title and "<table>" in no_title
+
+
+def test_tables_titled_filters():
+    tabs = [m.DataTable(title="Order channel mix — 2025"),
+            m.DataTable(title="EDI connection inventory"),
+            m.DataTable(title="Top trading accounts")]
+    assert len(_tables_titled(tabs, "channel mix")) == 1
+    assert len(_tables_titled(tabs, "edi connection", "top trading")) == 2
+    assert _tables_titled(None, "x") == []
+
+
+def test_level_badge():
+    assert "b-high" in _level_badge("High")
+    assert "b-med" in _level_badge("Medium")
+    assert "b-low" in _level_badge("Low")
+    assert "b-pat" in _level_badge("Unknown")
+    assert _level_badge("") == "—"
+
+
+def test_pain_point_card_business_consequence_and_detail_table():
+    # high-rank PP -> high-box business impact + detail table renders
+    pp = m.PainPoint(id="PP1", title="t", impact_rank=1, category="Data Governance",
+                     description="d", root_cause="rc", business_consequence="material exposure",
+                     detail_table=m.DataTable(title="Register", columns=["A"], rows=[["x"]]))
+    html = _pain_point_card(pp, 1)
+    assert "Data Governance" in html and "high-box" in html and "material exposure" in html
+    assert "Register" in html
+    # medium-rank PP -> med-box; no detail table -> none rendered
+    pp2 = m.PainPoint(id="PP2", title="t", impact_rank=2, description="d",
+                      business_consequence="some impact")
+    html2 = _pain_point_card(pp2, 2)
+    assert "med-box" in html2 and "high-box" not in html2
 
 
 def test_pain_point_card_with_quote_and_signal():

@@ -30,19 +30,17 @@ CSS = """
 body{ margin:0; font-family:var(--sans); color:var(--ink); background:var(--bg);
       line-height:1.6; -webkit-font-smoothing:antialiased; }
 
-/* ── screen layout: sidebar nav + content (each report still prints standalone) ── */
-.layout{ display:flex; min-height:100vh; }
-.sidebar{ width:268px; flex:0 0 268px; background:var(--navy); color:#cdd7e4; padding:1.5rem 1rem;
-          position:sticky; top:0; height:100vh; overflow:auto; }
-.sidebar .brandmark{ color:#fff; margin-bottom:1.1rem; }
-.sidebar h1{ font-size:1rem; color:#fff; margin:0 0 .25rem; font-weight:800; }
-.sidebar .sub{ font-size:.78rem; color:#93a4c4; margin-bottom:1.4rem; }
-.sidebar a{ display:block; color:#cdd7e4; text-decoration:none; padding:.5rem .7rem;
-            border-radius:6px; font-size:.88rem; margin-bottom:.12rem; }
-.sidebar a:hover{ background:#243b63; }
-.sidebar a.active{ background:var(--blue); color:#fff; }
-.sidebar .num{ color:#7f93b6; font-variant-numeric:tabular-nums; margin-right:.5rem; }
-.content{ flex:1; padding:2.4rem 3rem; max-width:940px; }
+/* ── screen layout: slim top nav-bar, then a centred standalone document (like the reference) ── */
+.topnav{ position:sticky; top:0; z-index:10; background:var(--navy); display:flex; align-items:center;
+         gap:1.2rem; padding:.55rem 1.5rem; flex-wrap:wrap; }
+.topnav .brandmark{ color:#fff; font-size:.95rem; }
+.tn-links{ display:flex; gap:.1rem; flex-wrap:wrap; }
+.topnav a{ color:#cdd7e4; text-decoration:none; padding:.3rem .6rem; border-radius:5px;
+           font-size:.8rem; }
+.topnav a:hover{ background:#243b63; }
+.topnav a.active{ background:var(--blue); color:#fff; }
+.topnav .num{ color:#7f93b6; font-variant-numeric:tabular-nums; margin-right:.35rem; }
+.content{ max-width:940px; margin:0 auto; padding:1.6rem 3rem 3rem; }
 
 /* ── typography (reference h1/h2/h3 rhythm) ── */
 .content h1{ font-size:1.7rem; font-weight:800; color:var(--navy); letter-spacing:-.01em;
@@ -78,6 +76,10 @@ tr.sr td{ background:var(--navy); color:#fff; font-weight:700; font-size:.74rem;
           text-transform:uppercase; letter-spacing:.04em; }
 table.usecase td{ font-size:.8rem; }
 table.rationale td{ font-size:.82rem; }
+.dt{ margin:1.2rem 0; }
+.dt h4{ margin:0 0 .2rem; }
+.dt-cap{ font-size:.82rem; color:var(--muted); margin-bottom:.2rem; }
+.who{ color:var(--muted); font-size:.82rem; margin-bottom:.3rem; }
 
 /* ── badge system ── */
 .badge{ display:inline-block; font-size:.68rem; font-weight:700; border-radius:3px;
@@ -256,11 +258,14 @@ table.rationale td{ font-size:.82rem; }
          border:1px solid var(--line); border-radius:7px; padding:1rem; font-size:.82rem;
          line-height:1.5; }
 
-/* ── per-report cover + own TOC ── */
+/* ── per-report cover + own TOC (VISIBLE on screen too — each report is a standalone
+      scrolling document like the reference, not a print-only artefact) ── */
 .brandmark{ display:inline-flex; align-items:center; gap:.5rem; font-weight:800; }
 .brandmark svg{ width:22px; height:22px; }
-.cover{ display:none; }              /* shown only in print */
-.report-toc{ display:none; }         /* shown only in print */
+.cover{ display:flex; margin:0 auto 1.5rem; box-shadow:0 2px 14px rgba(26,47,80,.16);
+        max-width:940px; }
+.report-toc{ display:block; max-width:760px; margin:0 auto 2rem; padding:0 .5rem; }
+.report-toc h1{ font-size:1.7rem; font-weight:800; color:var(--navy); margin:0 0 1rem; }
 .toc{ margin:1.3rem 0 1.5rem; }
 .toc a{ display:flex; align-items:baseline; text-decoration:none; color:var(--ink);
         padding:.35rem 0; }
@@ -283,11 +288,11 @@ table.rationale td{ font-size:.82rem; }
   @page cover{ margin:0; @top-right{ content:none; } @bottom-left{ content:none; }
                @bottom-right{ content:none; } }
   body{ background:#fff; }
-  .sidebar{ display:none; }
-  .layout{ display:block; }
-  .content{ max-width:none; padding:0; }
-  .cover{ display:flex; page:cover; break-after:page; }
-  .report-toc{ display:block; break-after:page; }
+  .topnav{ display:none; }
+  .content{ max-width:none; margin:0; padding:0; }
+  .cover{ display:flex; page:cover; break-after:page; margin:0; max-width:none;
+          box-shadow:none; }
+  .report-toc{ display:block; break-after:page; max-width:none; }
   .stat-box,.mini,.note-box,.high-box,.med-box,.ev-quote,.pp-hdr,.opp-card,.horizon,.opmodel,
   .prin-card,.fig,.kpi-row,.rec-hdr,tr{ break-inside:avoid; }
   h1,h2,h3,h4{ break-after:avoid; }
@@ -324,10 +329,9 @@ table.rationale td{ font-size:.82rem; }
 .cv-bot-badge{ font-size:8.5pt; font-weight:700; color:rgba(255,255,255,.85);
                border:1px solid rgba(255,255,255,.3); border-radius:3px; padding:.2rem .7rem; }
 
-@media (max-width:760px){ .layout{ flex-direction:column; } .sidebar{ width:100%; height:auto;
-   position:static; } .matrix,.two-col,.opp-cards,.principles{ grid-template-columns:1fr; }
+@media (max-width:760px){ .matrix,.two-col,.opp-cards,.principles{ grid-template-columns:1fr; }
    .ba-grid{ grid-template-columns:1fr; } .ba-arrow{ transform:rotate(90deg); }
-   .content{ padding:1.4rem; } }
+   .content{ padding:1.4rem; } .cover{ width:100%; min-height:0; } }
 """
 
 JS = ""  # no JS needed for standalone pages

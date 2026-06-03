@@ -691,101 +691,458 @@
         "unit": "orders"
       }
     ],
-    "cross_process_patterns": [],
+    "cross_process_patterns": [
+      {
+        "description": "The same channel that carries two-thirds of orders is also where fulfilment failures and escalations concentrate — the lack of a governed process links the two.",
+        "pattern": "Undocumented EDI channel drives both volume and failure"
+      }
+    ],
     "current_state": {
-      "domain_overview": "This assessment covers the order-to-cash process for the European retail business of a consumer-healthcare organisation — from how customer credit is set and maintained, through how orders arrive and are processed across channels, to how unfulfilled orders and service failures are escalated and resolved. The process spans two customer systems, a portfolio of large retail accounts, and a high-volume electronic ordering channel that together carry the majority of the organisation's order value.",
-      "format_taxonomy": [
+      "baseline_stats": [
         {
-          "description": "System extracts of customer records, credit limits, payment terms and order outcomes, organised account-by-account and order-by-order.",
-          "examples": "the enterprise resource customer records, the customer-relationship records, the order flow analysis",
-          "label": "Type 1 — Structured transactional and master-data exports"
+          "label": "Total orders processed",
+          "sublabel": "calendar year 2025",
+          "value": "8,420"
         },
         {
-          "description": "Formal documents that define how credit is set and how orders should be handled, including the designated system of record.",
-          "examples": "the credit management policy, the order management procedure, the retail customer onboarding guide, the parent-company order-to-cash procedure",
-          "label": "Type 2 — Governing policies and procedures"
+          "label": "Orders received via EDI",
+          "sublabel": "5,667 of 8,420",
+          "value": "67.3%"
         },
         {
-          "description": "Documents that map who owns which activity and which electronic connections exist.",
-          "examples": "the order-to-cash accountability matrix, the electronic ordering register",
-          "label": "Type 3 — Accountability and integration registers"
+          "label": "Active EDI connections",
+          "sublabel": "8 owned + 6 under TSA",
+          "value": "14"
         },
         {
-          "description": "Running records of escalations, disputes and the informal resolution steps applied to electronic-channel failures.",
-          "examples": "the customer service escalation log, the dispute resolution working notes, the accounts receivable review notes",
-          "label": "Type 4 — Operational logs and informal working notes"
+          "label": "Active customer accounts",
+          "sublabel": "in the ERP master",
+          "value": "340"
         }
       ],
-      "handoff_catalogue": [
+      "data_tables": [
         {
-          "from_step": "Customer account set-up and credit assignment",
-          "mechanism": "Credit limits and payment terms held in the two customer systems",
-          "to_step": "Credit release and order processing"
-        },
-        {
-          "from_step": "Order capture across channels",
-          "mechanism": "Captured orders passed for credit check and release",
-          "to_step": "Credit release and order processing"
-        },
-        {
-          "from_step": "Credit release and order processing",
-          "mechanism": "Released orders passed to fulfilment",
-          "to_step": "Fulfilment"
-        },
-        {
-          "from_step": "Fulfilment",
-          "mechanism": "Unfulfilled orders surfaced to customer service",
-          "to_step": "Escalation and dispute resolution"
-        },
-        {
-          "from_step": "Escalation and dispute resolution",
-          "mechanism": "Manual re-entry of failed electronic orders",
-          "to_step": "Order capture across channels"
-        }
-      ],
-      "ownership_map": [
-        {
-          "accountable": "Credit management function",
-          "activity": "Credit limit and payment-term assignment",
-          "consulted": "Finance",
-          "informed": "Sales",
-          "responsible": "Credit and customer-master teams"
-        },
-        {
-          "accountable": "Customer-service management",
-          "activity": "Manual and email order processing",
-          "consulted": "Order management",
-          "informed": "Sales",
-          "responsible": "Customer-service team"
-        },
-        {
-          "accountable": "Not assigned",
-          "activity": "Electronic data interchange order processing",
-          "consulted": "Customer-service team (informally)",
-          "informed": "Not assigned",
-          "responsible": "Not assigned"
-        },
-        {
-          "accountable": "Not assigned",
-          "activity": "Electronic-channel dispute and re-entry resolution",
-          "consulted": "Not assigned",
-          "informed": "Not assigned",
-          "responsible": "Customer-service team (via informal working notes)"
-        }
-      ],
-      "process_flow": [
-        {
-          "actor": "Credit and customer-master teams",
-          "description": "New retail customers are onboarded and assigned a credit limit and payment terms. Account records are created and maintained in both the customer-relationship system and the enterprise resource system. The credit policy designates the enterprise resource system as the sole system of record for credit limits.",
-          "failure_points": [
-            "The two systems hold different credit limits for the same customer",
-            "The two systems hold different payment terms for the same customer"
+          "caption": "Volumes and shares are counted directly from the order-flow export.",
+          "columns": [
+            "Channel",
+            "Orders",
+            "Share",
+            "Entry method",
+            "Not fulfilled"
           ],
-          "name": "Customer account set-up and credit assignment",
-          "seq": 1,
+          "note": "Fax appears in the order data although the Order Management SOP lists only telephone and email as standard channels.",
+          "rows": [
+            [
+              "EDI",
+              "5,667",
+              "67.3%",
+              "Automated into order management",
+              "1,196"
+            ],
+            [
+              "Telephone / manual",
+              "1,802",
+              "21.4%",
+              "Keyed into the ERP by an agent",
+              "320"
+            ],
+            [
+              "Email",
+              "767",
+              "9.1%",
+              "Keyed in within one business day",
+              "111"
+            ],
+            [
+              "Fax",
+              "184",
+              "2.2%",
+              "Keyed in; by exception agreement only",
+              "40"
+            ],
+            [
+              "Total",
+              "8,420",
+              "100%",
+              "—",
+              "1,667"
+            ]
+          ],
           "sources": [
             {
-              "doc_id": "retail-customer-onboarding-guide-opella-europe",
+              "doc_id": "order-flow-analysis-export-2025",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Order channel mix — 2025"
+        },
+        {
+          "caption": "Documented standard lead times and the distribution centre serving each market.",
+          "columns": [
+            "Market",
+            "Lead time",
+            "Primary distribution centre"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "France",
+              "2 business days",
+              "Chartres, FR"
+            ],
+            [
+              "United Kingdom",
+              "3 business days",
+              "Swindon, UK"
+            ],
+            [
+              "Germany",
+              "2 business days",
+              "Frankfurt, DE"
+            ],
+            [
+              "Austria / Switzerland",
+              "3 business days",
+              "Frankfurt, DE"
+            ],
+            [
+              "Spain",
+              "3 business days",
+              "Barcelona, ES"
+            ],
+            [
+              "Portugal",
+              "4 business days",
+              "Barcelona, ES"
+            ],
+            [
+              "Benelux",
+              "2 business days",
+              "Antwerp, BE"
+            ],
+            [
+              "Italy",
+              "3 business days",
+              "Milan, IT (third-party operated)"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "order-management-sop-opella-europe",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Standard fulfilment lead times by market"
+        },
+        {
+          "caption": "Approval authority for setting and changing credit limits, by band.",
+          "columns": [
+            "Credit limit band",
+            "New account",
+            "Limit increase"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "Up to €250,000",
+              "Credit Controller",
+              "Credit Controller"
+            ],
+            [
+              "€250,001 – €500,000",
+              "Finance Director",
+              "Finance Director"
+            ],
+            [
+              "€500,001 – €1,000,000",
+              "Finance Director + VP Commercial",
+              "Finance Director"
+            ],
+            [
+              "Above €1,000,000",
+              "Finance Director + VP Commercial + CEO",
+              "Finance Director + VP Commercial"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "credit-management-policy-opella-europe",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Credit limit approval authority"
+        },
+        {
+          "caption": "The documented overdue-collections escalation ladder.",
+          "columns": [
+            "Overdue",
+            "Action",
+            "Owner"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "1–30 days",
+              "Automated payment reminder on day 5",
+              "System"
+            ],
+            [
+              "31–60 days",
+              "Formal payment demand; account flagged",
+              "Credit Controller"
+            ],
+            [
+              "61–90 days",
+              "Second demand; credit-hold proposed",
+              "Credit Controller"
+            ],
+            [
+              "91+ days",
+              "Account on hold; new orders suspended; agency referral considered",
+              "Finance Director"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "credit-management-policy-opella-europe",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Collections escalation ladder"
+        },
+        {
+          "caption": "All 14 live EDI connections: 8 on the organisation's own platform, 6 still operated by the former parent under the transitional service arrangement.",
+          "columns": [
+            "#",
+            "Trading partner",
+            "Country",
+            "Managed by",
+            "Transition status"
+          ],
+          "note": "Migration targets for connections 12–14 are provisional pending technical scoping; the governing service terms sit in a schedule not included in the pack.",
+          "rows": [
+            [
+              "1",
+              "Tesco",
+              "UK",
+              "Own platform",
+              "Owned"
+            ],
+            [
+              "2",
+              "Mercadona",
+              "ES",
+              "Own platform",
+              "Owned"
+            ],
+            [
+              "3",
+              "REWE Group",
+              "DE",
+              "Own platform",
+              "Owned"
+            ],
+            [
+              "4",
+              "Boots (new)",
+              "UK",
+              "Own platform",
+              "Owned (live Aug 2025)"
+            ],
+            [
+              "5",
+              "Alliance Healthcare",
+              "EU",
+              "Own platform",
+              "Owned"
+            ],
+            [
+              "6",
+              "Rite Aid Europe",
+              "EU",
+              "Own platform",
+              "Owned"
+            ],
+            [
+              "7",
+              "Aldi Europe",
+              "EU",
+              "Own platform",
+              "Owned"
+            ],
+            [
+              "8",
+              "Coop Group (new)",
+              "EU",
+              "Own platform",
+              "Owned"
+            ],
+            [
+              "9",
+              "Carrefour France",
+              "FR",
+              "Parent (TSA)",
+              "Target Q4 2025"
+            ],
+            [
+              "10",
+              "Boots (legacy)",
+              "UK",
+              "Parent (TSA)",
+              "Target Q1 2026"
+            ],
+            [
+              "11",
+              "dm (Drogerie Markt)",
+              "DE",
+              "Parent (TSA)",
+              "Target Q1 2026"
+            ],
+            [
+              "12",
+              "E.Leclerc",
+              "FR",
+              "Parent (TSA)",
+              "Target Q2 2026 (provisional)"
+            ],
+            [
+              "13",
+              "Lidl Europe",
+              "EU",
+              "Parent (TSA)",
+              "Target Q2 2026 (provisional)"
+            ],
+            [
+              "14",
+              "Coop Group (legacy)",
+              "EU",
+              "Parent (TSA)",
+              "Target Q3 2026 (provisional)"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "edi-integration-register-opella-europe",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "EDI connection inventory"
+        },
+        {
+          "caption": "The eight accounts that trade across all channels, with their ERP credit baseline.",
+          "columns": [
+            "Account",
+            "Country",
+            "ERP credit limit",
+            "Payment terms",
+            "Status"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "Carrefour France",
+              "FR",
+              "€1,800,000",
+              "NET45",
+              "Active"
+            ],
+            [
+              "Boots UK",
+              "UK",
+              "€1,200,000",
+              "NET45",
+              "Active"
+            ],
+            [
+              "E.Leclerc",
+              "FR",
+              "€1,100,000",
+              "NET45",
+              "Active"
+            ],
+            [
+              "Tesco UK",
+              "UK",
+              "€1,000,000",
+              "NET45",
+              "Active"
+            ],
+            [
+              "dm (Drogerie Markt)",
+              "DE",
+              "€950,000",
+              "NET45",
+              "Active"
+            ],
+            [
+              "Lidl Europe",
+              "EU",
+              "€850,000",
+              "NET45",
+              "Active"
+            ],
+            [
+              "Coop Group",
+              "EU",
+              "€800,000",
+              "NET45",
+              "Active"
+            ],
+            [
+              "Mercadona",
+              "ES",
+              "€750,000",
+              "NET45",
+              "Active"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "sap-s4-customer-master-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Top trading accounts — credit baseline"
+        },
+        {
+          "caption": "The systems the order-to-cash process touches and who hosts them.",
+          "columns": [
+            "System",
+            "Role",
+            "Hosting"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "SAP S/4HANA",
+              "Core ERP; authoritative for credit limits and balances",
+              "Enterprise"
+            ],
+            [
+              "SAP CRM",
+              "Customer relationship records (not authoritative for credit)",
+              "Enterprise"
+            ],
+            [
+              "Own EDI platform",
+              "Routes the 8 owned connections",
+              "Own private cloud, Frankfurt"
+            ],
+            [
+              "Former parent's EDI platform",
+              "Routes the 6 connections still under the arrangement",
+              "Former parent"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "edi-integration-register-opella-europe",
               "locator": "",
               "quote": ""
             },
@@ -793,35 +1150,86 @@
               "doc_id": "credit-management-policy-opella-europe",
               "locator": "",
               "quote": ""
-            },
-            {
-              "doc_id": "sap-s4-customer-master-export",
-              "locator": "",
-              "quote": ""
-            },
-            {
-              "doc_id": "sap-crm-customer-export",
-              "locator": "",
-              "quote": ""
             }
           ],
-          "system": "Customer-relationship system and enterprise resource system"
+          "title": "Systems in scope"
+        }
+      ],
+      "domain_overview": "Order-to-Cash covers how customer orders are received, credit-checked, fulfilled, invoiced and collected. Orders arrive through several channels, with electronic data interchange (EDI) carrying the largest share.",
+      "format_taxonomy": [
+        {
+          "description": "Row-per-transaction tabular data with typed columns (amounts, dates, account IDs, channel). Machine-readable and directly aggregatable.",
+          "examples": "Order-flow export, customer-master extracts from the ERP and CRM, accounts-receivable ledger.",
+          "label": "Type 1 — Structured transactional export"
         },
         {
-          "actor": "Customer-service and order-management teams",
-          "description": "Orders are received through electronic data interchange, manual entry and email. The electronic channel accounts for the majority of order volume and value. Manual and email orders are keyed or handled by customer-service staff.",
-          "failure_points": [
-            "The electronic ordering channel is not covered by the order management procedure",
-            "The electronic ordering channel is not represented in the accountability matrix"
-          ],
-          "name": "Order capture across channels",
-          "seq": 2,
+          "description": "Prose documents that state the intended (to-be) rules: who approves what, which system is authoritative, and the documented procedure.",
+          "examples": "Order Management SOP, Credit Policy, the Order-to-Cash process RACI.",
+          "label": "Type 2 — Governance &amp; policy document"
+        },
+        {
+          "description": "Semi-structured incident and escalation records plus free-text agent notes — the lived reality of how exceptions are actually handled.",
+          "examples": "Customer-service escalation log, EDI dispute-resolution working notes.",
+          "label": "Type 3 — Operational log &amp; working notes"
+        }
+      ],
+      "handoff_catalogue": [
+        {
+          "from_step": "Order receipt",
+          "mechanism": "Order record",
+          "to_step": "Credit check"
+        },
+        {
+          "from_step": "Credit check",
+          "mechanism": "Released order",
+          "to_step": "Fulfilment"
+        },
+        {
+          "from_step": "Fulfilment",
+          "mechanism": "Dispatch confirmation",
+          "to_step": "Invoicing"
+        },
+        {
+          "from_step": "Invoicing",
+          "mechanism": "Open invoice",
+          "to_step": "Collections"
+        }
+      ],
+      "ownership_map": [
+        {
+          "accountable": "Customer Service Lead",
+          "activity": "Manual order processing",
+          "consulted": "",
+          "informed": "",
+          "responsible": "Customer Service"
+        },
+        {
+          "accountable": "Credit Controller",
+          "activity": "Credit decisions",
+          "consulted": "",
+          "informed": "",
+          "responsible": "Credit Control"
+        },
+        {
+          "accountable": "Not assigned",
+          "activity": "EDI order processing",
+          "consulted": "",
+          "informed": "",
+          "responsible": "Customer Service"
+        },
+        {
+          "accountable": "Not assigned",
+          "activity": "EDI dispute resolution",
+          "consulted": "",
+          "informed": "",
+          "responsible": "Customer Service"
+        }
+      ],
+      "process_detail": [
+        {
+          "actor": "Customer Service",
+          "body": "EDI orders flow automatically into order management across 14 connections (8 on the organisation's own platform, 6 still operated by the former parent). Telephone orders are keyed into the ERP within 30 minutes of the call; email orders within one business day, against per-market cut-off times.",
           "sources": [
-            {
-              "doc_id": "order-flow-analysis-export-2025",
-              "locator": "",
-              "quote": ""
-            },
             {
               "doc_id": "order-management-sop-opella-europe",
               "locator": "",
@@ -833,16 +1241,25 @@
               "quote": ""
             }
           ],
-          "system": "Order-management environment and the electronic ordering channel"
+          "system": "EDI / ERP",
+          "title": "Order receipt"
         },
         {
-          "actor": "Order-management and credit teams",
-          "description": "Orders are checked against the customer credit limit and released for fulfilment. Releases draw on the credit limit visible in the systems used at the point of decision.",
-          "failure_points": [
-            "Release decisions can be made against a credit limit that differs from the system of record"
+          "actor": "Customer Service",
+          "body": "A mandatory sequence runs in the ERP: customer account status, credit-limit verification against the outstanding balance, product availability at the allocated distribution centre, minimum-order-quantity compliance, and pricing validation (a variance under 2% is processed at the system price; 2% or more is referred to the account manager).",
+          "sources": [
+            {
+              "doc_id": "order-management-sop-opella-europe",
+              "locator": "",
+              "quote": ""
+            }
           ],
-          "name": "Credit release and order processing",
-          "seq": 3,
+          "system": "SAP S/4HANA",
+          "title": "Order validation"
+        },
+        {
+          "actor": "Credit Control",
+          "body": "The ERP places an order on credit hold automatically where it would take the account past its approved limit, or where an invoice is more than 60 days overdue. The agent notifies the Credit Controller within four business hours; release authority follows the approval-authority bands.",
           "sources": [
             {
               "doc_id": "credit-management-policy-opella-europe",
@@ -853,168 +1270,273 @@
               "doc_id": "order-management-sop-opella-europe",
               "locator": "",
               "quote": ""
-            },
+            }
+          ],
+          "system": "SAP S/4HANA",
+          "title": "Credit assessment"
+        },
+        {
+          "actor": "Customer Service / Distribution",
+          "body": "Confirmation issues within four business hours for telephone orders and two for email orders. Released orders are picked, packed and dispatched from the market's distribution centre against the documented standard lead times.",
+          "sources": [
             {
-              "doc_id": "accounts-receivable-review-notes-q4-2025",
+              "doc_id": "order-management-sop-opella-europe",
               "locator": "",
               "quote": ""
             }
           ],
-          "system": "Enterprise resource system and customer-relationship system"
+          "system": "ERP / order management",
+          "title": "Order confirmation & fulfilment"
         },
         {
-          "actor": "Fulfilment and supply teams",
-          "description": "Released orders proceed to fulfilment. A portion of orders, concentrated in the electronic channel, are recorded as not fulfilled.",
-          "failure_points": [
-            "Electronic-channel orders are recorded as unfulfilled at a higher rate than manual orders"
+          "actor": "Finance",
+          "body": "Invoices generate automatically on dispatch confirmation. Payment terms follow the account tier: major retail on NET 45 with a 1% early-payment discount, pharmacy and wholesale on NET 30, and new accounts on NET 14 or cash with order for the first six months.",
+          "sources": [
+            {
+              "doc_id": "order-management-sop-opella-europe",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "credit-management-policy-opella-europe",
+              "locator": "",
+              "quote": ""
+            }
           ],
+          "system": "SAP S/4HANA",
+          "title": "Invoicing"
+        },
+        {
+          "actor": "Accounts Receivable",
+          "body": "Aged-debtor reporting runs monthly; balances over 60 days are reviewed individually. Collections follow the overdue escalation ladder, and the team completes a quarterly self-assessment of compliance.",
+          "sources": [
+            {
+              "doc_id": "credit-management-policy-opella-europe",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "system": "SAP S/4HANA",
+          "title": "Accounts receivable & collections"
+        }
+      ],
+      "process_flow": [
+        {
+          "actor": "Customer Service",
+          "description": "Orders arrive by EDI, manual entry, email or fax and are recorded for processing.",
+          "failure_points": [],
+          "name": "Order receipt",
+          "seq": 1,
+          "sources": [],
+          "system": "EDI / order management"
+        },
+        {
+          "actor": "Credit Control",
+          "description": "Each order is checked against the customer's credit limit before it is released.",
+          "failure_points": [],
+          "name": "Credit check",
+          "seq": 2,
+          "sources": [],
+          "system": "SAP S/4HANA"
+        },
+        {
+          "actor": "Warehouse",
+          "description": "Released orders are picked, packed and dispatched.",
+          "failure_points": [],
           "name": "Fulfilment",
-          "seq": 4,
-          "sources": [
-            {
-              "doc_id": "order-flow-analysis-export-2025",
-              "locator": "",
-              "quote": ""
-            }
-          ],
-          "system": "Order-management environment"
+          "seq": 3,
+          "sources": [],
+          "system": "Order management"
         },
         {
-          "actor": "Customer-service team",
-          "description": "Order failures and disputes are raised through the customer-service escalation route. Electronic-channel issues requiring manual re-entry are among the most frequent escalation reasons and are handled through informal working notes.",
-          "failure_points": [
-            "Electronic-channel re-entry has no documented owner",
-            "Resolution depends on informal working notes"
-          ],
-          "name": "Escalation and dispute resolution",
+          "actor": "Finance",
+          "description": "Dispatched orders are invoiced to the customer.",
+          "failure_points": [],
+          "name": "Invoicing",
+          "seq": 4,
+          "sources": [],
+          "system": "SAP S/4HANA"
+        },
+        {
+          "actor": "Accounts Receivable",
+          "description": "Outstanding invoices are tracked and collected.",
+          "failure_points": [],
+          "name": "Collections",
           "seq": 5,
-          "sources": [
-            {
-              "doc_id": "customer-service-escalation-log-2025",
-              "locator": "",
-              "quote": ""
-            },
-            {
-              "doc_id": "edi-dispute-resolution-cs-working-notes",
-              "locator": "",
-              "quote": ""
-            }
-          ],
-          "system": "Customer-service escalation route"
+          "sources": [],
+          "system": "SAP S/4HANA"
         }
       ],
       "process_inventory": [
         {
-          "name": "Customer onboarding and credit assignment",
-          "purpose": "Establish retail customer accounts and set credit limits and payment terms across both customer systems.",
+          "name": "Order receipt and entry",
+          "purpose": "Capture customer orders",
           "system_of_record_for": ""
         },
         {
-          "name": "Multi-channel order capture",
-          "purpose": "Receive and record orders through electronic data interchange, manual entry and email.",
+          "name": "Credit assessment",
+          "purpose": "Check orders against credit limits",
           "system_of_record_for": ""
         },
         {
-          "name": "Credit release",
-          "purpose": "Check orders against customer credit limits and release them for fulfilment.",
+          "name": "Fulfilment",
+          "purpose": "Pick, pack and dispatch",
           "system_of_record_for": ""
         },
         {
-          "name": "Order fulfilment",
-          "purpose": "Progress released orders through to delivery.",
-          "system_of_record_for": ""
-        },
-        {
-          "name": "Escalation and dispute resolution",
-          "purpose": "Capture and resolve order failures, including electronic-channel re-entry.",
+          "name": "Invoicing and collections",
+          "purpose": "Bill and collect",
           "system_of_record_for": ""
         }
       ],
-      "process_summary": "Customer accounts are established and maintained across two systems — a customer-relationship system and an enterprise resource system — each of which holds its own view of credit limits and payment terms. Orders reach the organisation through several channels, the largest by far being electronic data interchange (the automated retailer-to-supplier ordering channel), alongside manual entry and email. Orders are released against credit limits, fulfilled, and where they fail, raised through a customer-service escalation route. Credit governance is defined in a single policy, order handling in an order-management procedure and an accountability matrix, while the electronic ordering channel is handled largely through informal working notes.",
+      "process_summary": "Orders enter through EDI, manual entry, email and fax. Customer and credit information is held in two systems — SAP S/4HANA and SAP CRM. Orders are checked against a credit limit, released to the warehouse for fulfilment, then invoiced and collected by the accounts receivable team.",
       "system_inventory": [
         {
-          "name": "Enterprise resource system",
-          "purpose": "Core transactional system holding customer master data, credit limits, payment terms and order fulfilment records.",
-          "system_of_record_for": "Credit limits, per the credit management policy"
+          "name": "SAP S/4HANA",
+          "purpose": "Core ERP — orders, invoicing, collections",
+          "system_of_record_for": "Customer credit limits (per the Credit Policy)"
         },
         {
-          "name": "Customer-relationship system",
-          "purpose": "Customer-facing system holding an account view including credit limits and payment terms.",
-          "system_of_record_for": "Not designated as system of record for credit"
+          "name": "SAP CRM",
+          "purpose": "Customer relationship management",
+          "system_of_record_for": ""
         },
         {
-          "name": "Electronic ordering channel (electronic data interchange)",
-          "purpose": "Automated retailer-to-supplier ordering channel carrying the majority of order volume and value.",
-          "system_of_record_for": "Inbound order capture for the largest retail accounts"
-        },
-        {
-          "name": "Customer-service escalation route",
-          "purpose": "Channel through which order failures and disputes are raised and tracked.",
-          "system_of_record_for": "Service escalations and dispute records"
+          "name": "EDI / order management",
+          "purpose": "Receives electronic orders",
+          "system_of_record_for": ""
         }
       ],
       "system_profiles": [
         {
-          "how_used": "Used day to day to hold authoritative customer records and to fulfil orders. The credit policy names it as the sole system of record for credit limits.",
-          "limitations": "Its credit limits differ from those held in the customer-relationship system for the majority of matched accounts.",
-          "name": "Enterprise resource system",
-          "owners": "Owned by the credit and customer-master functions, with access across credit, finance and order-management teams.",
-          "role": "The core transactional backbone for customer master data, credit limits, payment terms and order fulfilment records."
+          "how_used": "Customer Service, Credit Control, Finance and Accounts Receivable all work in S/4HANA: orders are recorded here, the credit check reads the credit limit held against the account, and invoices and open receivables are tracked here through to collection.",
+          "limitations": "Holds its own credit limit per account. For 267 shared accounts that value differs from the one held in CRM, and the credit check reads whichever record the system resolves first.",
+          "name": "SAP S/4HANA",
+          "owners": "Owned by Finance Systems; used daily by Customer Service, Credit Control and Accounts Receivable.",
+          "role": "The core ERP and the system of record for orders, credit limits, invoicing and collections."
         },
         {
-          "how_used": "Used by sales and customer-facing teams; its credit values are visible at points where order decisions are made.",
-          "limitations": "Holds credit limits and payment terms that diverge from the designated system of record for most matched accounts.",
-          "name": "Customer-relationship system",
-          "owners": "Owned by the commercial/sales function, with broad customer-facing access.",
-          "role": "The customer-facing account view, holding credit limits and payment terms alongside relationship data."
+          "how_used": "Used by the commercial team to manage account relationships; it also holds credit limits and payment terms that were updated by hand over time.",
+          "limitations": "CRM credit limits were edited manually without an approval trail. Its values differ from the ERP — Carrefour France shows €2.4M in CRM against €1.8M in the ERP, a €600,000 difference on a single account.",
+          "name": "SAP CRM",
+          "owners": "Owned by the commercial function; no shared governance with Finance Systems over the credit fields.",
+          "role": "The customer-relationship system, holding account and commercial relationship data for the same retail customers."
         },
         {
-          "how_used": "Receives orders automatically from large retail customers; failed orders are re-entered manually by customer service.",
-          "limitations": "Not covered by the order-management procedure or the accountability matrix; order failures in this channel are recorded at a higher rate than in manual entry.",
-          "name": "Electronic ordering channel",
-          "owners": "No documented owner in the order-management procedure or accountability matrix; handled informally by customer service.",
-          "role": "The automated retailer-to-supplier ordering channel through which most order volume and value arrive."
-        },
-        {
-          "how_used": "Customer service logs escalations and resolves electronic-channel issues using informal working notes.",
-          "limitations": "Resolution of electronic-channel issues relies on informal working notes rather than a documented procedure.",
-          "name": "Customer-service escalation route",
-          "owners": "Owned by customer-service management for logged escalations; electronic-channel resolution has no documented owner.",
-          "role": "The channel for raising and resolving order failures and disputes."
+          "how_used": "Carries 67% of order volume (5,667 of 8,420 orders). Orders flow straight into order management for fulfilment; exceptions are picked up by hand by Customer Service.",
+          "limitations": "Not covered by the Order Management SOP, and no credit check runs on it before release. 1,196 EDI orders (€12.4M) sit unfulfilled, and 'EDI order not processed' appears 34 times in the escalation log.",
+          "name": "EDI / order-management channel",
+          "owners": "No named owner — the Order-to-Cash RACI leaves EDI order processing and EDI dispute resolution as 'Not assigned'.",
+          "role": "The electronic data interchange channel through which the largest share of customer orders arrives."
         }
       ]
     },
-    "dependency_notes": "OPP3 depends on OPP2 because automated early detection of electronic-order failures requires a documented channel owner to receive and act on the flagged orders. OPP1 and OPP2 have no dependencies and can proceed in parallel.",
+    "dependency_notes": "OPP3 depends on OPP1. OPP1, OPP2, OPP4 and OPP5 are independent of each other and can run in parallel.",
+    "evidence_register": [
+      {
+        "confidence": "Verified",
+        "data_point": "267 of 318 shared accounts hold a different credit limit; Carrefour France differs by €600,000.",
+        "evidence_type": "Structured data",
+        "finding": "PP1",
+        "source": "ERP and CRM customer exports"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "The ERP is named the sole authoritative system for credit limits.",
+        "evidence_type": "Policy document",
+        "finding": "PP1",
+        "source": "Credit Policy"
+      },
+      {
+        "confidence": "Amber",
+        "data_point": "'Our credit policy does not define which system is authoritative.'",
+        "evidence_type": "Review note",
+        "finding": "PP1",
+        "source": "Accounts Receivable review notes"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "EDI carries 67.3% of orders (5,667 of 8,420).",
+        "evidence_type": "Structured data",
+        "finding": "PP2",
+        "source": "Order flow export"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "Neither the SOP nor the RACI covers the EDI channel.",
+        "evidence_type": "Policy documents",
+        "finding": "PP2",
+        "source": "Order Management SOP; Order-to-Cash RACI"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "1,196 unfulfilled EDI orders (€12.4M); 34 'EDI not processed' escalations.",
+        "evidence_type": "Structured data",
+        "finding": "PP3",
+        "source": "Order flow export; escalation log"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "6 of 14 connections remain under the transitional service arrangement.",
+        "evidence_type": "Technical register",
+        "finding": "PP4",
+        "source": "EDI integration register"
+      },
+      {
+        "confidence": "Gap",
+        "data_point": "Governing service terms and a firm transfer date are not in the pack.",
+        "evidence_type": "Working notes",
+        "finding": "PP4",
+        "source": "EDI dispute working notes"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "340 active accounts in the ERP versus 318 in the CRM — a 22-account difference.",
+        "evidence_type": "Structured data",
+        "finding": "PP5",
+        "source": "ERP and CRM customer exports"
+      }
+    ],
     "executive_summary": {
-      "headline": "This assessment of the European retail order-to-cash process found that credit decisions are being made against a credit view that diverges materially from the designated system of record across 267 accounts, while the channel carrying two-thirds of order value runs with no documented owner.",
-      "opportunity": "The greatest early value lies in two foundational moves with no prerequisites: bringing credit decisions onto a single trusted view with a controlled approval step, and assigning documented ownership of the electronic channel. With those in place, automated early detection of at-risk electronic orders can prevent failures before they reach customers.",
-      "situation": "Two customer systems hold conflicting credit limits and payment terms, and order releases can draw on the higher, non-authoritative figure. The electronic ordering channel — 67.3% of orders — sits outside the formal procedure and accountability matrix, and its orders fail to fulfil at nearly four times the rate of manual orders, generating repeated escalations and delisting threats."
+      "headline": "Order-to-Cash runs on two customer systems that disagree on credit, and a dominant electronic channel that no procedure owns — together putting material order value and revenue at risk.",
+      "opportunity": "Reconcile the customer master to a single agreed source of truth, bring the electronic channel under documented ownership with automated exception handling, then add a real-time credit gate to the channel that needs it most.",
+      "situation": "Orders arrive mainly through EDI, which carries two-thirds of volume yet sits outside the documented process and has no owner. Credit checks run against two systems whose limits diverge for 267 of 318 shared accounts."
     },
     "metrics_framework": [
       {
-        "definition": "The proportion of matched customer accounts where the two systems hold the same credit limit, measured against the baseline of 267 mismatched accounts.",
-        "name": "Credit-view alignment",
-        "target": "Near-complete alignment, a material reduction against the 267 mismatched-account baseline."
+        "definition": "Share of the 267 shared retail accounts holding a single agreed credit limit across the ERP and CRM, with an approval trail on any change.",
+        "name": "Customer-master agreement",
+        "target": "Every one of the 267 shared accounts reconciled, with no unapproved limit change thereafter."
       },
       {
-        "definition": "Aggregate credit-limit divergence between the two systems against the designated system of record.",
-        "name": "Controlled credit divergence",
-        "target": "A material reduction against the verified aggregate-divergence baseline, trending toward elimination."
+        "definition": "Share of EDI orders fulfilled without a manual exception, against the 1,196 (€12.4M) not fulfilled today.",
+        "name": "EDI fulfilment rate",
+        "target": "A sustained, material reduction in unfulfilled EDI orders after go-live; the 1,196 baseline is the yardstick."
       },
       {
-        "definition": "Whether the electronic channel — 67.3% of orders — is covered by a documented owner in the procedure and accountability matrix.",
-        "name": "Electronic-channel ownership coverage",
-        "target": "Full documented ownership of the channel and its re-entry failure mode."
+        "definition": "Customer-service escalations for 'EDI order not processed' — the single most frequent escalation today (34 cases).",
+        "name": "EDI escalation rate",
+        "target": "A clear downward trend against the 34-case baseline as exceptions resolve automatically."
       },
       {
-        "definition": "The count and value of electronic orders recorded as not fulfilled, against the baseline of 1,196 orders.",
-        "name": "Unfulfilled electronic orders",
-        "target": "A material reduction against the 1,196-order baseline, improving through tuning."
+        "definition": "Share of the EDI channel (67% of all orders) that receives a systematic credit check before release.",
+        "name": "EDI credit coverage",
+        "target": "Near-complete credit coverage of the EDI channel once the customer master is reconciled."
       },
       {
-        "definition": "Escalations raised for electronic orders requiring manual re-entry, against the baseline of 34 escalations representing 23.9% of all escalations.",
-        "name": "Manual-intervention escalations",
-        "target": "A material reduction against the 34-escalation baseline and its 23.9% share."
+        "definition": "Share of automated credit assessments (approve/hold/flag) that a credit analyst confirms as correct on review.",
+        "name": "Credit-decision accuracy",
+        "target": "A high confirmation rate at go-live, improving through tuning; tracked against analyst review."
+      },
+      {
+        "definition": "Share of the 14 live EDI connections operated on the organisation's own platform rather than the former parent's (8 of 14 today).",
+        "name": "EDI connection ownership",
+        "target": "All 14 connections on the organisation's own platform on the published migration schedule."
+      },
+      {
+        "definition": "Whether the ERP and CRM hold the same active-account population (a 22-account difference today).",
+        "name": "Customer-master population alignment",
+        "target": "A single agreed active-account population across both systems, kept aligned at onboarding."
       }
     ],
     "opportunities": [
@@ -1022,71 +1544,772 @@
         "addresses_pain_point": "PP1",
         "after_process": [
           {
-            "actor": "Credit team supported by an automated comparison",
-            "description": "The two credit views are continuously compared and any divergence is surfaced for review against the system of record.",
+            "actor": "Credit + Commercial",
+            "description": "A guided session reviews the conflicting records; the platform surfaces every discrepancy and proposes the canonical value.",
             "failure_points": [],
-            "name": "Reconcile and surface differences",
+            "name": "Reconciliation session",
             "seq": 1,
-            "sources": [
-              {
-                "doc_id": "sap-s4-customer-master-export",
-                "locator": "",
-                "quote": ""
-              },
-              {
-                "doc_id": "sap-crm-customer-export",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Reconciliation workflow"
+            "sources": [],
+            "system": ""
           },
           {
-            "actor": "Credit approver",
-            "description": "Where a release would exceed the system-of-record limit, the difference is routed to a credit approver for an explicit, recorded decision before the order proceeds.",
+            "actor": "Credit Controller",
+            "description": "The teams confirm the authoritative credit limit per account.",
             "failure_points": [],
-            "name": "Approve before release",
+            "name": "Canonical limit agreed",
             "seq": 2,
-            "sources": [
-              {
-                "doc_id": "credit-management-policy-opella-europe",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Credit release workflow"
+            "sources": [],
+            "system": ""
+          },
+          {
+            "actor": "Finance Systems",
+            "description": "A sync rule keeps the two systems aligned going forward.",
+            "failure_points": [],
+            "name": "Systems aligned",
+            "seq": 3,
+            "sources": [],
+            "system": "SAP S/4HANA / SAP CRM"
           }
         ],
         "before_process": [
           {
-            "actor": "Credit and customer-master teams",
-            "description": "Credit limits and payment terms are maintained independently in both systems with no enforced reconciliation.",
+            "actor": "Customer Service",
+            "description": "An order arrives for a major retail account.",
             "failure_points": [],
-            "name": "Credit values held separately",
+            "name": "Order arrives",
             "seq": 1,
+            "sources": [],
+            "system": ""
+          },
+          {
+            "actor": "Credit Control",
+            "description": "The credit check uses whichever record the system resolves first.",
+            "failure_points": [
+              "ERP and CRM hold different limits for the same account",
+              "No agreed source of truth, no approval trail on overrides"
+            ],
+            "name": "Credit limit looked up",
+            "seq": 2,
+            "sources": [],
+            "system": "SAP S/4HANA / SAP CRM"
+          },
+          {
+            "actor": "Credit Control",
+            "description": "The order is released, sometimes against an inflated limit.",
+            "failure_points": [],
+            "name": "Order released",
+            "seq": 3,
+            "sources": [],
+            "system": ""
+          }
+        ],
+        "business_impact": {
+          "derivation": "267 shared accounts differ today; the largest single gap is Carrefour France at €600,000 (€2.4M in CRM vs €1.8M in ERP).",
+          "narrative": "Removes the credit-limit disagreement across the largest retail accounts and establishes a single agreed source of truth.",
+          "quantified": [
+            {
+              "label": "accounts reconciled",
+              "sources": [
+                {
+                  "doc_id": "sap-s4-customer-master-export",
+                  "locator": "",
+                  "quote": ""
+                },
+                {
+                  "doc_id": "sap-crm-customer-export",
+                  "locator": "",
+                  "quote": ""
+                }
+              ],
+              "text": "267 of the shared accounts",
+              "unit": "accounts",
+              "value": 267
+            },
+            {
+              "label": "largest single gap closed",
+              "sources": [
+                {
+                  "doc_id": "sap-s4-customer-master-export",
+                  "locator": "",
+                  "quote": ""
+                },
+                {
+                  "doc_id": "sap-crm-customer-export",
+                  "locator": "",
+                  "quote": ""
+                },
+                {
+                  "doc_id": "accounts-receivable-review-notes-q4-2025",
+                  "locator": "",
+                  "quote": ""
+                }
+              ],
+              "text": "€600,000",
+              "unit": "eur",
+              "value": 600000
+            }
+          ]
+        },
+        "data_readiness": "high — both credit limits already exist as structured fields in the ERP and CRM; the discrepancy set (267 accounts) is computable directly from the two extracts.",
+        "dependencies": [],
+        "document_formats": [
+          "Structured master-data export",
+          "Governance policy document"
+        ],
+        "escalation": "Where the credit and commercial teams disagree on the canonical value, or the gap is material (e.g. the €600,000 Carrefour France gap), the item is held for the Credit Controller to adjudicate rather than auto-resolved.",
+        "expected_behaviour": "The assistant presents the conflicting ERP and CRM values side by side for each of the 267 shared accounts, proposes the canonical limit with its reasoning, and records the human decision. It never changes a limit on its own — it prepares the decision and writes the agreed value back only after sign-off.",
+        "feasibility_rating": "high",
+        "feasibility_score": 4,
+        "id": "OPP1",
+        "implementation_approach": "A human-in-the-loop reconciliation supported by an assistant that surfaces conflicts and proposes the canonical record; the credit team makes the final call.",
+        "knowledge_sources": [
+          "SAP S/4HANA customer master",
+          "SAP CRM customer records",
+          "Credit Policy"
+        ],
+        "matrix_quadrant": "do_first",
+        "operational_readiness": "high — Credit Control already owns credit decisions in the RACI, so there is a clear accountable owner to run the reconciliation.",
+        "overview": "Agree a single source of truth for customer credit limits and reconcile the ERP and CRM records, with the credit and commercial teams signing off the canonical values.",
+        "pattern": "hitl_workflow",
+        "personas": [
+          "Credit Controller",
+          "Credit Control analysts",
+          "Commercial / account managers",
+          "Finance Systems"
+        ],
+        "prerequisite_for": [
+          "OPP3"
+        ],
+        "required_integrations": [
+          "SAP S/4HANA customer master",
+          "SAP CRM customer records"
+        ],
+        "risks": [
+          "The credit and commercial teams must agree the canonical-record rules"
+        ],
+        "sources": [
+          {
+            "doc_id": "sap-s4-customer-master-export",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "sap-crm-customer-export",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "accounts-receivable-review-notes-q4-2025",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "credit-management-policy-opella-europe",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "success_metrics": [
+          "A single agreed credit limit per active retail account",
+          "An approval trail for any future limit change"
+        ],
+        "technical_complexity": "medium — read-and-compare across two SAP systems with a governed write-back; no model judgement on the numbers themselves.",
+        "title": "Customer Master Reconciliation",
+        "value_rating": "high",
+        "value_score": 5
+      },
+      {
+        "addresses_pain_point": "PP3",
+        "after_process": [
+          {
+            "actor": "Rule engine",
+            "description": "Each exception is classified by type and auto-routed to the right resolution path.",
+            "failure_points": [],
+            "name": "Exception classified",
+            "seq": 1,
+            "sources": [],
+            "system": ""
+          },
+          {
+            "actor": "Customer Service",
+            "description": "Genuine ambiguities reach an agent; the rest resolve automatically.",
+            "failure_points": [],
+            "name": "Only ambiguities escalate",
+            "seq": 2,
+            "sources": [],
+            "system": ""
+          }
+        ],
+        "before_process": [
+          {
+            "actor": "Order management",
+            "description": "An EDI order fails or is flagged.",
+            "failure_points": [],
+            "name": "EDI exception raised",
+            "seq": 1,
+            "sources": [],
+            "system": ""
+          },
+          {
+            "actor": "Customer Service",
+            "description": "An agent classifies, routes and resolves it by hand.",
+            "failure_points": [
+              "No classification or auto-routing",
+              "EDI-not-processed is the top escalation"
+            ],
+            "name": "Manual triage",
+            "seq": 2,
+            "sources": [],
+            "system": ""
+          }
+        ],
+        "business_impact": {
+          "derivation": "EDI orders not processed account for 34 of the customer-service escalations.",
+          "narrative": "Reduces the manual customer-service load from EDI exceptions, which are today the most frequent escalation.",
+          "quantified": [
+            {
+              "label": "EDI-not-processed escalations addressed",
+              "sources": [
+                {
+                  "doc_id": "customer-service-escalation-log-2025",
+                  "locator": "",
+                  "quote": ""
+                }
+              ],
+              "text": "34 escalations",
+              "unit": "escalations",
+              "value": 34
+            }
+          ]
+        },
+        "data_readiness": "high — the order-flow export already carries the fulfilment status and channel needed to identify and type EDI exceptions.",
+        "dependencies": [],
+        "document_formats": [
+          "Structured transactional export",
+          "Operational log"
+        ],
+        "escalation": "Any exception that does not match a known rule, or that the rule engine classifies with low confidence, is routed to a Customer Service agent with the classification and source order attached — nothing is silently dropped.",
+        "expected_behaviour": "Each EDI exception is classified by type against the documented rules and auto-routed to its resolution path. Clear-cut cases (the bulk of the 1,196 unfulfilled EDI orders) resolve without a person; the agent's queue holds only genuine ambiguities.",
+        "feasibility_rating": "high",
+        "feasibility_score": 5,
+        "id": "OPP2",
+        "implementation_approach": "A deterministic, auditable rule engine on the EDI order stream; no AI judgement required.",
+        "knowledge_sources": [
+          "EDI / order-management channel",
+          "Order Management SOP",
+          "Customer-service escalation log"
+        ],
+        "matrix_quadrant": "do_first",
+        "operational_readiness": "medium — Customer Service handles these exceptions today, but EDI has no named owner in the RACI, so accountability for the new process must be assigned first.",
+        "overview": "Automate the triage of EDI order exceptions so only genuine ambiguities reach the customer-service team.",
+        "pattern": "automation",
+        "personas": [
+          "Customer Service agents",
+          "Customer Service Lead"
+        ],
+        "prerequisite_for": [],
+        "required_integrations": [
+          "EDI / order management",
+          "Order management module"
+        ],
+        "risks": [
+          "Rule completeness — uncovered edge cases will still reach the team"
+        ],
+        "sources": [
+          {
+            "doc_id": "customer-service-escalation-log-2025",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "order-flow-analysis-export-2025",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "edi-dispute-resolution-cs-working-notes",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "success_metrics": [
+          "Fewer manual customer-service interventions on EDI exceptions"
+        ],
+        "technical_complexity": "low — a deterministic, auditable rule engine on the EDI stream; no AI judgement required, so it is the simplest to stand up.",
+        "title": "EDI Order Exception Handling",
+        "value_rating": "high",
+        "value_score": 4
+      },
+      {
+        "addresses_pain_point": "PP2",
+        "after_process": [
+          {
+            "actor": "AI Agent",
+            "description": "Each EDI order is assessed against the reconciled customer master and credit policy: approve, hold, or flag.",
+            "failure_points": [],
+            "name": "Real-time credit assessment",
+            "seq": 1,
+            "sources": [],
+            "system": "SAP S/4HANA credit + EDI stream"
+          },
+          {
+            "actor": "Credit Control",
+            "description": "Flagged orders go to a credit analyst; approved orders proceed.",
+            "failure_points": [],
+            "name": "Analyst reviews flags",
+            "seq": 2,
+            "sources": [],
+            "system": ""
+          }
+        ],
+        "before_process": [
+          {
+            "actor": "Order management",
+            "description": "An EDI order is received on the dominant channel.",
+            "failure_points": [],
+            "name": "EDI order arrives",
+            "seq": 1,
+            "sources": [],
+            "system": ""
+          },
+          {
+            "actor": "—",
+            "description": "The order proceeds to fulfilment with no systematic credit check on the EDI channel.",
+            "failure_points": [
+              "No credit gate on the channel carrying 67% of orders"
+            ],
+            "name": "Released without a credit gate",
+            "seq": 2,
+            "sources": [],
+            "system": ""
+          }
+        ],
+        "business_impact": {
+          "derivation": "EDI carries 67% of orders (5,667 of 8,420); today these are released without a systematic credit check.",
+          "narrative": "Brings a credit check to the EDI channel that carries 67% of orders, closing the coverage gap once the customer master is clean.",
+          "quantified": [
+            {
+              "label": "order share newly credit-checked",
+              "sources": [
+                {
+                  "doc_id": "order-flow-analysis-export-2025",
+                  "locator": "",
+                  "quote": ""
+                }
+              ],
+              "text": "67% of orders",
+              "unit": "percent",
+              "value": 67
+            }
+          ]
+        },
+        "data_readiness": "medium — depends on the reconciled customer master from OPP1; until credit limits agree across the two systems, a real-time check cannot be trusted.",
+        "dependencies": [
+          "OPP1"
+        ],
+        "document_formats": [
+          "Structured transactional export",
+          "Governance policy document"
+        ],
+        "escalation": "Low-confidence assessments and every 'hold' are routed to a credit analyst with the order, the limit used and the reasoning, so the analyst makes the final call. The agent never releases a held order on its own.",
+        "expected_behaviour": "For each EDI order the agent reads the reconciled customer master and the Credit Policy and returns one of three outcomes — approve, hold, or flag — with the reasoning shown. Approved orders proceed to fulfilment; held and flagged orders wait for a human decision.",
+        "feasibility_rating": "low",
+        "feasibility_score": 2,
+        "id": "OPP3",
+        "implementation_approach": "An AI agent on the EDI order stream that approves, holds or flags each order; escalates low-confidence cases to a human.",
+        "knowledge_sources": [
+          "Reconciled customer master (from OPP1)",
+          "Credit Policy",
+          "EDI order stream"
+        ],
+        "matrix_quadrant": "plan_for",
+        "operational_readiness": "low — credit analysts must come to trust and act on the agent's flags, and the EDI channel has no named owner today; this needs the foundations (OPP1, EDI ownership) in place first.",
+        "overview": "Apply a real-time credit assessment to the EDI order stream so the channel that carries most of your orders is no longer released without a credit check.",
+        "pattern": "ai_agent",
+        "personas": [
+          "Credit Control analysts",
+          "Credit Controller",
+          "Customer Service (downstream)"
+        ],
+        "prerequisite_for": [],
+        "required_integrations": [
+          "SAP S/4HANA credit module",
+          "Reconciled customer master (OPP1)",
+          "EDI order stream"
+        ],
+        "risks": [
+          "Needs the reconciled customer master (OPP1) first",
+          "Credit analysts must trust and act on the agent's flags"
+        ],
+        "sources": [
+          {
+            "doc_id": "order-flow-analysis-export-2025",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "o2c-process-raci-opella-europe",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "success_metrics": [
+          "Credit assessment coverage of the EDI channel",
+          "Low rate of incorrectly held orders"
+        ],
+        "technical_complexity": "high — real-time assessment on the live EDI stream against the ERP credit module, with model judgement that must be auditable.",
+        "title": "AI Credit Decisioning",
+        "value_rating": "high",
+        "value_score": 5
+      },
+      {
+        "addresses_pain_point": "PP4",
+        "after_process": [
+          {
+            "actor": "EDI integration team",
+            "description": "Each connection is migrated onto the organisation's own EDI platform on the published schedule.",
+            "failure_points": [],
+            "name": "Connection migrated",
+            "seq": 1,
+            "sources": [],
+            "system": "Own EDI platform"
+          },
+          {
+            "actor": "EDI integration team",
+            "description": "Incidents are resolved under the organisation's own service levels, with no dependency on the former parent.",
+            "failure_points": [],
+            "name": "Service owned end to end",
+            "seq": 2,
+            "sources": [],
+            "system": ""
+          }
+        ],
+        "before_process": [
+          {
+            "actor": "Customer Service",
+            "description": "An EDI incident occurs on one of the six connections operated by the former parent.",
+            "failure_points": [],
+            "name": "Incident on a parent-run connection",
+            "seq": 1,
+            "sources": [],
+            "system": ""
+          },
+          {
+            "actor": "Former parent IT",
+            "description": "Resolution depends on the parent's team under the transitional arrangement.",
+            "failure_points": [
+              "No control over response times on these connections",
+              "Governing service terms are not in the organisation's hands"
+            ],
+            "name": "Resolution waits on the parent",
+            "seq": 2,
+            "sources": [],
+            "system": ""
+          }
+        ],
+        "business_impact": {
+          "derivation": "Six of the fourteen live connections remain under the transitional arrangement today.",
+          "narrative": "Removes the dependency on the former parent for the connections carrying several of the largest retail accounts.",
+          "quantified": [
+            {
+              "label": "connections brought in-house",
+              "sources": [
+                {
+                  "doc_id": "edi-dispute-resolution-cs-working-notes",
+                  "locator": "",
+                  "quote": ""
+                }
+              ],
+              "text": "6 of 14 connections",
+              "unit": "count",
+              "value": 6
+            }
+          ]
+        },
+        "data_readiness": "medium — the connection inventory and managing entity are documented, but the governing service terms sit in a schedule not included in the pack.",
+        "dependencies": [],
+        "document_formats": [
+          "Technical register",
+          "Operational working notes"
+        ],
+        "escalation": "Where a connection's service terms or migration date are unclear, the item is held for the EDI integration lead and the transition programme office rather than migrated blind.",
+        "expected_behaviour": "Each of the six connections is migrated to the organisation's own platform on the schedule and validated against live order flow before the parent's connection is retired. The programme touches one connection at a time so order flow is never interrupted.",
+        "feasibility_rating": "medium",
+        "feasibility_score": 3,
+        "id": "OPP4",
+        "implementation_approach": "A phased migration on the published schedule, one connection at a time, validated against live order flow before the parent's connection is decommissioned.",
+        "knowledge_sources": [
+          "EDI integration register",
+          "EDI dispute working notes"
+        ],
+        "matrix_quadrant": "plan_for",
+        "operational_readiness": "medium — the organisation owns eight connections already and has run two migrations, but the remaining six depend on the former parent's cooperation.",
+        "overview": "Bring the six EDI connections still operated by the former parent onto the organisation's own platform, so it controls the service end to end.",
+        "pattern": "modernisation",
+        "personas": [
+          "EDI integration team",
+          "Customer Service",
+          "Commercial / account managers"
+        ],
+        "prerequisite_for": [],
+        "required_integrations": [
+          "Own EDI platform",
+          "Former parent's EDI platform (during cutover)"
+        ],
+        "risks": [
+          "The governing service terms are not in the document pack",
+          "Migration dates for the later connections are provisional"
+        ],
+        "sources": [
+          {
+            "doc_id": "edi-integration-register-opella-europe",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "edi-dispute-resolution-cs-working-notes",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "success_metrics": [
+          "All connections operated on the organisation's own platform",
+          "Incident resolution under the organisation's own service levels"
+        ],
+        "technical_complexity": "high — a live cutover of production EDI connections between two platforms, coordinated with an external party.",
+        "title": "EDI Connection Transition Programme",
+        "value_rating": "medium",
+        "value_score": 3
+      },
+      {
+        "addresses_pain_point": "PP5",
+        "after_process": [
+          {
+            "actor": "Data steward",
+            "description": "The two masters are compared and the missing accounts surfaced for review.",
+            "failure_points": [],
+            "name": "Populations compared",
+            "seq": 1,
+            "sources": [],
+            "system": "ERP / CRM"
+          },
+          {
+            "actor": "Data steward",
+            "description": "Missing records are created or retired under a maintained onboarding rule so the populations stay aligned.",
+            "failure_points": [],
+            "name": "Records aligned & governed",
+            "seq": 2,
+            "sources": [],
+            "system": ""
+          }
+        ],
+        "before_process": [
+          {
+            "actor": "Customer Service",
+            "description": "A new account is set up in the ERP.",
+            "failure_points": [],
+            "name": "Account created in the ERP",
+            "seq": 1,
+            "sources": [],
+            "system": ""
+          },
+          {
+            "actor": "—",
+            "description": "No matching record is maintained in the CRM.",
+            "failure_points": [
+              "22 accounts exist in the ERP with no CRM counterpart",
+              "Any process reading the CRM misses them"
+            ],
+            "name": "No matching CRM record",
+            "seq": 2,
+            "sources": [],
+            "system": ""
+          }
+        ],
+        "business_impact": {
+          "derivation": "The ERP holds 340 active accounts to the CRM's 318 — a 22-account difference.",
+          "narrative": "Aligns the account populations so the credit reconciliation works from a complete, agreed set of accounts.",
+          "quantified": [
+            {
+              "label": "accounts to align",
+              "sources": [
+                {
+                  "doc_id": "sap-s4-customer-master-export",
+                  "locator": "",
+                  "quote": ""
+                },
+                {
+                  "doc_id": "sap-crm-customer-export",
+                  "locator": "",
+                  "quote": ""
+                }
+              ],
+              "text": "22 accounts",
+              "unit": "accounts",
+              "value": 22
+            }
+          ]
+        },
+        "data_readiness": "high — both account populations are structured fields; the 22-account difference is computable directly from the two extracts.",
+        "dependencies": [],
+        "document_formats": [
+          "Structured master-data export"
+        ],
+        "escalation": "Any account whose status is ambiguous (e.g. possibly inactive) is held for the data steward and the account manager to decide rather than auto-aligned.",
+        "expected_behaviour": "The platform lists the accounts present in one master but not the other and proposes a create-or-retire action for each; a data steward confirms every decision. It never creates or retires a record on its own.",
+        "feasibility_rating": "high",
+        "feasibility_score": 4,
+        "id": "OPP5",
+        "implementation_approach": "A human-in-the-loop alignment: the platform surfaces the population difference and a data steward confirms each create-or-retire decision.",
+        "knowledge_sources": [
+          "SAP S/4HANA customer master",
+          "SAP CRM customer records"
+        ],
+        "matrix_quadrant": "plan_for",
+        "operational_readiness": "medium — the alignment needs a named data steward and a maintained onboarding rule, which do not exist today.",
+        "overview": "Align the two customer masters on which accounts exist, so the credit reconciliation has a clean, complete population to work from.",
+        "pattern": "hitl_workflow",
+        "personas": [
+          "Data steward",
+          "Commercial / account managers",
+          "Finance Systems"
+        ],
+        "prerequisite_for": [],
+        "required_integrations": [
+          "SAP S/4HANA customer master",
+          "SAP CRM customer records"
+        ],
+        "risks": [
+          "Some ERP-only accounts may be legitimately inactive and need retiring, not adding"
+        ],
+        "sources": [
+          {
+            "doc_id": "sap-s4-customer-master-export",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "sap-crm-customer-export",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "success_metrics": [
+          "The two masters hold the same active-account population",
+          "A maintained rule keeps them aligned at onboarding"
+        ],
+        "technical_complexity": "low — a compare-and-confirm over two master-data extracts.",
+        "title": "Customer Master Population Alignment",
+        "value_rating": "medium",
+        "value_score": 3
+      }
+    ],
+    "pain_points": [
+      {
+        "business_consequence": "Credit can be extended beyond the policy-approved limit, and the same account can be invoiced on two different payment terms.",
+        "category": "Data Governance",
+        "description": "Your ERP and CRM hold different credit limits and payment terms for the same major retail accounts, with no single agreed source of truth.",
+        "detail_table": {
+          "caption": "Where the two systems disagree, account by account — limits and terms.",
+          "columns": [
+            "Account",
+            "Country",
+            "ERP limit",
+            "CRM limit",
+            "ERP terms",
+            "CRM terms"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "Carrefour France",
+              "FR",
+              "€1,800,000",
+              "€2,400,000",
+              "NET45",
+              "NET30"
+            ],
+            [
+              "Boots UK",
+              "UK",
+              "€1,200,000",
+              "€1,550,000",
+              "NET45",
+              "NET30"
+            ],
+            [
+              "E.Leclerc",
+              "FR",
+              "€1,100,000",
+              "€1,400,000",
+              "NET45",
+              "NET30"
+            ],
+            [
+              "Tesco UK",
+              "UK",
+              "€1,000,000",
+              "€1,350,000",
+              "NET45",
+              "NET30"
+            ],
+            [
+              "dm (Drogerie Markt)",
+              "DE",
+              "€950,000",
+              "€1,150,000",
+              "NET45",
+              "NET30"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "sap-s4-customer-master-export",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "sap-crm-customer-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Credit-limit discrepancy register — top accounts"
+        },
+        "failure_pattern": "Orders are released against whichever limit the system resolves first, so the same account can trade on two different limits.",
+        "from_finding": "F1",
+        "id": "PP1",
+        "impact_rank": 1,
+        "opportunity_signal": "OPP1",
+        "quantified": [
+          {
+            "label": "accounts with different credit limits",
             "sources": [
-              {
-                "doc_id": "sap-crm-customer-export",
-                "locator": "",
-                "quote": ""
-              },
               {
                 "doc_id": "sap-s4-customer-master-export",
                 "locator": "",
                 "quote": ""
+              },
+              {
+                "doc_id": "sap-crm-customer-export",
+                "locator": "",
+                "quote": ""
               }
             ],
-            "system": "Both customer systems"
+            "text": "267 of the shared accounts",
+            "unit": "accounts",
+            "value": 267
           },
           {
-            "actor": "Order-management team",
-            "description": "Orders are released against whichever credit limit is visible at the point of decision, which may exceed the system of record.",
-            "failure_points": [],
-            "name": "Release against visible limit",
-            "seq": 2,
+            "label": "largest single gap (Carrefour France)",
             "sources": [
               {
-                "doc_id": "credit-management-policy-opella-europe",
+                "doc_id": "sap-s4-customer-master-export",
+                "locator": "",
+                "quote": ""
+              },
+              {
+                "doc_id": "sap-crm-customer-export",
                 "locator": "",
                 "quote": ""
               },
@@ -1096,65 +2319,13 @@
                 "quote": ""
               }
             ],
-            "system": "Order-management environment"
+            "text": "€600,000",
+            "unit": "eur",
+            "value": 600000
           }
         ],
-        "business_impact": {
-          "derivation": "Impact framed directly against the verified divergence figures; no new numbers introduced.",
-          "narrative": "Brings the aggregate credit-limit divergence under control and ensures the 267 mismatched accounts are decided against the designated system of record with a recorded approval trail. Removes silent over-extension on the largest accounts, where the single-account difference is substantial.",
-          "quantified": [
-            {
-              "label": "Mismatched accounts brought under control",
-              "sources": [],
-              "text": "267 mismatched accounts brought onto a single trusted credit view",
-              "unit": "accounts",
-              "value": 267
-            },
-            {
-              "label": "Aggregate divergence addressed",
-              "sources": [],
-              "text": "aggregate credit-limit divergence addressed",
-              "unit": "eur",
-              "value": 30675000.0
-            },
-            {
-              "label": "Largest single-account exposure removed",
-              "sources": [],
-              "text": "largest single-account divergence removed from silent use",
-              "unit": "eur",
-              "value": 600000.0
-            }
-          ]
-        },
-        "data_readiness": "high — credit limits and payment terms already exist as structured fields in both systems",
-        "dependencies": [],
-        "document_formats": [
-          "structured customer master exports",
-          "the credit policy document"
-        ],
-        "escalation": "When a release would exceed the system-of-record limit, it pauses the order and hands it to a credit approver with the difference shown, for an explicit decision.",
-        "expected_behaviour": "Day to day it compares the two credit views and lets matching orders flow through; it never raises a customer's effective credit limit on its own and never releases an over-limit order without a recorded human approval.",
-        "feasibility_rating": "high",
-        "feasibility_score": 4,
-        "id": "OPP1",
-        "implementation_approach": "Designate and enforce the enterprise resource system as the operative credit source at release; build a continuous comparison of the two views; introduce a controlled approval step for any release exceeding the system-of-record limit; align payment terms in the same reconciliation.",
-        "knowledge_sources": [
-          "the enterprise resource credit master",
-          "the customer-relationship credit view",
-          "the credit management policy"
-        ],
-        "matrix_quadrant": "do_first",
-        "operational_readiness": "medium — credit approvers exist but the controlled approval step is a new behaviour to embed",
-        "overview": "Establish the enterprise resource system as the enforced single source for credit limits and payment terms at the point of order release, and reconcile the customer-relationship view to it. Where the two views diverge, route the difference to a credit approver for an explicit, recorded decision before release rather than allowing the higher figure to be used silently.",
-        "pattern": "hitl_workflow",
-        "personas": [
-          "Credit approver",
-          "Credit and customer-master analyst",
-          "Order-management lead"
-        ],
-        "prerequisite_for": [],
-        "required_integrations": [],
-        "risks": [],
+        "root_cause": "Both systems were carried over at carve-out and were never reconciled; CRM limits were updated by hand without an approval trail.",
+        "severity": "high",
         "sources": [
           {
             "doc_id": "sap-s4-customer-master-export",
@@ -1167,411 +2338,7 @@
             "quote": ""
           },
           {
-            "doc_id": "credit-management-policy-opella-europe",
-            "locator": "",
-            "quote": ""
-          },
-          {
             "doc_id": "accounts-receivable-review-notes-q4-2025",
-            "locator": "",
-            "quote": ""
-          }
-        ],
-        "success_metrics": [],
-        "technical_complexity": "medium — requires a reliable continuous comparison and a release-time approval step across two systems",
-        "title": "Single trusted credit view with controlled approval at the point of release",
-        "value_rating": "high",
-        "value_score": 5
-      },
-      {
-        "addresses_pain_point": "PP3",
-        "after_process": [
-          {
-            "actor": "Order-management and customer-service leadership",
-            "description": "The electronic channel is documented in the procedure and the accountability matrix, with a named owner for the channel and the re-entry failure mode.",
-            "failure_points": [],
-            "name": "Channel brought into the procedure",
-            "seq": 1,
-            "sources": [
-              {
-                "doc_id": "order-management-sop-opella-europe",
-                "locator": "",
-                "quote": ""
-              },
-              {
-                "doc_id": "o2c-process-raci-opella-europe",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Order-management environment"
-          },
-          {
-            "actor": "Channel owner",
-            "description": "Manual re-entry follows a documented procedure under the named owner, replacing reliance on informal notes.",
-            "failure_points": [],
-            "name": "Standardised resolution",
-            "seq": 2,
-            "sources": [
-              {
-                "doc_id": "edi-integration-register-opella-europe",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Customer-service escalation route"
-          }
-        ],
-        "before_process": [
-          {
-            "actor": "Customer-service team (informally)",
-            "description": "The electronic channel carrying the majority of order value is excluded from the procedure and the accountability matrix.",
-            "failure_points": [],
-            "name": "Channel runs outside the procedure",
-            "seq": 1,
-            "sources": [
-              {
-                "doc_id": "order-management-sop-opella-europe",
-                "locator": "",
-                "quote": ""
-              },
-              {
-                "doc_id": "o2c-process-raci-opella-europe",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Electronic ordering channel"
-          },
-          {
-            "actor": "Customer-service team",
-            "description": "Manual re-entry of failed electronic orders is resolved using informal working notes with no documented owner.",
-            "failure_points": [],
-            "name": "Failures resolved informally",
-            "seq": 2,
-            "sources": [
-              {
-                "doc_id": "edi-dispute-resolution-cs-working-notes",
-                "locator": "",
-                "quote": ""
-              },
-              {
-                "doc_id": "customer-service-escalation-log-2025",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Customer-service escalation route"
-          }
-        ],
-        "business_impact": {
-          "derivation": "Framed against the verified channel share and escalation figures; no new numbers introduced.",
-          "narrative": "Establishes documented accountability for the channel carrying 67.3% of orders and a value of €59.7M, and gives the 34 manual-intervention escalations — 23.9% of all escalations — a named owner and a repeatable resolution path instead of informal notes.",
-          "quantified": [
-            {
-              "label": "Order value brought under ownership",
-              "sources": [],
-              "text": "order value brought under documented ownership",
-              "unit": "eur",
-              "value": 59711399.53
-            },
-            {
-              "label": "Channel share by count",
-              "sources": [],
-              "text": "67.3% of orders by count formally owned",
-              "unit": "percent",
-              "value": 67.3
-            },
-            {
-              "label": "Escalations given an owner",
-              "sources": [],
-              "text": "34 manual-intervention escalations given a named owner",
-              "unit": "escalations",
-              "value": 34
-            },
-            {
-              "label": "Share of all escalations addressed",
-              "sources": [],
-              "text": "23.9% of all escalations addressed through documented ownership",
-              "unit": "percent",
-              "value": 23.9
-            }
-          ]
-        },
-        "data_readiness": "high — the channel volume, value and failure modes are already documented",
-        "dependencies": [],
-        "document_formats": [
-          "procedure and accountability documents",
-          "the electronic ordering register",
-          "operational working notes"
-        ],
-        "escalation": "Where the documented procedure does not cover a situation, it routes to the named channel owner for a decision and a procedure update.",
-        "expected_behaviour": "Day to day it provides a documented owner and standard steps for handling electronic orders and their failures; it does not itself process orders but defines who does and how.",
-        "feasibility_rating": "high",
-        "feasibility_score": 5,
-        "id": "OPP2",
-        "implementation_approach": "Update the order-management procedure and accountability matrix to include the electronic channel; assign a named owner for the channel and the re-entry failure mode; formalise the informal working notes into a documented resolution procedure; reference the electronic ordering register for connection coverage.",
-        "knowledge_sources": [
-          "the order management procedure",
-          "the order-to-cash accountability matrix",
-          "the dispute resolution working notes",
-          "the electronic ordering register"
-        ],
-        "matrix_quadrant": "do_first",
-        "operational_readiness": "medium — requires leadership to assign ownership and embed the new procedure",
-        "overview": "Bring the electronic ordering channel into the formal order-management procedure and the accountability matrix, assigning a documented owner for the channel and for the manual re-entry failure mode, replacing reliance on informal working notes.",
-        "pattern": "modernisation",
-        "personas": [
-          "Electronic channel owner",
-          "Customer-service lead",
-          "Order-management lead"
-        ],
-        "prerequisite_for": [
-          "OPP3"
-        ],
-        "required_integrations": [],
-        "risks": [],
-        "sources": [
-          {
-            "doc_id": "order-flow-analysis-export-2025",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "order-management-sop-opella-europe",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "o2c-process-raci-opella-europe",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "edi-dispute-resolution-cs-working-notes",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "customer-service-escalation-log-2025",
-            "locator": "",
-            "quote": ""
-          }
-        ],
-        "success_metrics": [],
-        "technical_complexity": "low — this is procedural and accountability change rather than a system build",
-        "title": "Formal ownership and procedure for the electronic ordering channel",
-        "value_rating": "high",
-        "value_score": 4
-      },
-      {
-        "addresses_pain_point": "PP2",
-        "after_process": [
-          {
-            "actor": "Automated monitoring",
-            "description": "The electronic order flow is monitored and orders at risk of dropping out are surfaced before they reach the unfulfilled state.",
-            "failure_points": [],
-            "name": "Detect at risk early",
-            "seq": 1,
-            "sources": [
-              {
-                "doc_id": "order-flow-analysis-export-2025",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Monitoring workflow"
-          },
-          {
-            "actor": "Channel owner and customer-service team",
-            "description": "At-risk orders are resolved promptly by the documented channel owner before they become customer-facing failures.",
-            "failure_points": [],
-            "name": "Prompt resolution under ownership",
-            "seq": 2,
-            "sources": [
-              {
-                "doc_id": "edi-dispute-resolution-cs-working-notes",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Order-management environment"
-          }
-        ],
-        "before_process": [
-          {
-            "actor": "Customer-service team",
-            "description": "Electronic orders drop out and are only noticed once recorded as unfulfilled, often via customer escalations.",
-            "failure_points": [],
-            "name": "Failures caught late",
-            "seq": 1,
-            "sources": [
-              {
-                "doc_id": "order-flow-analysis-export-2025",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Order-management environment"
-          },
-          {
-            "actor": "Customer-service team",
-            "description": "Failed orders are recovered manually and surface as stockout and 'order not received' escalations, including delisting threats.",
-            "failure_points": [],
-            "name": "Manual recovery",
-            "seq": 2,
-            "sources": [
-              {
-                "doc_id": "customer-service-escalation-log-2025",
-                "locator": "",
-                "quote": ""
-              },
-              {
-                "doc_id": "edi-dispute-resolution-cs-working-notes",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Customer-service escalation route"
-          }
-        ],
-        "business_impact": {
-          "derivation": "Framed against the verified unfulfilled-order figures; no new numbers introduced.",
-          "narrative": "Targets the 1,196 unfulfilled electronic orders worth €12.4M — the largest failure bucket and far above the 320 unfulfilled manual and 111 unfulfilled email orders — by catching failures before they reach customers and reducing the stockout and delisting escalations they generate.",
-          "quantified": [
-            {
-              "label": "Unfulfilled electronic orders targeted",
-              "sources": [],
-              "text": "1,196 unfulfilled electronic orders targeted for prevention",
-              "unit": "orders",
-              "value": 1196
-            },
-            {
-              "label": "Order value at stake",
-              "sources": [],
-              "text": "value of unfulfilled electronic orders at stake",
-              "unit": "eur",
-              "value": 12362493.74
-            },
-            {
-              "label": "Manual orders for comparison",
-              "sources": [],
-              "text": "compared with 320 unfulfilled manual orders",
-              "unit": "orders",
-              "value": 320
-            },
-            {
-              "label": "Email orders for comparison",
-              "sources": [],
-              "text": "compared with 111 unfulfilled email orders",
-              "unit": "orders",
-              "value": 111
-            }
-          ]
-        },
-        "data_readiness": "high — order outcomes and failure patterns already exist as structured records",
-        "dependencies": [
-          "OPP2"
-        ],
-        "document_formats": [
-          "structured order flow exports",
-          "operational working notes",
-          "the escalation log"
-        ],
-        "escalation": "When an at-risk order cannot be resolved automatically, it hands the order to the channel owner with the detected issue for manual recovery.",
-        "expected_behaviour": "Day to day it watches the electronic order flow and flags orders at risk of failing; it surfaces them for action and never cancels or alters a customer order on its own.",
-        "feasibility_rating": "medium",
-        "feasibility_score": 3,
-        "id": "OPP3",
-        "implementation_approach": "Build automated monitoring of the electronic order flow that identifies orders at risk of dropping out; route at-risk orders to the channel owner for prompt action; track recovery against the unfulfilled baseline.",
-        "knowledge_sources": [
-          "the order flow records",
-          "the dispute resolution working notes",
-          "the customer service escalation log"
-        ],
-        "matrix_quadrant": "plan_for",
-        "operational_readiness": "medium — depends on a named channel owner being in place to act on flags",
-        "overview": "Introduce automated monitoring of the electronic channel that detects orders at risk of dropping out before fulfilment and surfaces them for action, reducing the volume of orders that reach the unfulfilled state and the downstream escalations and delisting threats they cause.",
-        "pattern": "automation",
-        "personas": [
-          "Electronic channel owner",
-          "Customer-service team",
-          "Order-management lead"
-        ],
-        "prerequisite_for": [],
-        "required_integrations": [],
-        "risks": [],
-        "sources": [
-          {
-            "doc_id": "order-flow-analysis-export-2025",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "customer-service-escalation-log-2025",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "edi-dispute-resolution-cs-working-notes",
-            "locator": "",
-            "quote": ""
-          }
-        ],
-        "success_metrics": [],
-        "technical_complexity": "medium — requires monitoring logic and reliable detection of at-risk orders",
-        "title": "Early detection and prevention of electronic-order fulfilment failures",
-        "value_rating": "high",
-        "value_score": 5
-      }
-    ],
-    "pain_points": [
-      {
-        "description": "For 267 of 318 matched customers, the customer-relationship system and the enterprise resource system hold different credit limits, with aggregate divergence reaching a large multi-million-euro total. On the largest accounts the difference on a single account is substantial. Payment terms also differ for 228 accounts. Because order release decisions can draw on whichever system is visible at the point of decision, credit can be extended beyond the limit held in the designated system of record without an approval trail.",
-        "failure_pattern": "Silent data divergence between two systems of truth, surfaced only in periodic reviews rather than at the point of decision.",
-        "from_finding": "F1",
-        "id": "PP1",
-        "impact_rank": 1,
-        "opportunity_signal": "OPP1",
-        "quantified": [
-          {
-            "label": "Accounts with mismatched credit limits",
-            "sources": [],
-            "text": "267 of 318 matched accounts hold different credit limits across the two systems",
-            "unit": "accounts",
-            "value": 267
-          },
-          {
-            "label": "Aggregate credit-limit divergence",
-            "sources": [],
-            "text": "aggregate credit-limit divergence against the system of record",
-            "unit": "eur",
-            "value": 30675000.0
-          },
-          {
-            "label": "Largest single-account delta",
-            "sources": [],
-            "text": "largest divergence observed on a single large retail account",
-            "unit": "eur",
-            "value": 600000.0
-          },
-          {
-            "label": "Accounts with mismatched payment terms",
-            "sources": [],
-            "text": "228 accounts also hold different payment terms across the two systems",
-            "unit": "accounts",
-            "value": 228
-          }
-        ],
-        "root_cause": "Two systems each hold their own credit values with no single enforced source feeding order release, despite the policy naming the enterprise resource system as the sole system of record.",
-        "sources": [
-          {
-            "doc_id": "sap-s4-customer-master-export",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "sap-crm-customer-export",
             "locator": "",
             "quote": ""
           },
@@ -1579,61 +2346,84 @@
             "doc_id": "credit-management-policy-opella-europe",
             "locator": "",
             "quote": ""
-          },
-          {
-            "doc_id": "accounts-receivable-review-notes-q4-2025",
-            "locator": "",
-            "quote": ""
           }
         ],
-        "title": "The two customer systems disagree on credit limits, and decisions are being made against the non-authoritative view"
+        "title": "Two customer systems disagree on credit limits"
       },
       {
-        "description": "The electronic ordering channel carries 67.3% of orders by count and a value of €59.7M, yet it is explicitly excluded from both the order-management procedure and the accountability matrix. The most frequent service failure tied to this channel — electronic orders requiring manual re-entry — has no documented owner and is resolved through informal working notes. This single root cause accounts for 23.9% of all escalations, with 34 escalations logged.",
-        "failure_pattern": "An unowned high-volume channel where resolution depends on individual knowledge rather than a defined procedure.",
+        "business_consequence": "The channel carrying most of the order value runs with no documented procedure and no accountable owner.",
+        "category": "Process Coverage",
+        "description": "EDI carries most of your order volume, yet it is not covered by the Order Management SOP and has no owner in the Order-to-Cash RACI.",
+        "detail_table": {
+          "caption": "Where each governing document leaves the EDI channel.",
+          "columns": [
+            "Document",
+            "How it treats EDI"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "Order Management SOP",
+              "Lists telephone and email as the standard channels; EDI is out of scope."
+            ],
+            [
+              "Order-to-Cash RACI",
+              "Covers manual and email steps only; no EDI rows."
+            ],
+            [
+              "EDI dispute working notes",
+              "Informal notes, explicitly 'not an official SOP'."
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "order-management-sop-opella-europe",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "o2c-process-raci-opella-europe",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "edi-dispute-resolution-cs-working-notes",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Document-level evidence"
+        },
+        "failure_pattern": "EDI orders that fail are handled informally, with no governed process or named owner.",
         "from_finding": "F2",
         "id": "PP2",
         "impact_rank": 2,
         "opportunity_signal": "OPP3",
         "quantified": [
           {
-            "label": "Electronic channel share by count",
-            "sources": [],
-            "text": "67.3% of orders by count arrive through the electronic channel",
+            "label": "EDI share of orders",
+            "sources": [
+              {
+                "doc_id": "order-flow-analysis-export-2025",
+                "locator": "",
+                "quote": ""
+              },
+              {
+                "doc_id": "edi-dispute-resolution-cs-working-notes",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "text": "67% of orders (5,667 of 8,420)",
             "unit": "percent",
-            "value": 67.3
-          },
-          {
-            "label": "Electronic channel order value",
-            "sources": [],
-            "text": "order value running through the electronic channel",
-            "unit": "eur",
-            "value": 59711399.53
-          },
-          {
-            "label": "Manual re-entry escalations",
-            "sources": [],
-            "text": "34 escalations logged for electronic orders requiring manual intervention",
-            "unit": "escalations",
-            "value": 34
-          },
-          {
-            "label": "Share of all escalations",
-            "sources": [],
-            "text": "this single root cause accounts for 23.9% of all escalations",
-            "unit": "percent",
-            "value": 23.9
+            "value": 67
           }
         ],
-        "root_cause": "The largest order channel was never brought into the formal procedure or accountability framework, leaving ownership informal.",
+        "root_cause": "The documented process was written for manual and email orders; EDI grew to dominate without the procedure or accountability catching up.",
+        "severity": "high",
         "sources": [
           {
             "doc_id": "order-flow-analysis-export-2025",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "order-management-sop-opella-europe",
             "locator": "",
             "quote": ""
           },
@@ -1643,51 +2433,109 @@
             "quote": ""
           },
           {
-            "doc_id": "customer-service-escalation-log-2025",
+            "doc_id": "order-management-sop-opella-europe",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "edi-dispute-resolution-cs-working-notes",
             "locator": "",
             "quote": ""
           }
         ],
-        "title": "Two-thirds of order value runs through a channel with no documented owner"
+        "title": "Two-thirds of orders run on an undocumented channel"
       },
       {
-        "description": "1,196 electronic-channel orders worth €12.4M are recorded as not fulfilled — the largest single failure bucket and nearly four times the unfulfilled rate of manual orders (320 unfulfilled) and email orders (111 unfulfilled). Combined with the absence of a procedure and ownership for the channel, this drives repeated stockout and 'order not received' escalations and explicit customer delisting threats, putting both revenue and key retail relationships at risk.",
-        "failure_pattern": "Concentrated fulfilment failure in the highest-volume channel, surfacing as customer-facing service incidents rather than being prevented at source.",
+        "business_consequence": "The largest single block of unfulfilled orders — and the most frequent escalation — sits on the channel nobody owns.",
+        "category": "Operational Resilience",
+        "description": "A large block of EDI orders is not fulfilled, on the same channel that has no documented process or owner.",
+        "detail_table": {
+          "caption": "Unfulfilled orders cluster on the EDI channel.",
+          "columns": [
+            "Channel",
+            "Orders not fulfilled"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "EDI",
+              "1,196"
+            ],
+            [
+              "Telephone / manual",
+              "320"
+            ],
+            [
+              "Email",
+              "111"
+            ],
+            [
+              "Fax",
+              "40"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "order-flow-analysis-export-2025",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Unfulfilled orders by channel"
+        },
+        "failure_pattern": "EDI orders not processed is the single most common customer-service escalation.",
         "from_finding": "F3",
         "id": "PP3",
         "impact_rank": 3,
         "opportunity_signal": "OPP2",
         "quantified": [
           {
-            "label": "Unfulfilled electronic orders",
-            "sources": [],
-            "text": "1,196 electronic-channel orders recorded as not fulfilled",
+            "label": "EDI orders not fulfilled",
+            "sources": [
+              {
+                "doc_id": "order-flow-analysis-export-2025",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "text": "1,196 EDI orders",
             "unit": "orders",
             "value": 1196
           },
           {
-            "label": "Unfulfilled electronic order value",
-            "sources": [],
-            "text": "value of electronic orders recorded as not fulfilled",
+            "label": "value not fulfilled",
+            "sources": [
+              {
+                "doc_id": "order-flow-analysis-export-2025",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "text": "€12.4M",
             "unit": "eur",
             "value": 12362493.74
           },
           {
-            "label": "Unfulfilled manual orders",
-            "sources": [],
-            "text": "320 manual orders unfulfilled by comparison",
-            "unit": "orders",
-            "value": 320
-          },
-          {
-            "label": "Unfulfilled email orders",
-            "sources": [],
-            "text": "111 email orders unfulfilled by comparison",
-            "unit": "orders",
-            "value": 111
+            "label": "EDI-not-processed escalations",
+            "sources": [
+              {
+                "doc_id": "customer-service-escalation-log-2025",
+                "locator": "",
+                "quote": ""
+              },
+              {
+                "doc_id": "edi-dispute-resolution-cs-working-notes",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "text": "34 escalations",
+            "unit": "escalations",
+            "value": 34
           }
         ],
-        "root_cause": "Failures in the electronic channel are caught late and resolved manually, with no upstream control to prevent orders from dropping out before fulfilment.",
+        "root_cause": "Without a governed EDI process, failures are absorbed reactively through manual re-entry rather than prevented.",
+        "severity": "high",
         "sources": [
           {
             "doc_id": "order-flow-analysis-export-2025",
@@ -1705,7 +2553,218 @@
             "quote": ""
           }
         ],
-        "title": "Electronic orders fail to fulfil at nearly four times the rate of manual orders"
+        "title": "EDI order failures concentrate on the unowned channel"
+      },
+      {
+        "business_consequence": "The organisation cannot guarantee its own response times on the connections carrying several of its largest retail accounts.",
+        "category": "Third-Party Dependency",
+        "description": "Six of the fourteen live EDI connections are still operated by the former parent under a transitional service arrangement, with the service terms held in a schedule that is not in the document pack.",
+        "detail_table": {
+          "caption": "The six connections to bring onto the organisation's own platform.",
+          "columns": [
+            "Trading partner",
+            "Country",
+            "Migration target"
+          ],
+          "note": "The governing service terms sit in a schedule not included in the document pack; the migration dates are the register's stated targets.",
+          "rows": [
+            [
+              "Carrefour France",
+              "FR",
+              "Q4 2025"
+            ],
+            [
+              "Boots (legacy)",
+              "UK",
+              "Q1 2026"
+            ],
+            [
+              "dm (Drogerie Markt)",
+              "DE",
+              "Q1 2026"
+            ],
+            [
+              "E.Leclerc",
+              "FR",
+              "Q2 2026 (provisional)"
+            ],
+            [
+              "Lidl Europe",
+              "EU",
+              "Q2 2026 (provisional)"
+            ],
+            [
+              "Coop Group (legacy)",
+              "EU",
+              "Q3 2026 (provisional)"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "edi-integration-register-opella-europe",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "edi-dispute-resolution-cs-working-notes",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Connections still under the transitional arrangement"
+        },
+        "failure_pattern": "When one of these six connections has an incident, resolution depends on the parent's team and a transitional agreement the organisation does not control.",
+        "from_finding": "F2",
+        "id": "PP4",
+        "impact_rank": 2,
+        "opportunity_signal": "OPP4",
+        "quantified": [
+          {
+            "label": "connections still under the arrangement",
+            "sources": [
+              {
+                "doc_id": "edi-dispute-resolution-cs-working-notes",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "text": "6 of 14 connections",
+            "unit": "count",
+            "value": 6
+          }
+        ],
+        "root_cause": "At carve-out, eight connections moved to the organisation's own platform while six remained on the parent's; the migration is partly complete.",
+        "severity": "medium",
+        "sources": [
+          {
+            "doc_id": "edi-integration-register-opella-europe",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "edi-dispute-resolution-cs-working-notes",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "title": "Six EDI connections still run on the former parent's platform"
+      },
+      {
+        "business_consequence": "A clean reconciliation cannot be completed until the account populations themselves are aligned.",
+        "category": "Data Governance",
+        "description": "The ERP holds more customer accounts than the CRM, so the two systems do not even agree on which accounts exist, let alone their credit terms.",
+        "detail_table": {
+          "caption": "The two masters hold different account populations.",
+          "columns": [
+            "System",
+            "Active accounts"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "ERP customer master",
+              "340"
+            ],
+            [
+              "CRM customer records",
+              "318"
+            ],
+            [
+              "In the ERP only",
+              "22"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "sap-s4-customer-master-export",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "sap-crm-customer-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Customer-master population"
+        },
+        "failure_pattern": "Twenty-two accounts exist in the ERP with no CRM counterpart, so any process that reads the CRM misses them entirely.",
+        "from_finding": "F1",
+        "id": "PP5",
+        "impact_rank": 3,
+        "opportunity_signal": "OPP5",
+        "quantified": [
+          {
+            "label": "accounts in the ERP but not the CRM",
+            "sources": [
+              {
+                "doc_id": "sap-s4-customer-master-export",
+                "locator": "",
+                "quote": ""
+              },
+              {
+                "doc_id": "sap-crm-customer-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "text": "22 accounts",
+            "unit": "accounts",
+            "value": 22
+          }
+        ],
+        "root_cause": "Accounts were created in the ERP without a matching record being maintained in the CRM after carve-out.",
+        "severity": "medium",
+        "sources": [
+          {
+            "doc_id": "sap-s4-customer-master-export",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "sap-crm-customer-export",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "title": "The two customer masters are not aligned on which accounts exist"
+      }
+    ],
+    "risk_register": [
+      {
+        "impact": "High",
+        "likelihood": "Medium",
+        "mitigation": "Material gaps (e.g. the €600,000 Carrefour France gap) are held for the Credit Controller to adjudicate; nothing auto-resolves.",
+        "owner": "Credit Controller",
+        "risk": "The credit and commercial teams cannot agree the canonical credit limit for a contested account."
+      },
+      {
+        "impact": "Medium",
+        "likelihood": "Medium",
+        "mitigation": "Unmatched and low-confidence exceptions route to an agent with the source order attached; coverage is reviewed as new types appear.",
+        "owner": "Customer Service Lead",
+        "risk": "The automated EDI exception rules do not cover an edge case, so it still reaches an agent."
+      },
+      {
+        "impact": "High",
+        "likelihood": "Medium",
+        "mitigation": "Every hold and low-confidence case is shown with its reasoning and the limit used, so analysts can confirm rather than re-derive.",
+        "owner": "Credit Controller",
+        "risk": "Credit analysts do not trust the automated credit assessment and override it by default."
+      },
+      {
+        "impact": "Medium",
+        "likelihood": "High",
+        "mitigation": "Migrate one connection at a time on the published schedule, validating against live order flow before decommissioning.",
+        "owner": "EDI integration lead",
+        "risk": "A TSA connection's migration slips because the former parent's cooperation or service terms are unclear."
+      },
+      {
+        "impact": "Medium",
+        "likelihood": "Low",
+        "mitigation": "A data steward confirms each create-or-retire decision; ambiguous accounts are held for the account manager.",
+        "owner": "Data steward",
+        "risk": "ERP-only accounts are added to the CRM when some should instead be retired as inactive."
       }
     ],
     "roadmap": [
@@ -1715,17 +2774,23 @@
           {
             "depends_on": [],
             "opportunity_id": "OPP1",
-            "rationale": "Highest-impact finding; brings the credit divergence across 267 accounts under control with no prerequisite, using data that already exists as structured fields.",
-            "title": "Single trusted credit view with controlled approval at release"
+            "rationale": "Establishes the single source of truth the rest depends on.",
+            "title": "Customer Master Reconciliation"
           },
           {
             "depends_on": [],
             "opportunity_id": "OPP2",
-            "rationale": "Assigns documented ownership for the channel carrying 67.3% of orders; mainly procedural, no prerequisite, and a foundation for prevention work.",
-            "title": "Formal ownership and procedure for the electronic ordering channel"
+            "rationale": "Cuts the most frequent escalation; independent, can run now.",
+            "title": "EDI Order Exception Handling"
+          },
+          {
+            "depends_on": [],
+            "opportunity_id": "OPP5",
+            "rationale": "Aligns the account populations so the reconciliation is clean.",
+            "title": "Customer Master Population Alignment"
           }
         ],
-        "theme": "Establish control and accountability over credit and the largest order channel",
+        "theme": "Stabilise the foundations",
         "window": "0-6 months"
       },
       {
@@ -1733,14 +2798,20 @@
         "items": [
           {
             "depends_on": [
-              "OPP2"
+              "OPP1"
             ],
             "opportunity_id": "OPP3",
-            "rationale": "Targets the 1,196 unfulfilled electronic orders; sequenced after ownership is in place so flagged orders have a documented owner to act on them.",
-            "title": "Early detection and prevention of electronic-order fulfilment failures"
+            "rationale": "Credit-checks the dominant EDI channel; needs OPP1 first.",
+            "title": "AI Credit Decisioning"
+          },
+          {
+            "depends_on": [],
+            "opportunity_id": "OPP4",
+            "rationale": "Brings the six parent-run connections onto the own platform.",
+            "title": "EDI Connection Transition Programme"
           }
         ],
-        "theme": "Prevent electronic-order failures before they reach customers",
+        "theme": "Close the gaps",
         "window": "6-18 months"
       },
       {
@@ -1749,15 +2820,27 @@
           {
             "depends_on": [],
             "opportunity_id": null,
-            "rationale": "Once control, ownership and prevention are live, sustain them through ongoing review so divergence, unfulfilled volume and escalation rates stay below their established baselines.",
-            "title": "Embed continuous monitoring and periodic governance review across credit and channel performance"
+            "rationale": "Consolidate customer data onto a single platform.",
+            "title": "CRM consolidation"
+          },
+          {
+            "depends_on": [],
+            "opportunity_id": null,
+            "rationale": "Modernise the EDI integration estate.",
+            "title": "EDI modernisation"
+          },
+          {
+            "depends_on": [],
+            "opportunity_id": null,
+            "rationale": "Strengthen credit controls in the core ERP.",
+            "title": "ERP credit module upgrade"
           }
         ],
-        "theme": "Sustain and extend the controlled order-to-cash baseline",
+        "theme": "Rationalise the landscape",
         "window": "18+ months"
       }
     ],
-    "sequencing_rationale": "The two foundational interventions — bringing the credit view under control and assigning ownership of the electronic channel — carry no prerequisites and can begin immediately; both address the highest-impact findings and require mainly governance and reconciliation work. The early-detection capability for electronic-order failures depends on a named channel owner being in place to act on what it surfaces, so it follows the ownership intervention rather than running ahead of it. Sequencing therefore establishes control and accountability first, then layers prevention on top.",
+    "sequencing_rationale": "Customer Master Reconciliation (OPP1) comes first because AI Credit Decisioning (OPP3) needs a clean, single credit limit per account to work. EDI Order Exception Handling (OPP2) and the population alignment (OPP5) are independent and run in parallel from the start; the connection transition (OPP4) follows on the published migration schedule.",
     "source_index": [
       {
         "business_name": "Customer Service Escalation Log 2025",
@@ -1864,11 +2947,58 @@
         "what_we_read": "your Sanofi Consumer Healthcare O2C SOP 2023"
       }
     ],
-    "strategic_readiness": "The organisation already holds the underlying records as structured data — credit values, order outcomes and escalation patterns are all available — which makes the data foundation strong. The principal readiness work is organisational: enforcing a single trusted credit source at release, assigning ownership for the largest order channel, and embedding the new approval and resolution behaviours. These are achievable with existing teams and documents.",
+    "strategic_readiness": "The current state can support the near-term moves once the customer master is reconciled; the credit decisioning step is the main capability to build toward.",
     "strategy_profile": {
-      "notes": "Sequence governance and accountability first, then layer automated prevention on the largest order channel.",
-      "posture": "Establish a single trusted operating baseline for credit and order fulfilment, then prevent failures at source"
+      "notes": "Consolidate the inherited landscape while modernising for the EDI-dominated order reality.",
+      "posture": "consolidate_modernize"
     },
-    "target_state": "Once these interventions land, credit decisions converge on a single trusted view: every release is checked against the designated system of record, and any difference is approved explicitly and recorded rather than applied silently. The electronic ordering channel — today the largest by value yet the least governed — sits firmly inside the formal procedure with a named owner accountable for both routine handling and failure recovery. Order failures in that channel are caught and resolved before they reach customers, replacing reactive escalations and delisting threats with prevention at source. The organisation operates from one controlled order-to-cash baseline, with credit divergence, unfulfilled volume and manual-intervention escalations all held below their current levels through continuous monitoring and periodic governance review."
+    "target_state": "Order-to-Cash converges on one trusted customer master, with every credit limit agreed across both systems and changes governed by an approval trail. The electronic channel is owned, documented, and self-healing: routine exceptions resolve automatically and only genuine ambiguities reach a person. Every order — whatever the channel — passes a consistent credit check before release, so the volume that flows through EDI is no longer a blind spot.",
+    "traceability": [
+      {
+        "expected_outcome": "One agreed credit limit per account, with an approval trail.",
+        "horizon": "H1",
+        "opportunity": "OPP1",
+        "pain_point": "PP1",
+        "recommendation": "R-01",
+        "severity": "High",
+        "summary": "ERP/CRM disagree on credit limits"
+      },
+      {
+        "expected_outcome": "A credit gate on the channel carrying most order value.",
+        "horizon": "H2",
+        "opportunity": "OPP3",
+        "pain_point": "PP2",
+        "recommendation": "R-03",
+        "severity": "High",
+        "summary": "EDI channel undocumented and unowned"
+      },
+      {
+        "expected_outcome": "Routine EDI exceptions resolve without an agent.",
+        "horizon": "H1",
+        "opportunity": "OPP2",
+        "pain_point": "PP3",
+        "recommendation": "R-02",
+        "severity": "High",
+        "summary": "EDI order failures concentrate here"
+      },
+      {
+        "expected_outcome": "All connections on the organisation's own platform.",
+        "horizon": "H2",
+        "opportunity": "OPP4",
+        "pain_point": "PP4",
+        "recommendation": "R-04",
+        "severity": "Medium",
+        "summary": "Six connections under the former parent"
+      },
+      {
+        "expected_outcome": "One agreed active-account population across both systems.",
+        "horizon": "H1",
+        "opportunity": "OPP5",
+        "pain_point": "PP5",
+        "recommendation": "R-05",
+        "severity": "Medium",
+        "summary": "Customer masters hold different populations"
+      }
+    ]
   }
 }

@@ -54,7 +54,7 @@ def test_dependency_invariant(raw_payload):
 def test_pp_opp_links(raw_payload):
     content = build.build_synthesis(raw_payload, live=False)
     pp = {p.id: p.opportunity_signal for p in content.pain_points}
-    assert pp == {"PP1": "OPP1", "PP2": "OPP3", "PP3": "OPP2"}
+    assert pp == {"PP1": "OPP1", "PP2": "OPP3", "PP3": "OPP2", "PP4": "OPP4", "PP5": "OPP5"}
 
 
 def test_report01_is_factual():
@@ -70,9 +70,11 @@ def test_suite_renders_six_files_no_leaks(raw_payload, tmp_path):
     for slug, _ in REPORTS:
         assert (out / f"{slug}.html").exists()
     assert (out / "index.html").exists()
-    # no TSA count fabrication anywhere (D2)
+    # the "6 of 14 connections" figure is now GROUNDED in the EDI register (PP4 / OPP4); the old
+    # blanket prohibition is obsolete. The real guard is the grounding gate + assert_no_leaks, which
+    # run in render_suite above. Confirm the grounded figure appears (depth was actually built).
     blob = "\n".join((out / f"{slug}.html").read_text() for slug, _ in REPORTS)
-    assert "6 of 14" not in blob and "14 connections" not in blob
+    assert "6 of 14" in blob
 
 
 def test_each_report_is_standalone_no_doc_control(raw_payload, tmp_path):
@@ -135,7 +137,7 @@ def test_depth_renders_into_html(raw_payload, tmp_path):
     r03h = (out / "03-recommendation.html").read_text()
     r04h = (out / "04-opportunity-portfolio.html").read_text()
     r06h = (out / "06-supporting-artefacts.html").read_text()
-    assert "Systems and sources" in r01h and "Information format" in r01h
+    assert "System profiles" in r01h and "Information format" in r01h
     assert "Prioritization rationale" in r03h and "rate-high" in r03h
     assert "Who uses it" in r04h and "Escalation" in r04h
     assert "Success metrics framework" in r06h
@@ -164,3 +166,34 @@ def test_executive_summary_and_visuals_render(raw_payload, tmp_path):
 def test_executive_summary_in_nav():
     from discovery.reportsuite.render import REPORTS
     assert REPORTS[0][0] == "00-executive-summary"             # exec summary is first in the suite
+
+
+def test_reference_depth_sections_render(raw_payload, tmp_path):
+    """The reference-grade depth must actually surface: report 01 carries the volume baseline, the
+    channel-mix / lead-time / EDI-connection / account tables and the per-step process inventory;
+    report 02 carries per-PP detail tables + the evidence register; report 03 carries the success-
+    metrics table, risk register and traceability matrix."""
+    content = build.build_synthesis(raw_payload, live=False)
+    out = tmp_path / "o2c"
+    render_suite(content, {"client": "", "domain_label": "Order-to-Cash"}, out)
+    r01 = (out / "01-current-state.html").read_text()
+    assert "Volume baseline" in r01 and "Order channel mix" in r01
+    assert "EDI connection inventory" in r01 and "Process inventory" in r01
+    assert "lead time" in r01.lower() and "Top trading accounts" in r01
+    r02 = (out / "02-pain-points.html").read_text()
+    assert "Credit-limit discrepancy register" in r02 and "evidence register" in r02.lower()
+    r03 = (out / "03-recommendation.html").read_text()
+    assert "Risk register" in r03 and "traceability matrix" in r03.lower()
+    assert "Success metrics" in r03
+
+
+def test_fixture_reaches_reference_counts():
+    """Honest depth: five grounded pain points and five opportunities (not a thin three), plus the
+    evidence/risk/traceability registers."""
+    c = build.fixture_o2c()
+    assert len(c.pain_points) == 5 and len(c.opportunities) == 5
+    assert len(c.evidence_register) >= 5
+    assert len(c.risk_register) >= 5
+    assert len(c.traceability) == 5
+    assert len(c.current_state.data_tables) >= 6
+    assert len(c.current_state.process_detail) >= 6

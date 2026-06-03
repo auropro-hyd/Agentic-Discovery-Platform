@@ -64,12 +64,20 @@ uv run python scripts/doctor.py          # verify provider connectivity
 ```bash
 uv run python run.py --domain o2c                  # live run (generates everything live)
 uv run python run.py --domain o2c --auto-resolve   # non-interactive
-uv run python run.py --domain o2c --use-fixture    # use the pre-built O2C fixture (demo-safe)
+uv run python run.py --domain o2c --use-fixture    # pre-built O2C fixture — the full reference-depth suite
 uv run python run.py --domain o2c --golden         # replay a saved run offline
 uv run python run.py --domain o2c --refresh        # diff against the previous run (new/resolved/changed)
 uv run python run.py --domain o2c --no-verify      # skip the adversarial verification pass
 uv run python run.py --domain p2p --auto-resolve   # any other domain — generated live
 ```
+
+> **Reference-depth O2C suite.** `--use-fixture` renders the hand-grounded O2C fixture — the full
+> reference-grade suite (per-report cover + own TOC, the channel-mix / lead-time / credit-band /
+> collections / EDI-connection / top-account tables, the five pain-point detail tables, the evidence
+> register, success-metrics, risk register and traceability matrix). Every figure traces to the raw
+> CSVs / source documents and passes the grounding gate. The live path emits the core suite today;
+> mining the corpus into these structured sections from the live agent is a planned follow-up, so
+> richer depth flows automatically for any domain.
 
 Findings are variable in number and ranked by impact; each is adversarially **verified** (a
 challenged finding is flagged for review, not dropped); the agent can **conformance-check** a

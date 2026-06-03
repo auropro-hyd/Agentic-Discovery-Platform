@@ -111,9 +111,14 @@ def depth_doc_keys() -> set[str]:
     return keys
 
 
-# The verified-number allow-list for the O2C fixture (the figures the findings actually computed).
+# The verified-number allow-list for the O2C fixture (the figures the findings actually computed,
+# plus the factual current-state figures restated from the source documents — account populations,
+# connection counts and per-account credit limits, all grounded in the CSVs/register).
 O2C_VERIFIED = {267.0, 600000.0, 67.0, 5667.0, 8420.0, 1196.0, 12362493.74, 12.4,
-                34.0, 2.4, 1.8, 2400000.0, 1800000.0}
+                34.0, 2.4, 1.8, 2400000.0, 1800000.0,
+                340.0, 318.0, 22.0, 14.0, 320.0, 111.0, 40.0,
+                1100000.0, 1200000.0, 1000000.0, 950000.0, 850000.0, 800000.0, 750000.0,
+                1400000.0, 1550000.0, 1350000.0, 1150000.0}
 
 
 def o2c_allow() -> set[float]:

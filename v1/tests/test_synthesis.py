@@ -28,7 +28,9 @@ from _payloads import depth_doc_keys, depth_synthesis_payload, o2c_allow  # noqa
 # ---- a minimal raw_payload whose allow-list covers the fixture's numbers ----
 def _raw_payload() -> dict:
     return {
-        "_tool_numbers": [267, 600000, 67, 5667, 8420, 1196, 12362493.74, 34, 2400000, 1800000],
+        "_tool_numbers": [267, 600000, 67, 5667, 8420, 1196, 12362493.74, 34, 2400000, 1800000,
+                          340, 318, 22, 14, 320, 111, 40, 1100000, 1200000, 1000000, 950000,
+                          850000, 800000, 750000, 1400000, 1550000, 1350000, 1150000],
         "findings": [
             {"id": "F1", "title": "Customer master conflict",
              "business_consequence": "Wrong limits applied.",
@@ -259,7 +261,7 @@ def test_validate_rejects_fewer_opps_than_pps():
 
 def test_validate_rejects_dependency_on_unknown_opp():
     p, a, d = _valid()
-    p["opportunities"][0]["dependencies"] = ["OPP4"]   # OPP4 not in payload (only OPP1-3 exist)
+    p["opportunities"][0]["dependencies"] = ["OPP99"]   # OPP99 is not in the payload
     with pytest.raises(GroundingError, match="unknown opportunity"):
         synthesis.validate_synthesis(p, a, d)
 

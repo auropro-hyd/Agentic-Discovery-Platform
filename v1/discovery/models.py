@@ -245,6 +245,48 @@ class FormatPattern:                       # the "knowledge/data format & struct
 
 
 @dataclass
+class KeyStat:                             # a single big-number stat tile (Report 01 baseline)
+    value: str                            # pre-formatted grounded figure, e.g. "8,420" or "67.3%"
+    label: str = ""
+    sublabel: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class DataTable:                          # a grounded factual table restated from source documents
+    """A factual reference table (channel mix, lead-times, credit bands, EDI connections, top
+    accounts, DC network, …). Cells are pre-formatted strings restated verbatim from the cited
+    source(s). Carried on the FACTUAL current-state report; the renderer draws it as a table and the
+    grounding gate treats its source-restated figures as sourced facts (not synthesized claims)."""
+    title: str
+    columns: list[str] = field(default_factory=list)
+    rows: list[list[str]] = field(default_factory=list)
+    caption: str = ""
+    note: str = ""                        # optional footnote (e.g. a sourcing caveat)
+    sources: list[SourceRef] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"title": self.title, "columns": self.columns, "rows": self.rows,
+                "caption": self.caption, "note": self.note,
+                "sources": [s.to_dict() for s in self.sources]}
+
+
+@dataclass
+class ProcessDetail:                      # one numbered process-inventory subsection (Report 01 §3.x)
+    title: str
+    body: str = ""                        # factual prose describing how the step runs
+    actor: str = ""
+    system: str = ""
+    sources: list[SourceRef] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"title": self.title, "body": self.body, "actor": self.actor,
+                "system": self.system, "sources": [s.to_dict() for s in self.sources]}
+
+
+@dataclass
 class CurrentState:                       # Report 01 — NO severity/confidence anywhere
     domain_overview: str = ""
     process_summary: str = ""
@@ -255,6 +297,10 @@ class CurrentState:                       # Report 01 — NO severity/confidence
     ownership_map: list[RaciRow] = field(default_factory=list)
     system_inventory: list[InventoryItem] = field(default_factory=list)
     handoff_catalogue: list[Handoff] = field(default_factory=list)
+    # deeper grounded baseline (all optional — a domain without them simply omits the section)
+    baseline_stats: list[KeyStat] = field(default_factory=list)          # §1 volume baseline tiles
+    data_tables: list[DataTable] = field(default_factory=list)           # channel mix, EDI, DCs, …
+    process_detail: list[ProcessDetail] = field(default_factory=list)    # §3 process inventory detail
 
     def to_dict(self) -> dict[str, Any]:
         return {"domain_overview": self.domain_overview,
@@ -265,7 +311,10 @@ class CurrentState:                       # Report 01 — NO severity/confidence
                 "process_inventory": [i.to_dict() for i in self.process_inventory],
                 "ownership_map": [r.to_dict() for r in self.ownership_map],
                 "system_inventory": [i.to_dict() for i in self.system_inventory],
-                "handoff_catalogue": [h.to_dict() for h in self.handoff_catalogue]}
+                "handoff_catalogue": [h.to_dict() for h in self.handoff_catalogue],
+                "baseline_stats": [k.to_dict() for k in self.baseline_stats],
+                "data_tables": [t.to_dict() for t in self.data_tables],
+                "process_detail": [p.to_dict() for p in self.process_detail]}
 
 
 @dataclass
@@ -277,15 +326,58 @@ class PainPoint:                          # Report 02
     description: str = ""
     root_cause: str = ""
     failure_pattern: str = ""
+    business_consequence: str = ""        # the "so what" — impact in business terms
+    category: str = ""                    # grounded category label (e.g. "Data Governance")
+    severity: str = ""                    # "high" | "medium" | "lower"; falls back to impact_rank
     opportunity_signal: str = ""          # OPP id, derived in code
     quantified: list[NumberRef] = field(default_factory=list)
+    detail_table: "DataTable | None" = None   # optional per-PP evidence table (grounded)
     sources: list[SourceRef] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
         d["quantified"] = [n.to_dict() for n in self.quantified]
         d["sources"] = [s.to_dict() for s in self.sources]
+        d["detail_table"] = self.detail_table.to_dict() if self.detail_table else None
         return d
+
+
+@dataclass
+class EvidenceRow:                        # one row of the Report 02 evidence register (appendix)
+    finding: str                          # the PP / finding id this evidence supports
+    source: str = ""                      # business-friendly document name(s)
+    evidence_type: str = ""               # e.g. "Structured data", "Policy document", "Working notes"
+    data_point: str = ""                  # the key figure or quote
+    confidence: str = ""                  # "Verified" | "Amber" | "Gap"
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class RiskItem:                           # one row of the Report 03 risk register
+    risk: str
+    likelihood: str = ""                  # "High" | "Medium" | "Low"
+    impact: str = ""                      # "High" | "Medium" | "Low"
+    mitigation: str = ""
+    owner: str = ""                       # a grounded ROLE (never an invented person)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class TraceRow:                           # one row of the Report 03 traceability matrix (appendix)
+    pain_point: str = ""
+    summary: str = ""
+    severity: str = ""
+    recommendation: str = ""
+    opportunity: str = ""
+    expected_outcome: str = ""
+    horizon: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass
@@ -427,6 +519,10 @@ class SynthesisContent:                    # everything reports 00-06 render
     source_index: list[SourceDoc] = field(default_factory=list)
     executive_summary: ExecutiveSummary = field(default_factory=ExecutiveSummary)  # Report 00
     target_state: str = ""                 # forward-looking "where this should converge" narrative
+    # deeper grounded appendices (all optional — omit cleanly when empty)
+    evidence_register: list[EvidenceRow] = field(default_factory=list)     # Report 02 appendix
+    risk_register: list[RiskItem] = field(default_factory=list)            # Report 03 risk register
+    traceability: list[TraceRow] = field(default_factory=list)             # Report 03 appendix
     # code-owned chart series, derived from grounded numbers in build (never model-set). Each entry:
     # {"key","title","unit","segments":[{"label","value"}]}. Renderer draws these as donut/bar.
     charts: list[dict[str, Any]] = field(default_factory=list)
@@ -445,6 +541,9 @@ class SynthesisContent:                    # everything reports 00-06 render
                 "source_index": [s.to_dict() for s in self.source_index],
                 "executive_summary": asdict(self.executive_summary),
                 "target_state": self.target_state,
+                "evidence_register": [e.to_dict() for e in self.evidence_register],
+                "risk_register": [r.to_dict() for r in self.risk_register],
+                "traceability": [t.to_dict() for t in self.traceability],
                 "charts": self.charts}
 
 

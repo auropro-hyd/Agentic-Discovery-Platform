@@ -29,7 +29,9 @@ class FakeSynthLLM:
 
 def _raw():
     return {
-        "_tool_numbers": [267, 600000, 67, 5667, 8420, 1196, 12362493.74, 34, 2400000, 1800000],
+        "_tool_numbers": [267, 600000, 67, 5667, 8420, 1196, 12362493.74, 34, 2400000, 1800000,
+                          340, 318, 22, 14, 320, 111, 40, 1100000, 1200000, 1000000, 950000,
+                          850000, 800000, 750000, 1400000, 1550000, 1350000, 1150000],
         "findings": [
             {"id": "F1", "title": "Customer master conflict", "business_consequence": "Wrong limits.",
              "computed_values": [{"label": "a", "value": 267}, {"label": "b", "value": 600000}],

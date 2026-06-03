@@ -346,6 +346,8 @@
     "charts": [],
     "cross_process_patterns": [],
     "current_state": {
+      "baseline_stats": [],
+      "data_tables": [],
       "domain_overview": "This domain covers how the company commits to spend with suppliers — from the point a purchase order is raised, through approval, to the point an order is placed. The process is steered by a written procurement policy and recorded in a structured commitments export. The policy sets two headline controls: a mandatory second Finance approval on large purchase orders, and a requirement that a purchase order exists before any order is placed.",
       "format_taxonomy": [
         {
@@ -413,6 +415,7 @@
           "responsible": "Not assigned"
         }
       ],
+      "process_detail": [],
       "process_flow": [
         {
           "actor": "Requesting function",
@@ -556,6 +559,7 @@
       ]
     },
     "dependency_notes": "The purchase-order-first gate depends on the second-approval checkpoint, and exception monitoring depends on both being live so that the states it surfaces are genuine residual exceptions rather than uncontrolled releases.",
+    "evidence_register": [],
     "executive_summary": {
       "headline": "This assessment reviewed how high-value purchase commitments are approved and recorded against the company's own procurement policy. The single most important finding is that EUR 557,000 of large commitments were released without the second Finance approval the policy requires.",
       "opportunity": "The value lies in turning the controls the policy already names into controls the business can actually enforce and monitor. The first move is a structured approval checkpoint that holds large commitments until a second Finance approval is recorded, supported by a routine that surfaces the exception states the export already captures.",
@@ -1010,7 +1014,10 @@
     ],
     "pain_points": [
       {
+        "business_consequence": "",
+        "category": "",
         "description": "Seven purchase orders, each above the large-spend threshold, were released carrying only a single approval. Together these represent EUR 557,000 of commitments and 12.0 percent of total purchase order value, released without the second Finance approval the policy mandates. The largest single order in the record reached EUR 150,000.",
+        "detail_table": null,
         "failure_pattern": "Single-approval release of large spend — the dual-control designed to prevent unauthorised large commitments is bypassed because it is advisory rather than enforced.",
         "from_finding": "F1",
         "id": "PP1",
@@ -1047,6 +1054,7 @@
           }
         ],
         "root_cause": "The second-approval control is named in the policy but is not enforced at the point of approval; nothing holds a large order until a second approval is recorded.",
+        "severity": "",
         "sources": [
           {
             "doc_id": "purchase-order-export",
@@ -1062,7 +1070,10 @@
         "title": "Large commitments released without the mandatory second Finance approval"
       },
       {
+        "business_consequence": "",
+        "category": "",
         "description": "Three orders, worth EUR 216,000 and representing 4.7 percent of total purchase order value, were placed before any purchase order existed — outside the controlled procurement process entirely, against an absolute prohibition. All three of these orders also lacked the second approval, meaning no preventive control applied to them at any point.",
+        "detail_table": null,
         "failure_pattern": "Maverick spend with compounded control failure — ordering outside the process, combined with the absence of any second approval, leaves these commitments with no preventive control whatsoever.",
         "from_finding": "F2",
         "id": "PP2",
@@ -1099,6 +1110,7 @@
           }
         ],
         "root_cause": "There is no enforced checkpoint requiring a purchase order to exist before an order is placed, so commitments can be made entirely outside the controlled process.",
+        "severity": "",
         "sources": [
           {
             "doc_id": "purchase-order-export",
@@ -1114,7 +1126,10 @@
         "title": "Orders placed before any purchase order existed, with no preventive control at all"
       },
       {
+        "business_consequence": "",
+        "category": "",
         "description": "The procurement policy names a 'second approval' control, yet the term appears zero times in the written rulebook, and no document assigns an owner or a detective or remediation step to the exception states the export already records. As a result, the EUR 557,000 of single-approval commitments and the EUR 216,000 of maverick commitments can persist without anyone detecting or actioning them.",
+        "detail_table": null,
         "failure_pattern": "Ungoverned exception states — the system records the exception, but no role is accountable for acting on it, so recorded exceptions sit unaddressed.",
         "from_finding": "F3",
         "id": "PP3",
@@ -1144,6 +1159,7 @@
           }
         ],
         "root_cause": "The policy describes the controls that should apply but is silent on exception handling — there is no defined ownership for detecting or remediating recorded exceptions.",
+        "severity": "",
         "sources": [
           {
             "doc_id": "procurement-policy",
@@ -1159,6 +1175,7 @@
         "title": "No owner or remediation defined for the exception states the record already captures"
       }
     ],
+    "risk_register": [],
     "roadmap": [
       {
         "horizon": "H1",
@@ -1235,6 +1252,7 @@
       "notes": "The business already has both the rulebook and the recorded outcomes; the priority is closing the distance between the two.",
       "posture": "Control-first: make the policy enforceable and the recorded exceptions visible before scaling spend volume"
     },
-    "target_state": "Once these interventions land, large purchase commitments will only release after a second Finance approval is recorded, and no order will reach a supplier without a purchase order already in place. The dual-control the policy mandates becomes an enforced step rather than an advisory one, and the requirement to have a purchase order before ordering is upheld at the point of ordering. The exception states the record already captures will have named owners and a routine that drives each to remediation, so recorded exceptions are seen and acted on rather than persisting unaddressed. The result is a procurement process where the rulebook and the recorded outcomes converge — the controls the policy describes are the controls the business actually enforces and monitors."
+    "target_state": "Once these interventions land, large purchase commitments will only release after a second Finance approval is recorded, and no order will reach a supplier without a purchase order already in place. The dual-control the policy mandates becomes an enforced step rather than an advisory one, and the requirement to have a purchase order before ordering is upheld at the point of ordering. The exception states the record already captures will have named owners and a routine that drives each to remediation, so recorded exceptions are seen and acted on rather than persisting unaddressed. The result is a procurement process where the rulebook and the recorded outcomes converge — the controls the policy describes are the controls the business actually enforces and monitors.",
+    "traceability": []
   }
 }

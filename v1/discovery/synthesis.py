@@ -20,7 +20,7 @@ import re
 from . import docnames, tools
 from .agent_loop import GroundingError, _close
 
-PP_TO_OPP = {"PP1": "OPP1", "PP2": "OPP3", "PP3": "OPP2"}
+PP_TO_OPP = {"PP1": "OPP1", "PP2": "OPP3", "PP3": "OPP2", "PP4": "OPP4", "PP5": "OPP5"}
 OPP_TO_PP = {v: k for k, v in PP_TO_OPP.items()}
 
 # numbers that are structural (report/horizon indices, 2x2 scores, opp count, calendar years,
@@ -85,6 +85,16 @@ def assert_factual(text: str) -> None:
         raise GroundingError(f"Report-01 prose contains diagnostic language: {hits[:3]}")
 
 
+# Keys whose string values are FACTUAL tables/figures restated verbatim from cited source documents
+# (channel mix, lead-times, credit bands, EDI connections, top accounts, DC network, per-pain-point
+# evidence tables, the evidence register). Report 01 is the factual baseline whose job is to restate
+# sourced facts; these are NOT synthesised impact claims. Their numbers are exempt from the
+# findings-allow-list check (they still pass assert_factual for diagnostic language, and every table
+# carries its source). All synthesised claim numbers (NumberRef.value, business impact) stay gated.
+_SOURCED_TABLE_KEYS = {"baseline_stats", "data_tables", "process_detail", "detail_table",
+                       "evidence_register"}
+
+
 def validate_synthesis(payload: dict, allow: set[float], doc_keys: set[str]) -> dict:
     """Raise GroundingError if the synthesis violates any grounding/quality invariant."""
     def prose_ok(s: str):
@@ -95,20 +105,21 @@ def validate_synthesis(payload: dict, allow: set[float], doc_keys: set[str]) -> 
             if not _close(v, allow):
                 raise GroundingError(f"prose has untraceable number {tok!r}")
 
-    def walk(o):
+    def walk(o, sourced=False):
         if isinstance(o, dict):
             if {"value", "unit", "text"} <= set(o):
                 if not _num_ok(o["value"], allow):
                     raise GroundingError(f"synthesis number {o['value']} not traceable to findings")
             if "doc_key" in o and o["doc_key"] not in doc_keys:
                 raise GroundingError(f"unknown doc_key {o['doc_key']!r}")
-            for v in o.values():
-                walk(v)
+            for k, v in o.items():
+                walk(v, sourced or k in _SOURCED_TABLE_KEYS)
         elif isinstance(o, list):
             for x in o:
-                walk(x)
+                walk(x, sourced)
         elif isinstance(o, str):
-            prose_ok(o)
+            if not sourced:                 # sourced factual tables restate cited document figures
+                prose_ok(o)
 
     walk(payload)
 

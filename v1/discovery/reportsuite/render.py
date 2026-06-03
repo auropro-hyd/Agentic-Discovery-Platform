@@ -174,6 +174,17 @@ def r00(s: SynthesisContent, meta) -> str:
     return d.toc_html() + d.body()
 
 
+def _tables_titled(tables, *needles):
+    """Return the grounded data tables whose title contains any of the given (lowercased) needles,
+    in declared order. Lets r01 place each table in the right numbered section without hardcoding."""
+    out = []
+    for t in tables or []:
+        low = (t.title or "").lower()
+        if any(n in low for n in needles):
+            out.append(t)
+    return out
+
+
 def r01(s: SynthesisContent, meta) -> str:
     cs = s.current_state
     dom = esc(meta.get("domain_label", "this process"))
@@ -181,9 +192,19 @@ def r01(s: SynthesisContent, meta) -> str:
     d = _Doc("Current State Assessment",
              f"How {dom} runs today{at_client}. A factual baseline of the process, the systems that "
              "support it, and how information is structured — stated as fact, no judgements.")
+
+    # 1. Domain overview — context + grounded volume baseline + channel mix
     d.h1("Domain overview")
     d.h2("Context and scope").p(cs.domain_overview).p(cs.process_summary)
-    d.h2("Process flow")
+    if cs.baseline_stats:
+        d.h2("Volume baseline")
+        d.raw(stat_tiles([(k.value, k.label + (f" — {k.sublabel}" if k.sublabel else ""), "blue")
+                          for k in cs.baseline_stats]))
+    for t in _tables_titled(cs.data_tables, "channel mix"):
+        d.raw(_data_table(t))
+
+    # 2. Process flow — diagram + step table
+    d.h1("Process flow")
     d.p("The end-to-end flow, who performs each step and on which system:")
     d.raw(process_flow_svg(cs.process_flow))
     rows = ["<table><thead><tr><th>Step</th><th>Performed by</th><th>System</th>"
@@ -194,9 +215,52 @@ def r01(s: SynthesisContent, meta) -> str:
     rows.append("</tbody></table>")
     d.raw("".join(rows))
 
-    d.h1("Systems & structure")
+    # 3. Process inventory — per-step detail + the supporting reference tables
+    if cs.process_detail:
+        d.h1("Process inventory")
+        d.p("Each stage of the process in detail — how it runs today, who performs it, and on which "
+            "system.")
+        for pd in cs.process_detail:
+            who = " · ".join(x for x in [pd.actor, pd.system] if x)
+            d.raw(f"<div class='card'><h4>{esc(pd.title)}</h4>"
+                  + (f"<div class='who'>{esc(who)}</div>" if who else "")
+                  + f"<p>{esc(pd.body)}</p>"
+                  + (f"<p class='prov'>Source: {_cite_links(pd.sources)}</p>" if pd.sources else "")
+                  + "</div>")
+        for t in _tables_titled(cs.data_tables, "credit limit approval", "lead time",
+                                "collections escalation"):
+            d.raw(_data_table(t))
+
+    # 4. Ownership map — RACI
+    d.h1("Ownership map")
+    if cs.process_inventory:
+        d.h2("Process inventory summary")
+        d.raw("<ul>" + "".join(f"<li><strong>{esc(it.name)}</strong> — {esc(it.purpose)}</li>"
+                               for it in cs.process_inventory) + "</ul>")
+    d.h2("RACI matrix")
+    om = ["<table><thead><tr><th>Activity</th><th>Responsible</th><th>Accountable</th>"
+          "</tr></thead><tbody>"]
+    for r in cs.ownership_map:
+        om.append(f"<tr><td>{esc(r.activity)}</td><td>{esc(r.responsible)}</td>"
+                  f"<td>{esc(r.accountable)}</td></tr>")
+    om.append("</tbody></table>")
+    d.raw("".join(om))
+
+    # 5. System inventory — systems table + EDI connections + deep profiles + format taxonomy
+    d.h1("System inventory")
+    for t in _tables_titled(cs.data_tables, "systems in scope"):
+        d.h2("Systems in scope").raw(_data_table(t, show_title=False))
+    si = ["<table><thead><tr><th>System</th><th>Role</th><th>System of record for</th>"
+          "</tr></thead><tbody>"]
+    for it in cs.system_inventory:
+        si.append(f"<tr><td>{esc(it.name)}</td><td>{esc(it.purpose)}</td>"
+                  f"<td>{esc(it.system_of_record_for)}</td></tr>")
+    si.append("</tbody></table>")
+    d.raw("".join(si))
+    for t in _tables_titled(cs.data_tables, "edi connection"):
+        d.h2("EDI connection inventory").raw(_data_table(t, show_title=False))
     if cs.system_profiles:
-        d.h2("Systems and sources")
+        d.h2("System profiles")
         d.p("Each system that supports this process — what it is, how it is used, who owns it, and "
             "the constraints observed.")
         for p in cs.system_profiles:
@@ -223,28 +287,7 @@ def r01(s: SynthesisContent, meta) -> str:
         tx.append("</tbody></table>")
         d.raw("".join(tx))
 
-    d.h1("Ownership & systems")
-    if cs.process_inventory:
-        d.h2("Process inventory")
-        d.raw("<ul>" + "".join(f"<li><strong>{esc(it.name)}</strong> — {esc(it.purpose)}</li>"
-                               for it in cs.process_inventory) + "</ul>")
-    d.h2("Ownership map")
-    om = ["<table><thead><tr><th>Activity</th><th>Responsible</th><th>Accountable</th>"
-          "</tr></thead><tbody>"]
-    for r in cs.ownership_map:
-        om.append(f"<tr><td>{esc(r.activity)}</td><td>{esc(r.responsible)}</td>"
-                  f"<td>{esc(r.accountable)}</td></tr>")
-    om.append("</tbody></table>")
-    d.raw("".join(om))
-    d.h2("System inventory")
-    si = ["<table><thead><tr><th>System</th><th>Role</th><th>System of record for</th>"
-          "</tr></thead><tbody>"]
-    for it in cs.system_inventory:
-        si.append(f"<tr><td>{esc(it.name)}</td><td>{esc(it.purpose)}</td>"
-                  f"<td>{esc(it.system_of_record_for)}</td></tr>")
-    si.append("</tbody></table>")
-    d.raw("".join(si))
-
+    # 6. Handoff map
     d.h1("Handoff map")
     d.p("How work crosses between steps and systems — each handoff is where information changes "
         "hands or format.")
@@ -253,6 +296,13 @@ def r01(s: SynthesisContent, meta) -> str:
         f"<li>{esc(ho.from_step)} → {esc(ho.to_step)} "
         f"<span class='prov'>({esc(ho.mechanism)})</span></li>" for ho in cs.handoff_catalogue)
         + "</ul>")
+
+    # Appendix — account baseline
+    appendix = _tables_titled(cs.data_tables, "top trading accounts")
+    if appendix:
+        d.h1("Appendix — account baseline")
+        for t in appendix:
+            d.raw(_data_table(t))
     return d.toc_html() + d.body()
 
 
@@ -274,6 +324,20 @@ def r02(s: SynthesisContent, meta) -> str:
     d.h1("Pain points in detail")
     for idx, pp in enumerate(sorted(s.pain_points, key=lambda p: p.impact_rank), start=1):
         d.raw(_pain_point_card(pp, idx))
+    if s.evidence_register:
+        d.h1("Appendix — evidence register")
+        d.p("Every finding traced to the source it rests on, with the confidence tier.")
+        er = ["<table><thead><tr><th>Finding</th><th>Source</th><th>Evidence type</th>"
+              "<th>Key data point</th><th>Confidence</th></tr></thead><tbody>"]
+        for e in s.evidence_register:
+            conf = e.confidence.lower()
+            cls = ("b-low" if conf == "verified" else "b-med" if conf == "amber"
+                   else "b-high" if conf == "gap" else "b-pat")
+            er.append(f"<tr><td><strong>{esc(e.finding)}</strong></td><td>{esc(e.source)}</td>"
+                      f"<td>{esc(e.evidence_type)}</td><td>{esc(e.data_point)}</td>"
+                      f"<td><span class='badge {cls}'>{esc(e.confidence)}</span></td></tr>")
+        er.append("</tbody></table>")
+        d.raw("".join(er))
     return d.toc_html() + d.body()
 
 
@@ -330,12 +394,61 @@ def r03(s: SynthesisContent, meta) -> str:
                       f"<td>{_rating_cell(o.operational_readiness)}</td></tr>")
         rt.append("</tbody></table>")
         d.raw("".join(rt))
+    d.h2("Implementation roadmap")
+    d.p("The recommendations sequenced across three horizons (now → later).")
+    d.raw(roadmap_timeline_svg(s.roadmap))
     d.h2("Sequencing rationale").p(s.sequencing_rationale)
     if s.dependency_notes:
         d.raw(f"<p><strong>Dependencies:</strong> {esc(s.dependency_notes)}</p>")
     d.raw(dependency_map_svg(s.opportunities))
     d.h2("Strategic readiness").p(s.strategic_readiness)
+
+    if s.metrics_framework:
+        d.h1("Success metrics")
+        d.p("How to measure delivery once live — the baseline today and the directional target.")
+        mt = ["<table><thead><tr><th>Metric</th><th>What it measures</th><th>Target</th>"
+              "</tr></thead><tbody>"]
+        for m in s.metrics_framework:
+            mt.append(f"<tr><td><strong>{esc(m.name)}</strong></td><td>{esc(m.definition)}</td>"
+                      f"<td>{esc(m.target)}</td></tr>")
+        mt.append("</tbody></table>")
+        d.raw("".join(mt))
+
+    if s.risk_register:
+        d.h1("Risk register")
+        d.p("The delivery risks, how likely and how serious each is, and how it is mitigated.")
+        rk = ["<table><thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th>"
+              "<th>Owner</th></tr></thead><tbody>"]
+        for r in s.risk_register:
+            rk.append(f"<tr><td>{esc(r.risk)}</td><td>{_level_badge(r.likelihood)}</td>"
+                      f"<td>{_level_badge(r.impact)}</td><td>{esc(r.mitigation)}</td>"
+                      f"<td>{esc(r.owner)}</td></tr>")
+        rk.append("</tbody></table>")
+        d.raw("".join(rk))
+
+    if s.traceability:
+        d.h1("Appendix — traceability matrix")
+        d.p("Each pain point traced through to the recommendation, opportunity, expected outcome "
+            "and horizon that addresses it.")
+        tr = ["<table><thead><tr><th>Pain point</th><th>Summary</th><th>Severity</th>"
+              "<th>Recommendation</th><th>Opportunity</th><th>Expected outcome</th><th>Horizon</th>"
+              "</tr></thead><tbody>"]
+        for t in s.traceability:
+            tr.append(f"<tr><td><strong>{esc(t.pain_point)}</strong></td><td>{esc(t.summary)}</td>"
+                      f"<td>{esc(t.severity)}</td><td>{esc(t.recommendation)}</td>"
+                      f"<td>{esc(t.opportunity)}</td><td>{esc(t.expected_outcome)}</td>"
+                      f"<td>{esc(t.horizon)}</td></tr>")
+        tr.append("</tbody></table>")
+        d.raw("".join(tr))
     return d.toc_html() + d.body()
+
+
+def _level_badge(level: str) -> str:
+    """A High/Medium/Low level as a coloured badge (risk likelihood/impact)."""
+    lo = (level or "").strip().lower()
+    cls = "b-high" if lo == "high" else "b-med" if lo == "medium" else "b-low" if lo == "low" \
+        else "b-pat"
+    return f"<span class='badge {cls}'>{esc(level)}</span>" if level else "—"
 
 
 def r04(s: SynthesisContent, meta) -> str:
@@ -431,22 +544,31 @@ def r06(s: SynthesisContent, meta) -> str:
 # ---------------------------------------------------------------------------
 # grounded component renderers (HTML)
 # ---------------------------------------------------------------------------
-def _severity(rank: int) -> tuple[str, str]:
-    """Map impact rank (1 = most material) to a severity badge. Grounded in the ranking, not
-    invented: rank 1 → High (red), rank 2 → Medium (amber), rank ≥3 → Lower (neutral blue, NOT
-    green — green reads as 'good' and would clash with a pain-point context)."""
-    if rank <= 1:
+def _severity(rank: int, explicit: str = "") -> tuple[str, str]:
+    """Severity badge for a pain point. Uses an explicit grounded severity when set
+    (high|medium|lower), else falls back to the impact rank. Red/amber for high/medium; neutral blue
+    for lower (green would read as 'good' and clash in a pain-point context)."""
+    level = (explicit or "").strip().lower()
+    if not level:
+        level = "high" if rank <= 1 else "medium" if rank == 2 else "lower"
+    if level == "high":
         return "b-high", "High Severity"
-    if rank == 2:
+    if level == "medium":
         return "b-med", "Medium Severity"
     return "b-pat", "Lower Severity"
 
 
+def _is_high(pp) -> bool:
+    lvl = (pp.severity or "").strip().lower()
+    return lvl == "high" if lvl else pp.impact_rank <= 1
+
+
 def _pain_point_card(pp, idx: int) -> str:
-    sev_cls, sev_lbl = _severity(pp.impact_rank)
+    sev_cls, sev_lbl = _severity(pp.impact_rank, pp.severity)
     badges = [f"<span class='badge {sev_cls}'>{sev_lbl}</span>"]
-    if pp.failure_pattern:
-        badges.append(f"<span class='badge b-cat'>{esc(_clip(pp.failure_pattern, 28))}</span>")
+    cat = pp.category or pp.failure_pattern
+    if cat:
+        badges.append(f"<span class='badge b-cat'>{esc(_clip(cat, 28))}</span>")
     h = ["<div class='card'>",
          "<div class='pp-hdr'>",
          f"<div class='pp-id'>PP<br>{idx:02d}</div>",
@@ -457,10 +579,19 @@ def _pain_point_card(pp, idx: int) -> str:
     mini = _mini_stats(pp.quantified)
     if mini:
         h.append(mini)
+    if pp.detail_table:
+        h.append(_data_table(pp.detail_table))
     h.append(f"<p><strong>Root cause:</strong> {esc(pp.root_cause)}</p>")
     quote = _ev_quote(pp.sources)
     if quote:
         h.append(quote)
+    if pp.business_consequence:
+        hi = _is_high(pp)
+        sev_box = "high-box" if hi else "med-box"
+        title_cls = "hb-title" if hi else "mb-title"
+        text_cls = "hb-text" if hi else "mb-text"
+        h.append(f"<div class='{sev_box}'><div class='{title_cls}'>Business impact</div>"
+                 f"<div class='{text_cls}'>{esc(pp.business_consequence)}</div></div>")
     if pp.opportunity_signal:
         h.append("<div class='note-box'><div class='nb-title'>Addressed by</div>"
                  f"<div class='nb-text'>{esc(pp.opportunity_signal)} — see the Opportunity "
@@ -1226,6 +1357,23 @@ def stat_tiles(tiles) -> str:
     return f"<div class='stat-row'>{cells}</div>"
 
 
+def _data_table(t, show_title: bool = True) -> str:
+    """Render a grounded factual DataTable: a titled table with a navy header, optional caption above
+    and footnote below, and a source line. `show_title=False` omits the table's own heading when a
+    section heading already names it (avoids a duplicate title). Empty rows → ''."""
+    if not t or not getattr(t, "rows", None):
+        return ""
+    head = "".join(f"<th>{esc(c)}</th>" for c in t.columns)
+    body = "".join("<tr>" + "".join(f"<td>{esc(c)}</td>" for c in row) + "</tr>" for row in t.rows)
+    title = f"<h4>{esc(t.title)}</h4>" if show_title else ""
+    cap = f"<div class='dt-cap'>{esc(t.caption)}</div>" if t.caption else ""
+    note = f"<p class='prov'>{esc(t.note)}</p>" if t.note else ""
+    src = (f"<p class='prov'>Source: {_cite_links(t.sources)}</p>"
+           if getattr(t, "sources", None) else "")
+    return (f"<div class='dt'>{title}{cap}"
+            f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>{note}{src}</div>")
+
+
 def _exec_tiles(s: SynthesisContent):
     """Derived-in-code grounded tiles for the executive summary (counts + headline figures)."""
     tiles = [(str(len(s.pain_points)), "issues identified", "blue"),
@@ -1249,10 +1397,15 @@ def _exec_tiles(s: SynthesisContent):
 
 
 def _pp_tiles(s: SynthesisContent):
-    """Severity-coloured tiles for the pain-points overview (counts by severity + opp count)."""
-    ranks = [p.impact_rank for p in s.pain_points]
-    high = sum(1 for r in ranks if r <= 1)
-    med = sum(1 for r in ranks if r == 2)
+    """Severity-coloured tiles for the pain-points overview (counts by severity + opp count). Counts
+    by the explicit grounded severity where set, else the impact rank."""
+    def level(p):
+        lvl = (p.severity or "").strip().lower()
+        return lvl if lvl else ("high" if p.impact_rank <= 1 else
+                                "medium" if p.impact_rank == 2 else "lower")
+    levels = [level(p) for p in s.pain_points]
+    high = sum(1 for x in levels if x == "high")
+    med = sum(1 for x in levels if x == "medium")
     return [(str(len(s.pain_points)), "pain points", "blue"),
             (str(high), "high severity", "red"),
             (str(med), "medium severity", "amber"),
@@ -1514,8 +1667,10 @@ def _cover(slug: str, title: str, meta: dict) -> str:
 
 
 def _page(slug: str, title: str, body: str, meta: dict) -> str:
-    """A standalone report document: cover (print) → its own TOC (print, already inside `body`) →
-    numbered sections. On screen, a sidebar nav lets the reader move between the seven reports."""
+    """A standalone report document — like the reference: a slim top nav-bar to move between the
+    seven reports (screen only), then the report's OWN cover, its OWN table of contents, and its
+    numbered sections, as one centred scrolling document. Cover/TOC are visible on screen AND in
+    print (where each report paginates from its own cover)."""
     nav = []
     for s_slug, label in REPORTS:
         num = s_slug.split("-")[0]
@@ -1525,21 +1680,16 @@ def _page(slug: str, title: str, body: str, meta: dict) -> str:
     client = (meta.get("client") or "").strip()
     domain = esc(meta.get("domain_label", "Discovery"))
     page_title = f"{esc(title)} — {esc(client)}" if client else esc(title)
-    heading = esc(client) if client else f"{domain} Discovery"
-    sub = f"{domain} Discovery" if client else "Discovery assessment"
     cover = _cover(slug, title, meta)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{page_title}</title>
 <link rel="stylesheet" href="assets/report.css"></head><body>
-{cover}
-<div class="layout">
-<nav class="sidebar">
+<nav class="topnav">
   <span class="brandmark">{_LOGO}AuroPro</span>
-  <h1>{heading}</h1>
-  <div class="sub">{sub}</div>
-  {''.join(nav)}
+  <span class="tn-links">{''.join(nav)}</span>
 </nav>
+{cover}
 <main class="content">
 {body}
-</main></div></body></html>"""
+</main></body></html>"""
