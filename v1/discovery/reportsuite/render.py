@@ -395,9 +395,9 @@ def r06(s: SynthesisContent, meta) -> str:
 _SVG_DEFS = (
     "<defs>"
     "<marker id='arr' markerWidth='10' markerHeight='10' refX='8' refY='3.2' orient='auto'>"
-    "<path d='M0,0 L8,3.2 L0,6.4 Z' fill='#1f6feb'/></marker>"
+    "<path d='M0,0 L8,3.2 L0,6.4 Z' fill='#0f7c8c'/></marker>"
     "<linearGradient id='hdr' x1='0' y1='0' x2='0' y2='1'>"
-    "<stop offset='0' stop-color='#2b76f0'/><stop offset='1' stop-color='#1f6feb'/></linearGradient>"
+    "<stop offset='0' stop-color='#2a93a3'/><stop offset='1' stop-color='#0f7c8c'/></linearGradient>"
     "<filter id='sh' x='-20%' y='-20%' width='140%' height='150%'>"
     "<feDropShadow dx='0' dy='1.5' stdDeviation='2.5' flood-color='#1a2230' flood-opacity='0.12'/>"
     "</filter></defs>"
@@ -432,13 +432,13 @@ def process_flow_svg(steps) -> str:
         x2, y2 = node_xy(i + 1)
         if (i // WRAP) == ((i + 1) // WRAP):
             out.append(f"<line x1='{x1 + NW}' y1='{y1 + NH/2}' x2='{x2 - 3}' y2='{y2 + NH/2}' "
-                       f"stroke='#1f6feb' stroke-width='2.2' marker-end='url(#arr)'/>")
+                       f"stroke='#0f7c8c' stroke-width='2.2' marker-end='url(#arr)'/>")
         else:
             sx, sy = x1 + NW / 2, y1 + NH
             ex, ey = x2 + NW / 2, y2 - 3
             midy = sy + GAP_Y / 2
             out.append(f"<path d='M{sx},{sy} L{sx},{midy} L{ex},{midy} L{ex},{ey}' fill='none' "
-                       f"stroke='#1f6feb' stroke-width='2.2' marker-end='url(#arr)'/>")
+                       f"stroke='#0f7c8c' stroke-width='2.2' marker-end='url(#arr)'/>")
 
     for i, st in enumerate(steps):
         x, y = node_xy(i)
@@ -501,9 +501,9 @@ def data_flow_svg(steps) -> str:
     for i, name in enumerate(systems):
         x, y = sxy(i)
         out.append(f"<g filter='url(#sh)'><rect x='{x}' y='{y}' width='{NW}' height='{NH}' rx='10' "
-                   f"fill='#eaf1fe' stroke='#1f6feb' stroke-width='1.2'/>"
+                   f"fill='#e6f1f3' stroke='#0f7c8c' stroke-width='1.2'/>"
                    f"<text x='{x+NW/2}' y='{y+NH/2+5}' text-anchor='middle' font-size='13' "
-                   f"font-weight='600' fill='#0a4bbd'>{esc(_clip(name, 22))}</text></g>")
+                   f"font-weight='600' fill='#0b5e6b'>{esc(_clip(name, 22))}</text></g>")
     out.append("</svg>")
     return ("<div class='flow-wrap'><div class='flow-cap'>Systems the process touches, and how "
             "data moves between them</div>" + "".join(out) + "</div>")
@@ -517,7 +517,7 @@ def _clip(t: str, n: int) -> str:
 # ---- data-viz helpers (pure inline SVG, offline-safe, grounded inputs only) -------------------
 # A restrained categorical palette for multi-series visuals — all in the calm blue/slate family,
 # no traffic-light status colours (those are reserved for the H/M/L readiness badges).
-_SERIES = ["#1f6feb", "#5b8def", "#8fb0f0", "#b9cdf3", "#d7e3f8"]
+_SERIES = ["#0f7c8c", "#2a93a3", "#5fb0bc", "#9fccd3", "#cfe6ea"]
 
 
 def _fmt_compact(v: float) -> str:
@@ -610,7 +610,7 @@ def value_feasibility_svg(opportunities) -> str:
         out.append(f"<circle cx='{cx}' cy='{cy}' r='17' fill='var(--accent)' fill-opacity='0.16' "
                    f"stroke='var(--accent)'/>")
         out.append(f"<text x='{cx}' y='{cy+4}' text-anchor='middle' font-size='11' "
-                   f"font-weight='700' fill='#0a4bbd'>{esc(o.id)}</text>")
+                   f"font-weight='700' fill='#0b5e6b'>{esc(o.id)}</text>")
     out.append("</svg>")
     return ("<div class='chart-wrap'><div class='chart-cap'>Where each opportunity sits on value "
             "versus feasibility</div>" + "".join(out) + "</div>")
@@ -688,7 +688,7 @@ def value_bar_svg(segments, caption: str, unit: str = "") -> str:
                    f"fill='url(#hdr)' filter='url(#sh)'/>")
         val = _fmt_compact(v) if unit == "eur" else (f"{int(v):,}" if v == int(v) else f"{v:g}")
         out.append(f"<text x='{PAD+LBLW+w+10}' y='{y+BARH/2+4}' font-size='12' font-weight='700' "
-                   f"fill='#0a4bbd'>{esc(val)}</text>")
+                   f"fill='#0b5e6b'>{esc(val)}</text>")
     out.append("</svg>")
     return ("<div class='chart-wrap'><div class='chart-cap'>" + esc(caption) + "</div>"
             + "".join(out) + "</div>")

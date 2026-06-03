@@ -1,11 +1,25 @@
-"""CSS/JS for the client-facing report suite. Restrained corporate palette; a single calm
-accent for emphasis only (no red/amber status colours anywhere)."""
+"""CSS/JS for the client-facing report suite.
+
+Visual identity — "Deep Teal & Graphite", editorial-consulting (see
+specs/001-report-visual-system/spec.md). Deep teal is the single brand accent (anchored to the
+cover); one warm bronze note is used sparingly for highest-impact emphasis only. Display type is a
+system serif (offline-safe, no web-font fetch) to read as an authored document, not a tool dump.
+All pure CSS/inline-SVG — no external fonts, libraries, or network."""
 
 CSS = """
-:root{ --ink:#1a2230; --muted:#5b6776; --line:#e3e8ee; --bg:#f7f9fb;
-       --accent:#1f6feb; --accent-soft:#eaf1fe; --panel:#ffffff; }
+:root{ --ink:#1a2230; --muted:#5b6776; --line:#e3e8ee; --bg:#f6f8f9;
+       --accent:#0f7c8c; --accent-soft:#e6f1f3; --accent-deep:#0b5e6b;
+       --warm:#c8772e; --warm-soft:#f7ece0;
+       --panel:#ffffff;
+       /* chart series ramp — cohesive teal family */
+       --c1:#0f7c8c; --c2:#2a93a3; --c3:#5fb0bc; --c4:#9fccd3; --c5:#cfe6ea;
+       /* system serif display stack (offline-safe) + sans body */
+       --display:"Iowan Old Style","Charter",Georgia,"Times New Roman",serif;
+       --sans:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+       /* spacing scale (8px base) */
+       --s1:.5rem; --s2:1rem; --s3:1.5rem; --s4:2rem; }
 *{ box-sizing:border-box; }
-body{ margin:0; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+body{ margin:0; font-family:var(--sans);
       color:var(--ink); background:var(--bg); line-height:1.55; }
 .layout{ display:flex; min-height:100vh; }
 .sidebar{ width:270px; flex:0 0 270px; background:#0f1b2d; color:#cdd7e4; padding:1.5rem 1rem;
@@ -18,10 +32,16 @@ body{ margin:0; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-s
 .sidebar a.active{ background:var(--accent); color:#fff; }
 .sidebar .num{ color:#6f86a6; font-variant-numeric:tabular-nums; margin-right:.5rem; }
 .content{ flex:1; padding:2.5rem 3rem; max-width:920px; }
-.content h1{ font-size:1.7rem; margin:0 0 .3rem; }
-.content h2{ font-size:1.25rem; margin:2.2rem 0 .6rem; padding-bottom:.3rem;
-             border-bottom:1px solid var(--line); }
-.content h3{ font-size:1.05rem; margin:1.6rem 0 .4rem; }
+.content h1{ font-family:var(--display); font-size:2rem; font-weight:700; letter-spacing:-.01em;
+             margin:0 0 .3rem; }
+.content h2{ font-family:var(--display); font-size:1.35rem; font-weight:700;
+             margin:2.4rem 0 .7rem; padding-bottom:.35rem; border-bottom:2px solid var(--accent);
+             display:flex; align-items:baseline; gap:.6rem; }
+.content h3{ font-family:var(--display); font-size:1.1rem; font-weight:700; margin:1.6rem 0 .4rem; }
+/* section-number chip on numbered headings (set by the renderer) */
+.secnum{ font-family:var(--sans); font-size:.7rem; font-weight:700; color:#fff;
+         background:var(--accent); border-radius:5px; padding:.12rem .42rem; letter-spacing:.02em;
+         position:relative; top:-.12rem; }
 .lede{ color:var(--muted); margin:0 0 1.5rem; }
 table{ border-collapse:collapse; width:100%; margin:1rem 0; background:var(--panel); font-size:.9rem; }
 th,td{ border:1px solid var(--line); padding:.55rem .7rem; text-align:left; vertical-align:top; }
@@ -68,10 +88,12 @@ ul{ margin:.4rem 0 .8rem; } li{ margin:.2rem 0; }
        margin:1.4rem 0 1.8rem; }
 @media print{ .kpis{ grid-template-columns:repeat(5,1fr); } }
 .kpi{ background:var(--panel); border:1px solid var(--line); border-radius:10px;
-      padding:1rem 1.1rem; border-top:3px solid var(--accent); }
-.kpi-v{ font-size:1.45rem; font-weight:700; color:var(--ink); letter-spacing:-.01em;
-        font-variant-numeric:tabular-nums; }
-.kpi-l{ font-size:.78rem; color:var(--muted); margin-top:.15rem; }
+      padding:1rem 1.1rem; border-top:3px solid var(--accent); position:relative; }
+.kpi-v{ font-family:var(--display); font-size:1.7rem; font-weight:700; color:var(--ink);
+        letter-spacing:-.01em; font-variant-numeric:tabular-nums; line-height:1.1; }
+.kpi-l{ font-size:.78rem; color:var(--muted); margin-top:.2rem; }
+.kpi-ico{ position:absolute; top:.7rem; right:.8rem; width:16px; height:16px; opacity:.35; }
+.kpi-ico svg{ width:16px; height:16px; fill:none; stroke:var(--accent); stroke-width:1.6; }
 .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.4rem 0; }
 .panel{ background:var(--panel); border:1px solid var(--line); border-radius:10px;
         padding:1rem 1.2rem; }
@@ -152,7 +174,8 @@ table.usecase th{ font-size:.82rem; }
 .cover{ flex-direction:column; justify-content:center; width:210mm; min-height:297mm;
         background:linear-gradient(128deg,#0f7c8c 0 56%,#243043 56% 100%); color:#fff;
         padding:48mm 24mm; box-sizing:border-box; }
-.cover .ctitle{ font-size:32pt; font-weight:700; line-height:1.12; max-width:64%; }
+.cover .ctitle{ font-family:var(--display); font-size:34pt; font-weight:700; line-height:1.1;
+                max-width:66%; letter-spacing:-.01em; }
 .cover .csub{ font-size:13pt; margin-top:1.1rem; opacity:.9; }
 .cover .cbrand{ margin-top:auto; font-size:12pt; display:flex; align-items:center; gap:.55rem; }
 .cover .cbrand svg{ width:30px; height:30px; }
