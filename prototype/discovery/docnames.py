@@ -218,6 +218,8 @@ def _collapse_pairs(ids: list[str], phrases: list[str]) -> list[str]:
             lead_b = " ".join(words(ids[b])[:-2]) or words(ids[b])[0]
             noun = " ".join(words(i)[-2:]) + "s"
             out.append(f"your {lead_a} and {lead_b} {noun}")
-        elif idx not in used:
+        else:
+            # this idx is not in `used` (the `continue` above filtered those out) and is either
+            # unpaired or the second member of a pair whose first member already emitted it
             out.append(phrase(i))
     return out

@@ -1,0 +1,31 @@
+# Coverage is measured against the ACTIVE discovery pipeline only.
+#
+# Omitted on purpose (tested by the live run or out of scope for offline unit tests):
+#   - llm.py          the real Anthropic/Azure HTTP client — exercised by the live run, not mocked
+#   - scripted.py / stages.py / resolve.py / loader.py / report.py
+#                     the legacy linear/scripted pipeline, superseded by the agentic path
+#   - env.py          process/dotenv bootstrap (IO glue)
+#   - run.py          CLI entrypoint wiring (driven end-to-end by the live run)
+[run]
+source = discovery
+branch = True
+omit =
+    discovery/llm.py
+    discovery/scripted.py
+    discovery/stages.py
+    discovery/resolve.py
+    discovery/loader.py
+    discovery/report.py
+    discovery/env.py
+    discovery/__init__.py
+
+[report]
+show_missing = True
+skip_covered = False
+# The active pipeline is held at 100% statement + branch coverage. A drop fails CI.
+fail_under = 100
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    raise NotImplementedError
+    \.\.\.

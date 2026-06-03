@@ -80,8 +80,13 @@ diffs a re-run against the prior one. New domain: drop docs in `inputs/<domain>/
 
 ```bash
 uv run pytest                                   # tests
+uv run coverage run -m pytest && uv run coverage report   # tests + coverage (active pipeline = 100%)
 uv run pyrefly check discovery run.py scripts   # type-check product code
 pre-commit install                              # (run from repo root) enable the hooks
 ```
+
+The active discovery pipeline is held at **100% statement + branch coverage** (enforced in CI via
+`fail_under = 100` in `.coveragerc`). The scope deliberately omits the real HTTP LLM client and the
+legacy scripted/linear modules — those are exercised by the live run, not offline unit tests.
 
 The output suite opens at `out/<domain>/index.html`.
