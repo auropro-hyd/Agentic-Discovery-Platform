@@ -192,7 +192,7 @@ def r02(s: SynthesisContent, meta) -> str:
          "<p class='lede'>The issues found in the discovery, ranked by business impact, "
          "each mapped to a recommended opportunity.</p>",
          impact_bars_svg(s.pain_points),
-         render_charts(s.charts)]
+         render_charts(s.charts, kinds={"bar"})]   # magnitude bars here; share donut on Report 06
     for pp in sorted(s.pain_points, key=lambda p: p.impact_rank):
         h.append("<div class='card'>")
         h.append(f"<h3>{esc(pp.title)}</h3>")
@@ -381,6 +381,10 @@ def r06(s: SynthesisContent, meta) -> str:
             h.append(f"<tr><td><strong>{esc(m.name)}</strong></td><td>{esc(m.definition)}</td>"
                      f"<td>{esc(m.target)}</td></tr>")
         h.append("</tbody></table>")
+    donut = render_charts(s.charts, kinds={"donut"})
+    if donut:
+        h.append("<h2>Where the failures concentrate</h2>")
+        h.append(donut)
     h.append("<h2>System &amp; data-flow map</h2>")
     h.append("<p class='prov'>The full step-by-step process flow is in the Current State "
              "Assessment; this is the systems view of the same domain.</p>")
@@ -702,7 +706,7 @@ def donut_svg(segments, caption: str) -> str:
         ly = 34 + i * 26
         legend.append(f"<rect x='196' y='{ly-10}' width='12' height='12' rx='2' fill='{col}'/>"
                       f"<text x='214' y='{ly}' font-size='12' fill='#1a2230'>"
-                      f"{esc(_clip(label, 22))} · {esc(_fmt_compact(v))} "
+                      f"{esc(_nice_label(_clip(label, 22)))} · {esc(_fmt_compact(v))} "
                       f"({frac*100:.0f}%)</text>")
         a0 = a1
     out += legend
@@ -752,10 +756,15 @@ def value_bar_svg(segments, caption: str, unit: str = "") -> str:
             + "".join(out) + "</div>")
 
 
-def render_charts(charts) -> str:
-    """Render the code-owned grounded chart series (donut for shares, bar for counts/values)."""
+def render_charts(charts, kinds=None) -> str:
+    """Render the code-owned grounded chart series (donut for shares, bar for counts/values).
+    `kinds` optionally restricts to certain chart kinds (e.g. only 'bar' on one report, 'donut'
+    on another) so the same grounded series can show as magnitude in one place and share in
+    another without duplicating on a single page."""
     out = []
     for c in charts or []:
+        if kinds is not None and c.get("kind") not in kinds:
+            continue
         segs = [(s.get("label", ""), s.get("value")) for s in c.get("segments", [])]
         title = c.get("title", "")
         if c.get("kind") == "donut":

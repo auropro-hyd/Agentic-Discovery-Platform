@@ -285,6 +285,13 @@ def test_render_charts_bar_and_donut():
                                          {"label": "Other", "value": 2_000_000}]}])
     assert "<svg" in donut and "%" in donut
     assert render_charts([]) == ""
+    # kinds filter: same series, restricted to one kind per call site
+    both = [{"kind": "bar", "unit": "orders", "title": "B", "segments": [{"label": "A", "value": 5},
+            {"label": "C", "value": 2}]},
+            {"kind": "donut", "unit": "orders", "title": "D", "segments": [{"label": "A", "value": 5},
+            {"label": "C", "value": 2}]}]
+    assert "donut" not in render_charts(both, kinds={"bar"})
+    assert render_charts(both, kinds={"donut"}).count("<svg") == 1
 
 
 def test_metric_prepends_figure_when_text_has_no_number():

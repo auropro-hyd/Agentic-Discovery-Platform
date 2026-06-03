@@ -105,11 +105,14 @@ def test_derive_charts_builds_grounded_series():
         {"label": "Unfulfilled Email orders (count)", "value": 111},
         {"label": "some non-numeric", "value": "n/a"}]}]}   # bad value -> skipped, no crash
     charts = build.derive_charts(raw)
-    assert len(charts) == 1
-    c = charts[0]
-    assert c["key"] == "unfulfilled_by_channel" and c["kind"] == "bar"
-    # sorted descending, EDI first
-    assert [s["value"] for s in c["segments"]] == [1196, 320, 111]
+    # emits BOTH a magnitude bar and a share donut over the same grounded segments
+    kinds = {c["kind"] for c in charts}
+    assert kinds == {"bar", "donut"}
+    bar = next(c for c in charts if c["kind"] == "bar")
+    assert bar["key"] == "unfulfilled_by_channel"
+    assert [s["value"] for s in bar["segments"]] == [1196, 320, 111]   # sorted desc, EDI first
+    donut = next(c for c in charts if c["kind"] == "donut")
+    assert [s["value"] for s in donut["segments"]] == [1196, 320, 111]
 
 
 def test_derive_charts_empty_when_no_breakdown():

@@ -68,14 +68,18 @@ def derive_charts(raw_payload: dict) -> list[dict]:
                 continue
 
     charts: list[dict] = []
-    # unfulfilled orders by channel (a "by channel" breakdown of a count) — bar
+    # unfulfilled orders by channel — a fully-grounded multi-category whole (every segment is a
+    # real count from the tools; nothing derived/subtracted). Render BOTH a magnitude bar and a
+    # share-of-failures donut — bars show "how much more", donuts show "what share".
     unf = [(lbl.split("unfulfilled")[1].split("order")[0].strip().title() or "Channel", v)
            for lbl, v in vals.items() if "unfulfilled" in lbl and "order" in lbl and "value" not in lbl]
     unf = [(c, v) for c, v in unf if v > 0]
     if len(unf) >= 2:
+        seg = [{"label": c, "value": v} for c, v in sorted(unf, key=lambda x: -x[1])]
         charts.append({"key": "unfulfilled_by_channel", "unit": "orders", "kind": "bar",
-                       "title": "Unfulfilled orders by channel",
-                       "segments": [{"label": c, "value": v} for c, v in sorted(unf, key=lambda x: -x[1])]})
+                       "title": "Unfulfilled orders by channel", "segments": seg})
+        charts.append({"key": "unfulfilled_share", "unit": "orders", "kind": "donut",
+                       "title": "Share of unfulfilled orders by channel", "segments": seg})
     return charts
 
 
