@@ -191,7 +191,8 @@ def r02(s: SynthesisContent, meta) -> str:
     h = ["<h1>Pain Points &amp; Opportunities</h1>",
          "<p class='lede'>The issues found in the discovery, ranked by business impact, "
          "each mapped to a recommended opportunity.</p>",
-         impact_bars_svg(s.pain_points)]
+         impact_bars_svg(s.pain_points),
+         render_charts(s.charts)]
     for pp in sorted(s.pain_points, key=lambda p: p.impact_rank):
         h.append("<div class='card'>")
         h.append(f"<h3>{esc(pp.title)}</h3>")
@@ -575,8 +576,11 @@ def value_feasibility_svg(opportunities) -> str:
     def py(score): return PAD + plotH - (score - 1) / 4 * plotH   # value 1..5 -> y (inverted)
     out = [f"<svg class='chart' viewBox='0 0 {W} {H}' width='100%' role='img' "
            f"aria-label='Value versus feasibility' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
-    # quadrant guide lines at the midpoint
+    # shade the top-right "do first" quadrant softly so the map reads as intentional
     midx, midy = px(3), py(3)
+    out.append(f"<rect x='{midx}' y='{PAD}' width='{PAD+plotW-midx}' height='{midy-PAD}' "
+               f"fill='var(--accent-soft)'/>")
+    # quadrant guide lines at the midpoint
     out.append(f"<line x1='{midx}' y1='{PAD}' x2='{midx}' y2='{PAD+plotH}' stroke='#e3e8ee'/>")
     out.append(f"<line x1='{PAD}' y1='{midy}' x2='{PAD+plotW}' y2='{midy}' stroke='#e3e8ee'/>")
     # axes labels
@@ -584,7 +588,14 @@ def value_feasibility_svg(opportunities) -> str:
                f"fill='#5b6776' font-weight='600'>Feasibility →</text>")
     out.append(f"<text x='16' y='{PAD+plotH/2}' text-anchor='middle' font-size='12' fill='#5b6776' "
                f"font-weight='600' transform='rotate(-90 16 {PAD+plotH/2})'>Value →</text>")
-    out.append(f"<text x='{px(4.4)}' y='{py(4.6)}' font-size='10.5' fill='#9aa7b6'>Do first</text>")
+    # quadrant captions in all four corners so empty space reads as the map, not missing data
+    for qx, qy, anchor, label in [
+            (PAD + plotW - 6, PAD + 16, "end", "Do first"),
+            (PAD + 6, PAD + 16, "start", "Plan for"),
+            (PAD + plotW - 6, PAD + plotH - 8, "end", "Quick wins"),
+            (PAD + 6, PAD + plotH - 8, "start", "Reconsider")]:
+        out.append(f"<text x='{qx}' y='{qy}' text-anchor='{anchor}' font-size='10' "
+                   f"fill='#9aa7b6' font-weight='600'>{label}</text>")
     # spread bubbles that land on the same coordinate so labels never collide (deterministic)
     placed: dict[tuple, int] = {}
     for o in opps:
@@ -647,6 +658,53 @@ def _to_number_safe(v):
         return False
 
 
+def _nice_label(s: str) -> str:
+    """Tidy a derived series label: uppercase known acronyms, else title-case."""
+    s = str(s).strip()
+    return "EDI" if s.lower() == "edi" else s
+
+
+def value_bar_svg(segments, caption: str, unit: str = "") -> str:
+    """A horizontal bar chart from (label, value) pairs — bar length proportional to value, the
+    real figure labelled on each. For grounded breakdowns (e.g. unfulfilled orders by channel)."""
+    segs = [(_nice_label(l), float(v)) for l, v in segments if _to_number_safe(v) and float(v) > 0]
+    if not segs:
+        return ""
+    mx = max(v for _, v in segs)
+    BARH, GAP, PAD, LBLW, VALW = 30, 16, 14, 130, 90
+    W = 700
+    innerW = W - PAD * 2 - LBLW - VALW
+    H = PAD * 2 + len(segs) * BARH + (len(segs) - 1) * GAP
+    out = [f"<svg class='chart' viewBox='0 0 {W} {H}' width='100%' role='img' "
+           f"aria-label='{esc(caption)}' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
+    for i, (label, v) in enumerate(segs):
+        y = PAD + i * (BARH + GAP)
+        w = max(2, int(innerW * (v / mx)))
+        out.append(f"<text x='{PAD}' y='{y+BARH/2+4}' font-size='12.5' font-weight='600' "
+                   f"fill='#1a2230'>{esc(_clip(label, 18))}</text>")
+        out.append(f"<rect x='{PAD+LBLW}' y='{y}' width='{w}' height='{BARH}' rx='5' "
+                   f"fill='url(#hdr)' filter='url(#sh)'/>")
+        val = _fmt_compact(v) if unit == "eur" else (f"{int(v):,}" if v == int(v) else f"{v:g}")
+        out.append(f"<text x='{PAD+LBLW+w+10}' y='{y+BARH/2+4}' font-size='12' font-weight='700' "
+                   f"fill='#0a4bbd'>{esc(val)}</text>")
+    out.append("</svg>")
+    return ("<div class='chart-wrap'><div class='chart-cap'>" + esc(caption) + "</div>"
+            + "".join(out) + "</div>")
+
+
+def render_charts(charts) -> str:
+    """Render the code-owned grounded chart series (donut for shares, bar for counts/values)."""
+    out = []
+    for c in charts or []:
+        segs = [(s.get("label", ""), s.get("value")) for s in c.get("segments", [])]
+        title = c.get("title", "")
+        if c.get("kind") == "donut":
+            out.append(donut_svg(segs, title))
+        else:
+            out.append(value_bar_svg(segs, title, unit=c.get("unit", "")))
+    return "\n".join(x for x in out if x)
+
+
 def kpi_tiles(s: SynthesisContent) -> str:
     """The 'at a glance' strip on the executive summary. Every figure is DERIVED in code from the
     grounded content (counts + the largest quantified pain-point numbers) — never model-set, so it
@@ -700,7 +758,17 @@ def _steps(steps) -> str:
 
 
 def _metric(n) -> str:
-    return f"<span class='metric'>{esc(n.text or n.label)}</span>"
+    """Render a NumberRef as a chip. If the model's text/label already carries a digit, show it as
+    is; otherwise prepend the formatted grounded value so the figure is always visible (the model
+    sometimes writes 'aggregate divergence addressed' and expects the number rendered separately)."""
+    import re as _re
+    text = (n.text or n.label or "").strip()
+    if not _re.search(r"\d", text):
+        figure = _fmt_compact(n.value) if n.unit == "eur" else (
+            f"{n.value:g}%" if n.unit == "percent" else
+            (f"{int(n.value):,}" if float(n.value) == int(n.value) else f"{n.value:g}"))
+        text = f"{figure} — {text}" if text else figure
+    return f"<span class='metric'>{esc(text)}</span>"
 
 
 def _rating_cell(raw: str) -> str:
@@ -798,6 +866,35 @@ def _strip_tags(htmlfrag: str) -> str:
     return re.sub(r"<[^>]+>", " ", htmlfrag)
 
 
+# The AuroPro brand mark — inline SVG (offline-safe), the cyan/teal twin-triangle device.
+_LOGO = ("<svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'>"
+         "<path d='M16 3 L27 26 H19 L16 18 L13 26 H5 Z' fill='#0f7c8c'/>"
+         "<path d='M16 3 L21 13 L16 13 Z' fill='#22c3d6'/></svg>")
+
+
+def _toc(meta: dict) -> str:
+    """A table of contents over the report sections (print-quality navigation)."""
+    rows = []
+    for i, (slug, label) in enumerate(REPORTS):
+        num = slug.split("-")[0]
+        rows.append(f"<a href='{slug}.html'><span class='toc-num'>{num}</span>"
+                    f"<span class='toc-t'>{esc(label)}</span></a>")
+    return "<div class='toc'>" + "".join(rows) + "</div>"
+
+
+def _cover(meta: dict) -> str:
+    """The branded cover page (print only). Domain + AuroPro brand; the client name appears only
+    when it is known AND not suppressed (meta['client'] is already blanked when suppressed)."""
+    client = (meta.get("client") or "").strip()
+    domain = esc(meta.get("domain_label", "Discovery"))
+    title = f"{domain} Discovery Report"
+    sub = esc(client) if client else "Autonomous Discovery Assessment"
+    return (f"<section class='cover'><div class='ctitle'>{esc(title)}</div>"
+            f"<div class='csub'>{sub}</div>"
+            f"<div class='cbrand'>{_LOGO}<span>AuroPro · Autonomous Discovery Platform</span></div>"
+            f"</section>")
+
+
 def _page(title: str, body: str, active: str, meta: dict, is_index=False) -> str:
     nav = []
     for slug, label in REPORTS:
@@ -812,12 +909,26 @@ def _page(title: str, body: str, active: str, meta: dict, is_index=False) -> str
     # sidebar heading: the client name if known, otherwise the engagement (domain) — never a placeholder
     heading = esc(client) if client else f"{domain} Discovery"
     sub = f"{domain} Discovery" if client else "Discovery assessment"
+    # running header/footer: in the DOM always, shown only in print (via CSS). The header carries
+    # the brand mark + engagement; the footer a confidentiality note. Page numbers come from @page.
+    hdr_label = f"{domain} Discovery Report" + (f" · {esc(client)}" if client else "")
+    rep_header = ""   # omitted in print (a fixed top band collides with headings)
+    rep_footer = (f"<div class='rep-footer'><span class='brandmark'>{_LOGO}{hdr_label}</span>"
+                  f"<span>Confidential</span></div>")
+    # the index page leads with the branded cover + a table of contents (print only — on screen the
+    # index shows the executive summary directly; the cover/TOC are for the PDF deliverable)
+    cover = (_cover(meta)
+             + f"<main class='content cover-toc'><h1>Contents</h1>{_toc(meta)}</main>"
+             if is_index else "")
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{page_title}</title>
 <link rel="stylesheet" href="assets/report.css"></head><body>
+{rep_header}{rep_footer}
+{cover}
 <div class="layout">
 <nav class="sidebar">
+  <span class="brandmark" style="color:#fff;margin-bottom:1rem">{_LOGO}AuroPro</span>
   <h1>{heading}</h1>
   <div class="sub">{sub}</div>
   {''.join(nav)}

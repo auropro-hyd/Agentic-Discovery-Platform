@@ -96,3 +96,24 @@ def test_build_source_index_falls_back_to_cited_docs_when_no_list():
 
 def test_q_helper_maps_quadrant():
     assert build._q("do_first") is MatrixQuadrant.DO_FIRST
+
+
+def test_derive_charts_builds_grounded_series():
+    raw = {"findings": [{"computed_values": [
+        {"label": "Unfulfilled EDI orders (count)", "value": 1196},
+        {"label": "Unfulfilled Manual orders (count)", "value": 320},
+        {"label": "Unfulfilled Email orders (count)", "value": 111},
+        {"label": "some non-numeric", "value": "n/a"}]}]}   # bad value -> skipped, no crash
+    charts = build.derive_charts(raw)
+    assert len(charts) == 1
+    c = charts[0]
+    assert c["key"] == "unfulfilled_by_channel" and c["kind"] == "bar"
+    # sorted descending, EDI first
+    assert [s["value"] for s in c["segments"]] == [1196, 320, 111]
+
+
+def test_derive_charts_empty_when_no_breakdown():
+    assert build.derive_charts({"findings": []}) == []
+    # only one channel present -> not enough for a breakdown
+    raw = {"findings": [{"computed_values": [{"label": "Unfulfilled EDI orders", "value": 5}]}]}
+    assert build.derive_charts(raw) == []

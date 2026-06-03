@@ -427,6 +427,9 @@ class SynthesisContent:                    # everything reports 00-06 render
     source_index: list[SourceDoc] = field(default_factory=list)
     executive_summary: ExecutiveSummary = field(default_factory=ExecutiveSummary)  # Report 00
     target_state: str = ""                 # forward-looking "where this should converge" narrative
+    # code-owned chart series, derived from grounded numbers in build (never model-set). Each entry:
+    # {"key","title","unit","segments":[{"label","value"}]}. Renderer draws these as donut/bar.
+    charts: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {"current_state": self.current_state.to_dict(),
@@ -441,7 +444,8 @@ class SynthesisContent:                    # everything reports 00-06 render
                 "metrics_framework": [m.to_dict() for m in self.metrics_framework],
                 "source_index": [s.to_dict() for s in self.source_index],
                 "executive_summary": asdict(self.executive_summary),
-                "target_state": self.target_state}
+                "target_state": self.target_state,
+                "charts": self.charts}
 
 
 @dataclass

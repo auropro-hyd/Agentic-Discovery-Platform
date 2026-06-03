@@ -48,7 +48,35 @@ def build_synthesis(raw_payload: dict, *, domain: str = "o2c", live=False, llm=N
             f"(a fixture from another domain must never be reused here).")
     _apply_derived_links(content)
     content.source_index = build_source_index(raw_payload, doc_keys)
+    content.charts = derive_charts(raw_payload)
     return content
+
+
+def derive_charts(raw_payload: dict) -> list[dict]:
+    """Code-owned chart series, built ONLY from the grounded numbers the tools returned this run
+    (findings' computed_values). Never model-set, so a chart can't carry a fabricated figure. Each
+    series is included only if its components are all present — otherwise it is silently omitted
+    (graceful, generic; no domain constants). Returns [] when nothing chartable is found."""
+    # index every computed value by a normalised label substring -> value
+    vals: dict[str, float] = {}
+    for f in raw_payload.get("findings", []):
+        for cv in f.get("computed_values", []):
+            label = str(cv.get("label", "")).lower()
+            try:
+                vals[label] = float(cv["value"])
+            except (TypeError, ValueError, KeyError):
+                continue
+
+    charts: list[dict] = []
+    # unfulfilled orders by channel (a "by channel" breakdown of a count) — bar
+    unf = [(lbl.split("unfulfilled")[1].split("order")[0].strip().title() or "Channel", v)
+           for lbl, v in vals.items() if "unfulfilled" in lbl and "order" in lbl and "value" not in lbl]
+    unf = [(c, v) for c, v in unf if v > 0]
+    if len(unf) >= 2:
+        charts.append({"key": "unfulfilled_by_channel", "unit": "orders", "kind": "bar",
+                       "title": "Unfulfilled orders by channel",
+                       "segments": [{"label": c, "value": v} for c, v in sorted(unf, key=lambda x: -x[1])]})
+    return charts
 
 
 # ---------------------------------------------------------------------------

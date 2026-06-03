@@ -14,6 +14,7 @@ dev = [
     "pytest>=8.0",
     "pyrefly>=0.1",      # type checker (also run via pre-commit)
     "coverage>=7.14.1",
+    "pypdf>=6.12.2",
 ]
 
 [tool.pytest.ini_options]

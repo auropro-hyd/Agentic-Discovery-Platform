@@ -15,8 +15,9 @@ from discovery import models as m  # noqa: E402
 from discovery import registry  # noqa: E402
 from discovery.reportsuite import render  # noqa: E402
 from discovery.reportsuite.render import (  # noqa: E402
-    REPORTS, _cite_links, _fmt_compact, _rating_cell, data_flow_svg, donut_svg, impact_bars_svg,
-    kpi_tiles, process_flow_svg, render_suite, value_feasibility_svg,
+    REPORTS, _cite_links, _fmt_compact, _metric, _rating_cell, data_flow_svg, donut_svg,
+    impact_bars_svg, kpi_tiles, process_flow_svg, render_charts, render_suite, value_bar_svg,
+    value_feasibility_svg,
 )
 
 
@@ -228,6 +229,40 @@ def test_fmt_compact():
     assert _fmt_compact(1196) == "1,196"
     assert _fmt_compact(5) == "5"                  # small number -> %g fallback
     assert _fmt_compact("not-a-number") == "not-a-number"
+
+
+def test_value_bar_svg_empty_and_populated():
+    assert value_bar_svg([], "cap") == ""
+    svg = value_bar_svg([("EDI", 1196), ("Manual", 320)], "Unfulfilled by channel", unit="orders")
+    assert "<svg" in svg and "EDI" in svg and "1,196" in svg
+    # eur unit formats compactly
+    svg2 = value_bar_svg([("A", 12362493.74)], "Value", unit="eur")
+    assert "€12.4M" in svg2
+
+
+def test_render_charts_bar_and_donut():
+    bar = render_charts([{"kind": "bar", "unit": "orders", "title": "By channel",
+                          "segments": [{"label": "EDI", "value": 1196},
+                                       {"label": "Manual", "value": 320}]}])
+    assert "<svg" in bar and "EDI" in bar
+    donut = render_charts([{"kind": "donut", "unit": "eur", "title": "Value share",
+                            "segments": [{"label": "EDI", "value": 6_000_000},
+                                         {"label": "Other", "value": 2_000_000}]}])
+    assert "<svg" in donut and "%" in donut
+    assert render_charts([]) == ""
+
+
+def test_metric_prepends_figure_when_text_has_no_number():
+    # NumberRef-like with text that lacks a digit -> figure prepended
+    nr = m.NumberRef(value=30675000, unit="eur", label="x", text="aggregate divergence addressed")
+    out = _metric(nr)
+    assert "€30.7M" in out and "aggregate divergence addressed" in out
+    # text already carries a number -> shown as-is, no double-prefix
+    nr2 = m.NumberRef(value=267, unit="accounts", label="x", text="267 accounts reconciled")
+    assert _metric(nr2).count("267") == 1
+    # percent + bare-count fallbacks
+    assert "67.3%" in _metric(m.NumberRef(value=67.3, unit="percent", text="share"))
+    assert "1,196" in _metric(m.NumberRef(value=1196, unit="orders", text="orders affected"))
 
 
 def test_exec_summary_partial_panels(tmp_path):

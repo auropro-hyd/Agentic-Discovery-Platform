@@ -56,6 +56,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "coverage" },
+    { name = "pypdf" },
     { name = "pyrefly" },
     { name = "pytest" },
 ]
@@ -70,6 +71,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "coverage", specifier = ">=7.14.1" },
+    { name = "pypdf", specifier = ">=6.12.2" },
     { name = "pyrefly", specifier = ">=0.1" },
     { name = "pytest", specifier = ">=8.0" },
 ]
