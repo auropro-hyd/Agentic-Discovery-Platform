@@ -45,10 +45,18 @@ def to_result(payload: dict, domain: str, domain_label: str, documents: list[Doc
         desc = f.get("description", "")
         if derived:
             desc = desc + "\n\nWhat the data shows:\n" + "\n".join(f"- {d}" for d in derived)
+        # if adversarial verification challenged this finding, downgrade its confidence to a
+        # review flag so the SME (and the client report) treats it as needing confirmation
+        conf = _conf(f.get("confidence"))
+        ver = f.get("verification") or {}
+        if ver.get("supported") is False:
+            conf = ConfidenceTier.AMBER
+            note = ver.get("suggested_fix") or ver.get("reason") or "needs confirmation"
+            desc = desc + f"\n\n_Flagged for review: {note}_"
         findings.append(Finding(
             id=f["id"], title=f["title"], severity=_sev(f.get("severity")),
             description=desc, business_consequence=f.get("business_consequence", ""),
-            confidence=_conf(f.get("confidence")), sources=sources,
+            confidence=conf, sources=sources,
         ))
     result = DiscoveryResult(
         domain=domain, domain_label=domain_label, documents=documents,

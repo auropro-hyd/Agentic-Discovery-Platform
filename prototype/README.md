@@ -66,15 +66,27 @@ uv run python run.py --domain o2c                  # live run (generates everyth
 uv run python run.py --domain o2c --auto-resolve   # non-interactive
 uv run python run.py --domain o2c --use-fixture    # use the pre-built O2C fixture (demo-safe)
 uv run python run.py --domain o2c --golden         # replay a saved run offline
+uv run python run.py --domain o2c --refresh        # diff against the previous run (new/resolved/changed)
+uv run python run.py --domain o2c --no-verify      # skip the adversarial verification pass
 uv run python run.py --domain p2p --auto-resolve   # any other domain — generated live
 ```
+
+Findings are variable in number and ranked by impact; each is adversarially **verified** (a
+challenged finding is flagged for review, not dropped); the agent can **conformance-check** a
+documented rule against the data; every report number **links to its source**; and `--refresh`
+diffs a re-run against the prior one. New domain: drop docs in `inputs/<domain>/` and run.
 
 ## Dev
 
 ```bash
 uv run pytest                                   # tests
+uv run coverage run -m pytest && uv run coverage report   # tests + coverage (active pipeline = 100%)
 uv run pyrefly check discovery run.py scripts   # type-check product code
 pre-commit install                              # (run from repo root) enable the hooks
 ```
+
+The active discovery pipeline is held at **100% statement + branch coverage** (enforced in CI via
+`fail_under = 100` in `.coveragerc`). The scope deliberately omits the real HTTP LLM client and the
+legacy scripted/linear modules — those are exercised by the live run, not offline unit tests.
 
 The output suite opens at `out/<domain>/index.html`.

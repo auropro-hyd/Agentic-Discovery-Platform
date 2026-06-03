@@ -12,6 +12,7 @@ the agent did not obtain from a tool (anti-fabrication).
 from __future__ import annotations
 
 import json
+import re
 
 from . import tools
 from .llm import LLMClient
@@ -31,17 +32,23 @@ class GroundingError(Exception):
 
 EMIT_TOOL = {
     "name": "emit_findings",
-    "description": ("Call EXACTLY ONCE when investigation is complete, then stop. Emit exactly 3 "
-                    "findings ranked by business consequence. Every number in computed_values MUST "
-                    "be a value you received from a prior CSV-tool result; every number in "
-                    "narrative_values MUST be backed by a verbatim quote from a find_mentions "
-                    "snippet. Do not introduce any number you did not get from a tool."),
+    "description": ("Call EXACTLY ONCE when investigation is complete, then stop. Emit ALL the "
+                    "material findings you discovered — as many as the evidence supports (typically "
+                    "3-8; a thin document set may have fewer). Number them F1, F2, … and ORDER them "
+                    "most-impactful first. Give each an impact_score (0-100) reflecting business "
+                    "consequence (€ exposure, volume, frequency, risk) so the ranking is explicit. "
+                    "Every number in computed_values MUST be a value you received from a prior "
+                    "CSV-tool result; every number in narrative_values MUST be backed by a verbatim "
+                    "quote from a find_mentions snippet. Do not introduce any number you did not get "
+                    "from a tool."),
     "input_schema": {"type": "object", "properties": {"findings": {
-        "type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "object", "properties": {
-            "id": {"type": "string", "enum": ["F1", "F2", "F3"]},
+        "type": "array", "minItems": 1, "maxItems": 10, "items": {"type": "object", "properties": {
+            "id": {"type": "string", "pattern": r"^F\d+$"},
             "title": {"type": "string"},
             "severity": {"type": "string", "enum": ["high", "amber", "info"]},
             "confidence": {"type": "string", "enum": ["verified", "amber", "gap"]},
+            "impact_score": {"type": "integer", "minimum": 0, "maximum": 100,
+                             "description": "business consequence, higher = more material; used to rank"},
             "description": {"type": "string"},
             "business_consequence": {"type": "string"},
             "computed_values": {"type": "array", "items": {"type": "object", "properties": {
@@ -54,7 +61,7 @@ EMIT_TOOL = {
             "sources": {"type": "array", "minItems": 2, "items": {"type": "object", "properties": {
                 "doc_id": {"type": "string"}, "locator": {"type": "string"},
                 "quote": {"type": "string"}}, "required": ["doc_id"]}}},
-            "required": ["id", "title", "severity", "confidence", "description",
+            "required": ["id", "title", "severity", "confidence", "impact_score", "description",
                          "business_consequence", "sources"]}},
         }, "required": ["findings"]},
 }
@@ -85,15 +92,20 @@ PROTOCOL (in order):
      to is a finding. Confirm the documentation gap by QUOTING the relevant document line via
      find_mentions.
    - A categorical value naming a specific failure — how OFTEN? Use filter_count.
+   - A documented RULE (a policy/SOP says "X must Y", e.g. "orders over a threshold need a second
+     approval", "a PO must exist before an order") — does the DATA obey it? Use check_conformance
+     with `when` = the rows the rule covers and `require` = what they must satisfy. The violating
+     count and value-at-risk is a finding. This is the SOP-as-to-be-model conformance check.
    - Named entities/ownership in the narrative docs — locate and COUNT them with find_mentions over
      the exact terms; quote the lines.
 3. GROUND. Every quantitative claim MUST come from a tool result, cited by tool: a CSV number from
    group_by/join_diff/filter_count/aggregate (put it in computed_values), or a narrative-stated
    number backed by a verbatim find_mentions quote (put it in narrative_values). NEVER estimate a
    number from a sample or from prose you summarized. Each finding needs >=2 distinct source docs.
-4. STOP. When you have investigated every data file and cross-referenced the narrative docs, rank
-   candidate findings by business consequence and call emit_findings with EXACTLY the top 3. Do not
-   call any tool afterward.
+4. STOP. When you have investigated every data file and cross-referenced the narrative docs, call
+   emit_findings with ALL the material findings the evidence supports (typically 3-8). Give each an
+   impact_score and ORDER them most-impactful first. Do not pad with weak findings, and do not drop
+   a material one to hit a number. Do not call any tool afterward.
 
 RULES:
 - Code does the math; you do the reasoning. Get every number from a tool; never compute or round one
@@ -134,6 +146,8 @@ def narrate(tu: dict) -> str:
                 f"{a.get('file_b','another')} on {a.get('key','the shared key')}…")
     if name == "filter_count":
         return f"Counting how often a condition occurs in {a.get('file','the records')}…"
+    if name == "check_conformance":
+        return f"Checking {a.get('file','the records')} against the documented rule…"
     if name == "aggregate":
         return f"Totalling {a.get('col','a field')} in {a.get('file','the records')}…"
     if name == "find_mentions":
@@ -198,13 +212,28 @@ def _tr(tool_use_id: str, content: dict) -> dict:
 
 
 def validate_and_ground(payload: dict, transcript: list) -> dict:
-    """Anti-fabrication gate. Pure Python, post-emit."""
-    ids = {f["id"] for f in payload["findings"]}
-    if ids != {"F1", "F2", "F3"}:
-        raise GroundingError(f"findings must be exactly F1,F2,F3; got {sorted(ids)}")
+    """Anti-fabrication gate. Pure Python, post-emit.
+
+    Findings are variable in number and ranked by impact (most material first). We check: at least
+    one finding; unique sequential F-ids; impact-descending order; and the grounding rules (>=2
+    source docs, every computed value from a tool, every narrative number backed by a real quote).
+    """
+    findings = payload.get("findings", [])
+    if not findings:
+        raise GroundingError("no findings emitted")
+    ids = [f["id"] for f in findings]
+    if len(set(ids)) != len(ids):
+        raise GroundingError(f"finding ids must be unique; got {ids}")
+    if not all(re.fullmatch(r"F\d+", i) for i in ids):
+        raise GroundingError(f"finding ids must match F<n>; got {ids}")
+    # ranked most-impactful first
+    scores = [f.get("impact_score", 0) for f in findings]
+    if scores != sorted(scores, reverse=True):
+        raise GroundingError(f"findings must be ordered by impact_score descending; got {scores}")
+
     tool_numbers = _collect_tool_numbers(transcript)
     snippets = _collect_snippets(transcript)
-    for f in payload["findings"]:
+    for f in findings:
         if len({s["doc_id"] for s in f["sources"]}) < 2:
             raise GroundingError(f"{f['id']}: needs >=2 distinct source docs")
         for cv in f.get("computed_values", []):

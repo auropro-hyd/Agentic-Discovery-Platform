@@ -18,6 +18,12 @@ prototype/.venv/
 # ── prototype runtime cache (regenerated; noisy) ──────────────────
 prototype/.cache/
 
+# ── coverage artifacts (regenerated) ──────────────────────────────
+.coverage
+prototype/.coverage
+htmlcov/
+prototype/htmlcov/
+
 # NOTE: out/, golden/, shared_context/, and the input documents ARE committed (by request) as a
 # reference/handoff bundle. They contain the engagement org name in raw/internal layers — this repo
 # is treated as private reference. Only secrets (.env), the LLM response cache, the venv, and OS

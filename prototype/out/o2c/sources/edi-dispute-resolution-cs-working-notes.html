@@ -1,0 +1,134 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>EDI Dispute Resolution CS Working Notes</title><link rel='stylesheet' href='../assets/report.css'></head><body><main class='content'><h1>EDI Dispute Resolution CS Working Notes</h1>
+<p class='lede'>Notes — referenced by findings: F3</p>
+<p><a href='../06-supporting-artefacts.html'>&larr; back to the source index</a></p>
+<pre class='srcdoc'>EDI DISPUTE RESOLUTION — HOW WE ACTUALLY DO IT
+Written by: Alina Kovacs, Customer Service Lead Europe
+Last updated: 2025-11-14
+Purpose: Onboarding guide for new CS team members
+
+This is not an official SOP. Our official Order Management SOP does not cover EDI, which
+is a problem because roughly two-thirds of our order volume comes through EDI. Until
+someone writes the official version, this document is the closest thing we have to a
+procedure. Please keep it updated if you discover something I&#x27;ve missed.
+
+---
+
+BACKGROUND
+
+When the organisation separated from Sanofi in April 2025, we inherited 14 active EDI connections
+to retail and pharmacy customers across Europe. EDI is how our largest customers send us
+purchase orders automatically — it accounts for around 67% of our total order volume.
+
+the organisation Digital manages 8 of those connections directly. For those 8, if there is a problem
+you contact James Okafor or raise a ticket in the the organisation Digital helpdesk. Response time
+is usually same day.
+
+For the other 6 connections — Carrefour France, Boots UK, dm (Drogerie Markt), E.Leclerc,
+Lidl Europe, and Coop Group — the connections were established by Sanofi Shared Services
+and were not yet handed over at the time of carve-out. the organisation Digital doesn&#x27;t manage these
+yet. If there is an outage or a mapping error on one of those connections, you need to
+contact the Sanofi IT helpdesk on the number below. They will respond but it can take 24
+to 48 hours. Do not open a ticket with the organisation Digital for these connections — they cannot
+access the Sanofi systems.
+
+Sanofi IT Helpdesk (EDI): +33 1 53 77 40 00 (option 3 — EDI and Integration Support)
+Reference: the organisation / [connection name] / Ticket type: EDI
+
+I know this is not how it should work. I have flagged it to James Okafor twice. It is on
+the TSA review list but I do not know when it will be resolved.
+
+---
+
+COMMON ISSUES AND WHAT TO DO
+
+1. ORDER NOT RECEIVED
+
+The customer&#x27;s system shows the order was sent. Our system shows nothing. This is an EDI
+channel failure — the order was not transmitted, or it was transmitted and rejected at our
+end before creating a record.
+
+Check: Go to the EDI monitoring dashboard (the organisation Digital have access — ask James). If the
+connection is one of the 6 Sanofi-managed ones, call the Sanofi helpdesk first.
+
+Action: Manually re-enter the order while the EDI issue is investigated. Do not wait for
+the EDI channel to be fixed before processing — the customer will complain about late
+delivery long before the EDI issue is resolved.
+
+2. DUPLICATE ORDERS
+
+Sometimes an EDI order arrives twice — the customer&#x27;s system sent it, got no acknowledgement,
+and sent it again. We process both. The customer receives double the stock and refuses
+the second delivery.
+
+Check: Look for orders from the same customer on the same date with the same PO number.
+If they match, flag to Helena Brandt who handles DACH, or Thomas Beaumont for France.
+
+Action: Cancel the duplicate in our system. Issue a cancellation confirmation to the
+customer by email (not via EDI — it is faster and creates a clear audit trail).
+
+3. MAPPING ERRORS
+
+An EDI mapping error means the product codes in the customer&#x27;s order do not match ours.
+This usually happens when a customer updates their internal catalogue without telling us.
+
+For the 8 the organisation Digital-managed connections, James Okafor can update the mapping table.
+For the 6 Sanofi-managed connections, the Sanofi IT helpdesk updates the mapping. This
+can take several days. In the meantime, process the order manually.
+
+4. CREDIT HOLDS BLOCKING EDI ORDERS
+
+Sometimes an EDI order arrives but is automatically placed on hold because the customer
+has exceeded their credit limit. The problem is that our credit limits differ between ERP
+and CRM. Raj Patel has been trying to resolve this since Q3 but it is not fixed yet.
+
+If an EDI order from Carrefour France, Boots UK, dm, E.Leclerc, Lidl, or Coop is on
+credit hold, check with Raj before releasing. Do not release based on what you see in CRM
+alone — the ERP limit is lower.
+
+5. ESCALATIONS FROM THE SANOFI-MANAGED CONNECTIONS
+
+If a customer on one of the 6 Sanofi-managed connections is threatening to escalate
+(delist a product, escalate to a director), contact Sophie Marchetti as well as the
+Sanofi helpdesk. Do not let a Sanofi helpdesk delay become a commercial relationship
+problem without escalating internally.
+
+---
+
+TIMELINE EXPECTATIONS FOR SANOFI-MANAGED CONNECTION ISSUES
+
+When you contact the Sanofi IT helpdesk for one of the 6 Sanofi-managed connections,
+here is what to expect:
+
+Initial acknowledgement: Usually within 2 hours during business hours (Paris time).
+First diagnosis: Usually same day for Priority 1 issues (account cannot send orders at
+all). 24 to 48 hours for mapping errors and standard failures.
+
+Priority 1 means the customer cannot transmit orders at all — zero connectivity. If Boots
+UK or Carrefour France is completely dark on EDI, use those words: &quot;Priority 1, customer
+cannot transmit, account is the organisation.&quot; They respond faster when you are specific.
+
+If you do not hear back within 4 hours on a Priority 1 issue, escalate to James Okafor.
+Even though the organisation Digital does not manage these connections, James has a direct line to
+the Sanofi EDI team lead and can expedite. He will not be happy about it — he has told
+me that every escalation weakens our negotiating position on the TSA handover timeline —
+but customer impact takes priority.
+
+Do not promise the customer a resolution time based on the Sanofi SLA. Tell them you are
+working on it and will update them by end of business. Under-promise and update frequently.
+
+---
+
+WHAT WE STILL DON&#x27;T HAVE
+
+- A formal SOP for EDI order management (the official Order Management SOP covers manual
+  and email orders only).
+- A RACI for EDI dispute resolution (there is no row in the O2C RACI for EDI).
+- A clear date for when the 6 Sanofi-managed connections will be transferred to the organisation Digital.
+- A single answer on credit limits for the migrated accounts.
+
+I have raised all of these gaps with Sophie Marchetti. They are known. They are not yet fixed.
+
+Alina Kovacs
+Customer Service Lead, Europe
+November 2025
+</pre></main></body></html>

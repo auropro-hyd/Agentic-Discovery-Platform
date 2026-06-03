@@ -90,3 +90,61 @@ def test_no_new_numbers_in_fixture(raw_payload):
             for x in o:
                 walk(x)
     walk(content.to_dict())
+
+
+def test_fixture_has_consultant_depth():
+    """Lock in the consultant-grade depth: per-system narrative profiles, a format taxonomy, the
+    three readiness ratings + operating-model fields per opportunity, and a metrics framework.
+    A regression that strips any of these (back to the thin original) fails here."""
+    c = build.fixture_o2c()
+    assert len(c.current_state.system_profiles) >= 3
+    assert all(p.name and p.how_used and p.limitations for p in c.current_state.system_profiles)
+    assert len(c.current_state.format_taxonomy) >= 2
+    assert len(c.metrics_framework) >= 4
+    assert all(m.name and m.definition and m.target for m in c.metrics_framework)
+    for o in c.opportunities:
+        assert o.personas, f"{o.id} has no personas"
+        assert o.expected_behaviour and o.escalation, f"{o.id} missing operating model"
+        for dim in (o.data_readiness, o.technical_complexity, o.operational_readiness):
+            assert dim.split("—")[0].strip().lower() in ("high", "medium", "low"), \
+                f"{o.id} readiness must start high|medium|low: {dim!r}"
+
+
+def test_depth_renders_into_html(raw_payload, tmp_path):
+    """The depth fields must actually surface in the rendered HTML (not silently dropped)."""
+    content = build.build_synthesis(raw_payload, live=False)
+    out = tmp_path / "o2c"
+    render_suite(content, {"client": "the organisation", "domain_label": "Order-to-Cash"}, out)
+    r01h = (out / "01-current-state.html").read_text()
+    r03h = (out / "03-recommendation.html").read_text()
+    r04h = (out / "04-opportunity-portfolio.html").read_text()
+    r06h = (out / "06-supporting-artefacts.html").read_text()
+    assert "Systems &amp; sources" in r01h and "Information format" in r01h
+    assert "Prioritization rationale" in r03h and "rate-high" in r03h
+    assert "Who uses it" in r04h and "Escalation" in r04h
+    assert "Success metrics framework" in r06h
+
+
+def test_executive_summary_and_visuals_render(raw_payload, tmp_path):
+    """The new suite intro + visual upgrade: exec-summary page (index + 00), KPI tiles, the
+    value/feasibility chart, the use-case summary table, and the target-state section."""
+    content = build.build_synthesis(raw_payload, live=False)
+    out = tmp_path / "o2c"
+    render_suite(content, {"client": "", "domain_label": "Order-to-Cash"}, out)
+    idx = (out / "index.html").read_text()
+    exec_pg = (out / "00-executive-summary.html").read_text()
+    assert idx == exec_pg or "Executive Summary" in idx        # index IS the exec summary
+    assert "class='kpis'" in exec_pg and "kpi-v" in exec_pg     # KPI tiles
+    assert "Where to start" in exec_pg
+    assert "value versus feasibility" in exec_pg.lower()        # the bubble chart caption
+    r02h = (out / "02-pain-points.html").read_text()
+    assert "ranked by impact" in r02h.lower()                  # impact bars chart
+    r03h = (out / "03-recommendation.html").read_text()
+    assert "Where this should converge" in r03h                # target-state section
+    r04h = (out / "04-opportunity-portfolio.html").read_text()
+    assert "At a glance" in r04h and "Knowledge sources" in r04h  # use-case summary table
+
+
+def test_executive_summary_in_nav():
+    from discovery.reportsuite.render import REPORTS
+    assert REPORTS[0][0] == "00-executive-summary"             # exec summary is first in the suite

@@ -6,36 +6,37 @@
 <nav class="sidebar">
   <h1>Acme Manufacturing</h1>
   <div class="sub">Procure-to-Pay Discovery</div>
-  <a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='active' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
+  <a class='' href='00-executive-summary.html'><span class='num'>00</span>Executive Summary</a><a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='active' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
 </nav>
 <main class="content">
 <h1>Pain Points &amp; Opportunities</h1>
 <p class='lede'>The issues found in the discovery, ranked by business impact, each mapped to a recommended opportunity.</p>
+<div class='chart-wrap'><div class='chart-cap'>Issues ranked by business impact (most material first)</div><svg class='chart' viewBox='0 0 760 142' width='100%' role='img' aria-label='Pain points ranked by impact' xmlns='http://www.w3.org/2000/svg'><defs><marker id='arr' markerWidth='10' markerHeight='10' refX='8' refY='3.2' orient='auto'><path d='M0,0 L8,3.2 L0,6.4 Z' fill='#1f6feb'/></marker><linearGradient id='hdr' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#2b76f0'/><stop offset='1' stop-color='#1f6feb'/></linearGradient><filter id='sh' x='-20%' y='-20%' width='140%' height='150%'><feDropShadow dx='0' dy='1.5' stdDeviation='2.5' flood-color='#1a2230' flood-opacity='0.12'/></filter></defs><rect x='150' y='12' width='520' height='30' rx='5' fill='url(#hdr)' filter='url(#sh)'/><text x='140' y='31.0' text-anchor='end' font-size='12.5' font-weight='700' fill='#1a2230'>PP1</text><text x='162' y='31.0' font-size='12' fill='#fff' font-weight='600'>Large commitments released without the mandatory second Finance…</text><rect x='150' y='56' width='346' height='30' rx='5' fill='url(#hdr)' filter='url(#sh)'/><text x='140' y='75.0' text-anchor='end' font-size='12.5' font-weight='700' fill='#1a2230'>PP2</text><text x='162' y='75.0' font-size='12' fill='#fff' font-weight='600'>Orders placed before any purchase order existed, with no preven…</text><rect x='150' y='100' width='173' height='30' rx='5' fill='url(#hdr)' filter='url(#sh)'/><text x='140' y='119.0' text-anchor='end' font-size='12.5' font-weight='700' fill='#1a2230'>PP3</text><text x='162' y='119.0' font-size='12' fill='#fff' font-weight='600'>No owner or remediation defined for the exception states the re…</text></svg></div>
 <div class='card'>
-<h3>Largest orders committed without the required second approval</h3>
-<p>Every purchase order above the EUR 50,000 dual-approval threshold received only a single approval. This accounts for 7 orders representing EUR 557,000 of committed spend, which is 91.9% of the total value reviewed.</p>
-<p><span class='metric'>7 orders received only a single approval</span> &nbsp; <span class='metric'>EUR 557,000 of committed spend</span> &nbsp; <span class='metric'>91.9% of total value reviewed</span></p>
-<p><strong>Root cause:</strong> The approval threshold exists in the policy but is not enforced at the point an order is committed, so a second approval can be skipped without anything stopping the commitment.</p>
-<p><strong>Pattern:</strong> Control defined in policy but not enforced in the working process.</p>
+<h3>Large commitments released without the mandatory second Finance approval</h3>
+<p>Seven purchase orders, each above the large-spend threshold, were released carrying only a single approval. Together these represent EUR 557,000 of commitments and 12.0 percent of total purchase order value, released without the second Finance approval the policy mandates. The largest single order in the record reached EUR 150,000.</p>
+<p><span class='metric'>seven large orders released with only a single approval</span> &nbsp; <span class='metric'>EUR 557,000 released without the mandated second approval</span> &nbsp; <span class='metric'>12.0 percent of total purchase order value</span> &nbsp; <span class='metric'>the largest single order reached EUR 150,000</span></p>
+<p><strong>Root cause:</strong> The second-approval control is named in the policy but is not enforced at the point of approval; nothing holds a large order until a second approval is recorded.</p>
+<p><strong>Pattern:</strong> Single-approval release of large spend — the dual-control designed to prevent unauthorised large commitments is bypassed because it is advisory rather than enforced.</p>
 <p><strong>Addressed by:</strong> OPP1 (see the Opportunity Portfolio)</p>
-<p class='prov'>Where this comes from: your Procurement Policy and your Purchase Order Export</p>
+<p class='prov'>Where this comes from: <a href='sources/purchase-order-export.html'>Purchase Order Export</a> and <a href='sources/procurement-policy.html'>Procurement Policy</a></p>
 </div>
 <div class='card'>
-<h3>Spend committed to suppliers before any purchase order exists</h3>
-<p>Spend banned by policy occurs on 25.0% of orders, worth EUR 216,000, where commitments were made to suppliers before a purchase order existed. All 3 of these orders also received only a single approval, with the full EUR 216,000 affected by both issues at once.</p>
-<p><span class='metric'>3 orders committed before a purchase order existed</span> &nbsp; <span class='metric'>25.0% of orders</span> &nbsp; <span class='metric'>EUR 216,000 committed without a prior order</span></p>
-<p><strong>Root cause:</strong> The policy rule requiring an order before any supplier commitment is not built into the working process, so buyers can commit first and document later.</p>
-<p><strong>Pattern:</strong> Sequencing control bypassed, compounding with the missing second approval on the same orders.</p>
+<h3>Orders placed before any purchase order existed, with no preventive control at all</h3>
+<p>Three orders, worth EUR 216,000 and representing 4.7 percent of total purchase order value, were placed before any purchase order existed — outside the controlled procurement process entirely, against an absolute prohibition. All three of these orders also lacked the second approval, meaning no preventive control applied to them at any point.</p>
+<p><span class='metric'>three orders placed outside the controlled process</span> &nbsp; <span class='metric'>EUR 216,000 committed outside the controlled process</span> &nbsp; <span class='metric'>4.7 percent of total purchase order value</span> &nbsp; <span class='metric'>all three also lacked the second approval</span></p>
+<p><strong>Root cause:</strong> There is no enforced checkpoint requiring a purchase order to exist before an order is placed, so commitments can be made entirely outside the controlled process.</p>
+<p><strong>Pattern:</strong> Maverick spend with compounded control failure — ordering outside the process, combined with the absence of any second approval, leaves these commitments with no preventive control whatsoever.</p>
 <p><strong>Addressed by:</strong> OPP3 (see the Opportunity Portfolio)</p>
-<p class='prov'>Where this comes from: your Procurement Policy and your Purchase Order Export</p>
+<p class='prov'>Where this comes from: <a href='sources/purchase-order-export.html'>Purchase Order Export</a> and <a href='sources/procurement-policy.html'>Procurement Policy</a></p>
 </div>
 <div class='card'>
-<h3>Repeat non-compliance concentrated in one buyer, with no owner</h3>
-<p>Repeat non-compliance is concentrated in a single buyer, accounting for 2 orders worth EUR 149,000, which is 24.6% of value. No document assigns anyone to own, monitor, or grant exceptions to the control, so the pattern goes undetected and unremediated.</p>
-<p><span class='metric'>2 orders from a single buyer</span> &nbsp; <span class='metric'>EUR 149,000 concentrated in one buyer</span> &nbsp; <span class='metric'>24.6% of value</span></p>
-<p><strong>Root cause:</strong> No accountable owner is assigned for monitoring control adherence, so concentrated non-compliance is never surfaced or addressed.</p>
-<p><strong>Pattern:</strong> Unowned control with no monitoring, allowing repeat behaviour to persist.</p>
+<h3>No owner or remediation defined for the exception states the record already captures</h3>
+<p>The procurement policy names a &#x27;second approval&#x27; control, yet the term appears zero times in the written rulebook, and no document assigns an owner or a detective or remediation step to the exception states the export already records. As a result, the EUR 557,000 of single-approval commitments and the EUR 216,000 of maverick commitments can persist without anyone detecting or actioning them.</p>
+<p><span class='metric'>the record carries two distinct approval states</span> &nbsp; <span class='metric'>EUR 557,000 of single-approval commitments left ungoverned</span> &nbsp; <span class='metric'>EUR 216,000 of maverick commitments left ungoverned</span></p>
+<p><strong>Root cause:</strong> The policy describes the controls that should apply but is silent on exception handling — there is no defined ownership for detecting or remediating recorded exceptions.</p>
+<p><strong>Pattern:</strong> Ungoverned exception states — the system records the exception, but no role is accountable for acting on it, so recorded exceptions sit unaddressed.</p>
 <p><strong>Addressed by:</strong> OPP2 (see the Opportunity Portfolio)</p>
-<p class='prov'>Where this comes from: your Purchase Order Export and your Procurement Policy</p>
+<p class='prov'>Where this comes from: <a href='sources/procurement-policy.html'>Procurement Policy</a> and <a href='sources/purchase-order-export.html'>Purchase Order Export</a></p>
 </div>
 </main></div></body></html>
