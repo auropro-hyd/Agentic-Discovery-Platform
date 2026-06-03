@@ -1,0 +1,14 @@
+# Code owners — automatically requested for review on matching paths.
+# (Update the handles to your team's GitHub usernames.)
+
+# Default owner for everything
+*                       @anmolg1997
+
+# The prototype engine
+/prototype/             @anmolg1997
+
+# Market / UI research
+/research/              @anmolg1997
+
+# CI / governance
+/.github/               @anmolg1997
