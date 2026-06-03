@@ -34,6 +34,8 @@ def render_suite(s: SynthesisContent, meta: dict, outdir: Path,
     (outdir / "assets").mkdir(exist_ok=True)
     (outdir / "assets" / "report.css").write_text(CSS, encoding="utf-8")
     (outdir / "assets" / "report.js").write_text(JS, encoding="utf-8")
+    # render each source document to a readable page so citations can click through (provenance)
+    _render_source_pages(s, outdir, suppress_names)
     fns = {"01-current-state": r01, "02-pain-points": r02, "03-recommendation": r03,
            "04-opportunity-portfolio": r04, "05-roadmap": r05, "06-supporting-artefacts": r06}
     for slug, title in REPORTS:
@@ -111,7 +113,7 @@ def r02(s: SynthesisContent, meta) -> str:
         if pp.opportunity_signal:
             h.append(f"<p><strong>Addressed by:</strong> {esc(pp.opportunity_signal)} "
                      f"(see the Opportunity Portfolio)</p>")
-        h.append(f"<p class='prov'>Where this comes from: {esc(_cite(pp.sources))}</p>")
+        h.append(f"<p class='prov'>Where this comes from: {_cite_links(pp.sources)}</p>")
         h.append("</div>")
     if s.cross_process_patterns:
         h.append("<h2>Cross-process patterns</h2>")
@@ -183,7 +185,7 @@ def r04(s: SynthesisContent, meta) -> str:
         if o.risks:
             h.append("<p><strong>Risks:</strong></p><ul>" +
                      "".join(f"<li>{esc(x)}</li>" for x in o.risks) + "</ul>")
-        h.append(f"<p class='prov'>Where this comes from: {esc(_cite(o.sources))}</p>")
+        h.append(f"<p class='prov'>Where this comes from: {_cite_links(o.sources)}</p>")
         h.append("</div>")
     return "\n".join(h)
 
@@ -211,7 +213,8 @@ def r06(s: SynthesisContent, meta) -> str:
          "<th>Findings it supported</th></tr></thead><tbody>"]
     for d in s.source_index:
         fnd = ", ".join(d.supported_findings) if d.supported_findings else "—"
-        h.append(f"<tr><td>{esc(d.business_name)}</td><td>{esc(d.doc_type)}</td>"
+        name = f"<a href='{_src_href(d.doc_id)}'>{esc(d.business_name)}</a>"
+        h.append(f"<tr><td>{name}</td><td>{esc(d.doc_type)}</td>"
                  f"<td>{esc(d.what_we_read)}</td><td>{esc(fnd)}</td></tr>")
     h.append("</tbody></table>")
     h.append("<h2>System &amp; data-flow map</h2>")
@@ -378,6 +381,71 @@ def _metric(n) -> str:
 
 def _cite(refs) -> str:
     return docnames.business_phrase_list([r.doc_id for r in refs]) or "—"
+
+
+def _src_href(doc_id: str) -> str:
+    from .. import docnames as dn
+    return f"sources/{dn.stem(doc_id)}.html"
+
+
+def _cite_links(refs) -> str:
+    """Like _cite but each source is a clickable link to its rendered source page (provenance)."""
+    from .. import docnames as dn
+    seen, out = set(), []
+    for r in refs:
+        sid = dn.stem(r.doc_id)
+        if sid in seen:
+            continue
+        seen.add(sid)
+        out.append(f"<a href='{_src_href(r.doc_id)}'>{esc(dn.friendly(r.doc_id))}</a>")
+    if not out:
+        return "—"
+    if len(out) == 1:
+        return out[0]
+    return ", ".join(out[:-1]) + " and " + out[-1]
+
+
+def _render_source_pages(s: SynthesisContent, outdir: Path, suppress_names) -> None:
+    """Write a readable page per source document so citations can click through. CSV sources show
+    a row-count + preview; narrative docs show their frozen text. Suppressed names are scrubbed."""
+    from .. import docnames as dn, tools
+    sdir = outdir / "sources"
+    sdir.mkdir(exist_ok=True)
+    for d in s.source_index:
+        sid = dn.stem(d.doc_id)
+        disp = _scrub_names(dn.friendly(sid), suppress_names)  # respect current noise words + scrub
+        body = [f"<h1>{esc(disp)}</h1>",
+                f"<p class='lede'>{esc(d.doc_type)} — referenced by findings: "
+                f"{esc(', '.join(d.supported_findings) or '—')}</p>",
+                "<p><a href='../06-supporting-artefacts.html'>&larr; back to the source index</a></p>"]
+        text = tools.DOC_TEXT.get(sid)
+        if text is None:  # a CSV source — show a compact preview
+            path = tools.FILE_REGISTRY.get(sid)
+            if path:
+                import csv as _csv
+                with path.open(encoding="utf-8-sig", newline="") as fh:
+                    rdr = _csv.reader(fh)
+                    rows = list(rdr)
+                head = rows[0] if rows else []
+                body.append(f"<p class='prov'>{len(rows)-1} rows · columns: {esc(', '.join(head))}</p>")
+                prev = rows[1:21]
+                body.append("<table><thead><tr>" + "".join(f"<th>{esc(c)}</th>" for c in head)
+                            + "</tr></thead><tbody>"
+                            + "".join("<tr>" + "".join(f"<td>{esc(c)}</td>" for c in r) + "</tr>"
+                                      for r in prev) + "</tbody></table>")
+                if len(rows) - 1 > 20:
+                    body.append(f"<p class='prov'>… {len(rows)-1-20} more rows</p>")
+        else:
+            body.append("<pre class='srcdoc'>" + esc(text) + "</pre>")
+        html_body = _scrub_names("\n".join(body), suppress_names)
+        (sdir / f"{sid}.html").write_text(_src_page(disp, html_body), encoding="utf-8")
+
+
+def _src_page(title: str, body: str) -> str:
+    return (f"<!doctype html><html lang='en'><head><meta charset='utf-8'>"
+            f"<meta name='viewport' content='width=device-width, initial-scale=1'>"
+            f"<title>{esc(title)}</title><link rel='stylesheet' href='../assets/report.css'>"
+            f"</head><body><main class='content'>{body}</main></body></html>")
 
 
 def esc(x) -> str:

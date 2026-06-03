@@ -318,6 +318,47 @@ def filter_count(file: str, predicate: dict) -> dict:
     }
 
 
+def check_conformance(file: str, when: dict, require: dict,
+                      value_col: str | None = None) -> dict:
+    """Conformance check — the documented rule (the 'to-be' model) vs. the actual data.
+
+    Of the rows the rule APPLIES to (`when` predicate), how many COMPLY with what it REQUIRES
+    (`require` predicate), and how many VIOLATE it. Optionally totals `value_col` over the
+    violating rows (e.g. EUR exposure). This is the doc-vs-data conformance diff a process-mining
+    tool cannot do — it has no documented model to conform against.
+    """
+    path = _resolve(file, "check_conformance")
+    cols, rows = _read_rows(path)
+    _validate_predicate(when, cols, 0)
+    _validate_predicate(require, cols, 0)
+    if value_col is not None:
+        _need_col(value_col, cols, "check_conformance")
+    applies = comply = 0
+    violating_rows = []
+    violating_value = 0.0
+    for i, r in enumerate(rows, 1):
+        if not _eval_predicate(when, r):
+            continue
+        applies += 1
+        if _eval_predicate(require, r):
+            comply += 1
+        else:
+            violating_rows.append(i)
+            if value_col is not None:
+                v = _to_number(r.get(value_col))
+                if v is not None:
+                    violating_value += v
+    return {
+        "provenance": _provenance(file, path, len(rows)),
+        "applies": applies,
+        "compliant": comply,
+        "violating": applies - comply,
+        "compliance_rate_pct": _round_pct(comply / applies * 100) if applies else 0.0,
+        "violating_value": _round_money(violating_value) if value_col is not None else None,
+        "example_violating_rows": violating_rows[:5],
+    }
+
+
 def _validate_predicate(p, cols: list[str], depth: int):
     if depth > 6:
         raise ToolError("bad_predicate", "predicate nesting too deep (>6).", "filter_count")
@@ -445,6 +486,7 @@ def find_mentions(doc: str, terms: list[str]) -> dict:
 _DISPATCH = {
     "describe": describe, "group_by": group_by, "join_diff": join_diff,
     "filter_count": filter_count, "aggregate": aggregate, "find_mentions": find_mentions,
+    "check_conformance": check_conformance,
 }
 
 
@@ -517,6 +559,29 @@ def schemas() -> list[dict]:
              "file": csv_enum,
              "predicate": {"$ref": "#/$defs/predicate"}},
              "required": ["file", "predicate"],
+             "$defs": {"predicate": {"oneOf": [
+                 {"type": "object", "properties": {
+                     "col": {"type": "string"},
+                     "op": {"type": "string", "enum": sorted(_OPS)},
+                     "value": {}}, "required": ["col", "op"], "additionalProperties": False},
+                 {"type": "object", "properties": {"all": {"type": "array", "items": {"$ref": "#/$defs/predicate"}, "minItems": 1}}, "required": ["all"], "additionalProperties": False},
+                 {"type": "object", "properties": {"any": {"type": "array", "items": {"$ref": "#/$defs/predicate"}, "minItems": 1}}, "required": ["any"], "additionalProperties": False},
+                 {"type": "object", "properties": {"not": {"$ref": "#/$defs/predicate"}}, "required": ["not"], "additionalProperties": False}]}}}},
+        {"name": "check_conformance",
+         "description": ("Conformance check: the documented rule (the 'to-be' model from an SOP/"
+                         "policy) vs. the actual data. `when` selects the rows the rule applies to; "
+                         "`require` is what those rows must satisfy. Returns how many comply vs. "
+                         "violate, the compliance rate, and (if value_col given) the value at risk "
+                         "in the violating rows. Use to quantify a documented-process-vs-reality "
+                         "gap, e.g. 'orders above EUR 50,000 (when) must carry a second approval "
+                         "(require)'."),
+         "input_schema": {"type": "object", "properties": {
+             "file": csv_enum,
+             "when": {"$ref": "#/$defs/predicate"},
+             "require": {"$ref": "#/$defs/predicate"},
+             "value_col": {"type": ["string", "null"], "default": None,
+                           "description": "optional numeric column to total over violating rows"}},
+             "required": ["file", "when", "require"],
              "$defs": {"predicate": {"oneOf": [
                  {"type": "object", "properties": {
                      "col": {"type": "string"},

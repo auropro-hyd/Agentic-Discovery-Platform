@@ -29,7 +29,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from discovery import agent_loop, assemble, docnames, env, loader, registry, report, resolve, scripted, tools  # noqa: E402
+from discovery import agent_loop, assemble, docnames, env, loader, refresh, registry, report, resolve, scripted, tools, verify  # noqa: E402
 from discovery.llm import LLMClient, LLMError  # noqa: E402
 from discovery.reportsuite import build  # noqa: E402
 from discovery.reportsuite.render import render_suite  # noqa: E402
@@ -57,6 +57,10 @@ def main(argv=None) -> int:
                     help="use a domain's pre-built grounded fixture instead of generating the "
                          "report content live (only where a fixture exists, e.g. o2c). Default: "
                          "generate everything live for any domain.")
+    ap.add_argument("--no-verify", action="store_true",
+                    help="skip the adversarial verification pass over findings")
+    ap.add_argument("--refresh", action="store_true",
+                    help="diff this run against the previous one for the domain (new/resolved/changed)")
     args = ap.parse_args(argv)
     if args.provider:
         os.environ["DISCOVERY_PROVIDER"] = args.provider
@@ -85,6 +89,24 @@ def main(argv=None) -> int:
         return 1
     print(f"  discovery complete via the {path_used} path; "
           f"{len(payload['findings'])} findings.")
+
+    # ---- discovery refresh: diff this run against the previous one (before overwriting) ----
+    refresh_diff = None
+    if args.refresh:
+        prior_path = OUT / f"discovery-{args.domain}.json"
+        if prior_path.exists():
+            prior = json.loads(prior_path.read_text()).get("internal_trace", {})
+            refresh_diff = refresh.diff_runs(prior, payload)
+            print(f"  {refresh.summary_line(refresh_diff)}")
+        else:
+            print("  refresh: no previous run found — this is the baseline.")
+
+    # ---- adversarial verification (challenge each finding's reasoning) -----
+    if not args.no_verify:
+        verify.verify_findings(llm, payload, model=None)
+        s = verify.verification_summary(payload)
+        print(f"  verification: {s['supported']} supported, {s['challenged']} challenged, "
+              f"{s['unverified']} unverified")
 
     # ---- human-in-the-loop SME resolution (optional, on findings) ---------
     result = assemble.to_result(payload, args.domain, domain_label, documents,
@@ -145,6 +167,8 @@ def main(argv=None) -> int:
                          suite_dir, suppress_names=suppress_names)
     # internal JSON: client view + synthesis + the raw tool-level trace (audit, never client-facing)
     internal = {**result.to_dict(), "internal_trace": result.raw_payload or {}}
+    if refresh_diff is not None:
+        internal["refresh_diff"] = refresh_diff
     (OUT / f"discovery-{args.domain}.json").write_text(
         json.dumps(internal, indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8")
     print(f"\nDone. Open the suite: {index.relative_to(ROOT)}")

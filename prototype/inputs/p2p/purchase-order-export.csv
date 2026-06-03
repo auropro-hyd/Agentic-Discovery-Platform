@@ -1,13 +1,234 @@
 po_id,supplier,category,amount_eur,raised_by,approval_status,po_before_order
-PO-1001,Steelco,Raw Materials,72000,buyer_a,single_approval_only,yes
-PO-1002,BoltWorks,Components,18000,buyer_b,approved,yes
-PO-1003,Steelco,Raw Materials,95000,buyer_a,single_approval_only,yes
-PO-1004,LubriCorp,Consumables,4200,buyer_c,approved,yes
-PO-1005,Steelco,Raw Materials,61000,buyer_a,single_approval_only,no
-PO-1006,PackRight,Packaging,8800,buyer_b,approved,yes
-PO-1007,BoltWorks,Components,120000,buyer_d,single_approval_only,yes
-PO-1008,LubriCorp,Consumables,3100,buyer_c,approved,yes
-PO-1009,Steelco,Raw Materials,88000,buyer_a,single_approval_only,no
-PO-1010,PackRight,Packaging,15000,buyer_b,approved,yes
-PO-1011,BoltWorks,Components,67000,buyer_d,single_approval_only,no
-PO-1012,Steelco,Raw Materials,54000,buyer_a,single_approval_only,yes
+PO-1007,PackRight,Packaging,45000,buyer_e,approved,yes
+PO-1203,CargoLink,Logistics,18500,buyer_h,approved,yes
+PO-1054,PrecisionParts,Components,45000,buyer_h,approved,yes
+PO-1003,ITPartner,Services,2800,buyer_b,approved,yes
+PO-1050,FreightOne,Logistics,6500,buyer_a,approved,yes
+PO-1196,ForgePrime,Raw Materials,45000,buyer_e,approved,yes
+PO-1164,LubriCorp,Consumables,4200,buyer_b,approved,yes
+PO-1208,ValveTech,Components,1500,buyer_g,approved,yes
+PO-1145,ForgePrime,Raw Materials,6500,buyer_g,approved,yes
+PO-1137,GearHaus,Components,24000,buyer_h,approved,yes
+PO-1186,BoxLine,Packaging,31000,buyer_f,approved,yes
+PO-1027,ValveTech,Components,31000,buyer_e,approved,yes
+PO-1214,LubriCorp,Consumables,4200,buyer_b,approved,yes
+PO-1021,WrapCo,Packaging,9800,buyer_d,approved,yes
+PO-1052,AlloyWorks,Raw Materials,12000,buyer_b,approved,yes
+PO-1155,ValveTech,Components,1500,buyer_e,approved,yes
+PO-1180,Steelco,Raw Materials,31000,buyer_d,approved,yes
+PO-1211,ITPartner,Services,24000,buyer_b,approved,yes
+PO-1026,PackRight,Packaging,4200,buyer_e,approved,yes
+PO-1045,LubriCorp,Consumables,31000,buyer_g,approved,yes
+PO-1064,ValveTech,Components,4200,buyer_g,approved,yes
+PO-1066,ValveTech,Components,18500,buyer_a,approved,yes
+PO-1116,SafetyFirst,Consumables,2800,buyer_e,approved,yes
+PO-1210,MetalSource EU,Raw Materials,6500,buyer_e,approved,yes
+PO-1163,CargoLink,Logistics,6500,buyer_h,approved,yes
+PO-1216,ForgePrime,Raw Materials,24000,buyer_e,approved,yes
+PO-1157,CleanSupply,Consumables,18500,buyer_e,approved,yes
+PO-1200,FreightOne,Logistics,1500,buyer_c,approved,yes
+PO-1150,ForgePrime,Raw Materials,18500,buyer_f,approved,yes
+PO-1036,GearHaus,Components,24000,buyer_a,approved,yes
+PO-1055,PackRight,Packaging,18500,buyer_d,approved,yes
+PO-1103,AlloyWorks,Raw Materials,24000,buyer_d,approved,yes
+PO-1085,FreightOne,Logistics,9800,buyer_b,approved,yes
+PO-1079,CleanSupply,Consumables,2800,buyer_a,approved,yes
+PO-1047,ITPartner,Services,12000,buyer_h,approved,yes
+PO-1028,FreightOne,Logistics,18500,buyer_f,approved,yes
+PO-1110,MetalSource EU,Raw Materials,45000,buyer_g,approved,yes
+PO-1233,ForgePrime,Raw Materials,54000,buyer_a,single_approval_only,yes
+PO-1029,BoltWorks,Components,31000,buyer_h,approved,yes
+PO-1090,MetalSource EU,Raw Materials,2800,buyer_g,approved,yes
+PO-1100,BoltWorks,Components,4200,buyer_g,approved,yes
+PO-1165,CleanSupply,Consumables,2800,buyer_a,approved,yes
+PO-1143,ConsultEU,Services,6500,buyer_b,approved,yes
+PO-1091,AlloyWorks,Raw Materials,1500,buyer_f,approved,yes
+PO-1158,LubriCorp,Consumables,2800,buyer_h,approved,yes
+PO-1225,BoxLine,Packaging,110000,buyer_f,approved,yes
+PO-1096,BoxLine,Packaging,4200,buyer_a,approved,yes
+PO-1102,CleanSupply,Consumables,4200,buyer_b,approved,yes
+PO-1017,BoxLine,Packaging,12000,buyer_c,approved,yes
+PO-1095,FreightOne,Logistics,1500,buyer_f,approved,yes
+PO-1197,PackRight,Packaging,24000,buyer_f,approved,yes
+PO-1015,MaintainPro,Services,6500,buyer_e,approved,yes
+PO-1120,FreightOne,Logistics,9800,buyer_g,approved,yes
+PO-1072,AlloyWorks,Raw Materials,31000,buyer_b,approved,yes
+PO-1067,CleanSupply,Consumables,24000,buyer_e,approved,yes
+PO-1016,GearHaus,Components,2800,buyer_g,approved,yes
+PO-1188,SafetyFirst,Consumables,6500,buyer_b,approved,yes
+PO-1108,FreightOne,Logistics,12000,buyer_a,approved,yes
+PO-1025,ITPartner,Services,24000,buyer_g,approved,yes
+PO-1144,BoxLine,Packaging,12000,buyer_h,approved,yes
+PO-1181,PrecisionParts,Components,18500,buyer_h,approved,yes
+PO-1201,FreightOne,Logistics,9800,buyer_b,approved,yes
+PO-1146,CargoLink,Logistics,1500,buyer_g,approved,yes
+PO-1078,BoxLine,Packaging,4200,buyer_e,approved,yes
+PO-1187,ConsultEU,Services,24000,buyer_e,approved,yes
+PO-1174,BoxLine,Packaging,18500,buyer_e,approved,yes
+PO-1199,Steelco,Raw Materials,18500,buyer_h,approved,yes
+PO-1202,AlloyWorks,Raw Materials,31000,buyer_g,approved,yes
+PO-1135,ConsultEU,Services,31000,buyer_f,approved,yes
+PO-1048,PackRight,Packaging,2800,buyer_d,approved,yes
+PO-1046,CargoLink,Logistics,6500,buyer_e,approved,yes
+PO-1170,Steelco,Raw Materials,31000,buyer_f,approved,yes
+PO-1228,ForgePrime,Raw Materials,95000,buyer_a,single_approval_only,yes
+PO-1042,BoltWorks,Components,45000,buyer_b,approved,yes
+PO-1006,MaintainPro,Services,31000,buyer_g,approved,yes
+PO-1190,GearHaus,Components,6500,buyer_h,approved,yes
+PO-1213,AlloyWorks,Raw Materials,31000,buyer_d,approved,yes
+PO-1022,LubriCorp,Consumables,1500,buyer_d,approved,yes
+PO-1184,WrapCo,Packaging,6500,buyer_e,approved,yes
+PO-1147,ForgePrime,Raw Materials,12000,buyer_e,approved,yes
+PO-1118,MaintainPro,Services,9800,buyer_c,approved,yes
+PO-1056,ForgePrime,Raw Materials,18500,buyer_f,approved,yes
+PO-1136,CargoLink,Logistics,31000,buyer_g,approved,yes
+PO-1185,CargoLink,Logistics,12000,buyer_h,approved,yes
+PO-1037,CargoLink,Logistics,4200,buyer_b,approved,yes
+PO-1094,AlloyWorks,Raw Materials,2800,buyer_b,approved,yes
+PO-1183,AlloyWorks,Raw Materials,2800,buyer_e,approved,yes
+PO-1009,BoltWorks,Components,6500,buyer_f,approved,yes
+PO-1227,MetalSource EU,Raw Materials,72000,buyer_a,single_approval_only,yes
+PO-1005,PrecisionParts,Components,6500,buyer_a,approved,yes
+PO-1177,AlloyWorks,Raw Materials,24000,buyer_f,approved,yes
+PO-1173,ValveTech,Components,31000,buyer_e,approved,yes
+PO-1092,ITPartner,Services,9800,buyer_c,approved,yes
+PO-1232,BoltWorks,Components,67000,buyer_d,single_approval_only,no
+PO-1193,PrecisionParts,Components,9800,buyer_a,approved,yes
+PO-1205,FreightOne,Logistics,45000,buyer_a,approved,yes
+PO-1159,ConsultEU,Services,31000,buyer_a,approved,yes
+PO-1087,CargoLink,Logistics,4200,buyer_e,approved,yes
+PO-1153,FreightOne,Logistics,45000,buyer_a,approved,yes
+PO-1011,LubriCorp,Consumables,45000,buyer_e,approved,yes
+PO-1111,ITPartner,Services,12000,buyer_g,approved,yes
+PO-1051,MaintainPro,Services,1500,buyer_d,approved,yes
+PO-1148,BoxLine,Packaging,31000,buyer_d,approved,yes
+PO-1192,GearHaus,Components,9800,buyer_d,approved,yes
+PO-1044,PrecisionParts,Components,4200,buyer_h,approved,yes
+PO-1204,CleanSupply,Consumables,45000,buyer_g,approved,yes
+PO-1101,PrecisionParts,Components,12000,buyer_g,approved,yes
+PO-1061,BoxLine,Packaging,4200,buyer_e,approved,yes
+PO-1129,WrapCo,Packaging,45000,buyer_d,approved,yes
+PO-1020,ConsultEU,Services,6500,buyer_c,approved,yes
+PO-1084,ITPartner,Services,9800,buyer_a,approved,yes
+PO-1207,BoltWorks,Components,6500,buyer_c,approved,yes
+PO-1019,ITPartner,Services,2800,buyer_c,approved,yes
+PO-1215,ValveTech,Components,9800,buyer_e,approved,yes
+PO-1002,LubriCorp,Consumables,6500,buyer_d,approved,yes
+PO-1059,MaintainPro,Services,12000,buyer_b,approved,yes
+PO-1068,MaintainPro,Services,31000,buyer_h,approved,yes
+PO-1134,ForgePrime,Raw Materials,24000,buyer_c,approved,yes
+PO-1057,WrapCo,Packaging,24000,buyer_a,approved,yes
+PO-1109,LubriCorp,Consumables,4200,buyer_e,approved,yes
+PO-1123,WrapCo,Packaging,24000,buyer_d,approved,yes
+PO-1013,MetalSource EU,Raw Materials,31000,buyer_e,approved,yes
+PO-1112,FreightOne,Logistics,2800,buyer_g,approved,yes
+PO-1043,ITPartner,Services,24000,buyer_b,approved,yes
+PO-1076,ConsultEU,Services,45000,buyer_f,approved,yes
+PO-1167,Steelco,Raw Materials,45000,buyer_d,approved,yes
+PO-1231,ForgePrime,Raw Materials,88000,buyer_a,single_approval_only,no
+PO-1033,SafetyFirst,Consumables,31000,buyer_a,approved,yes
+PO-1010,MetalSource EU,Raw Materials,18500,buyer_b,approved,yes
+PO-1127,PrecisionParts,Components,1500,buyer_a,approved,yes
+PO-1152,CargoLink,Logistics,31000,buyer_a,approved,yes
+PO-1221,FreightOne,Logistics,58000,buyer_a,approved,yes
+PO-1098,ConsultEU,Services,6500,buyer_b,approved,yes
+PO-1122,CargoLink,Logistics,45000,buyer_f,approved,yes
+PO-1082,CleanSupply,Consumables,2800,buyer_d,approved,yes
+PO-1012,ConsultEU,Services,24000,buyer_b,approved,yes
+PO-1219,MaintainPro,Services,12000,buyer_e,approved,yes
+PO-1060,PrecisionParts,Components,6500,buyer_h,approved,yes
+PO-1226,MaintainPro,Services,150000,buyer_b,approved,yes
+PO-1209,ConsultEU,Services,45000,buyer_h,approved,yes
+PO-1168,ITPartner,Services,9800,buyer_b,approved,yes
+PO-1230,MetalSource EU,Raw Materials,61000,buyer_a,single_approval_only,no
+PO-1172,CleanSupply,Consumables,24000,buyer_c,approved,yes
+PO-1097,LubriCorp,Consumables,1500,buyer_f,approved,yes
+PO-1140,CleanSupply,Consumables,6500,buyer_e,approved,yes
+PO-1171,BoxLine,Packaging,24000,buyer_b,approved,yes
+PO-1086,SafetyFirst,Consumables,2800,buyer_b,approved,yes
+PO-1089,ConsultEU,Services,9800,buyer_h,approved,yes
+PO-1175,ValveTech,Components,2800,buyer_e,approved,yes
+PO-1138,PrecisionParts,Components,9800,buyer_h,approved,yes
+PO-1115,WrapCo,Packaging,2800,buyer_f,approved,yes
+PO-1039,SafetyFirst,Consumables,4200,buyer_a,approved,yes
+PO-1126,PrecisionParts,Components,9800,buyer_d,approved,yes
+PO-1149,ValveTech,Components,9800,buyer_g,approved,yes
+PO-1151,MaintainPro,Services,4200,buyer_h,approved,yes
+PO-1077,GearHaus,Components,12000,buyer_d,approved,yes
+PO-1073,AlloyWorks,Raw Materials,45000,buyer_b,approved,yes
+PO-1223,ValveTech,Components,72000,buyer_g,approved,yes
+PO-1206,BoltWorks,Components,6500,buyer_e,approved,yes
+PO-1130,ConsultEU,Services,18500,buyer_h,approved,yes
+PO-1088,FreightOne,Logistics,6500,buyer_f,approved,yes
+PO-1176,GearHaus,Components,24000,buyer_g,approved,yes
+PO-1071,AlloyWorks,Raw Materials,1500,buyer_h,approved,yes
+PO-1018,SafetyFirst,Consumables,6500,buyer_e,approved,yes
+PO-1035,CleanSupply,Consumables,2800,buyer_e,approved,yes
+PO-1178,BoxLine,Packaging,6500,buyer_f,approved,yes
+PO-1154,ConsultEU,Services,18500,buyer_c,approved,yes
+PO-1217,CleanSupply,Consumables,31000,buyer_h,approved,yes
+PO-1099,FreightOne,Logistics,18500,buyer_c,approved,yes
+PO-1038,MaintainPro,Services,31000,buyer_d,approved,yes
+PO-1189,PrecisionParts,Components,12000,buyer_b,approved,yes
+PO-1117,CleanSupply,Consumables,18500,buyer_f,approved,yes
+PO-1063,Steelco,Raw Materials,31000,buyer_a,approved,yes
+PO-1121,CleanSupply,Consumables,9800,buyer_d,approved,yes
+PO-1124,BoxLine,Packaging,4200,buyer_b,approved,yes
+PO-1107,SafetyFirst,Consumables,31000,buyer_g,approved,yes
+PO-1070,CargoLink,Logistics,31000,buyer_a,approved,yes
+PO-1131,BoltWorks,Components,4200,buyer_a,approved,yes
+PO-1075,CargoLink,Logistics,1500,buyer_b,approved,yes
+PO-1224,MetalSource EU,Raw Materials,88000,buyer_h,approved,yes
+PO-1040,LubriCorp,Consumables,24000,buyer_a,approved,yes
+PO-1166,FreightOne,Logistics,18500,buyer_g,approved,yes
+PO-1031,ConsultEU,Services,18500,buyer_b,approved,yes
+PO-1220,MetalSource EU,Raw Materials,6500,buyer_a,approved,yes
+PO-1229,ValveTech,Components,120000,buyer_d,single_approval_only,yes
+PO-1058,ConsultEU,Services,2800,buyer_a,approved,yes
+PO-1024,PrecisionParts,Components,45000,buyer_f,approved,yes
+PO-1105,ValveTech,Components,1500,buyer_d,approved,yes
+PO-1191,MaintainPro,Services,45000,buyer_e,approved,yes
+PO-1004,PackRight,Packaging,1500,buyer_a,approved,yes
+PO-1142,PrecisionParts,Components,6500,buyer_g,approved,yes
+PO-1080,FreightOne,Logistics,45000,buyer_b,approved,yes
+PO-1041,LubriCorp,Consumables,9800,buyer_d,approved,yes
+PO-1182,ConsultEU,Services,24000,buyer_h,approved,yes
+PO-1062,BoltWorks,Components,2800,buyer_h,approved,yes
+PO-1156,CleanSupply,Consumables,6500,buyer_h,approved,yes
+PO-1162,BoltWorks,Components,4200,buyer_h,approved,yes
+PO-1008,GearHaus,Components,18500,buyer_f,approved,yes
+PO-1032,WrapCo,Packaging,45000,buyer_h,approved,yes
+PO-1125,FreightOne,Logistics,45000,buyer_f,approved,yes
+PO-1179,SafetyFirst,Consumables,9800,buyer_e,approved,yes
+PO-1113,LubriCorp,Consumables,1500,buyer_g,approved,yes
+PO-1074,WrapCo,Packaging,2800,buyer_d,approved,yes
+PO-1034,ITPartner,Services,2800,buyer_e,approved,yes
+PO-1141,LubriCorp,Consumables,31000,buyer_b,approved,yes
+PO-1069,BoltWorks,Components,9800,buyer_d,approved,yes
+PO-1053,SafetyFirst,Consumables,24000,buyer_d,approved,yes
+PO-1218,ForgePrime,Raw Materials,45000,buyer_a,approved,yes
+PO-1195,LubriCorp,Consumables,4200,buyer_h,approved,yes
+PO-1114,CargoLink,Logistics,31000,buyer_d,approved,yes
+PO-1161,PrecisionParts,Components,6500,buyer_a,approved,yes
+PO-1128,BoxLine,Packaging,45000,buyer_b,approved,yes
+PO-1194,SafetyFirst,Consumables,1500,buyer_a,approved,yes
+PO-1160,BoltWorks,Components,2800,buyer_a,approved,yes
+PO-1093,WrapCo,Packaging,31000,buyer_g,approved,yes
+PO-1133,FreightOne,Logistics,24000,buyer_a,approved,yes
+PO-1049,AlloyWorks,Raw Materials,12000,buyer_a,approved,yes
+PO-1014,FreightOne,Logistics,6500,buyer_b,approved,yes
+PO-1106,CleanSupply,Consumables,9800,buyer_b,approved,yes
+PO-1119,WrapCo,Packaging,18500,buyer_c,approved,yes
+PO-1139,SafetyFirst,Consumables,24000,buyer_b,approved,yes
+PO-1169,MetalSource EU,Raw Materials,12000,buyer_g,approved,yes
+PO-1001,ITPartner,Services,2800,buyer_a,approved,yes
+PO-1212,ValveTech,Components,9800,buyer_d,approved,yes
+PO-1132,WrapCo,Packaging,6500,buyer_c,approved,yes
+PO-1222,BoxLine,Packaging,64000,buyer_h,approved,yes
+PO-1104,PackRight,Packaging,12000,buyer_e,approved,yes
+PO-1198,Steelco,Raw Materials,9800,buyer_h,approved,yes
+PO-1030,AlloyWorks,Raw Materials,2800,buyer_c,approved,yes
+PO-1083,SafetyFirst,Consumables,4200,buyer_h,approved,yes
+PO-1065,PackRight,Packaging,6500,buyer_g,approved,yes
+PO-1081,FreightOne,Logistics,6500,buyer_e,approved,yes
+PO-1023,LubriCorp,Consumables,18500,buyer_e,approved,yes

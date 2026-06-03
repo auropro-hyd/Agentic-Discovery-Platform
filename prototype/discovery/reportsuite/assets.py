@@ -57,6 +57,9 @@ th{ background:#f0f3f7; font-weight:600; }
 .flow-cap{ font-size:.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;
            margin-bottom:.7rem; font-weight:600; }
 .flow{ display:block; max-width:820px; }
+.srcdoc{ white-space:pre-wrap; word-break:break-word; background:var(--panel);
+         border:1px solid var(--line); border-radius:8px; padding:1rem; font-size:.82rem;
+         line-height:1.5; max-height:none; }
 ul{ margin:.4rem 0 .8rem; } li{ margin:.2rem 0; }
 @media print{ .sidebar{ display:none; } .content{ max-width:none; } }
 @media (max-width:760px){ .layout{ flex-direction:column; } .sidebar{ width:100%; height:auto;

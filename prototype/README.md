@@ -66,8 +66,15 @@ uv run python run.py --domain o2c                  # live run (generates everyth
 uv run python run.py --domain o2c --auto-resolve   # non-interactive
 uv run python run.py --domain o2c --use-fixture    # use the pre-built O2C fixture (demo-safe)
 uv run python run.py --domain o2c --golden         # replay a saved run offline
+uv run python run.py --domain o2c --refresh        # diff against the previous run (new/resolved/changed)
+uv run python run.py --domain o2c --no-verify      # skip the adversarial verification pass
 uv run python run.py --domain p2p --auto-resolve   # any other domain — generated live
 ```
+
+Findings are variable in number and ranked by impact; each is adversarially **verified** (a
+challenged finding is flagged for review, not dropped); the agent can **conformance-check** a
+documented rule against the data; every report number **links to its source**; and `--refresh`
+diffs a re-run against the prior one. New domain: drop docs in `inputs/<domain>/` and run.
 
 ## Dev
 
