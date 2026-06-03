@@ -90,3 +90,36 @@ def test_no_new_numbers_in_fixture(raw_payload):
             for x in o:
                 walk(x)
     walk(content.to_dict())
+
+
+def test_fixture_has_consultant_depth():
+    """Lock in the consultant-grade depth: per-system narrative profiles, a format taxonomy, the
+    three readiness ratings + operating-model fields per opportunity, and a metrics framework.
+    A regression that strips any of these (back to the thin original) fails here."""
+    c = build.fixture_o2c()
+    assert len(c.current_state.system_profiles) >= 3
+    assert all(p.name and p.how_used and p.limitations for p in c.current_state.system_profiles)
+    assert len(c.current_state.format_taxonomy) >= 2
+    assert len(c.metrics_framework) >= 4
+    assert all(m.name and m.definition and m.target for m in c.metrics_framework)
+    for o in c.opportunities:
+        assert o.personas, f"{o.id} has no personas"
+        assert o.expected_behaviour and o.escalation, f"{o.id} missing operating model"
+        for dim in (o.data_readiness, o.technical_complexity, o.operational_readiness):
+            assert dim.split("—")[0].strip().lower() in ("high", "medium", "low"), \
+                f"{o.id} readiness must start high|medium|low: {dim!r}"
+
+
+def test_depth_renders_into_html(raw_payload, tmp_path):
+    """The depth fields must actually surface in the rendered HTML (not silently dropped)."""
+    content = build.build_synthesis(raw_payload, live=False)
+    out = tmp_path / "o2c"
+    render_suite(content, {"client": "the organisation", "domain_label": "Order-to-Cash"}, out)
+    r01h = (out / "01-current-state.html").read_text()
+    r03h = (out / "03-recommendation.html").read_text()
+    r04h = (out / "04-opportunity-portfolio.html").read_text()
+    r06h = (out / "06-supporting-artefacts.html").read_text()
+    assert "Systems &amp; sources" in r01h and "Information format" in r01h
+    assert "Prioritization rationale" in r03h and "rate-high" in r03h
+    assert "Who uses it" in r04h and "Escalation" in r04h
+    assert "Success metrics framework" in r06h

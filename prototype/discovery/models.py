@@ -222,10 +222,34 @@ class Handoff:
 
 
 @dataclass
+class SystemProfile:                      # a deep, narrative per-system/source profile (Report 01)
+    name: str
+    role: str = ""                        # what it is / what it's for
+    how_used: str = ""                    # how the business actually uses it
+    owners: str = ""                      # who owns / who has access
+    limitations: str = ""                 # gaps, risks, constraints observed
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class FormatPattern:                       # the "knowledge/data format & structure" taxonomy
+    label: str                             # e.g. "Type 1: Structured transactional export"
+    description: str = ""
+    examples: str = ""                     # which sources/docs follow this pattern
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
 class CurrentState:                       # Report 01 — NO severity/confidence anywhere
     domain_overview: str = ""
     process_summary: str = ""
     process_flow: list[ProcessStep] = field(default_factory=list)
+    system_profiles: list[SystemProfile] = field(default_factory=list)   # deep per-system narrative
+    format_taxonomy: list[FormatPattern] = field(default_factory=list)   # data/doc format patterns
     process_inventory: list[InventoryItem] = field(default_factory=list)
     ownership_map: list[RaciRow] = field(default_factory=list)
     system_inventory: list[InventoryItem] = field(default_factory=list)
@@ -235,6 +259,8 @@ class CurrentState:                       # Report 01 — NO severity/confidence
         return {"domain_overview": self.domain_overview,
                 "process_summary": self.process_summary,
                 "process_flow": [s.to_dict() for s in self.process_flow],
+                "system_profiles": [p.to_dict() for p in self.system_profiles],
+                "format_taxonomy": [f.to_dict() for f in self.format_taxonomy],
                 "process_inventory": [i.to_dict() for i in self.process_inventory],
                 "ownership_map": [r.to_dict() for r in self.ownership_map],
                 "system_inventory": [i.to_dict() for i in self.system_inventory],
@@ -289,6 +315,14 @@ class Opportunity:                         # Report 04 (centrepiece) + 03 matrix
     dependencies: list[str] = field(default_factory=list)
     prerequisite_for: list[str] = field(default_factory=list)  # derived
     risks: list[str] = field(default_factory=list)
+    # consultant-grade depth (mirrors the prior-engagement bar):
+    personas: list[str] = field(default_factory=list)          # who this serves
+    expected_behaviour: str = ""                               # how the solution should behave
+    escalation: str = ""                                       # what happens when it can't resolve
+    # prioritisation rationale across the three standard dimensions (rating + one-line reason)
+    data_readiness: str = ""          # "high|medium|low — reason"
+    technical_complexity: str = ""    # "high|medium|low — reason"
+    operational_readiness: str = ""   # "high|medium|low — reason"
     value_rating: str = "medium"
     feasibility_rating: str = "medium"
     value_score: int = 3
@@ -306,11 +340,26 @@ class Opportunity:                         # Report 04 (centrepiece) + 03 matrix
                 "required_integrations": self.required_integrations,
                 "success_metrics": self.success_metrics,
                 "dependencies": self.dependencies, "prerequisite_for": self.prerequisite_for,
-                "risks": self.risks, "value_rating": self.value_rating,
+                "risks": self.risks, "personas": self.personas,
+                "expected_behaviour": self.expected_behaviour, "escalation": self.escalation,
+                "data_readiness": self.data_readiness,
+                "technical_complexity": self.technical_complexity,
+                "operational_readiness": self.operational_readiness,
+                "value_rating": self.value_rating,
                 "feasibility_rating": self.feasibility_rating,
                 "value_score": self.value_score, "feasibility_score": self.feasibility_score,
                 "matrix_quadrant": self.matrix_quadrant.value,
                 "sources": [s.to_dict() for s in self.sources]}
+
+
+@dataclass
+class MetricItem:                          # one row of the success-metrics framework
+    name: str
+    definition: str = ""
+    target: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass
@@ -360,6 +409,7 @@ class SynthesisContent:                    # everything reports 01-05 render
     dependency_notes: str = ""
     roadmap: list[RoadmapHorizon] = field(default_factory=list)
     strategy_profile: dict[str, Any] = field(default_factory=dict)
+    metrics_framework: list[MetricItem] = field(default_factory=list)   # how success is measured
     source_index: list[SourceDoc] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -372,6 +422,7 @@ class SynthesisContent:                    # everything reports 01-05 render
                 "dependency_notes": self.dependency_notes,
                 "roadmap": [h.to_dict() for h in self.roadmap],
                 "strategy_profile": self.strategy_profile,
+                "metrics_framework": [m.to_dict() for m in self.metrics_framework],
                 "source_index": [s.to_dict() for s in self.source_index]}
 
 

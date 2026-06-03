@@ -198,6 +198,9 @@ def synthesis_emit_tool(doc_keys: list[str]) -> dict:
         "failure_points": {"type": "array", "items": {"type": "string"}},
         "sources": {"type": "array", "items": SOURCE}},
         "required": ["seq", "name", "actor", "description"]}
+    READINESS = {"type": "string", "description":
+                 "one of high|medium|low, an em-dash, then a one-line reason, e.g. "
+                 "'high — both values already exist as structured fields'"}
     OPP = {"type": "object", "properties": {
         "id": {"type": "string", "pattern": r"^OPP\d+$"}, "title": {"type": "string"},
         "pattern": {"type": "string", "enum": ["hitl_workflow", "automation", "ai_agent",
@@ -210,6 +213,17 @@ def synthesis_emit_tool(doc_keys: list[str]) -> dict:
             "quantified": {"type": "array", "items": NUMBER_REF},
             "derivation": {"type": "string"}}, "required": ["narrative", "quantified"]},
         "implementation_approach": {"type": "string"},
+        "personas": {"type": "array", "items": {"type": "string"},
+                     "description": "the business roles who use this once live"},
+        "expected_behaviour": {"type": "string",
+                               "description": "how the solution behaves day to day, in business "
+                                              "terms (what it does, what it never does on its own)"},
+        "escalation": {"type": "string",
+                       "description": "what happens when it cannot resolve — when and to whom it "
+                                      "hands back to a human"},
+        "data_readiness": READINESS,
+        "technical_complexity": READINESS,
+        "operational_readiness": READINESS,
         "required_integrations": {"type": "array", "items": {"type": "string"}},
         "success_metrics": {"type": "array", "items": {"type": "string"}},
         "dependencies": {"type": "array", "items": {"type": "string", "pattern": r"^OPP\d+$"}},
@@ -224,7 +238,8 @@ def synthesis_emit_tool(doc_keys: list[str]) -> dict:
         "required": ["id", "title", "pattern", "overview", "before_process", "after_process",
                      "business_impact", "implementation_approach", "value_rating",
                      "feasibility_rating", "value_score", "feasibility_score", "matrix_quadrant",
-                     "dependencies", "sources"]}
+                     "dependencies", "sources", "personas", "expected_behaviour", "escalation",
+                     "data_readiness", "technical_complexity", "operational_readiness"]}
     PP = {"type": "object", "properties": {
         "id": {"type": "string", "pattern": r"^PP\d+$"}, "title": {"type": "string"},
         "impact_rank": {"type": "integer", "minimum": 1, "maximum": 3},
@@ -261,10 +276,30 @@ def synthesis_emit_tool(doc_keys: list[str]) -> dict:
                         "system_of_record_for": {"type": "string"}}, "required": ["name", "role"]}},
                     "handoff_catalogue": {"type": "array", "items": {"type": "object", "properties": {
                         "from_step": {"type": "string"}, "to_step": {"type": "string"},
-                        "mechanism": {"type": "string"}}, "required": ["from_step", "to_step"]}}},
+                        "mechanism": {"type": "string"}}, "required": ["from_step", "to_step"]}},
+                    "system_profiles": {"type": "array", "items": {"type": "object", "properties": {
+                        "name": {"type": "string"},
+                        "role": {"type": "string", "description": "what it is / what it's for"},
+                        "how_used": {"type": "string",
+                                     "description": "how the business actually uses it day to day"},
+                        "owners": {"type": "string",
+                                   "description": "who owns it and who has access"},
+                        "limitations": {"type": "string",
+                                        "description": "observed constraints stated as plain fact, "
+                                                       "NOT as a judgement (no 'gap'/'conflict'/"
+                                                       "'risk' wording — that belongs in pain "
+                                                       "points)"}},
+                        "required": ["name", "role"]}},
+                    "format_taxonomy": {"type": "array", "items": {"type": "object", "properties": {
+                        "label": {"type": "string",
+                                  "description": "e.g. 'Type 1 — Structured transactional export'"},
+                        "description": {"type": "string"},
+                        "examples": {"type": "string",
+                                     "description": "which sources follow this pattern"}},
+                        "required": ["label", "description"]}}},
                     "required": ["domain_overview", "process_summary", "process_flow",
                                  "process_inventory", "ownership_map", "system_inventory",
-                                 "handoff_catalogue"]},
+                                 "handoff_catalogue", "system_profiles", "format_taxonomy"]},
                 "pain_points": {"type": "array", "minItems": 2, "maxItems": 8, "items": PP},
                 "cross_process_patterns": {"type": "array", "items": {"type": "object", "properties": {
                     "pattern": {"type": "string"}, "description": {"type": "string"}},
@@ -285,9 +320,19 @@ def synthesis_emit_tool(doc_keys: list[str]) -> dict:
                     "required": ["horizon", "window", "theme", "items"]}},
                 "strategy_profile": {"type": "object", "properties": {
                     "posture": {"type": "string"},
-                    "notes": {"type": "string"}}, "required": ["posture"]}},
+                    "notes": {"type": "string"}}, "required": ["posture"]},
+                "metrics_framework": {"type": "array", "minItems": 3, "items": {
+                    "type": "object", "properties": {
+                        "name": {"type": "string"},
+                        "definition": {"type": "string",
+                                       "description": "what the metric measures, in business terms"},
+                        "target": {"type": "string",
+                                   "description": "the target to hold delivery to; a forward-looking "
+                                                  "goal phrase, e.g. 'at least 70% at go-live, "
+                                                  "improving to 90% within 3 months'"}},
+                    "required": ["name", "definition", "target"]}}},
                 "required": ["current_state", "pain_points", "opportunities", "transformation",
-                             "roadmap", "strategy_profile"]}}
+                             "roadmap", "strategy_profile", "metrics_framework"]}}
 
 
 SYNTH_SYSTEM = """You are a transformation strategist writing a briefing for a non-technical Head of \
@@ -302,7 +347,11 @@ ABSOLUTE RULES (checked automatically — violations are rejected):
    a source by choosing its key in `sources`.
 2. NO NEW NUMBERS. Every figure goes in a NumberRef.value and must equal one of the VERIFIED NUMBERS
    you are given. Never invent, estimate, sum, average, or round a new number. Do NOT state ROI, FTE,
-   hours-saved, or time-to-resolve figures — keep those impacts qualitative.
+   hours-saved, or time-to-resolve figures — keep those impacts qualitative. This applies EVERYWHERE,
+   including metric targets and readiness reasons: NEVER write a target like "70% at go-live" or
+   "within 3 months" — those are unverifiable. State targets as DIRECTIONAL goals against the
+   verified baseline (e.g. "a material reduction against the 1,196 baseline", "near-complete
+   coverage", "improving through tuning"). The ONLY numbers allowed anywhere are the VERIFIED NUMBERS.
 3. FACTUAL CURRENT STATE (report 01). Describe how the process runs. State facts only — NO evaluative
    words (breach, risk, violation, gap, conflict, uncontrolled, critical, broken, exposure). Where a
    step has no documented owner, write "Not assigned". Judgement belongs in pain points and
@@ -336,8 +385,13 @@ def run_synthesis(llm, raw_payload: dict, doc_keys: list[str], model=None,
     user = (f"VERIFIED FINDINGS (settled — restate, don't re-derive):\n{findings_brief}\n\n"
             f"VERIFIED NUMBERS you may use (and ONLY these):\n{numbers_brief}\n\n"
             f"DOCUMENT KEYS you may cite: {sorted(doc_keys)}\n{avoid}\n"
-            f"Produce, in business language:\n"
-            f"- current_state: a factual baseline of how this process runs today (no judgements).\n"
+            f"Produce, in business language, a DEEP consultant-grade assessment (not a thin "
+            f"summary — break things down, explain, and use the structured fields fully):\n"
+            f"- current_state: a factual baseline of how this process runs today (no judgements). "
+            f"Include system_profiles — a narrative profile per system/source (role, how it's used, "
+            f"who owns it, observed constraints stated as plain fact) — and format_taxonomy, the "
+            f"2-4 patterns the source information follows (e.g. 'Type 1 — structured transactional "
+            f"export').\n"
             f"- pain_points: one per finding ({n} total), each PP ranked by business impact, with "
             f"root cause and failure pattern, citing its source documents.\n"
             f"- opportunities: one recommended intervention per pain point. Give each an id (OPP1, "
@@ -345,10 +399,18 @@ def run_synthesis(llm, raw_payload: dict, doc_keys: list[str], model=None,
             f"intervention pattern (hitl_workflow | automation | ai_agent | modernisation), a full "
             f"BEFORE process and AFTER process, quantified business impact (verified numbers only), "
             f"implementation approach, integrations, success metrics, dependencies (only real "
-            f"prerequisites), and risks. Place each on the value/feasibility matrix.\n"
+            f"prerequisites), and risks. ALSO give each: personas (the roles who use it once live), "
+            f"expected_behaviour (how it behaves day to day and what it never does on its own), "
+            f"escalation (when and to whom it hands back to a human), and the three readiness "
+            f"ratings (data_readiness, technical_complexity, operational_readiness) — each written "
+            f"as 'high|medium|low — reason'. Place each on the value/feasibility matrix.\n"
             f"- transformation: sequencing rationale + strategic readiness, honouring dependencies.\n"
             f"- roadmap: three horizons (H1 0-6 / H2 6-18 / H3 18+ months); never schedule an "
             f"opportunity before something it depends on.\n"
+            f"- metrics_framework: 4-5 metrics for measuring success once live — name, definition "
+            f"(tie to the verified baseline where relevant), and a DIRECTIONAL target (no invented "
+            f"numbers; reference the verified baseline, e.g. 'a material reduction against the "
+            f"1,196 baseline').\n"
             f"- strategy_profile.posture: a short phrase for the client's strategic direction.\n"
             f"Call emit_synthesis once.")
     messages: list[dict] = [{"role": "user", "content": user}]

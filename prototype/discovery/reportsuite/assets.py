@@ -61,6 +61,17 @@ th{ background:#f0f3f7; font-weight:600; }
          border:1px solid var(--line); border-radius:8px; padding:1rem; font-size:.82rem;
          line-height:1.5; max-height:none; }
 ul{ margin:.4rem 0 .8rem; } li{ margin:.2rem 0; }
+.card h3{ margin:.1rem 0 .6rem; }
+.opmodel{ background:var(--accent-soft); border-radius:8px; padding:.6rem .9rem; margin:.9rem 0; }
+.opmodel p{ margin:.35rem 0; }
+.rationale td{ font-size:.86rem; }
+.rate{ display:inline-block; font-weight:700; font-size:.72rem; letter-spacing:.03em;
+       text-transform:uppercase; border-radius:5px; padding:.08rem .45rem; margin-right:.4rem;
+       white-space:nowrap; }
+.rate-high{ background:#e3f5ea; color:#1a7a44; }
+.rate-medium{ background:#fdf4e3; color:#8a5a00; }
+.rate-low{ background:#fbe7e7; color:#a32424; }
+.rate-na{ background:#eef1f5; color:var(--muted); }
 @media print{ .sidebar{ display:none; } .content{ max-width:none; } }
 @media (max-width:760px){ .layout{ flex-direction:column; } .sidebar{ width:100%; height:auto;
    position:static; } .ba-grid,.matrix{ grid-template-columns:1fr; } .content{ padding:1.5rem; } }

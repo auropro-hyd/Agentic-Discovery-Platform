@@ -59,12 +59,13 @@ def r01(s: SynthesisContent, meta) -> str:
     cs = s.current_state
     dom = esc(meta.get("domain_label", "this process"))
     at_client = f" at {esc(meta['client'])}" if meta.get("client") else ""
-    h = [f"<h1>Current State Assessment</h1>",
-         f"<p class='lede'>How {dom} runs today{at_client}. "
-         "A factual baseline — no judgements.</p>",
-         "<h2>Domain overview</h2>", f"<p>{esc(cs.domain_overview)}</p>",
+    h = [f"<h1>1. Current State Assessment</h1>",
+         f"<p class='lede'>How {dom} runs today{at_client}. A factual baseline of the process, the "
+         "systems that support it, and how information is structured — stated as fact, no judgements.</p>",
+         "<h2>1.1 Domain overview</h2>", f"<p>{esc(cs.domain_overview)}</p>",
          f"<p>{esc(cs.process_summary)}</p>",
-         "<h2>Process flow</h2>",
+         "<h2>1.2 Process flow</h2>",
+         "<p>The end-to-end flow, who performs each step and on which system:</p>",
          process_flow_svg(cs.process_flow),
          "<table><thead><tr><th>Step</th><th>Performed by</th><th>System</th>"
          "<th>What happens</th></tr></thead><tbody>"]
@@ -72,25 +73,57 @@ def r01(s: SynthesisContent, meta) -> str:
         h.append(f"<tr><td>{st.seq}. {esc(st.name)}</td><td>{esc(st.actor)}</td>"
                  f"<td>{esc(st.system)}</td><td>{esc(st.description)}</td></tr>")
     h.append("</tbody></table>")
-    h.append("<h2>Process inventory</h2><ul>")
-    for it in cs.process_inventory:
-        h.append(f"<li><strong>{esc(it.name)}</strong> — {esc(it.purpose)}</li>")
-    h.append("</ul>")
-    h.append("<h2>Ownership map</h2>"
+
+    # 1.3 deep per-system narrative profiles (the depth the prior-engagement bar has)
+    if cs.system_profiles:
+        h.append("<h2>1.3 Systems &amp; sources</h2>")
+        h.append("<p>Each system that supports this process — what it is, how it is used, who owns "
+                 "it, and the constraints observed.</p>")
+        for p in cs.system_profiles:
+            h.append("<div class='card'>")
+            h.append(f"<h3>{esc(p.name)}</h3>")
+            if p.role:
+                h.append(f"<p>{esc(p.role)}</p>")
+            if p.how_used:
+                h.append(f"<p><strong>How it's used.</strong> {esc(p.how_used)}</p>")
+            if p.owners:
+                h.append(f"<p><strong>Ownership &amp; access.</strong> {esc(p.owners)}</p>")
+            if p.limitations:
+                h.append(f"<p><strong>Observed constraints.</strong> {esc(p.limitations)}</p>")
+            h.append("</div>")
+
+    # 1.4 data / document format taxonomy
+    if cs.format_taxonomy:
+        h.append("<h2>1.4 Information format &amp; structure</h2>")
+        h.append("<p>The patterns the source information follows — this drives how it can be "
+                 "ingested and reasoned over.</p>")
+        h.append("<table><thead><tr><th>Pattern</th><th>Description</th><th>Where it appears</th>"
+                 "</tr></thead><tbody>")
+        for fp in cs.format_taxonomy:
+            h.append(f"<tr><td><strong>{esc(fp.label)}</strong></td><td>{esc(fp.description)}</td>"
+                     f"<td>{esc(fp.examples)}</td></tr>")
+        h.append("</tbody></table>")
+
+    if cs.process_inventory:
+        h.append("<h2>1.5 Process inventory</h2><ul>")
+        for it in cs.process_inventory:
+            h.append(f"<li><strong>{esc(it.name)}</strong> — {esc(it.purpose)}</li>")
+        h.append("</ul>")
+    h.append("<h2>1.6 Ownership map</h2>"
              "<table><thead><tr><th>Activity</th><th>Responsible</th><th>Accountable</th>"
              "</tr></thead><tbody>")
     for r in cs.ownership_map:
         h.append(f"<tr><td>{esc(r.activity)}</td><td>{esc(r.responsible)}</td>"
                  f"<td>{esc(r.accountable)}</td></tr>")
     h.append("</tbody></table>")
-    h.append("<h2>System inventory</h2>"
+    h.append("<h2>1.7 System inventory</h2>"
              "<table><thead><tr><th>System</th><th>Role</th><th>System of record for</th>"
              "</tr></thead><tbody>")
     for it in cs.system_inventory:
         h.append(f"<tr><td>{esc(it.name)}</td><td>{esc(it.purpose)}</td>"
                  f"<td>{esc(it.system_of_record_for)}</td></tr>")
     h.append("</tbody></table>")
-    h.append("<h2>Handoff catalogue</h2><ul>")
+    h.append("<h2>1.8 Handoff catalogue</h2><ul>")
     for ho in cs.handoff_catalogue:
         h.append(f"<li>{esc(ho.from_step)} → {esc(ho.to_step)} "
                  f"<span class='prov'>({esc(ho.mechanism)})</span></li>")
@@ -143,6 +176,25 @@ def r03(s: SynthesisContent, meta) -> str:
                  f"<td>{esc(o.value_rating.title())}</td>"
                  f"<td>{esc(o.feasibility_rating.title())}</td><td>{esc(seq)}</td></tr>")
     h.append("</tbody></table>")
+
+    # Prioritization rationale across three readiness dimensions (the prior-engagement bar).
+    rated = [o for o in s.opportunities
+             if o.data_readiness or o.technical_complexity or o.operational_readiness]
+    if rated:
+        h.append("<h2>Prioritization rationale</h2>")
+        h.append("<p>Each opportunity assessed across three readiness dimensions. The rating "
+                 "(high / medium / low) is followed by the reason, so the sequence is defensible "
+                 "rather than asserted.</p>")
+        h.append("<table class='rationale'><thead><tr><th>Opportunity</th>"
+                 "<th>Data readiness</th><th>Technical complexity</th>"
+                 "<th>Operational readiness</th></tr></thead><tbody>")
+        for o in rated:
+            h.append(f"<tr><td><strong>{esc(o.title)}</strong></td>"
+                     f"<td>{_rating_cell(o.data_readiness)}</td>"
+                     f"<td>{_rating_cell(o.technical_complexity)}</td>"
+                     f"<td>{_rating_cell(o.operational_readiness)}</td></tr>")
+        h.append("</tbody></table>")
+
     h.append(f"<h2>Sequencing rationale</h2><p>{esc(s.sequencing_rationale)}</p>")
     if s.dependency_notes:
         h.append(f"<p><strong>Dependencies:</strong> {esc(s.dependency_notes)}</p>")
@@ -171,6 +223,18 @@ def r04(s: SynthesisContent, meta) -> str:
         if bi.derivation:
             h.append(f"<p class='prov'>How we get there: {esc(bi.derivation)}</p>")
         h.append(f"<p><strong>How it's delivered.</strong> {esc(o.implementation_approach)}</p>")
+        # Operating model: who uses it, what it does, and when it hands back to a human.
+        if o.personas or o.expected_behaviour or o.escalation:
+            h.append("<div class='opmodel'>")
+            if o.personas:
+                h.append("<p><strong>Who uses it.</strong> " +
+                         ", ".join(esc(x) for x in o.personas) + "</p>")
+            if o.expected_behaviour:
+                h.append(f"<p><strong>Expected behaviour.</strong> {esc(o.expected_behaviour)}</p>")
+            if o.escalation:
+                h.append(f"<p><strong>Escalation &amp; human fallback.</strong> "
+                         f"{esc(o.escalation)}</p>")
+            h.append("</div>")
         if o.required_integrations:
             h.append("<p><strong>Connects:</strong> " +
                      ", ".join(esc(x) for x in o.required_integrations) + "</p>")
@@ -217,6 +281,16 @@ def r06(s: SynthesisContent, meta) -> str:
         h.append(f"<tr><td>{name}</td><td>{esc(d.doc_type)}</td>"
                  f"<td>{esc(d.what_we_read)}</td><td>{esc(fnd)}</td></tr>")
     h.append("</tbody></table>")
+    if s.metrics_framework:
+        h.append("<h2>Success metrics framework</h2>")
+        h.append("<p>How the impact of the recommended interventions should be measured once live — "
+                 "the dimension, what it means, and the target to hold delivery to.</p>")
+        h.append("<table><thead><tr><th>Metric</th><th>Definition</th><th>Target</th>"
+                 "</tr></thead><tbody>")
+        for m in s.metrics_framework:
+            h.append(f"<tr><td><strong>{esc(m.name)}</strong></td><td>{esc(m.definition)}</td>"
+                     f"<td>{esc(m.target)}</td></tr>")
+        h.append("</tbody></table>")
     h.append("<h2>System &amp; data-flow map</h2>")
     h.append("<p class='prov'>The full step-by-step process flow is in the Current State "
              "Assessment; this is the systems view of the same domain.</p>")
@@ -377,6 +451,23 @@ def _steps(steps) -> str:
 
 def _metric(n) -> str:
     return f"<span class='metric'>{esc(n.text or n.label)}</span>"
+
+
+def _rating_cell(raw: str) -> str:
+    """Render a readiness rating of the form 'high — reason' as a coloured H/M/L badge followed by
+    the reason. Tolerant of an em-dash, hyphen, or colon separator, or a bare rating."""
+    if not raw:
+        return "—"
+    rating, _, reason = raw.partition("—")
+    if not reason:
+        rating, _, reason = raw.partition(" - ")
+    if not reason:
+        rating, _, reason = raw.partition(":")
+    level = rating.strip().lower()
+    cls = level if level in ("high", "medium", "low") else "na"
+    badge = f"<span class='rate rate-{cls}'>{esc(rating.strip().title() or '—')}</span>"
+    reason = reason.strip()
+    return f"{badge} {esc(reason)}" if reason else badge
 
 
 def _cite(refs) -> str:
