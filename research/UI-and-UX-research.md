@@ -191,7 +191,7 @@ A thin web app over the existing engine. Priority order reflects demo value vs. 
 The shipped report suite renders as: a fixed dark sidebar (engagement / client name + 6 numbered
 nav links) beside a white content pane. Report 04 shows each opportunity as a card with a
 two-column Before/After process grid; Report 03 shows the 2×2 matrix as a tinted grid of quadrant
-boxes with opportunity chips. To view: open `prototype/out/<domain>/index.html` in a browser.
+boxes with opportunity chips. To view: open `v1/out/<domain>/index.html` in a browser.
 
 **Screenshots** (captured 2026-06-02 via headless Chrome, in `research/screenshots/`):
 - `o2c-01-current-state.png` — factual baseline, process-flow table, no status colours
@@ -205,9 +205,9 @@ To regenerate screenshots:
 ```
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu \
   --window-size=1280,1600 --screenshot=research/screenshots/o2c-04.png \
-  "file://$PWD/prototype/out/o2c/04-opportunity-portfolio.html"
+  "file://$PWD/v1/out/o2c/04-opportunity-portfolio.html"
 ```
-The CSS lives in `prototype/discovery/reportsuite/assets.py`.
+The CSS lives in `v1/discovery/reportsuite/assets.py`.
 
 ---
 

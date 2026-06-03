@@ -15,7 +15,7 @@
 
 ## Checklist
 
-- [ ] `cd prototype && uv run pytest` passes
+- [ ] `cd v1 && uv run pytest` passes
 - [ ] `uv run pyrefly check discovery run.py scripts` is clean
 - [ ] No client/secret data added to client-facing reports (grounding + no-leak guard respected)
 - [ ] Docs/README updated if behaviour changed

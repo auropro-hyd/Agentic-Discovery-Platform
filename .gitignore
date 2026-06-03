@@ -4,7 +4,7 @@
 
 # ── secrets (never commit) ────────────────────────────────────────
 .env
-prototype/.env
+v1/.env
 
 # ── Claude / tooling local state ──────────────────────────────────
 .claude/
@@ -13,18 +13,23 @@ prototype/.env
 __pycache__/
 *.pyc
 .pytest_cache/
-prototype/.venv/
+v1/.venv/
 
-# ── prototype runtime cache (regenerated; noisy) ──────────────────
-prototype/.cache/
+# ── v1 runtime cache (regenerated; noisy) ─────────────────────────
+v1/.cache/
 
 # ── coverage artifacts (regenerated) ──────────────────────────────
 .coverage
-prototype/.coverage
+v1/.coverage
 htmlcov/
-prototype/htmlcov/
+v1/htmlcov/
 
 # NOTE: out/, golden/, shared_context/, and the input documents ARE committed (by request) as a
 # reference/handoff bundle. They contain the engagement org name in raw/internal layers — this repo
 # is treated as private reference. Only secrets (.env), the LLM response cache, the venv, and OS
 # noise are excluded.
+
+# ── spec-kit local tooling + specs (not committed by request) ─────
+.specify/
+specs/
+CLAUDE.md

@@ -3,7 +3,7 @@
 ## Setup
 
 ```bash
-cd prototype
+cd v1
 uv sync                       # env + deps (runtime + dev: pytest, pyrefly)
 cp .env.example .env          # add ANTHROPIC_API_KEY (or the Azure vars)
 uv run python scripts/doctor.py   # verify provider connectivity
@@ -19,7 +19,7 @@ pre-commit install            # (from repo root) enable hooks
    (the grounding gate + no-leak guard enforce this).
 3. Before pushing:
    ```bash
-   cd prototype
+   cd v1
    uv run pytest
    uv run pyrefly check discovery run.py scripts
    ```
@@ -30,13 +30,13 @@ pre-commit install            # (from repo root) enable hooks
 - Commits: short imperative subject (`fix: …`, `feat: …`, `chore: …`).
 - Type-check the **product code** (`discovery/`, `run.py`, `scripts/`); test fixtures are
   intentionally loosely typed and excluded from the pyrefly hook.
-- Don't commit secrets (`.env`) or the LLM cache (`prototype/.cache/`).
+- Don't commit secrets (`.env`) or the LLM cache (`v1/.cache/`).
 
 ## Where things live
 
 | Path | What |
 |---|---|
-| `prototype/` | the discovery engine + 6-report suite (the product) |
-| `prototype/docs/` | internal design specs + verified numbers |
+| `v1/` | the discovery engine + 6-report suite (the product) |
+| `v1/docs/` | internal design specs + verified numbers |
 | `research/` | market/competitor + UI research |
 | `shared_context/` | local-only received material (gitignored) |

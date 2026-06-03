@@ -15,7 +15,7 @@ body:
       label: How to reproduce
       description: Command(s) run, domain, provider (anthropic/azure), and the output.
       placeholder: |
-        cd prototype && uv run python run.py --domain o2c --auto-resolve
+        cd v1 && uv run python run.py --domain o2c --auto-resolve
     validations:
       required: true
   - type: input

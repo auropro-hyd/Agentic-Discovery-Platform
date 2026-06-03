@@ -7,7 +7,7 @@ Email the maintainers (anmol@auropro.com) with details. We aim to acknowledge wi
 
 ## Data handling principles (built into the platform)
 
-- **No secrets in git.** `.env` is gitignored; the LLM response cache (`prototype/.cache/`) is too.
+- **No secrets in git.** `.env` is gitignored; the LLM response cache (`v1/.cache/`) is too.
   Provider keys live only in your local `.env`.
 - **Client-agnostic by default.** The platform shows no organisation name unless one is detected
   from the documents; a run can suppress a detected name. Client-facing reports pass a no-leak
@@ -19,5 +19,5 @@ Email the maintainers (anmol@auropro.com) with details. We aim to acknowledge wi
 
 ## Note on this repository
 
-Reference artefacts (`prototype/out/`, `prototype/golden/`, `shared_context/`) may contain
+Reference artefacts (`v1/out/`, `v1/golden/`, `shared_context/`) may contain
 engagement-specific names in raw/internal layers. Treat repository access accordingly.

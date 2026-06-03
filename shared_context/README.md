@@ -43,5 +43,5 @@ v2 is the authoritative basis for what was built.
 ## Relationship to the prototype
 
 The prototype is **self-contained** — the O2C input documents it runs on live in
-`prototype/inputs/o2c/` (copied in earlier). Nothing in the prototype depends on this folder;
+`v1/inputs/o2c/` (copied in earlier). Nothing in the prototype depends on this folder;
 it's purely reference/archive.

@@ -1,0 +1,26 @@
+[project]
+name = "auropro-discovery-prototype"
+version = "0.1.0"
+description = "AuroPro autonomous discovery prototype — agentic document discovery + 6-report suite"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.40",   # DISCOVERY_PROVIDER=anthropic (default)
+    "openai>=1.40",      # DISCOVERY_PROVIDER=azure (Azure OpenAI)
+    "pypdf>=6.0",        # reading the PDF input documents
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pyrefly>=0.1",      # type checker (also run via pre-commit)
+    "coverage>=7.14.1",
+    "pypdf>=6.12.2",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# smoke_test.py has a main(), not pytest test_ functions — don't collect it
+addopts = "--ignore=tests/smoke_test.py"
+
+[tool.pyrefly]
+project-includes = ["discovery", "run.py", "scripts", "tests"]

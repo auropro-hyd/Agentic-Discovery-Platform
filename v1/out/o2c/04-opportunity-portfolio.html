@@ -1,0 +1,96 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Opportunity Portfolio</title>
+<link rel="stylesheet" href="assets/report.css"></head><body>
+<div class='rep-footer'><span class='brandmark'><svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'><path d='M16 3 L27 26 H19 L16 18 L13 26 H5 Z' fill='#0f7c8c'/><path d='M16 3 L21 13 L16 13 Z' fill='#22c3d6'/></svg>Order-to-Cash Discovery Report</span><span>Confidential</span></div>
+
+<div class="layout">
+<nav class="sidebar">
+  <span class="brandmark" style="color:#fff;margin-bottom:1rem"><svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'><path d='M16 3 L27 26 H19 L16 18 L13 26 H5 Z' fill='#0f7c8c'/><path d='M16 3 L21 13 L16 13 Z' fill='#22c3d6'/></svg>AuroPro</span>
+  <h1>Order-to-Cash Discovery</h1>
+  <div class="sub">Discovery assessment</div>
+  <a class='' href='00-executive-summary.html'><span class='num'>00</span>Executive Summary</a><a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='active' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
+</nav>
+<main class="content">
+<h1>AI Opportunity Portfolio</h1>
+<p class='lede'>The recommended interventions in full — what the problem is, how the process changes, and what it delivers.</p>
+<h2>At a glance</h2>
+<table class='usecase'><thead><tr><th>Opportunity</th><th>Pattern</th><th>Who it serves</th><th>Knowledge sources</th><th>Expected behaviour</th></tr></thead><tbody>
+<tr><td><strong>Single trusted credit view with controlled approval at the point of release</strong></td><td>HITL Workflow</td><td>Credit approver, Credit and customer-master analyst, Order-management lead</td><td>the enterprise resource credit master, the customer-relationship credit view, the credit management policy</td><td>Day to day it compares the two credit views and lets matching orders flow through; it never raises a customer…</td></tr>
+<tr><td><strong>Formal ownership and procedure for the electronic ordering channel</strong></td><td>Modernisation</td><td>Electronic channel owner, Customer-service lead, Order-management lead</td><td>the order management procedure, the order-to-cash accountability matrix, the dispute resolution working notes, the electronic ordering register</td><td>Day to day it provides a documented owner and standard steps for handling electronic orders and their failure…</td></tr>
+<tr><td><strong>Early detection and prevention of electronic-order fulfilment failures</strong></td><td>Automation Pipeline</td><td>Electronic channel owner, Customer-service team, Order-management lead</td><td>the order flow records, the dispute resolution working notes, the customer service escalation log</td><td>Day to day it watches the electronic order flow and flags orders at risk of failing; it surfaces them for act…</td></tr>
+</tbody></table>
+<h2>In detail</h2>
+<div class='card'>
+<h3>Single trusted credit view with controlled approval at the point of release<span class='pattern'>HITL Workflow</span></h3>
+<p>Establish the enterprise resource system as the enforced single source for credit limits and payment terms at the point of order release, and reconcile the customer-relationship view to it. Where the two views diverge, route the difference to a credit approver for an explicit, recorded decision before release rather than allowing the higher figure to be used silently.</p>
+<div class='ba-grid'>
+<div class='col before'><div class='ba-tag'>Today</div><div class='step'><strong>1. Credit values held separately</strong><div class='who'>Credit and customer-master teams · Both customer systems</div><div>Credit limits and payment terms are maintained independently in both systems with no enforced reconciliation.</div></div>
+<div class='step'><strong>2. Release against visible limit</strong><div class='who'>Order-management team · Order-management environment</div><div>Orders are released against whichever credit limit is visible at the point of decision, which may exceed the system of record.</div></div></div>
+<div class='ba-arrow' aria-hidden='true'><svg viewBox='0 0 28 28'><path d='M4 14h16M15 8l6 6-6 6' fill='none' stroke='var(--accent)' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg></div>
+<div class='col after'><div class='ba-tag after'>With the change</div><div class='step'><strong>1. Reconcile and surface differences</strong><div class='who'>Credit team supported by an automated comparison · Reconciliation workflow</div><div>The two credit views are continuously compared and any divergence is surfaced for review against the system of record.</div></div>
+<div class='step'><strong>2. Approve before release</strong><div class='who'>Credit approver · Credit release workflow</div><div>Where a release would exceed the system-of-record limit, the difference is routed to a credit approver for an explicit, recorded decision before the order proceeds.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Brings the aggregate credit-limit divergence under control and ensures the 267 mismatched accounts are decided against the designated system of record with a recorded approval trail. Removes silent over-extension on the largest accounts, where the single-account difference is substantial.
+ <span class='metric'>267 mismatched accounts brought onto a single trusted credit view</span> &nbsp; <span class='metric'>€30.7M — aggregate credit-limit divergence addressed</span> &nbsp; <span class='metric'>600,000 — largest single-account divergence removed from silent use</span>
+</p>
+<p class='prov'>How we get there: Impact framed directly against the verified divergence figures; no new numbers introduced.</p>
+<p><strong>How it's delivered.</strong> Designate and enforce the enterprise resource system as the operative credit source at release; build a continuous comparison of the two views; introduce a controlled approval step for any release exceeding the system-of-record limit; align payment terms in the same reconciliation.</p>
+<div class='opmodel'>
+<p><strong>Who uses it.</strong> Credit approver, Credit and customer-master analyst, Order-management lead</p>
+<p><strong>Expected behaviour.</strong> Day to day it compares the two credit views and lets matching orders flow through; it never raises a customer&#x27;s effective credit limit on its own and never releases an over-limit order without a recorded human approval.</p>
+<p><strong>Escalation &amp; human fallback.</strong> When a release would exceed the system-of-record limit, it pauses the order and hands it to a credit approver with the difference shown, for an explicit decision.</p>
+<p><strong>Sources.</strong> the enterprise resource credit master, the customer-relationship credit view, the credit management policy &nbsp; <strong>Formats.</strong> structured customer master exports, the credit policy document</p>
+</div>
+<p><strong>Dependencies:</strong> Independent — can start immediately.</p>
+<p class='prov'>Where this comes from: <a href='sources/sap-s4-customer-master-export.html'>SAP S/4HANA Customer Master Export</a>, <a href='sources/sap-crm-customer-export.html'>SAP CRM Customer Export</a>, <a href='sources/credit-management-policy-the organisation-europe.html'>Credit Management Policy Europe</a> and <a href='sources/accounts-receivable-review-notes-q4-2025.html'>Accounts Receivable Review Notes Q4 2025</a></p>
+</div>
+<div class='card'>
+<h3>Formal ownership and procedure for the electronic ordering channel<span class='pattern'>Modernisation</span></h3>
+<p>Bring the electronic ordering channel into the formal order-management procedure and the accountability matrix, assigning a documented owner for the channel and for the manual re-entry failure mode, replacing reliance on informal working notes.</p>
+<div class='ba-grid'>
+<div class='col before'><div class='ba-tag'>Today</div><div class='step'><strong>1. Channel runs outside the procedure</strong><div class='who'>Customer-service team (informally) · Electronic ordering channel</div><div>The electronic channel carrying the majority of order value is excluded from the procedure and the accountability matrix.</div></div>
+<div class='step'><strong>2. Failures resolved informally</strong><div class='who'>Customer-service team · Customer-service escalation route</div><div>Manual re-entry of failed electronic orders is resolved using informal working notes with no documented owner.</div></div></div>
+<div class='ba-arrow' aria-hidden='true'><svg viewBox='0 0 28 28'><path d='M4 14h16M15 8l6 6-6 6' fill='none' stroke='var(--accent)' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg></div>
+<div class='col after'><div class='ba-tag after'>With the change</div><div class='step'><strong>1. Channel brought into the procedure</strong><div class='who'>Order-management and customer-service leadership · Order-management environment</div><div>The electronic channel is documented in the procedure and the accountability matrix, with a named owner for the channel and the re-entry failure mode.</div></div>
+<div class='step'><strong>2. Standardised resolution</strong><div class='who'>Channel owner · Customer-service escalation route</div><div>Manual re-entry follows a documented procedure under the named owner, replacing reliance on informal notes.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Establishes documented accountability for the channel carrying 67.3% of orders and a value of €59.7M, and gives the 34 manual-intervention escalations — 23.9% of all escalations — a named owner and a repeatable resolution path instead of informal notes.
+ <span class='metric'>€59.7M — order value brought under documented ownership</span> &nbsp; <span class='metric'>67.3% of orders by count formally owned</span> &nbsp; <span class='metric'>34 manual-intervention escalations given a named owner</span> &nbsp; <span class='metric'>23.9% of all escalations addressed through documented ownership</span>
+</p>
+<p class='prov'>How we get there: Framed against the verified channel share and escalation figures; no new numbers introduced.</p>
+<p><strong>How it's delivered.</strong> Update the order-management procedure and accountability matrix to include the electronic channel; assign a named owner for the channel and the re-entry failure mode; formalise the informal working notes into a documented resolution procedure; reference the electronic ordering register for connection coverage.</p>
+<div class='opmodel'>
+<p><strong>Who uses it.</strong> Electronic channel owner, Customer-service lead, Order-management lead</p>
+<p><strong>Expected behaviour.</strong> Day to day it provides a documented owner and standard steps for handling electronic orders and their failures; it does not itself process orders but defines who does and how.</p>
+<p><strong>Escalation &amp; human fallback.</strong> Where the documented procedure does not cover a situation, it routes to the named channel owner for a decision and a procedure update.</p>
+<p><strong>Sources.</strong> the order management procedure, the order-to-cash accountability matrix, the dispute resolution working notes, the electronic ordering register &nbsp; <strong>Formats.</strong> procedure and accountability documents, the electronic ordering register, operational working notes</p>
+</div>
+<p><strong>Dependencies:</strong> Independent — can start immediately. Prerequisite for Early detection and prevention of electronic-order fulfilment failures.</p>
+<p class='prov'>Where this comes from: <a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a>, <a href='sources/order-management-sop-the organisation-europe.html'>Order Management SOP Europe</a>, <a href='sources/o2c-process-raci-the organisation-europe.html'>O2C Process RACI Europe</a>, <a href='sources/edi-dispute-resolution-cs-working-notes.html'>EDI Dispute Resolution CS Working Notes</a> and <a href='sources/customer-service-escalation-log-2025.html'>Customer Service Escalation Log 2025</a></p>
+</div>
+<div class='card'>
+<h3>Early detection and prevention of electronic-order fulfilment failures<span class='pattern'>Automation Pipeline</span></h3>
+<p>Introduce automated monitoring of the electronic channel that detects orders at risk of dropping out before fulfilment and surfaces them for action, reducing the volume of orders that reach the unfulfilled state and the downstream escalations and delisting threats they cause.</p>
+<div class='ba-grid'>
+<div class='col before'><div class='ba-tag'>Today</div><div class='step'><strong>1. Failures caught late</strong><div class='who'>Customer-service team · Order-management environment</div><div>Electronic orders drop out and are only noticed once recorded as unfulfilled, often via customer escalations.</div></div>
+<div class='step'><strong>2. Manual recovery</strong><div class='who'>Customer-service team · Customer-service escalation route</div><div>Failed orders are recovered manually and surface as stockout and &#x27;order not received&#x27; escalations, including delisting threats.</div></div></div>
+<div class='ba-arrow' aria-hidden='true'><svg viewBox='0 0 28 28'><path d='M4 14h16M15 8l6 6-6 6' fill='none' stroke='var(--accent)' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg></div>
+<div class='col after'><div class='ba-tag after'>With the change</div><div class='step'><strong>1. Detect at risk early</strong><div class='who'>Automated monitoring · Monitoring workflow</div><div>The electronic order flow is monitored and orders at risk of dropping out are surfaced before they reach the unfulfilled state.</div></div>
+<div class='step'><strong>2. Prompt resolution under ownership</strong><div class='who'>Channel owner and customer-service team · Order-management environment</div><div>At-risk orders are resolved promptly by the documented channel owner before they become customer-facing failures.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Targets the 1,196 unfulfilled electronic orders worth €12.4M — the largest failure bucket and far above the 320 unfulfilled manual and 111 unfulfilled email orders — by catching failures before they reach customers and reducing the stockout and delisting escalations they generate.
+ <span class='metric'>1,196 unfulfilled electronic orders targeted for prevention</span> &nbsp; <span class='metric'>€12.4M — value of unfulfilled electronic orders at stake</span> &nbsp; <span class='metric'>compared with 320 unfulfilled manual orders</span> &nbsp; <span class='metric'>compared with 111 unfulfilled email orders</span>
+</p>
+<p class='prov'>How we get there: Framed against the verified unfulfilled-order figures; no new numbers introduced.</p>
+<p><strong>How it's delivered.</strong> Build automated monitoring of the electronic order flow that identifies orders at risk of dropping out; route at-risk orders to the channel owner for prompt action; track recovery against the unfulfilled baseline.</p>
+<div class='opmodel'>
+<p><strong>Who uses it.</strong> Electronic channel owner, Customer-service team, Order-management lead</p>
+<p><strong>Expected behaviour.</strong> Day to day it watches the electronic order flow and flags orders at risk of failing; it surfaces them for action and never cancels or alters a customer order on its own.</p>
+<p><strong>Escalation &amp; human fallback.</strong> When an at-risk order cannot be resolved automatically, it hands the order to the channel owner with the detected issue for manual recovery.</p>
+<p><strong>Sources.</strong> the order flow records, the dispute resolution working notes, the customer service escalation log &nbsp; <strong>Formats.</strong> structured order flow exports, operational working notes, the escalation log</p>
+</div>
+<p><strong>Dependencies:</strong> Requires Formal ownership and procedure for the electronic ordering channel first.</p>
+<p class='prov'>Where this comes from: <a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a>, <a href='sources/customer-service-escalation-log-2025.html'>Customer Service Escalation Log 2025</a> and <a href='sources/edi-dispute-resolution-cs-working-notes.html'>EDI Dispute Resolution CS Working Notes</a></p>
+</div>
+</main></div></body></html>
