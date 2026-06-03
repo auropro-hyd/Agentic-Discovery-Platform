@@ -115,9 +115,28 @@ def test_run_synthesis_gives_up_after_retries():
     raw = _raw_payload()
     bad = depth_synthesis_payload()
     bad["opportunities"][0]["business_impact"]["narrative"] += " saving 999999 euros."
-    llm = ScriptedSynthLLM([bad, bad])      # never fixes it
+    llm = ScriptedSynthLLM([bad, bad, bad])   # never fixes it (3 attempts)
     with pytest.raises(GroundingError, match="failed validation after retries"):
         synthesis.run_synthesis(llm, raw, sorted(depth_doc_keys()))
+    assert llm.calls == 3                     # three attempts before giving up
+
+
+def test_run_synthesis_recovers_on_third_attempt():
+    raw = _raw_payload()
+    bad = depth_synthesis_payload()
+    bad["opportunities"][0]["business_impact"]["narrative"] += " saving 999999 euros."
+    good = depth_synthesis_payload()
+    llm = ScriptedSynthLLM([bad, bad, good])  # fixes it on the 3rd
+    out = synthesis.run_synthesis(llm, raw, sorted(depth_doc_keys()))
+    assert llm.calls == 3 and out["opportunities"]
+
+
+def test_fix_hint_is_targeted_per_error_kind():
+    from discovery.agent_loop import GroundingError as GE
+    assert "FACTUAL" in synthesis._fix_hint(GE("Report-01 prose contains diagnostic language: ['exposure']"))
+    assert "VERIFIED NUMBERS" in synthesis._fix_hint(GE("prose has untraceable number '999'"))
+    assert "DOCUMENT KEYS" in synthesis._fix_hint(GE("unknown doc_key 'x'"))
+    assert synthesis._fix_hint(GE("some other failure"))   # generic fallback non-empty
 
 
 def test_run_synthesis_with_suppress_names_adds_avoid_clause():

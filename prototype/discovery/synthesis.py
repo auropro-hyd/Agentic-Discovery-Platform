@@ -245,6 +245,7 @@ def synthesis_emit_tool(doc_keys: list[str]) -> dict:
                      "business_impact", "implementation_approach", "value_rating",
                      "feasibility_rating", "value_score", "feasibility_score", "matrix_quadrant",
                      "dependencies", "sources", "personas", "expected_behaviour", "escalation",
+                     "knowledge_sources", "document_formats",
                      "data_readiness", "technical_complexity", "operational_readiness"]}
     PP = {"type": "object", "properties": {
         "id": {"type": "string", "pattern": r"^PP\d+$"}, "title": {"type": "string"},
@@ -444,7 +445,7 @@ def run_synthesis(llm, raw_payload: dict, doc_keys: list[str], model=None,
             f"Call emit_synthesis once.")
     messages: list[dict] = [{"role": "user", "content": user}]
     last_err = None
-    for attempt in range(2):
+    for attempt in range(3):
         # the full 6-report emit (3+ opportunities with before/after) is large — give it room so
         # opportunities aren't truncated mid-emit
         turn = llm.messages_with_tools(system=SYNTH_SYSTEM, messages=messages, tools=[tool],
@@ -460,9 +461,27 @@ def run_synthesis(llm, raw_payload: dict, doc_keys: list[str], model=None,
             last_err = e
             messages.append({"role": "user", "content": [
                 {"type": "tool_result", "tool_use_id": emits[0]["id"],
-                 "content": f"REJECTED: {e}. Re-emit, fixing this. Use only verified numbers; "
-                            f"keep report 01 factual."}]})
+                 "content": f"REJECTED: {e}\n\n{_fix_hint(e)} Re-emit the FULL corrected "
+                            f"emit_synthesis now."}]})
     raise GroundingError(f"synthesis failed validation after retries: {last_err}")
+
+
+def _fix_hint(e: GroundingError) -> str:
+    """A targeted remedy for the retry, keyed to the kind of grounding failure — so the model can
+    actually fix it rather than guess."""
+    msg = str(e)
+    if "diagnostic language" in msg:
+        return ("current_state (report 01) must be FACTUAL — state what is, with no evaluative "
+                "words (exposure, risk, gap, conflict, breach, critical, broken, …). Move any such "
+                "wording into pain_points or opportunities, and restate report 01 neutrally "
+                "(e.g. 'differs from' instead of 'exposure').")
+    if "untraceable number" in msg or "not traceable" in msg:
+        return ("every figure must equal one of the VERIFIED NUMBERS you were given. Remove or "
+                "correct the offending number; keep metric targets DIRECTIONAL (no invented "
+                "percentages or timeframes).")
+    if "doc_key" in msg:
+        return "cite only the DOCUMENT KEYS you were given; fix the unknown key."
+    return "fix the issue above; use only verified numbers and keep report 01 factual."
 
 
 def _findings_brief(raw_payload: dict) -> str:
