@@ -2,8 +2,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Opportunity Portfolio — Acme Manufacturing</title>
 <link rel="stylesheet" href="assets/report.css"></head><body>
+<div class='rep-footer'><span class='brandmark'><svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'><path d='M16 3 L27 26 H19 L16 18 L13 26 H5 Z' fill='#0f7c8c'/><path d='M16 3 L21 13 L16 13 Z' fill='#22c3d6'/></svg>Procure-to-Pay Discovery Report · Acme Manufacturing</span><span>Confidential</span></div>
+
 <div class="layout">
 <nav class="sidebar">
+  <span class="brandmark" style="color:#fff;margin-bottom:1rem"><svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'><path d='M16 3 L27 26 H19 L16 18 L13 26 H5 Z' fill='#0f7c8c'/><path d='M16 3 L21 13 L16 13 Z' fill='#22c3d6'/></svg>AuroPro</span>
   <h1>Acme Manufacturing</h1>
   <div class="sub">Procure-to-Pay Discovery</div>
   <a class='' href='00-executive-summary.html'><span class='num'>00</span>Executive Summary</a><a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='active' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
@@ -29,7 +32,7 @@
 <div class='step'><strong>3. Release on dual control</strong><div class='who'>Finance approver · Commitments export</div><div>The order releases only once both approvals are recorded.</div></div></div>
 </div>
 <p><strong>Business impact.</strong> This directly addresses the EUR 557,000 of large commitments released without a second approval, which today represent 12.0 percent of total purchase order value. By holding large orders until dual control is satisfied, the company restores the control the policy already mandates and removes the single-approval release path.
- <span class='metric'>EUR 557,000 of large commitments brought under enforced dual control</span> &nbsp; <span class='metric'>seven large orders that would now require a second approval</span> &nbsp; <span class='metric'>12.0 percent of total purchase order value protected</span>
+ <span class='metric'>EUR 557,000 of large commitments brought under enforced dual control</span> &nbsp; <span class='metric'>7 — seven large orders that would now require a second approval</span> &nbsp; <span class='metric'>12.0 percent of total purchase order value protected</span>
 </p>
 <p class='prov'>How we get there: Based on the seven large orders released on single approval and their recorded value.</p>
 <p><strong>How it's delivered.</strong> Define the large-spend threshold from the policy, configure an approval hold for orders above it, and route held orders to a Finance approver. Embed the rule at the point of approval in the commitments record so release is impossible without the second approval.</p>
@@ -51,7 +54,7 @@
 <div class='step'><strong>2. Block order without a purchase order</strong><div class='who'>Procurement lead · Commitments export</div><div>If no purchase order exists, the order cannot proceed and is returned to the requesting function to raise one first.</div></div></div>
 </div>
 <p><strong>Business impact.</strong> This addresses the EUR 216,000 of orders placed entirely outside the controlled process — 4.7 percent of total purchase order value — by requiring a purchase order before any order can be committed. Because all three maverick orders also lacked a second approval, this gate works alongside the dual-control checkpoint to close the path that left these commitments with no preventive control at all.
- <span class='metric'>EUR 216,000 of maverick spend brought into the controlled process</span> &nbsp; <span class='metric'>three orders that would now require a purchase order first</span> &nbsp; <span class='metric'>4.7 percent of total purchase order value</span>
+ <span class='metric'>EUR 216,000 of maverick spend brought into the controlled process</span> &nbsp; <span class='metric'>3 — three orders that would now require a purchase order first</span> &nbsp; <span class='metric'>4.7 percent of total purchase order value</span>
 </p>
 <p class='prov'>How we get there: Based on the three orders recorded as placed before a purchase order existed and their value.</p>
 <p><strong>How it's delivered.</strong> Apply a control at the point of ordering that requires a valid purchase order reference before an order can be committed, using the order-sequence indicator already recorded. Return non-compliant orders to the requesting function.</p>
@@ -73,7 +76,7 @@
 <div class='step'><strong>2. Assign owner and remediate</strong><div class='who'>Finance approver · Commitments export</div><div>Each surfaced order is assigned to a named owner who drives it to remediation and records the outcome.</div></div></div>
 </div>
 <p><strong>Business impact.</strong> This makes the EUR 557,000 of single-approval commitments and the EUR 216,000 of maverick commitments visible and owned, so recorded exceptions are detected and actioned rather than persisting unaddressed. It closes the policy&#x27;s silence on exception handling by assigning accountability to the states the record already captures.
- <span class='metric'>EUR 557,000 of single-approval commitments brought under monitoring</span> &nbsp; <span class='metric'>EUR 216,000 of maverick commitments brought under monitoring</span> &nbsp; <span class='metric'>the two recorded approval states to be monitored</span>
+ <span class='metric'>EUR 557,000 of single-approval commitments brought under monitoring</span> &nbsp; <span class='metric'>EUR 216,000 of maverick commitments brought under monitoring</span> &nbsp; <span class='metric'>2 — the two recorded approval states to be monitored</span>
 </p>
 <p class='prov'>How we get there: Based on the recorded single-approval and maverick values that currently have no owner.</p>
 <p><strong>How it's delivered.</strong> Define exception ownership in the policy, set a regular review of orders in an exception state drawn from the commitments record, and record remediation against each. Extend the policy to name the exception-handling control it currently omits.</p>

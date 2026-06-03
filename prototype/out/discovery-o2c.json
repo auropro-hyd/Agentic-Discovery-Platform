@@ -649,6 +649,28 @@
   "process_summary": "",
   "recommendations": [],
   "synthesis": {
+    "charts": [
+      {
+        "key": "unfulfilled_by_channel",
+        "kind": "bar",
+        "segments": [
+          {
+            "label": "Edi",
+            "value": 1196.0
+          },
+          {
+            "label": "Manual",
+            "value": 320.0
+          },
+          {
+            "label": "Email",
+            "value": 111.0
+          }
+        ],
+        "title": "Unfulfilled orders by channel",
+        "unit": "orders"
+      }
+    ],
     "cross_process_patterns": [],
     "current_state": {
       "domain_overview": "This assessment covers the order-to-cash process for the European retail business of a consumer-healthcare organisation — from how customer credit is set and maintained, through how orders arrive and are processed across channels, to how unfulfilled orders and service failures are escalated and resolved. The process spans two customer systems, a portfolio of large retail accounts, and a high-volume electronic ordering channel that together carry the majority of the organisation's order value.",

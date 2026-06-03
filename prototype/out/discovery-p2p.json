@@ -343,6 +343,7 @@
   "process_summary": "",
   "recommendations": [],
   "synthesis": {
+    "charts": [],
     "cross_process_patterns": [],
     "current_state": {
       "domain_overview": "This domain covers how the company commits to spend with suppliers — from the point a purchase order is raised, through approval, to the point an order is placed. The process is steered by a written procurement policy and recorded in a structured commitments export. The policy sets two headline controls: a mandatory second Finance approval on large purchase orders, and a requirement that a purchase order exists before any order is placed.",

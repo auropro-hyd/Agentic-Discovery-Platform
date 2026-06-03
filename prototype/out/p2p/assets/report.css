@@ -61,8 +61,9 @@ ul{ margin:.4rem 0 .8rem; } li{ margin:.2rem 0; }
 .card h3{ margin:.1rem 0 .6rem; }
 
 /* ── executive summary: KPI tiles, panels, opportunity cards ─────────── */
-.kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:.8rem;
+.kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(115px,1fr)); gap:.7rem;
        margin:1.4rem 0 1.8rem; }
+@media print{ .kpis{ grid-template-columns:repeat(5,1fr); } }
 .kpi{ background:var(--panel); border:1px solid var(--line); border-radius:10px;
       padding:1rem 1.1rem; border-top:3px solid var(--accent); }
 .kpi-v{ font-size:1.45rem; font-weight:700; color:var(--ink); letter-spacing:-.01em;
@@ -104,7 +105,50 @@ table.usecase th{ font-size:.82rem; }
 .rate-medium{ background:#fdf4e3; color:#8a5a00; }
 .rate-low{ background:#fbe7e7; color:#a32424; }
 .rate-na{ background:#eef1f5; color:var(--muted); }
-@media print{ .sidebar{ display:none; } .content{ max-width:none; } }
+/* ── cover page + running header/footer (screen: header hidden, cover compact) ─── */
+.rep-header{ display:none; }            /* shown only in print */
+.rep-footer{ display:none; }            /* shown only in print */
+.cover{ display:none; }                 /* shown only on the index / first print page */
+.cover-toc{ display:none; }             /* the TOC page — print only */
+.toc{ margin:1.5rem 0 2rem; }
+.toc a{ display:flex; align-items:baseline; text-decoration:none; color:var(--ink);
+        padding:.4rem 0; border-bottom:1px dotted var(--line); }
+.toc .toc-num{ color:var(--accent); font-weight:700; width:1.8rem; flex:0 0 1.8rem; }
+.toc .toc-t{ flex:1; }
+.toc .toc-pg{ color:var(--muted); font-variant-numeric:tabular-nums; }
+.brandmark{ display:inline-flex; align-items:center; gap:.5rem; font-weight:700; }
+.brandmark svg{ width:22px; height:22px; }
+
+@media print{
+  @page{ size:A4; margin:18mm 14mm 16mm 14mm; }
+  body{ background:#fff; }
+  .sidebar{ display:none; }
+  .layout{ display:block; }
+  .content{ max-width:none; padding:0; }
+  /* running header/footer + page numbers are supplied by the PDF tool's native margin boxes
+     (see scripts/make_pdf.py) — CSS position:fixed repeats unreliably across printed pages and
+     collides with headings, so we don't use it. The branded cover carries the identity. */
+  .rep-header,.rep-footer{ display:none; }
+  /* page-break hygiene: keep visual blocks whole */
+  .card,.kpi,.panel,.opp-card,.chart-wrap,.flow-wrap,.horizon,table,tr,
+  .two-col,.opmodel{ break-inside:avoid; }
+  h1,h2,h3,h4{ break-after:avoid; }
+  h2{ break-before:auto; }
+  .cover{ display:flex; }              /* the branded cover, first page of the index */
+  .cover-toc{ display:block; break-before:page; break-after:page; }   /* TOC on its own page */
+  .cover ~ .layout .content{ break-before:page; }  /* body starts fresh after cover/TOC */
+  a[href]{ color:var(--ink); text-decoration:none; }   /* links print as plain text */
+}
+
+/* ── branded cover (print) ──────────────────────────────────────────────── */
+.cover{ flex-direction:column; justify-content:center; min-height:240mm;
+        background:linear-gradient(135deg,#0f7c8c 0 55%,#2b3440 55% 100%); color:#fff;
+        margin:-18mm -14mm 0; padding:40mm 22mm; }
+.cover .ctitle{ font-size:30pt; font-weight:700; line-height:1.15; max-width:70%; }
+.cover .csub{ font-size:13pt; margin-top:1rem; opacity:.92; }
+.cover .cbrand{ margin-top:auto; font-size:12pt; display:flex; align-items:center; gap:.55rem; }
+.cover .cbrand svg{ width:30px; height:30px; }
+
 @media (max-width:760px){ .layout{ flex-direction:column; } .sidebar{ width:100%; height:auto;
    position:static; } .ba-grid,.matrix,.two-col,.opp-cards{ grid-template-columns:1fr; }
    .content{ padding:1.5rem; } }
