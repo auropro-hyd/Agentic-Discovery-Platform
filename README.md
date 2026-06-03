@@ -11,26 +11,55 @@
 ## How it works
 
 ```mermaid
-flowchart LR
-    D[Business documents<br/>SOPs · policies · RACIs<br/>system exports · notes] --> A
+flowchart TB
+    D["📂 Business documents<br/><small>SOPs · policies · RACIs · system exports · working notes</small>"]
 
-    subgraph Agent["Discovery agent — live"]
-      A[Read and classify] --> T{{Generic tools<br/>describe · group_by<br/>join_diff · filter_count<br/>find_mentions}}
-      T -->|code does the math| A
-      A --> F[Findings<br/>contradictions · gaps<br/>unowned processes]
+    subgraph DISCOVER["① Discover — live agent loop"]
+      direction TB
+      A["Read &amp; classify each document"]
+      T{{"Generic tools<br/><small>describe · group_by · join_diff<br/>filter_count · find_mentions</small>"}}
+      X["Cross-reference<br/><small>documented process vs. actual data</small>"]
+      A --> T
+      T -- "code computes the numbers" --> X
+      X -- "more evidence needed" --> T
+      X --> F["Findings<br/><small>contradictions · gaps · unowned processes</small>"]
     end
 
-    F --> G[/Grounding gate<br/>every number traces to data/]
-    G --> S[Synthesis<br/>pain points · opportunities<br/>roadmap]
-    S --> R[(6-report suite<br/>HTML + Markdown)]
+    subgraph REVIEW["② Verify"]
+      G{"Grounding gate<br/><small>every number traces to a tool result</small>"}
+      H["👤 SME review (HITL)<br/><small>accept · override · route</small>"]
+      G -- "ungrounded → rejected" --> A
+      G -- "grounded" --> H
+    end
 
-    style Agent fill:#eaf1fe,stroke:#1f6feb
-    style G fill:#fff6e5,stroke:#c98a00
-    style R fill:#e7f7ee,stroke:#0b8a4b
+    subgraph DELIVER["③ Deliver"]
+      S["Synthesis<br/><small>pain points · opportunities · roadmap</small>"]
+      C["Confidence + provenance tiering<br/><small>cite source docs, business language only</small>"]
+      R["📑 6-report client suite<br/><small>HTML + Markdown</small>"]
+      S --> C --> R
+    end
+
+    D --> A
+    F --> G
+    H --> S
+
+    %% high-contrast: dark text on light fills (readable in light & dark themes)
+    classDef src     fill:#dbe4f3,stroke:#33425b,stroke-width:1.5px,color:#11161f;
+    classDef agent   fill:#cfe0ff,stroke:#1f4fa3,stroke-width:1.5px,color:#0a1f44;
+    classDef gate    fill:#ffe6b3,stroke:#9a6a00,stroke-width:1.5px,color:#3d2a00;
+    classDef human   fill:#e8d8ff,stroke:#6a3bb0,stroke-width:1.5px,color:#2a124d;
+    classDef out     fill:#c9efd6,stroke:#1b7a45,stroke-width:1.5px,color:#0a2f1a;
+
+    class D src;
+    class A,T,X,F agent;
+    class G gate;
+    class H human;
+    class S,C,R out;
 ```
 
-**The agent reasons; code does the math.** It calls deterministic tools to compute over the data,
-so every figure is exact and traceable — not an LLM guess.
+**The agent reasons; code does the math.** It loops over deterministic tools to compute over the
+data, so every figure is exact and traceable — never an LLM guess. The grounding gate bounces any
+ungrounded number back to the agent; an SME reviews findings before they become a deliverable.
 
 ---
 
