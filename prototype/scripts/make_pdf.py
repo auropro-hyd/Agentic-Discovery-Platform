@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """Render a generated report suite (out/<domain>/) to a single, print-quality PDF.
 
-Why a separate step: the suite is HTML-first (screen), and a reliable running header/footer with
-page numbers across a multi-page PDF needs the browser's NATIVE margin boxes — CSS position:fixed
-repeats unreliably in print and collides with headings. So we drive headless Chrome with
---header-template / --footer-template here, where it is supported, and concatenate the sections in
-suite order (cover + TOC come from the index page; then 01..06).
+The suite is HTML-first; the print chrome (full-bleed cover, running brand line, page numbers,
+Confidential footer) is all in the report's print stylesheet via CSS @page margin boxes — which
+render reliably in headless Chrome. So this just prints each section to PDF with Chrome's own
+default header/footer SUPPRESSED (--no-pdf-header-footer), then concatenates them in suite order
+(the index carries the cover + TOC; then 01..06).
 
 Usage:
     uv run python scripts/make_pdf.py --domain o2c
     uv run python scripts/make_pdf.py --domain o2c --out /tmp/o2c-report.pdf
 
-No new dependencies: uses headless Chrome (found at the usual macOS path or $CHROME) and the stdlib
-to stitch the per-page PDFs. If a PDF-merge lib (pypdf) is present it produces one file; otherwise
-it writes the per-section PDFs into a folder and tells you.
+Uses headless Chrome (the usual macOS path or $CHROME) + pypdf to stitch. Without pypdf it writes
+the per-section PDFs into a folder and tells you.
 """
 from __future__ import annotations
 
@@ -28,16 +27,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SECTIONS = ["index", "01-current-state", "02-pain-points", "03-recommendation",
             "04-opportunity-portfolio", "05-roadmap", "06-supporting-artefacts"]
-
-# native running header/footer templates (Chrome injects page numbers via the classes below)
-_HEADER = ("<div style='font-size:8px;color:#5b6776;width:100%;padding:0 14mm;"
-           "display:flex;justify-content:space-between;'>"
-           "<span>{title}</span><span>AuroPro · Autonomous Discovery Platform</span></div>")
-_FOOTER = ("<div style='font-size:8px;color:#5b6776;width:100%;padding:0 14mm;"
-           "display:flex;justify-content:space-between;'>"
-           "<span>Confidential</span>"
-           "<span>Page <span class='pageNumber'></span> of <span class='totalPages'></span></span>"
-           "</div>")
 
 
 def _chrome() -> str:
@@ -56,23 +45,18 @@ def render(domain: str, out_path: Path) -> int:
     suite = ROOT / "out" / domain
     if not (suite / "index.html").exists():
         sys.exit(f"error: no suite at {suite} — run `python run.py --domain {domain}` first.")
-    title = f"{domain.upper()} Discovery Report"
     chrome = _chrome()
     tmp = Path(tempfile.mkdtemp())
     parts = []
-    # the cover page (index) gets no running header/footer; the rest do
+    # all chrome (cover, running brand line, page numbers, Confidential) is in the print CSS;
+    # suppress Chrome's OWN default header/footer so only our @page margin boxes show.
     for i, name in enumerate(SECTIONS):
         src = suite / f"{name}.html"
         if not src.exists():
             continue
         dst = tmp / f"{i:02d}-{name}.pdf"
         cmd = [chrome, "--headless=new", "--disable-gpu", "--no-sandbox",
-               f"--print-to-pdf={dst}", src.as_uri()]
-        if name == "index":
-            cmd.insert(-1, "--no-pdf-header-footer")     # cover/TOC: clean, no running chrome
-        else:
-            cmd[-1:-1] = [f"--print-to-pdf-header-template={_HEADER.format(title=title)}",
-                          f"--print-to-pdf-footer-template={_FOOTER}"]
+               "--no-pdf-header-footer", f"--print-to-pdf={dst}", src.as_uri()]
         subprocess.run(cmd, check=True, capture_output=True)
         parts.append(dst)
     # stitch

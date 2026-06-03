@@ -123,32 +123,37 @@ table.usecase th{ font-size:.82rem; }
 .brandmark svg{ width:22px; height:22px; }
 
 @media print{
-  @page{ size:A4; margin:18mm 14mm 16mm 14mm; }
+  /* content pages: A4 with a running brand (top-right) + confidentiality/page note (bottom).
+     CSS @page margin boxes render reliably in headless Chrome and never collide with headings. */
+  @page{ size:A4; margin:16mm 14mm 15mm 14mm;
+         @top-right{ content:"AuroPro · Autonomous Discovery"; font-size:8pt; color:#9aa7b6; }
+         @bottom-left{ content:"Confidential"; font-size:8pt; color:#9aa7b6; }
+         @bottom-right{ content:"Page " counter(page); font-size:8pt; color:#9aa7b6; } }
+  /* the cover is a full-bleed first page with NO margin boxes */
+  @page cover{ margin:0; @top-right{ content:none; } @bottom-left{ content:none; }
+               @bottom-right{ content:none; } }
   body{ background:#fff; }
   .sidebar{ display:none; }
   .layout{ display:block; }
   .content{ max-width:none; padding:0; }
-  /* running header/footer + page numbers are supplied by the PDF tool's native margin boxes
-     (see scripts/make_pdf.py) — CSS position:fixed repeats unreliably across printed pages and
-     collides with headings, so we don't use it. The branded cover carries the identity. */
   .rep-header,.rep-footer{ display:none; }
-  /* page-break hygiene: keep visual blocks whole */
-  .card,.kpi,.panel,.opp-card,.chart-wrap,.flow-wrap,.horizon,table,tr,
-  .two-col,.opmodel{ break-inside:avoid; }
+  /* page-break hygiene: keep SMALL visual blocks whole (charts, KPI tiles, panels, chart-wraps,
+     table rows). Big prose CARDS may split across a page boundary rather than leaving a tall
+     half-empty page before them — readability is fine and pages fill naturally. */
+  .kpi,.panel,.opp-card,.horizon,.opmodel,tr,.chart-wrap{ break-inside:avoid; }
   h1,h2,h3,h4{ break-after:avoid; }
-  h2{ break-before:auto; }
-  .cover{ display:flex; }              /* the branded cover, first page of the index */
-  .cover-toc{ display:block; break-before:page; break-after:page; }   /* TOC on its own page */
-  .cover ~ .layout .content{ break-before:page; }  /* body starts fresh after cover/TOC */
+  /* the cover owns the @page cover (full bleed); the TOC and body follow on fresh pages */
+  .cover{ display:flex; page:cover; break-after:page; }
+  .cover-toc{ display:block; break-after:page; }
   a[href]{ color:var(--ink); text-decoration:none; }   /* links print as plain text */
 }
 
-/* ── branded cover (print) ──────────────────────────────────────────────── */
-.cover{ flex-direction:column; justify-content:center; min-height:240mm;
-        background:linear-gradient(135deg,#0f7c8c 0 55%,#2b3440 55% 100%); color:#fff;
-        margin:-18mm -14mm 0; padding:40mm 22mm; }
-.cover .ctitle{ font-size:30pt; font-weight:700; line-height:1.15; max-width:70%; }
-.cover .csub{ font-size:13pt; margin-top:1rem; opacity:.92; }
+/* ── branded cover (print) — full-bleed A4 ──────────────────────────────── */
+.cover{ flex-direction:column; justify-content:center; width:210mm; min-height:297mm;
+        background:linear-gradient(128deg,#0f7c8c 0 56%,#243043 56% 100%); color:#fff;
+        padding:48mm 24mm; box-sizing:border-box; }
+.cover .ctitle{ font-size:32pt; font-weight:700; line-height:1.12; max-width:64%; }
+.cover .csub{ font-size:13pt; margin-top:1.1rem; opacity:.9; }
 .cover .cbrand{ margin-top:auto; font-size:12pt; display:flex; align-items:center; gap:.55rem; }
 .cover .cbrand svg{ width:30px; height:30px; }
 
