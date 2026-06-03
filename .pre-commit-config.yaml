@@ -7,10 +7,10 @@ repos:
       # Tests are intentionally excluded — their fixtures are deliberately loosely typed.
       - id: pyrefly
         name: pyrefly (type check, product code)
-        entry: bash -c 'cd prototype && uv run pyrefly check discovery run.py scripts'
+        entry: bash -c 'cd v1 && uv run pyrefly check discovery run.py scripts'
         language: system
         pass_filenames: false
-        files: ^prototype/(discovery/|run\.py|scripts/).*\.py$
+        files: ^v1/(discovery/|run\.py|scripts/).*\.py$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

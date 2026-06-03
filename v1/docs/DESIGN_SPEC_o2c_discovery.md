@@ -5,7 +5,7 @@ Scope: linear CLI prototype, Python 3.14, no orchestrator. Governing principle: 
 math, the agent does the reasoning**; output must be **consistent** (same 3 findings every run on
 the same docs) and **not fabricated** (every number computed from data, never hardcoded).
 
-All numbers below are verified against the live data in `prototype/inputs/o2c/` (see §4 Gate A).
+All numbers below are verified against the live data in `v1/inputs/o2c/` (see §4 Gate A).
 
 ---
 
@@ -18,7 +18,7 @@ All numbers below are verified against the live data in `prototype/inputs/o2c/` 
 | D3 | F2 "volume" = count or value? | **Count is canonical.** `group_by(count)` → EDI = 5667/8420 = **67.3%**. The finding cites the **count** as primary. `group_by` returns BOTH `pct_of_rows` and (when `value_col` given) `pct_of_value`, and the emit schema forces a `basis` label, so the 67.3%-by-count vs 66.8%-by-value ambiguity can never silently flip the headline. |
 | D4 | F3: hand-transcribe a CSV sidecar, or read prose? | **Read frozen prose + a deterministic text primitive.** Verified: the EDI register PDF extracts the "8 / 6 / 14" split in **clean prose** ("8 under Opella Digital management (connections 1-8) and 6 remaining under Sanofi Shared Services... (connections 9-14)", "these six trading partners", "All 14 active production EDI connections"). The table *rows* mangle (the `#` column splits "10"→"1\n0"), so **do not count table rows**; count via the prose + a `find_mentions` text tool over the pinned 6-entity list. No hand-built CSV — that would re-introduce a hand-authored answer (anti-principle). |
 | D5 | F2 "undocumented" = prove a negative over a mangled RACI table? | **No — it is a positive statement.** Verified the RACI says, in clean prose: *"This RACI covers Manual (telephone) and Email order channels only. EDI channel process steps are not included in this version of the RACI"* and *"EDI-related rows excluded pending formal EDI process [SOP]"*. F2's "undocumented/unowned" is grounded by **quoting that line**, via `find_mentions`, not by asserting an absence. |
-| D6 | pypdf installed? extraction stable? | **Installed (6.12.2 in `prototype/.venv`); extraction is byte-stable** across repeated runs (verified, all 3 PDFs). Still **pin the version** (`pypdf==6.12.2`) and **freeze extracted text to committed sidecars** for portability/audit, but the "not installed / garbage" premise is false. |
+| D6 | pypdf installed? extraction stable? | **Installed (6.12.2 in `v1/.venv`); extraction is byte-stable** across repeated runs (verified, all 3 PDFs). Still **pin the version** (`pypdf==6.12.2`) and **freeze extracted text to committed sidecars** for portability/audit, but the "not installed / garbage" premise is false. |
 | D7 | `filter_count` predicate: string DSL vs JSON-AST vs flat? | **Flat structured leaf for the prototype** `{col, op, value}` with closed `op` enum + optional `all/any/not` nesting (cap depth 6). No `eval`, no free-text. Unicode **NFC-normalized, case-insensitive** compare (the root_cause has a U+2014 em-dash; ASCII `-` would silently return 0). |
 | D8 | Channel vocabulary | Verified: order-flow channels are **`EDI / Manual / Fax / Email`** (NO "Phone"; "Phone" exists only in the escalation log's `channel` column). All draft prose saying "Phone/email" is wrong. The agent must read channels from `group_by`, never from prose or a 5-row sample. |
 | D9 | Finding count 1–5? | **Exactly 3.** `emit_findings` schema `minItems:3, maxItems:3`. System prompt instructs "rank by business consequence; emit the top 3." Report renderer stable-sorts by `(severity_rank, id)`. Stops the 3-vs-4-vs-5 drift (the 34-incident stat and the 307-account stat are folded into F3 and F1 respectively, not split into new findings). |
@@ -531,7 +531,7 @@ hard guarantee across provider/backend drift; the scripted path removes model ch
    non-fabrication control), then B/C/D/E; Gate F as a scheduled job. CI grep tripwire for
    `now(|random|uuid|time.time`.
 
-### Corrected golden values for implementers (verified against `prototype/inputs/o2c/`)
+### Corrected golden values for implementers (verified against `v1/inputs/o2c/`)
 EDI = **5,667 orders / 67.3% by count / 66.8% by value**; channels **{EDI, Manual, Fax, Email}**
 (NOT "Phone" — Phone is escalation-log only). Customer conflict: **318 shared, 307 differ, 22 ERP-
 only, 0 CRM-only**, FR001 **+€600,000** (NET45→NET30), credit n_mismatch **267** sum_delta

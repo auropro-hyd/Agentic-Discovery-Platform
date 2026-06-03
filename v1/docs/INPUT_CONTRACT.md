@@ -7,7 +7,7 @@ pipeline cross-reference reliably and lets Akhilesh's docs drop in without code 
 ## Where docs go
 
 ```
-prototype/inputs/<domain>/        e.g. inputs/o2c/  or  inputs/demand_planning/
+v1/inputs/<domain>/        e.g. inputs/o2c/  or  inputs/demand_planning/
 ```
 
 Each file is one document. Supported formats: `.md`, `.txt`, `.csv`, `.pdf` (text-based),

@@ -1,4 +1,4 @@
-"""Tiny .env loader (no dependency). Reads prototype/.env into os.environ if present.
+"""Tiny .env loader (no dependency). Reads v1/.env into os.environ if present.
 
 Existing environment variables win over .env (so you can override per-run). Lines are KEY=VALUE;
 blank lines and # comments ignored; surrounding quotes stripped.

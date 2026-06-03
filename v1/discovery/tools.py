@@ -42,9 +42,16 @@ def _q(x, places):
     return float(Decimal(str(x)).quantize(Decimal(10) ** -places, rounding=ROUND_HALF_EVEN))
 
 
-def _round_money(x): return _q(x, 2)
-def _round_pct(x): return _q(x, 1)
-def _round_avg(x): return _q(x, 4)
+def _round_money(x):
+    return _q(x, 2)
+
+
+def _round_pct(x):
+    return _q(x, 1)
+
+
+def _round_avg(x):
+    return _q(x, 4)
 
 
 def _norm(s) -> str:

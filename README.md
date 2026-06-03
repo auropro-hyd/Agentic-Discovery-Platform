@@ -4,7 +4,7 @@
 > documents; it **discovers** the contradictions, undocumented processes, and control gaps — then
 > produces a client-ready report suite. Runs on **any domain** with zero config.
 
-<sub>Internal / proprietary · `prototype/` = the engine · `research/` = market & UI analysis</sub>
+<sub>Internal / proprietary · `v1/` = the engine · `research/` = market & UI analysis</sub>
 
 ---
 
@@ -86,21 +86,21 @@ ungrounded number back to the agent; an SME reviews findings before they become 
 - **Client-agnostic** → no org name unless detected from the docs; a run can suppress it.
 - **Human-in-the-loop SME review** → the trust step and the basis of the "less stakeholder time" story.
 
-Full rationale: [`prototype/docs/`](prototype/docs/) · competitive positioning: [`research/`](research/).
+Full rationale: [`v1/docs/`](v1/docs/) · competitive positioning: [`research/`](research/).
 
 ---
 
 ## Quickstart
 
 ```bash
-cd prototype
+cd v1
 uv sync                                   # env + deps
 cp .env.example .env                      # add ANTHROPIC_API_KEY (or Azure vars)
 uv run python scripts/doctor.py           # check connectivity
 uv run python run.py --domain o2c --auto-resolve     # → opens out/o2c/index.html
 ```
 
-Run on any domain by dropping its documents in `prototype/inputs/<domain>/`.
+Run on any domain by dropping its documents in `v1/inputs/<domain>/`.
 
 ## Develop
 
@@ -115,7 +115,7 @@ pre-commit install                              # enable hooks
 ## Layout
 
 ```
-prototype/      discovery engine + 6-report suite, tests, scripts, design docs
+v1/      discovery engine + 6-report suite, tests, scripts, design docs
 research/        market/competitor dossiers + UI/UX research (+ screenshots)
 shared_context/  received engagement material (local only, gitignored)
 ```

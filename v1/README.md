@@ -34,7 +34,7 @@ out/report.md + out/report.html
 ## Layout
 
 ```
-prototype/
+v1/
   discovery/            # the package (pipeline stages, models, llm client, report suite)
   inputs/<domain>/      # input docs for a domain (gitignored — local synthetic/client data)
   golden/<domain>/      # pre-baked golden run for the safe offline replay (gitignored)
@@ -53,7 +53,7 @@ prototype/
 ## Setup (uv-based)
 
 ```bash
-cd prototype
+cd v1
 uv sync                 # creates .venv and installs deps + dev tools (pytest, pyrefly)
 cp .env.example .env    # then add your ANTHROPIC_API_KEY (or the Azure vars)
 uv run python scripts/doctor.py          # verify provider connectivity

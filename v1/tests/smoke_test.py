@@ -2,7 +2,7 @@
 """Offline smoke test: exercises loader -> stages -> resolve -> report with a fake LLM.
 
 No API key required. Proves the wiring is sound before real docs/creds arrive.
-Run:  ./.venv/bin/python tests/smoke_test.py   (from the prototype/ root)
+Run:  ./.venv/bin/python tests/smoke_test.py   (from the v1/ root)
 """
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent   # prototype/ (this file lives in prototype/tests/)
+ROOT = Path(__file__).resolve().parent.parent   # v1/ (this file lives in v1/tests/)
 sys.path.insert(0, str(ROOT))
 
 from discovery import loader, report, resolve, stages  # noqa: E402

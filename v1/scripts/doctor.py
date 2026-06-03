@@ -16,7 +16,7 @@ import os
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent   # prototype/ (this file lives in prototype/scripts/)
+ROOT = Path(__file__).resolve().parent.parent   # v1/ (this file lives in v1/scripts/)
 sys.path.insert(0, str(ROOT))
 from discovery import env  # noqa: E402
 env.load_env()
@@ -42,7 +42,7 @@ def main(argv=None) -> int:
         shown = (val[:6] + "…" + str(len(val)) + "ch") if val else "MISSING"
         print(f"  {v:28s} {shown}")
     if missing:
-        print(f"\nFAIL: missing {missing}. Add them to prototype/.env (see .env.example).")
+        print(f"\nFAIL: missing {missing}. Add them to v1/.env (see .env.example).")
         return 2
 
     print("\nmaking a tiny live call...")

@@ -572,8 +572,10 @@ def value_feasibility_svg(opportunities) -> str:
         return ""
     W, H, PAD = 520, 420, 56
     plotW, plotH = W - PAD * 2, H - PAD * 2
-    def px(score): return PAD + (score - 1) / 4 * plotW           # feasibility 1..5 -> x
-    def py(score): return PAD + plotH - (score - 1) / 4 * plotH   # value 1..5 -> y (inverted)
+    def px(score):                                # feasibility 1..5 -> x
+        return PAD + (score - 1) / 4 * plotW
+    def py(score):                                # value 1..5 -> y (inverted)
+        return PAD + plotH - (score - 1) / 4 * plotH
     out = [f"<svg class='chart' viewBox='0 0 {W} {H}' width='100%' role='img' "
            f"aria-label='Value versus feasibility' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
     # shade the top-right "do first" quadrant softly so the map reads as intentional

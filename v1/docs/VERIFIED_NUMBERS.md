@@ -1,6 +1,6 @@
 # Verified Golden Numbers — O2C (independently recomputed from raw data 2026-06-02)
 
-Computed directly from `prototype/inputs/o2c/` with plain stdlib csv, not trusting any spec or
+Computed directly from `v1/inputs/o2c/` with plain stdlib csv, not trusting any spec or
 workflow report. These are the only numbers the demo may assert. Re-run the checks in
 `tests/` (Gate A) to reconfirm before any demo.
 

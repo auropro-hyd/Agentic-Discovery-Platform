@@ -34,7 +34,7 @@ from discovery.llm import LLMClient, LLMError  # noqa: E402
 from discovery.reportsuite import build  # noqa: E402
 from discovery.reportsuite.render import render_suite  # noqa: E402
 
-env.load_env()  # pull prototype/.env into os.environ (creds), if present
+env.load_env()  # pull v1/.env into os.environ (creds), if present
 
 INPUTS = ROOT / "inputs"
 OUT = ROOT / "out"
