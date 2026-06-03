@@ -221,6 +221,12 @@ def synthesis_emit_tool(doc_keys: list[str]) -> dict:
         "escalation": {"type": "string",
                        "description": "what happens when it cannot resolve — when and to whom it "
                                       "hands back to a human"},
+        "knowledge_sources": {"type": "array", "items": {"type": "string"},
+                              "description": "the business systems/sources this draws on (named "
+                                             "generically, e.g. 'the ERP credit master')"},
+        "document_formats": {"type": "array", "items": {"type": "string"},
+                             "description": "the data/document formats it consumes (e.g. "
+                                            "'structured transactional export')"},
         "data_readiness": READINESS,
         "technical_complexity": READINESS,
         "operational_readiness": READINESS,
@@ -330,9 +336,25 @@ def synthesis_emit_tool(doc_keys: list[str]) -> dict:
                                    "description": "the target to hold delivery to; a forward-looking "
                                                   "goal phrase, e.g. 'at least 70% at go-live, "
                                                   "improving to 90% within 3 months'"}},
-                    "required": ["name", "definition", "target"]}}},
+                    "required": ["name", "definition", "target"]}},
+                "executive_summary": {"type": "object", "properties": {
+                    "headline": {"type": "string",
+                                 "description": "1-2 sentences framing the engagement and the "
+                                                "single most important thing found"},
+                    "situation": {"type": "string",
+                                  "description": "2-3 sentences: the current state in a nutshell"},
+                    "opportunity": {"type": "string",
+                                    "description": "2-3 sentences: where the value is and what to "
+                                                   "do first"}},
+                    "required": ["headline", "situation", "opportunity"]},
+                "target_state": {"type": "string",
+                                 "description": "a forward-looking 'where this should converge' "
+                                                "narrative (3-5 sentences): the to-be picture once "
+                                                "the opportunities land. Business language; no new "
+                                                "numbers."}},
                 "required": ["current_state", "pain_points", "opportunities", "transformation",
-                             "roadmap", "strategy_profile", "metrics_framework"]}}
+                             "roadmap", "strategy_profile", "metrics_framework",
+                             "executive_summary", "target_state"]}}
 
 
 SYNTH_SYSTEM = """You are a transformation strategist writing a briefing for a non-technical Head of \
@@ -401,9 +423,11 @@ def run_synthesis(llm, raw_payload: dict, doc_keys: list[str], model=None,
             f"implementation approach, integrations, success metrics, dependencies (only real "
             f"prerequisites), and risks. ALSO give each: personas (the roles who use it once live), "
             f"expected_behaviour (how it behaves day to day and what it never does on its own), "
-            f"escalation (when and to whom it hands back to a human), and the three readiness "
-            f"ratings (data_readiness, technical_complexity, operational_readiness) — each written "
-            f"as 'high|medium|low — reason'. Place each on the value/feasibility matrix.\n"
+            f"escalation (when and to whom it hands back to a human), knowledge_sources (the "
+            f"systems/sources it draws on, named generically), document_formats (the data/document "
+            f"formats it consumes), and the three readiness ratings (data_readiness, "
+            f"technical_complexity, operational_readiness) — each written as 'high|medium|low — "
+            f"reason'. Place each on the value/feasibility matrix.\n"
             f"- transformation: sequencing rationale + strategic readiness, honouring dependencies.\n"
             f"- roadmap: three horizons (H1 0-6 / H2 6-18 / H3 18+ months); never schedule an "
             f"opportunity before something it depends on.\n"
@@ -412,6 +436,11 @@ def run_synthesis(llm, raw_payload: dict, doc_keys: list[str], model=None,
             f"numbers; reference the verified baseline, e.g. 'a material reduction against the "
             f"1,196 baseline').\n"
             f"- strategy_profile.posture: a short phrase for the client's strategic direction.\n"
+            f"- executive_summary: a headline (1-2 sentences framing the engagement and the single "
+            f"most important finding), a situation (the current state in a nutshell), and an "
+            f"opportunity (where the value is and what to do first) — for the landing page.\n"
+            f"- target_state: a short forward-looking 'where this should converge' narrative (the "
+            f"to-be picture once the opportunities land). Business language, no new numbers.\n"
             f"Call emit_synthesis once.")
     messages: list[dict] = [{"role": "user", "content": user}]
     last_err = None

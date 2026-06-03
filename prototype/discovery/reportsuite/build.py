@@ -12,9 +12,9 @@ from __future__ import annotations
 
 from .. import docnames
 from ..models import (
-    BusinessImpact, CurrentState, FormatPattern, Handoff, InventoryItem, MatrixQuadrant, MetricItem,
-    NumberRef, Opportunity, OppPattern, PainPoint, ProcessStep, RaciRow, RoadmapHorizon, RoadmapItem,
-    SourceDoc, SourceRef, SynthesisContent, SystemProfile,
+    BusinessImpact, CurrentState, ExecutiveSummary, FormatPattern, Handoff, InventoryItem,
+    MatrixQuadrant, MetricItem, NumberRef, Opportunity, OppPattern, PainPoint, ProcessStep, RaciRow,
+    RoadmapHorizon, RoadmapItem, SourceDoc, SourceRef, SynthesisContent, SystemProfile,
 )
 from ..synthesis import OPP_TO_PP, PP_TO_OPP, allowed_numbers, validate_synthesis
 
@@ -319,6 +319,9 @@ def fixture_o2c() -> SynthesisContent:
         risks=["The credit and commercial teams must agree the canonical-record rules"],
         personas=["Credit Controller", "Credit Control analysts", "Commercial / account managers",
                   "Finance Systems"],
+        knowledge_sources=["SAP S/4HANA customer master", "SAP CRM customer records",
+                           "Credit Policy"],
+        document_formats=["Structured master-data export", "Governance policy document"],
         expected_behaviour="The assistant presents the conflicting ERP and CRM values side by side "
                            "for each of the 267 shared accounts, proposes the canonical limit with "
                            "its reasoning, and records the human decision. It never changes a limit "
@@ -371,6 +374,9 @@ def fixture_o2c() -> SynthesisContent:
         dependencies=[],
         risks=["Rule completeness — uncovered edge cases will still reach the team"],
         personas=["Customer Service agents", "Customer Service Lead"],
+        knowledge_sources=["EDI / order-management channel", "Order Management SOP",
+                           "Customer-service escalation log"],
+        document_formats=["Structured transactional export", "Operational log"],
         expected_behaviour="Each EDI exception is classified by type against the documented rules and "
                            "auto-routed to its resolution path. Clear-cut cases (the bulk of the "
                            "1,196 unfulfilled EDI orders) resolve without a person; the agent's "
@@ -425,6 +431,9 @@ def fixture_o2c() -> SynthesisContent:
         risks=["Needs the reconciled customer master (OPP1) first",
                "Credit analysts must trust and act on the agent's flags"],
         personas=["Credit Control analysts", "Credit Controller", "Customer Service (downstream)"],
+        knowledge_sources=["Reconciled customer master (from OPP1)", "Credit Policy",
+                           "EDI order stream"],
+        document_formats=["Structured transactional export", "Governance policy document"],
         expected_behaviour="For each EDI order the agent reads the reconciled customer master and the "
                            "Credit Policy and returns one of three outcomes — approve, hold, or flag "
                            "— with the reasoning shown. Approved orders proceed to fulfilment; held "
@@ -516,7 +525,24 @@ def fixture_o2c() -> SynthesisContent:
                            "analyst confirms as correct on review.",
                 target="A high confirmation rate at go-live, improving through tuning; tracked "
                        "against analyst review."),
-        ])
+        ],
+        executive_summary=ExecutiveSummary(
+            headline="Order-to-Cash runs on two customer systems that disagree on credit, and a "
+                     "dominant electronic channel that no procedure owns — together putting "
+                     "material order value and revenue at risk.",
+            situation="Orders arrive mainly through EDI, which carries two-thirds of volume yet sits "
+                      "outside the documented process and has no owner. Credit checks run against "
+                      "two systems whose limits diverge for 267 of 318 shared accounts.",
+            opportunity="Reconcile the customer master to a single agreed source of truth, bring the "
+                        "electronic channel under documented ownership with automated exception "
+                        "handling, then add a real-time credit gate to the channel that needs it "
+                        "most."),
+        target_state="Order-to-Cash converges on one trusted customer master, with every credit "
+                     "limit agreed across both systems and changes governed by an approval trail. "
+                     "The electronic channel is owned, documented, and self-healing: routine "
+                     "exceptions resolve automatically and only genuine ambiguities reach a person. "
+                     "Every order — whatever the channel — passes a consistent credit check before "
+                     "release, so the volume that flows through EDI is no longer a blind spot.")
 
 
 def _from_payload(payload: dict) -> SynthesisContent:
@@ -569,7 +595,14 @@ def _from_payload(payload: dict) -> SynthesisContent:
         strategy_profile=payload.get("strategy_profile", {}),
         metrics_framework=[MetricItem(name=m["name"], definition=m.get("definition", ""),
                                       target=m.get("target", ""))
-                           for m in payload.get("metrics_framework", [])])
+                           for m in payload.get("metrics_framework", [])],
+        executive_summary=_exec_summary(payload.get("executive_summary", {})),
+        target_state=payload.get("target_state", ""))
+
+
+def _exec_summary(es: dict) -> ExecutiveSummary:
+    return ExecutiveSummary(headline=es.get("headline", ""), situation=es.get("situation", ""),
+                            opportunity=es.get("opportunity", ""))
 
 
 def _step(s) -> ProcessStep:
@@ -605,7 +638,10 @@ def _opp(o) -> Opportunity:
         value_score=o.get("value_score", 3), feasibility_score=o.get("feasibility_score", 3),
         matrix_quadrant=MatrixQuadrant(o.get("matrix_quadrant", "consider")),
         personas=o.get("personas", []), expected_behaviour=o.get("expected_behaviour", ""),
-        escalation=o.get("escalation", ""), data_readiness=o.get("data_readiness", ""),
+        escalation=o.get("escalation", ""),
+        knowledge_sources=o.get("knowledge_sources", []),
+        document_formats=o.get("document_formats", []),
+        data_readiness=o.get("data_readiness", ""),
         technical_complexity=o.get("technical_complexity", ""),
         operational_readiness=o.get("operational_readiness", ""),
         sources=[_sref(s) for s in o.get("sources", [])])

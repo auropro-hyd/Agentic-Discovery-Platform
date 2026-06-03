@@ -320,6 +320,8 @@ class Opportunity:                         # Report 04 (centrepiece) + 03 matrix
     personas: list[str] = field(default_factory=list)          # who this serves
     expected_behaviour: str = ""                               # how the solution should behave
     escalation: str = ""                                       # what happens when it can't resolve
+    knowledge_sources: list[str] = field(default_factory=list) # which sources/systems feed it
+    document_formats: list[str] = field(default_factory=list)  # the data/doc formats it consumes
     # prioritisation rationale across the three standard dimensions (rating + one-line reason)
     data_readiness: str = ""          # "high|medium|low — reason"
     technical_complexity: str = ""    # "high|medium|low — reason"
@@ -343,6 +345,8 @@ class Opportunity:                         # Report 04 (centrepiece) + 03 matrix
                 "dependencies": self.dependencies, "prerequisite_for": self.prerequisite_for,
                 "risks": self.risks, "personas": self.personas,
                 "expected_behaviour": self.expected_behaviour, "escalation": self.escalation,
+                "knowledge_sources": self.knowledge_sources,
+                "document_formats": self.document_formats,
                 "data_readiness": self.data_readiness,
                 "technical_complexity": self.technical_complexity,
                 "operational_readiness": self.operational_readiness,
@@ -400,7 +404,16 @@ class SourceDoc:                           # Report 06 — the ONLY place doc na
 
 
 @dataclass
-class SynthesisContent:                    # everything reports 01-05 render
+class ExecutiveSummary:                    # the landing-page framing for the whole suite
+    headline: str = ""                     # 1-2 sentence framing of the engagement and what was found
+    situation: str = ""                    # short prose: the current-state in a nutshell
+    opportunity: str = ""                  # short prose: where the value is
+    # "at a glance" KPI tiles are DERIVED in code from grounded numbers (build), not model-set,
+    # so they can never carry a fabricated figure.
+
+
+@dataclass
+class SynthesisContent:                    # everything reports 00-06 render
     current_state: CurrentState = field(default_factory=CurrentState)
     pain_points: list[PainPoint] = field(default_factory=list)
     cross_process_patterns: list[dict[str, Any]] = field(default_factory=list)
@@ -412,6 +425,8 @@ class SynthesisContent:                    # everything reports 01-05 render
     strategy_profile: dict[str, Any] = field(default_factory=dict)
     metrics_framework: list[MetricItem] = field(default_factory=list)   # how success is measured
     source_index: list[SourceDoc] = field(default_factory=list)
+    executive_summary: ExecutiveSummary = field(default_factory=ExecutiveSummary)  # Report 00
+    target_state: str = ""                 # forward-looking "where this should converge" narrative
 
     def to_dict(self) -> dict[str, Any]:
         return {"current_state": self.current_state.to_dict(),
@@ -424,7 +439,9 @@ class SynthesisContent:                    # everything reports 01-05 render
                 "roadmap": [h.to_dict() for h in self.roadmap],
                 "strategy_profile": self.strategy_profile,
                 "metrics_framework": [m.to_dict() for m in self.metrics_framework],
-                "source_index": [s.to_dict() for s in self.source_index]}
+                "source_index": [s.to_dict() for s in self.source_index],
+                "executive_summary": asdict(self.executive_summary),
+                "target_state": self.target_state}
 
 
 @dataclass

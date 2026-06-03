@@ -15,7 +15,8 @@ from discovery import models as m  # noqa: E402
 from discovery import registry  # noqa: E402
 from discovery.reportsuite import render  # noqa: E402
 from discovery.reportsuite.render import (  # noqa: E402
-    REPORTS, _cite_links, _rating_cell, data_flow_svg, process_flow_svg, render_suite,
+    REPORTS, _cite_links, _fmt_compact, _rating_cell, data_flow_svg, donut_svg, impact_bars_svg,
+    kpi_tiles, process_flow_svg, render_suite, value_feasibility_svg,
 )
 
 
@@ -193,6 +194,101 @@ def test_source_page_csv_small_and_unregistered(tmp_path):
 
 def test_process_flow_svg_empty():
     assert "No process flow available" in process_flow_svg([])
+
+
+# ---- data-viz helpers --------------------------------------------------------
+def test_impact_bars_empty_and_populated():
+    assert impact_bars_svg([]) == ""
+    pts = [m.PainPoint(id="PP1", title="A", impact_rank=1),
+           m.PainPoint(id="PP2", title="B", impact_rank=2)]
+    svg = impact_bars_svg(pts)
+    assert "<svg" in svg and "PP1" in svg and "PP2" in svg
+
+
+def test_value_feasibility_empty_and_collision_spread():
+    assert value_feasibility_svg([]) == ""
+    # three opps, two sharing the exact same coordinate -> collision-spread branch fires
+    opps = [m.Opportunity(id="OPP1", title="x", value_score=5, feasibility_score=4),
+            m.Opportunity(id="OPP2", title="y", value_score=3, feasibility_score=3),
+            m.Opportunity(id="OPP3", title="z", value_score=3, feasibility_score=3)]
+    svg = value_feasibility_svg(opps)
+    assert "<svg" in svg and svg.count("<circle") == 3
+
+
+def test_donut_svg_empty_and_populated():
+    assert donut_svg([], "cap") == ""
+    assert donut_svg([("X", 0), ("Y", "bad")], "cap") == ""     # no positive numeric segments
+    svg = donut_svg([("EDI", 6_000_000), ("Manual", 2_000_000)], "Value by channel")
+    assert "<svg" in svg and "EDI" in svg and "%" in svg
+
+
+def test_fmt_compact():
+    assert _fmt_compact(30_675_000) == "€30.7M"
+    assert _fmt_compact(2_000_000) == "€2M"
+    assert _fmt_compact(1196) == "1,196"
+    assert _fmt_compact(5) == "5"                  # small number -> %g fallback
+    assert _fmt_compact("not-a-number") == "not-a-number"
+
+
+def test_exec_summary_partial_panels(tmp_path):
+    """An executive summary with only 'situation' (no 'opportunity') hits the absent-panel arc."""
+    from discovery.reportsuite.render import r00
+    cs = m.CurrentState(domain_overview="o", process_summary="s")
+    s = m.SynthesisContent(current_state=cs, pain_points=[], opportunities=[], source_index=[])
+    s.executive_summary = m.ExecutiveSummary(headline="H", situation="just the situation")
+    html = r00(s, {"domain_label": "Process"})
+    assert "The situation" in html and "The opportunity" not in html
+    # mirror: only 'opportunity' set (covers the situation-absent arc)
+    s.executive_summary = m.ExecutiveSummary(headline="H", opportunity="just the opportunity")
+    html2 = r00(s, {"domain_label": "Process"})
+    assert "The opportunity" in html2 and "The situation" not in html2
+
+
+def test_opp_partial_sources_formats(tmp_path):
+    """An opportunity with knowledge_sources but no document_formats hits that absent arc."""
+    from discovery.reportsuite.render import r04
+    o = m.Opportunity(id="OPP1", title="t", overview="o",
+                      before_process=[m.ProcessStep(seq=1, name="b", actor="A", description="d")],
+                      after_process=[m.ProcessStep(seq=1, name="a", actor="A", description="d")],
+                      business_impact=m.BusinessImpact(narrative="n"),
+                      personas=["Analyst"], knowledge_sources=["ERP"], matrix_quadrant=m.MatrixQuadrant.DO_FIRST)
+    cs = m.CurrentState(domain_overview="o", process_summary="s")
+    s = m.SynthesisContent(current_state=cs, opportunities=[o])
+    html = r04(s, {})
+    assert "Sources." in html and "Formats." not in html
+    # mirror: only document_formats (covers the knowledge_sources-absent arc)
+    o2 = m.Opportunity(id="OPP1", title="t", overview="o",
+                       before_process=[m.ProcessStep(seq=1, name="b", actor="A", description="d")],
+                       after_process=[m.ProcessStep(seq=1, name="a", actor="A", description="d")],
+                       business_impact=m.BusinessImpact(narrative="n"),
+                       personas=["Analyst"], document_formats=["CSV export"],
+                       matrix_quadrant=m.MatrixQuadrant.DO_FIRST)
+    html2 = r04(m.SynthesisContent(current_state=cs, opportunities=[o2]), {})
+    assert "Formats." in html2 and "Sources." not in html2
+
+
+def test_kpi_tiles_derives_from_grounded_content():
+    cs = m.CurrentState(domain_overview="o", process_summary="s")
+    pp = m.PainPoint(id="PP1", title="Money issue", impact_rank=1,
+                     quantified=[m.NumberRef(value=600000, unit="eur", label="small gap"),
+                                 m.NumberRef(value=30675000, unit="eur", label="big divergence"),
+                                 m.NumberRef(value=67, unit="percent", label="EDI share")])
+    s = m.SynthesisContent(current_state=cs, pain_points=[pp],
+                           opportunities=[m.Opportunity(id="OPP1", title="o")],
+                           source_index=[m.SourceDoc(doc_id="d", business_name="D", doc_type="x")])
+    tiles = kpi_tiles(s)
+    assert "€30.7M" in tiles and "€600" not in tiles            # leads with the LARGEST money figure
+    assert "67%" in tiles                                       # first percentage
+    assert "issues identified" in tiles and "opportunities mapped" in tiles
+
+
+def test_kpi_tiles_no_money_figures():
+    cs = m.CurrentState(domain_overview="o", process_summary="s")
+    s = m.SynthesisContent(current_state=cs,
+                           pain_points=[m.PainPoint(id="PP1", title="t", impact_rank=1)],
+                           opportunities=[], source_index=[])
+    tiles = kpi_tiles(s)
+    assert "issues identified" in tiles                        # counts always present
 
 
 def test_data_flow_svg_too_few_systems():
