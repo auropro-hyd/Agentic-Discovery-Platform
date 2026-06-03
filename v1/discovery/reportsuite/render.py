@@ -346,7 +346,9 @@ def r05(s: SynthesisContent, meta) -> str:
     posture = s.strategy_profile.get("posture", "").replace("_", " + ")
     h = ["<h1>Transformation Roadmap</h1>",
          f"<p class='lede'>Sequenced across three horizons, aimed at a "
-         f"<strong>{esc(posture)}</strong> direction.</p>"]
+         f"<strong>{esc(posture)}</strong> direction.</p>",
+         roadmap_timeline_svg(s.roadmap),
+         "<h2>Horizon detail</h2>"]
     for hz in s.roadmap:
         h.append(f"<div class='horizon'><h3>{esc(hz.horizon)} — {esc(hz.theme)} "
                  f"<span class='win'>({esc(hz.window)})</span></h3><ul>")
@@ -562,6 +564,62 @@ def impact_bars_svg(pain_points) -> str:
     out.append("</svg>")
     return ("<div class='chart-wrap'><div class='chart-cap'>Issues ranked by business impact "
             "(most material first)</div>" + "".join(out) + "</div>")
+
+
+def roadmap_timeline_svg(roadmap) -> str:
+    """A horizon timeline: one column per horizon (H1/H2/H3), a coloured header band with the
+    theme + window, and the horizon's items as stacked cards beneath. A time arrow runs across the
+    top (left = now). Opportunity-backed items carry a teal dot. Positions encode horizon order and
+    item order only — no quantitative claim. Returns '' when the roadmap is empty."""
+    horizons = list(roadmap or [])
+    if not horizons:
+        return ""
+    cols = len(horizons)
+    COLW, GAP, PAD, HDR, TOPBAR = 232, 26, 16, 56, 34
+    ITEMH, ITEMGAP = 52, 10
+    max_items = max((len(hz.items) for hz in horizons), default=0)
+    bodyH = max_items * ITEMH + max(0, max_items - 1) * ITEMGAP
+    W = PAD * 2 + cols * COLW + (cols - 1) * GAP
+    H = PAD * 2 + TOPBAR + HDR + bodyH + 10
+    out = [f"<svg class='chart timeline' viewBox='0 0 {W} {H}' width='100%' role='img' "
+           f"aria-label='Transformation roadmap timeline' xmlns='http://www.w3.org/2000/svg'>",
+           _SVG_DEFS]
+    # time arrow across the top
+    ay = PAD + TOPBAR / 2
+    out.append(f"<line x1='{PAD}' y1='{ay}' x2='{W-PAD-6}' y2='{ay}' stroke='#0f7c8c' "
+               f"stroke-width='1.6' marker-end='url(#arr)'/>")
+    out.append(f"<text x='{PAD+2}' y='{ay-8}' font-size='10' fill='#9aa7b6' "
+               f"font-weight='600'>NOW</text>")
+    out.append(f"<text x='{W-PAD-10}' y='{ay-8}' font-size='10' fill='#9aa7b6' text-anchor='end' "
+               f"font-weight='600'>LATER</text>")
+    shades = ["var(--accent)", "#2a93a3", "#5fb0bc"]
+    for ci, hz in enumerate(horizons):
+        x = PAD + ci * (COLW + GAP)
+        y = PAD + TOPBAR
+        band = shades[ci % len(shades)]
+        # header band
+        out.append(f"<path d='M{x},{y+10} a10,10 0 0 1 10,-10 h{COLW-20} a10,10 0 0 1 10,10 "
+                   f"v{HDR-10} h-{COLW} z' fill='{band}'/>")
+        out.append(f"<text x='{x+14}' y='{y+22}' font-size='12.5' font-weight='700' fill='#fff'>"
+                   f"{esc(hz.horizon)} · {esc(_clip(hz.theme, 26))}</text>")
+        out.append(f"<text x='{x+14}' y='{y+40}' font-size='10.5' fill='#e6f1f3'>"
+                   f"{esc(hz.window)}</text>")
+        # item cards
+        iy = y + HDR + 12
+        for it in hz.items:
+            out.append(f"<rect x='{x}' y='{iy}' width='{COLW}' height='{ITEMH}' rx='8' "
+                       f"fill='#fff' stroke='var(--line)'/>")
+            if it.opportunity_id:
+                out.append(f"<circle cx='{x+14}' cy='{iy+ITEMH/2}' r='4' fill='{band}'/>")
+            tx = x + (26 if it.opportunity_id else 14)
+            out.append(f"<text x='{tx}' y='{iy+ITEMH/2-3}' font-size='11.5' font-weight='700' "
+                       f"fill='#1a2230'>{esc(_clip(it.title, 30))}</text>")
+            out.append(f"<text x='{tx}' y='{iy+ITEMH/2+13}' font-size='10' fill='#5b6776'>"
+                       f"{esc(_clip(it.rationale, 36))}</text>")
+            iy += ITEMH + ITEMGAP
+    out.append("</svg>")
+    return ("<div class='chart-wrap'><div class='chart-cap'>The plan across three horizons "
+            "(now → later)</div>" + "".join(out) + "</div>")
 
 
 def value_feasibility_svg(opportunities) -> str:

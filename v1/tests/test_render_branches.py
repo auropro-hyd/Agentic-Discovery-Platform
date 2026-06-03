@@ -17,7 +17,7 @@ from discovery.reportsuite import render  # noqa: E402
 from discovery.reportsuite.render import (  # noqa: E402
     REPORTS, _cite_links, _fmt_compact, _kpi_icon, _metric, _rating_cell, _secnum_chips,
     data_flow_svg, donut_svg, impact_bars_svg, kpi_tiles, process_flow_svg, render_charts,
-    render_suite, value_bar_svg, value_feasibility_svg,
+    render_suite, roadmap_timeline_svg, value_bar_svg, value_feasibility_svg,
 )
 
 
@@ -229,6 +229,23 @@ def test_fmt_compact():
     assert _fmt_compact(1196) == "1,196"
     assert _fmt_compact(5) == "5"                  # small number -> %g fallback
     assert _fmt_compact("not-a-number") == "not-a-number"
+
+
+def test_roadmap_timeline_empty_and_populated():
+    assert roadmap_timeline_svg([]) == ""
+    rm = [m.RoadmapHorizon(horizon="H1", window="0-6 months", theme="Stabilise",
+                           items=[m.RoadmapItem(title="Reconcile master", rationale="foundation",
+                                                opportunity_id="OPP1"),
+                                  m.RoadmapItem(title="Govern channel", rationale="no prereq")]),
+          m.RoadmapHorizon(horizon="H2", window="6-18 months", theme="Prevent",
+                           items=[m.RoadmapItem(title="Credit gate", rationale="needs OPP1",
+                                                opportunity_id="OPP3")]),
+          m.RoadmapHorizon(horizon="H3", window="18+ months", theme="Sustain", items=[])]
+    svg = roadmap_timeline_svg(rm)
+    assert "<svg" in svg and "H1" in svg and "H2" in svg and "H3" in svg
+    assert "NOW" in svg and "LATER" in svg
+    assert "Reconcile master" in svg                # item title appears
+    assert svg.count("<circle") >= 2                # opportunity-backed items get a dot
 
 
 def test_secnum_chips_wraps_numbered_headings_only():
