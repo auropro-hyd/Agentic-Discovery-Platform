@@ -23,6 +23,7 @@ REPORTS = [
     ("06-supporting-artefacts", "Supporting Artefacts"),
 ]
 _PATTERN_LABEL = {"hitl_workflow": "HITL Workflow", "automation": "Automation Pipeline",
+                  "modernisation": "Modernisation",
                   "ai_agent": "AI Agent"}
 _QUAD = [("do_first", "Do First"), ("plan_for", "Plan For"),
          ("consider", "Consider"), ("deprioritise", "Deprioritise")]

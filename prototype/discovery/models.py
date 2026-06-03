@@ -150,6 +150,7 @@ class OppPattern(str, Enum):
     HITL = "hitl_workflow"
     AUTOMATION = "automation"
     AI_AGENT = "ai_agent"
+    MODERNISATION = "modernisation"     # replatform / consolidate / upgrade an existing system
 
 
 class MatrixQuadrant(str, Enum):

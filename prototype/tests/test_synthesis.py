@@ -144,6 +144,27 @@ def test_emit_tool_schema_carries_all_depth_fields():
         "properties"]["doc_key"]["enum"] == ["customer-master-erp", "order-flow"]
 
 
+# ---- schema <-> model enum sync (regression: 'modernisation' crashed the live run) ----
+def test_opp_pattern_schema_enum_matches_model_enum():
+    """Every `pattern` value the emit schema allows MUST be a valid OppPattern, or the live model
+    can emit a schema-valid value the dataclass rejects (the bug that fell back to the fixture)."""
+    from discovery.models import OppPattern
+    tool = synthesis.synthesis_emit_tool(["d"])
+    schema_patterns = set(
+        tool["input_schema"]["properties"]["opportunities"]["items"]["properties"]["pattern"]["enum"])
+    model_patterns = {p.value for p in OppPattern}
+    assert schema_patterns <= model_patterns, \
+        f"schema offers patterns the model can't parse: {schema_patterns - model_patterns}"
+
+
+def test_build_opp_accepts_modernisation_pattern():
+    from discovery.reportsuite.build import _opp
+    o = _opp({"id": "OPP1", "title": "Modernise", "pattern": "modernisation",
+              "business_impact": {"narrative": "n", "quantified": []},
+              "before_process": [], "after_process": [], "sources": []})
+    assert o.pattern.value == "modernisation"
+
+
 # ---- allowed_numbers ----------------------------------------------------------
 def test_allowed_numbers_includes_tool_numbers_ratios_and_eur_scaling():
     raw = _raw_payload()
