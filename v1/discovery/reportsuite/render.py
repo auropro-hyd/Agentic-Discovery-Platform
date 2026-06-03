@@ -42,7 +42,7 @@ def render_suite(s: SynthesisContent, meta: dict, outdir: Path,
            "03-recommendation": r03, "04-opportunity-portfolio": r04, "05-roadmap": r05,
            "06-supporting-artefacts": r06}
     for slug, title in REPORTS:
-        body = _scrub_names(fns[slug](s, meta), suppress_names)
+        body = _secnum_chips(_scrub_names(fns[slug](s, meta), suppress_names))
         text = _strip_tags(body)
         # tool/jargon leaks still hard-fail; suppressed client names are scrubbed above, so the
         # guard here is a backstop that should never trip on a name post-scrub.
@@ -52,7 +52,7 @@ def render_suite(s: SynthesisContent, meta: dict, outdir: Path,
         (outdir / f"{slug}.html").write_text(_page(title, body, slug, meta), encoding="utf-8")
     # index.html IS the executive summary (the natural entry point to the suite)
     index = outdir / "index.html"
-    index_body = _scrub_names(fns["00-executive-summary"](s, meta), suppress_names)
+    index_body = _secnum_chips(_scrub_names(fns["00-executive-summary"](s, meta), suppress_names))
     index.write_text(_page(REPORTS[0][1], index_body, "00-executive-summary", meta, is_index=True),
                      encoding="utf-8")
     return index
@@ -731,9 +731,45 @@ def kpi_tiles(s: SynthesisContent) -> str:
     if pct:
         headline.append(pct[0])
     tiles = headline + tiles
-    cells = "".join(f"<div class='kpi'><div class='kpi-v'>{esc(v)}</div>"
+    cells = "".join(f"<div class='kpi'>{_kpi_icon(l)}<div class='kpi-v'>{esc(v)}</div>"
                     f"<div class='kpi-l'>{esc(l)}</div></div>" for v, l in tiles[:5])
     return f"<div class='kpis'>{cells}</div>"
+
+
+# small line-glyphs (inline SVG, offline-safe) chosen by what the tile measures
+_KPI_GLYPHS = {
+    "value": "<circle cx='8' cy='8' r='6'/><path d='M8 5v6M6 7h3a1.3 1.3 0 010 2.6H6'/>",  # currency
+    "share": "<circle cx='8' cy='8' r='6'/><path d='M8 2.2A5.8 5.8 0 0113.8 8H8z'/>",       # pie/percent
+    "issue": "<path d='M8 2l6 11H2z'/><path d='M8 7v3M8 11.5v.2'/>",                          # alert triangle
+    "opportunity": "<path d='M5 9a3 3 0 116 0c0 1.5-1.2 2-1.2 3.2H6.2C6.2 11 5 10.5 5 9z'/>"  # lightbulb
+                   "<path d='M6.4 14h3.2'/>",
+    "source": "<path d='M3.5 3.2h6l3 3v6.6h-9z'/><path d='M9.5 3.2v3h3'/>",                    # document
+}
+
+
+def _kpi_icon(label: str) -> str:
+    lo = label.lower()
+    key = ("value" if "value" in lo or "€" in label or "divergence" in lo or "gap" in lo
+           else "share" if "%" in label or "share" in lo or "percent" in lo
+           else "issue" if "issue" in lo
+           else "opportunity" if "opportun" in lo
+           else "source" if "source" in lo
+           else "value")
+    return (f"<span class='kpi-ico'><svg viewBox='0 0 16 16' fill='none' "
+            f"stroke-linecap='round' stroke-linejoin='round'>{_KPI_GLYPHS[key]}</svg></span>")
+
+
+def _secnum_chips(body: str) -> str:
+    """Wrap a leading section number (e.g. '1.3' or '2') in any <h2> with a teal .secnum chip, so
+    numbered headings get a designed number tile. Headings with no leading number are untouched.
+    Operates on the rendered HTML fragment (post-scrub) so call sites stay simple."""
+    import re
+
+    def repl(m):
+        num, rest = m.group(1), m.group(2)
+        return f"<h2><span class='secnum'>{num}</span>{rest}</h2>"
+    # <h2>1.3 Title</h2>  or  <h2>1. Title</h2>  -> chip + title
+    return re.sub(r"<h2>(\d+(?:\.\d+)?)\.?\s+(.*?)</h2>", repl, body)
 
 
 def _scrub_names(body: str, suppress_names) -> str:

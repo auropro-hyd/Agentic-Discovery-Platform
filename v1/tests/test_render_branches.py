@@ -15,9 +15,9 @@ from discovery import models as m  # noqa: E402
 from discovery import registry  # noqa: E402
 from discovery.reportsuite import render  # noqa: E402
 from discovery.reportsuite.render import (  # noqa: E402
-    REPORTS, _cite_links, _fmt_compact, _metric, _rating_cell, data_flow_svg, donut_svg,
-    impact_bars_svg, kpi_tiles, process_flow_svg, render_charts, render_suite, value_bar_svg,
-    value_feasibility_svg,
+    REPORTS, _cite_links, _fmt_compact, _kpi_icon, _metric, _rating_cell, _secnum_chips,
+    data_flow_svg, donut_svg, impact_bars_svg, kpi_tiles, process_flow_svg, render_charts,
+    render_suite, value_bar_svg, value_feasibility_svg,
 )
 
 
@@ -229,6 +229,24 @@ def test_fmt_compact():
     assert _fmt_compact(1196) == "1,196"
     assert _fmt_compact(5) == "5"                  # small number -> %g fallback
     assert _fmt_compact("not-a-number") == "not-a-number"
+
+
+def test_secnum_chips_wraps_numbered_headings_only():
+    # numbered h2 (N.M and N.) get a teal chip; unnumbered h2 untouched; h1 untouched
+    out = _secnum_chips("<h2>1.3 Systems &amp; sources</h2><h2>2. Scope</h2>"
+                        "<h2>Where to start</h2><h1>1. Current State</h1>")
+    assert "<span class='secnum'>1.3</span>Systems &amp; sources" in out
+    assert "<span class='secnum'>2</span>Scope" in out
+    assert "<h2>Where to start</h2>" in out                 # no leading number -> unchanged
+    assert "<h1>1. Current State</h1>" in out                # h1 untouched
+
+
+def test_kpi_icon_picks_glyph_by_label():
+    assert "<svg" in _kpi_icon("issues identified")
+    # each category resolves to a glyph without error
+    for lbl in ["aggregate divergence", "channel share by count", "opportunities mapped",
+                "sources analysed", "something else"]:
+        assert "kpi-ico" in _kpi_icon(lbl)
 
 
 def test_value_bar_svg_empty_and_populated():

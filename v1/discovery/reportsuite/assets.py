@@ -22,7 +22,7 @@ CSS = """
 body{ margin:0; font-family:var(--sans);
       color:var(--ink); background:var(--bg); line-height:1.55; }
 .layout{ display:flex; min-height:100vh; }
-.sidebar{ width:270px; flex:0 0 270px; background:#0f1b2d; color:#cdd7e4; padding:1.5rem 1rem;
+.sidebar{ width:270px; flex:0 0 270px; background:#10222a; color:#cdd7e4; padding:1.5rem 1rem;
           position:sticky; top:0; height:100vh; overflow:auto; }
 .sidebar h1{ font-size:1rem; color:#fff; margin:0 0 .25rem; }
 .sidebar .sub{ font-size:.78rem; color:#8da2bd; margin-bottom:1.5rem; }
@@ -45,9 +45,9 @@ body{ margin:0; font-family:var(--sans);
 .lede{ color:var(--muted); margin:0 0 1.5rem; }
 table{ border-collapse:collapse; width:100%; margin:1rem 0; background:var(--panel); font-size:.9rem; }
 th,td{ border:1px solid var(--line); padding:.55rem .7rem; text-align:left; vertical-align:top; }
-th{ background:#f0f3f7; font-weight:600; }
+th{ background:#eef2f3; font-weight:600; color:var(--accent-deep); }
 .prov{ color:var(--muted); font-size:.82rem; font-style:italic; }
-.metric{ display:inline-block; background:var(--accent-soft); color:#0a4bbd; font-weight:600;
+.metric{ display:inline-block; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;
          padding:.05rem .4rem; border-radius:5px; }
 .card{ background:var(--panel); border:1px solid var(--line); border-radius:10px;
        padding:1.2rem 1.4rem; margin:1.2rem 0; }
@@ -67,7 +67,7 @@ th{ background:#f0f3f7; font-weight:600; }
 .quad h4{ margin:0 0 .4rem; font-size:.82rem; color:var(--muted); text-transform:uppercase;
           letter-spacing:.03em; }
 .quad.do_first{ background:var(--accent-soft); }
-.chip{ display:inline-block; background:#fff; border:1px solid var(--accent); color:#0a4bbd;
+.chip{ display:inline-block; background:#fff; border:1px solid var(--accent); color:var(--accent-deep);
        border-radius:6px; padding:.15rem .5rem; margin:.2rem .2rem 0 0; font-size:.84rem; }
 .horizon{ border-left:3px solid var(--accent); padding:.2rem 0 .2rem 1rem; margin:1rem 0; }
 .horizon .win{ color:var(--muted); font-size:.85rem; }
