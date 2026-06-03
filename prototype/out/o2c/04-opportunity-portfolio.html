@@ -1,0 +1,80 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Opportunity Portfolio</title>
+<link rel="stylesheet" href="assets/report.css"></head><body>
+<div class="layout">
+<nav class="sidebar">
+  <h1>Order-to-Cash Discovery</h1>
+  <div class="sub">Discovery assessment</div>
+  <a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='active' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
+</nav>
+<main class="content">
+<h1>AI Opportunity Portfolio</h1>
+<p class='lede'>The recommended interventions in full — what the problem is, how the process changes, and what it delivers.</p>
+<div class='card'>
+<h3>Single trusted view of customer credit, with controlled release<span class='pattern'>HITL Workflow</span></h3>
+<p>Establish one authoritative credit limit and payment terms per customer aligned to the policy&#x27;s system of record, surface every divergence for review, and route any order that would release above the authoritative limit to a credit owner for approval before it proceeds.</p>
+<div class='ba-grid'>
+<div class='col before'><h4>Before</h4><div class='step'><strong>1. Limit read at release</strong><div class='who'>Credit team · Two systems</div><div>An order is checked against whichever credit limit is read at release time — sometimes the commercial view, sometimes the system of record.</div></div>
+<div class='step'><strong>2. Silent over-release</strong><div class='who'>Credit team · Two systems</div><div>Where the commercial limit is higher, the order releases above the system of record with no approval trail.</div></div></div>
+<div class='col after'><h4>After</h4><div class='step'><strong>1. Reconcile to one source</strong><div class='who'>Master-data and credit teams · Core enterprise resource planning system</div><div>Each customer&#x27;s credit limit and payment terms are reconciled to the policy&#x27;s system of record, and every divergence is listed for review and decision.</div></div>
+<div class='step'><strong>2. Controlled exception release</strong><div class='who'>Credit owner · Core enterprise resource planning system</div><div>Any order that would release above the authoritative limit is held and routed to a named credit owner for approval, creating an approval trail.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Brings the 30675000 EUR of aggregate divergence under review and replaces silent over-release with a controlled, traceable approval, protecting the largest retail accounts where deltas reach 600000 EUR.
+ <span class='metric'>30675000 EUR of divergence brought under review</span> &nbsp; <span class='metric'>267 customers with mismatched limits reconciled</span> &nbsp; <span class='metric'>228 payment-term mismatches resolved</span>
+</p>
+<p class='prov'>How we get there: Figures restate the verified divergence and mismatch counts.</p>
+<p><strong>How it's delivered.</strong> Confirm the policy&#x27;s system of record as authoritative, reconcile each customer record to it, present every divergence for a documented decision, and introduce an approval step that holds any above-limit release for a named credit owner.</p>
+<div class='opmodel'>
+<p><strong>Who uses it.</strong> Credit owner, Master-data team, Order management team</p>
+<p><strong>Expected behaviour.</strong> Day to day it shows one authoritative limit per customer and holds any order that would exceed it for approval; it never auto-approves an above-limit release on its own.</p>
+<p><strong>Escalation &amp; human fallback.</strong> Any above-limit release, and any divergence it cannot reconcile automatically, is handed to the named credit owner for a documented decision.</p>
+</div>
+<p><strong>Dependencies:</strong> Independent — can start immediately.</p>
+<p class='prov'>Where this comes from: <a href='sources/credit-management-policy-the organisation-europe.html'>Credit Management Policy Europe</a>, <a href='sources/accounts-receivable-review-notes-q4-2025.html'>Accounts Receivable Review Notes Q4 2025</a>, <a href='sources/sap-crm-customer-export.html'>SAP CRM Customer Export</a> and <a href='sources/sap-s4-customer-master-export.html'>SAP S/4HANA Customer Master Export</a></p>
+</div>
+<div class='card'>
+<h3>Bring the electronic order channel into documented ownership<span class='pattern'>Modernisation</span></h3>
+<p>Write the electronic channel into the order management procedure and the responsibility matrix, assign a named accountable owner, and convert the informal dispute notes into a documented resolution procedure.</p>
+<div class='ba-grid'>
+<div class='col before'><h4>Before</h4><div class='step'><strong>1. Unowned channel</strong><div class='who'>Not assigned · Electronic data interchange channel</div><div>Two-thirds of orders run through a channel absent from the procedure and the responsibility matrix, with no accountable owner.</div></div>
+<div class='step'><strong>2. Informal resolution</strong><div class='who'>Customer service team · Informal working notes</div><div>Electronic-order disputes are worked from informal notes rather than a documented procedure.</div></div></div>
+<div class='col after'><h4>After</h4><div class='step'><strong>1. Documented and owned</strong><div class='who'>Process owner · Order management procedure and responsibility matrix</div><div>The electronic channel is added to the procedure and the responsibility matrix with a named accountable owner.</div></div>
+<div class='step'><strong>2. Standard resolution path</strong><div class='who'>Customer service team · Documented resolution procedure</div><div>Electronic-order disputes follow a documented procedure with a clear owner and escalation route.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Brings the channel carrying 67.3 percent of orders and 59711399.53 EUR of value under documented ownership and gives the most frequent escalation — 34 cases, 23.9 percent of all escalations — a clear owner and procedure.
+ <span class='metric'>67.3 percent of orders brought under documented ownership</span> &nbsp; <span class='metric'>59711399.53 EUR of order value covered</span> &nbsp; <span class='metric'>34 manual-intervention escalations given a clear owner</span>
+</p>
+<p class='prov'>How we get there: Figures restate the verified channel share, value, and escalation counts.</p>
+<p><strong>How it's delivered.</strong> Document the electronic channel end to end in the order management procedure, assign accountability in the responsibility matrix, and formalise the dispute-resolution notes into a standard procedure.</p>
+<div class='opmodel'>
+<p><strong>Who uses it.</strong> Process owner, Customer service team, Order management team</p>
+<p><strong>Expected behaviour.</strong> Day to day it gives the electronic channel a written procedure and a named owner for every step; it never leaves an electronic dispute without a defined resolution path.</p>
+<p><strong>Escalation &amp; human fallback.</strong> Disputes that fall outside the documented procedure are escalated to the named channel owner.</p>
+</div>
+<p><strong>Dependencies:</strong> Independent — can start immediately. Prerequisite for the AI Credit Decisioning step.</p>
+<p class='prov'>Where this comes from: <a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a>, <a href='sources/order-management-sop-the organisation-europe.html'>Order Management SOP Europe</a>, <a href='sources/o2c-process-raci-the organisation-europe.html'>O2C Process RACI Europe</a> and <a href='sources/edi-dispute-resolution-cs-working-notes.html'>EDI Dispute Resolution CS Working Notes</a></p>
+</div>
+<div class='card'>
+<h3>Catch and recover failed electronic orders before they become complaints<span class='pattern'>Automation Pipeline</span></h3>
+<p>Monitor electronic orders for those that need manual re-entry or fall out of fulfilment, route them automatically to the owning team for completion, and recover them before they surface as customer escalations or delisting threats.</p>
+<div class='ba-grid'>
+<div class='col before'><h4>Before</h4><div class='step'><strong>1. Silent fall-out</strong><div class='who'>Not assigned · Electronic data interchange channel</div><div>Electronic orders that need manual re-entry quietly fall out of fulfilment, accumulating as 1196 unfulfilled orders worth 12362493.74 EUR.</div></div>
+<div class='step'><strong>2. Surface as complaints</strong><div class='who'>Customer service team · Customer service records</div><div>Failures surface only as stockout and &#x27;order not received&#x27; escalations and delisting threats.</div></div></div>
+<div class='col after'><h4>After</h4><div class='step'><strong>1. Detect and route</strong><div class='who'>Order management team · Core enterprise resource planning system</div><div>Electronic orders needing manual intervention are detected and routed automatically to the owning team for completion.</div></div>
+<div class='step'><strong>2. Recover before complaint</strong><div class='who'>Order management team · Core enterprise resource planning system</div><div>Failed orders are completed before they reach the customer as a missed delivery, reducing escalations.</div></div></div>
+</div>
+<p><strong>Business impact.</strong> Targets the 1196 unfulfilled electronic orders worth 12362493.74 EUR — far above the 320 manual and 111 email equivalents — recovering revenue and protecting key retail relationships.
+ <span class='metric'>1196 unfulfilled electronic orders targeted for recovery</span> &nbsp; <span class='metric'>12362493.74 EUR of unfulfilled value addressed</span> &nbsp; <span class='metric'>320 unfulfilled manual orders by comparison</span>
+</p>
+<p class='prov'>How we get there: Figures restate the verified unfulfilled counts and value.</p>
+<p><strong>How it's delivered.</strong> Introduce monitoring of electronic orders for failure to process or fulfil, route exceptions to the owning team automatically, and track recovery against the verified unfulfilled baseline.</p>
+<div class='opmodel'>
+<p><strong>Who uses it.</strong> Order management team, Customer service team, Channel owner</p>
+<p><strong>Expected behaviour.</strong> Day to day it watches for failed electronic orders and routes them for completion; it never completes or amends an order on its own without the owning team acting on it.</p>
+<p><strong>Escalation &amp; human fallback.</strong> Orders it cannot route or that remain incomplete past a threshold are handed to the named channel owner.</p>
+</div>
+<p><strong>Dependencies:</strong> Requires Customer Master Reconciliation first.</p>
+<p class='prov'>Where this comes from: <a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a>, <a href='sources/customer-service-escalation-log-2025.html'>Customer Service Escalation Log 2025</a>, <a href='sources/edi-dispute-resolution-cs-working-notes.html'>EDI Dispute Resolution CS Working Notes</a> and <a href='sources/edi-integration-register-the organisation-europe.html'>EDI Integration Register Europe</a></p>
+</div>
+</main></div></body></html>

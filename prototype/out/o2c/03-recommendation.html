@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformation Recommendation</title>
+<link rel="stylesheet" href="assets/report.css"></head><body>
+<div class="layout">
+<nav class="sidebar">
+  <h1>Order-to-Cash Discovery</h1>
+  <div class="sub">Discovery assessment</div>
+  <a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='active' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
+</nav>
+<main class="content">
+<h1>Transformation Recommendation</h1>
+<p class='lede'>Which opportunities to pursue, in what order, by value and feasibility.</p>
+<h2>Value vs. feasibility</h2>
+<div class='matrix'>
+<div class='quad do_first'><h4>Do First</h4><span class='chip'>Single trusted view of customer credit, with controlled release</span><span class='chip'>Bring the electronic order channel into documented ownership</span></div>
+<div class='quad plan_for'><h4>Plan For</h4><span class='chip'>Catch and recover failed electronic orders before they become complaints</span></div>
+<div class='quad consider'><h4>Consider</h4><span class=prov>—</span></div>
+<div class='quad deprioritise'><h4>Deprioritise</h4><span class=prov>—</span></div>
+</div>
+<h2>Opportunity ratings</h2><table><thead><tr><th>Opportunity</th><th>Pattern</th><th>Value</th><th>Feasibility</th><th>Sequence</th></tr></thead><tbody>
+<tr><td>Single trusted view of customer credit, with controlled release</td><td>HITL Workflow</td><td>High</td><td>High</td><td>Can start now</td></tr>
+<tr><td>Bring the electronic order channel into documented ownership</td><td>Modernisation</td><td>High</td><td>High</td><td>Can start now</td></tr>
+<tr><td>Catch and recover failed electronic orders before they become complaints</td><td>Automation Pipeline</td><td>High</td><td>Medium</td><td>Requires Customer Master Reconciliation first</td></tr>
+</tbody></table>
+<h2>Prioritization rationale</h2>
+<p>Each opportunity assessed across three readiness dimensions. The rating (high / medium / low) is followed by the reason, so the sequence is defensible rather than asserted.</p>
+<table class='rationale'><thead><tr><th>Opportunity</th><th>Data readiness</th><th>Technical complexity</th><th>Operational readiness</th></tr></thead><tbody>
+<tr><td><strong>Single trusted view of customer credit, with controlled release</strong></td><td><span class='rate rate-high'>High</span> both sets of limits already exist as structured records that can be compared directly.</td><td><span class='rate rate-low'>Low</span> the comparison and review use information already held in both systems.</td><td><span class='rate rate-medium'>Medium</span> requires a named credit owner and an agreed approval step to be in place.</td></tr>
+<tr><td><strong>Bring the electronic order channel into documented ownership</strong></td><td><span class='rate rate-high'>High</span> the channel volume and escalation history are already recorded.</td><td><span class='rate rate-low'>Low</span> this is documentation and accountability rather than system change.</td><td><span class='rate rate-medium'>Medium</span> depends on agreeing and appointing the accountable owner.</td></tr>
+<tr><td><strong>Catch and recover failed electronic orders before they become complaints</strong></td><td><span class='rate rate-high'>High</span> the unfulfilled-order baseline and channel data already exist.</td><td><span class='rate rate-medium'>Medium</span> requires monitoring and routing across the electronic channel and the core system.</td><td><span class='rate rate-medium'>Medium</span> depends on the channel having a documented owner and procedure first.</td></tr>
+</tbody></table>
+<h2>Sequencing rationale</h2><p>Two interventions stand alone and should start immediately: establishing a single trusted view of customer credit with controlled release, and bringing the electronic order channel into documented ownership. Both rely only on information already held and address the highest-impact findings. Recovering failed electronic orders depends on the channel first having a documented procedure and named owner, so it follows the ownership work rather than running ahead of it.</p>
+<p><strong>Dependencies:</strong> Only one genuine prerequisite exists: recovering failed electronic orders (OPP3) depends on the electronic channel being documented and owned (OPP2). The credit intervention (OPP1) has no dependencies.</p>
+<h2>Strategic readiness</h2><p>The underlying information already exists in structured form across the credit, order, and escalation records, so the assessment rests on settled facts rather than new discovery. Readiness is strongest where the work is reconciliation and documentation, and is gated mainly by appointing named owners for credit approval and the electronic channel.</p>
+</main></div></body></html>

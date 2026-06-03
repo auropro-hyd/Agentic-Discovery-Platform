@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pain Points &amp; Opportunities</title>
+<link rel="stylesheet" href="assets/report.css"></head><body>
+<div class="layout">
+<nav class="sidebar">
+  <h1>Order-to-Cash Discovery</h1>
+  <div class="sub">Discovery assessment</div>
+  <a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='active' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a>
+</nav>
+<main class="content">
+<h1>Pain Points &amp; Opportunities</h1>
+<p class='lede'>The issues found in the discovery, ranked by business impact, each mapped to a recommended opportunity.</p>
+<div class='card'>
+<h3>Credit decisions run against two disagreeing sets of limits, with the higher figures winning</h3>
+<p>For 267 of 318 matched retail customers, the credit limit held in the customer-relationship system differs from the limit held in the core enterprise resource planning system that the credit policy names as the single system of record. The differences total 30675000 EUR in aggregate and reach 600000 EUR for a single major account, where the commercial view carries 2400000 EUR against the system-of-record figure of 1800000 EUR. Payment terms also differ for 228 customers. Orders are being released against limits that exceed the system of record with no approval trail.</p>
+<p><span class='metric'>267 of 318 matched customers carry mismatched credit limits</span> &nbsp; <span class='metric'>30675000 EUR of aggregate credit-limit divergence</span> &nbsp; <span class='metric'>up to 600000 EUR difference on a single major account</span> &nbsp; <span class='metric'>228 customers carry mismatched payment terms</span></p>
+<p><strong>Root cause:</strong> Two systems each hold credit limits and payment terms with no single authoritative reconciliation, and the policy&#x27;s named system of record is not consistently the one used at the point of order release.</p>
+<p><strong>Pattern:</strong> Silent divergence between two master sources, resolved in favour of whichever limit is read at release time, with no approval trail.</p>
+<p><strong>Addressed by:</strong> OPP1 (see the Opportunity Portfolio)</p>
+<p class='prov'>Where this comes from: <a href='sources/sap-s4-customer-master-export.html'>SAP S/4HANA Customer Master Export</a>, <a href='sources/sap-crm-customer-export.html'>SAP CRM Customer Export</a>, <a href='sources/credit-management-policy-the organisation-europe.html'>Credit Management Policy Europe</a> and <a href='sources/accounts-receivable-review-notes-q4-2025.html'>Accounts Receivable Review Notes Q4 2025</a></p>
+</div>
+<div class='card'>
+<h3>Two-thirds of orders run through a channel that no procedure or accountability covers</h3>
+<p>The electronic channel carries 67.3 percent of orders by count and 59711399.53 EUR of order value, yet it is explicitly left out of both the order management procedure and the responsibility matrix. The most frequent service failure — an electronic order requiring manual re-entry — has no documented owner and is handled through informal working notes. This accounts for 34 escalations, 23.9 percent of all escalations.</p>
+<p><span class='metric'>67.3 percent of orders by count arrive electronically</span> &nbsp; <span class='metric'>59711399.53 EUR of order value runs through the electronic channel</span> &nbsp; <span class='metric'>34 escalations for electronic orders needing manual intervention</span> &nbsp; <span class='metric'>23.9 percent of all escalations trace to this single root cause</span></p>
+<p><strong>Root cause:</strong> The electronic channel was never brought into the documented process or assigned an accountable owner, so the largest part of the business operates outside formal procedure.</p>
+<p><strong>Pattern:</strong> Largest-volume channel left undocumented and unowned, with resolution dependent on individual knowledge rather than procedure.</p>
+<p><strong>Addressed by:</strong> OPP3 (see the Opportunity Portfolio)</p>
+<p class='prov'>Where this comes from: <a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a>, <a href='sources/order-management-sop-the organisation-europe.html'>Order Management SOP Europe</a>, <a href='sources/o2c-process-raci-the organisation-europe.html'>O2C Process RACI Europe</a> and <a href='sources/customer-service-escalation-log-2025.html'>Customer Service Escalation Log 2025</a></p>
+</div>
+<div class='card'>
+<h3>Electronic orders fail to fulfil far more often than manual ones, driving lost revenue and delisting threats</h3>
+<p>The electronic channel records 1196 unfulfilled orders worth 12362493.74 EUR — the largest single bucket of unfulfilled orders, against 320 for manual orders and 111 for email orders, a non-fulfilment rate close to four times that of manual orders. Combined with the absence of a documented procedure and owner for this channel, this drives repeated stockout and &#x27;order not received&#x27; escalations and explicit customer delisting threats.</p>
+<p><span class='metric'>1196 unfulfilled electronic orders</span> &nbsp; <span class='metric'>12362493.74 EUR of unfulfilled electronic orders</span> &nbsp; <span class='metric'>320 unfulfilled manual orders by comparison</span> &nbsp; <span class='metric'>111 unfulfilled email orders by comparison</span></p>
+<p><strong>Root cause:</strong> Electronic orders that require manual re-entry are not reliably caught and completed, so a large share quietly fall out of fulfilment with no owning process to recover them.</p>
+<p><strong>Pattern:</strong> High-volume automated intake without a recovery process, so failed orders accumulate unfulfilled and surface only as customer complaints.</p>
+<p><strong>Addressed by:</strong> OPP2 (see the Opportunity Portfolio)</p>
+<p class='prov'>Where this comes from: <a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a>, <a href='sources/customer-service-escalation-log-2025.html'>Customer Service Escalation Log 2025</a> and <a href='sources/edi-dispute-resolution-cs-working-notes.html'>EDI Dispute Resolution CS Working Notes</a></p>
+</div>
+</main></div></body></html>

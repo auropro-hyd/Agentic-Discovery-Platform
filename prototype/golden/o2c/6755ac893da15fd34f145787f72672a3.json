@@ -1,0 +1,5 @@
+{
+  "system": "You are a connectivity check.",
+  "prompt": "Reply with exactly the word: OK",
+  "response": "OK"
+}

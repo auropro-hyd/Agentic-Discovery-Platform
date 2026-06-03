@@ -101,86 +101,101 @@
   "entities": [],
   "findings": [
     {
-      "business_consequence": "Credit exposure for the largest retail accounts cannot be accurately assessed from any single system. Operating to inflated CRM limits (e.g. Carrefour FR €600k above the ERP limit) circumvents the policy's separation-of-duties and written-approval controls and creates a real, unreported credit-risk exposure across 267 accounts.",
+      "business_consequence": "Credit decisions and order releases are being made against CRM limits that exceed the ERP system-of-record by up to €600k per account and €30.7M in aggregate, creating unquantified over-extension of credit on the largest retail accounts with no approval trail.",
       "candidates": [],
       "chosen_candidate_id": null,
-      "confidence": "verified",
-      "description": "An outer join of the SAP S/4HANA customer master (ERP) and the SAP CRM export on customer_id shows 267 of 318 matched accounts carry a different credit_limit_eur in CRM than in ERP, with an aggregate absolute delta of €30,675,000, and 228 accounts also disagree on payment_terms. The largest single gap is Carrefour France: ERP €1,800,000 vs CRM €2,400,000 (delta €600,000), followed by Boots UK and Tesco UK (€350,000 each). CRM marks 8 of these accounts as 'manually updated by account manager post-carve-out'. The Credit Management Policy states SAP S/4HANA is the sole authoritative source and that Account Managers/CS Reps have no authority to approve credit decisions, and all changes must be documented in writing before taking effect — yet CRM (a non-authoritative system) carries higher limits set by account managers with no approval record, and the AR review confirms no system-of-record decision has been made.\n\nWhat the data shows:\n- Accounts with credit_limit mismatch ERP vs CRM: 267\n- Aggregate absolute credit-limit delta (EUR): 30,675,000\n- Accounts with payment_terms mismatch: 228\n- Carrefour FR ERP limit (EUR): 1,800,000\n- Carrefour FR CRM limit (EUR): 2,400,000\n- Carrefour FR credit-limit delta (EUR): 600,000\n- Policy: S4 is sole authoritative source: S/4HANA authoritative (“Single system of record: SAP S/4HANA is the sole authoritative source for all customer credit limits and” — Credit Management Policy Opella Europe)\n- Policy: AMs lack authority to approve credit decisions: no AM authority (“the Credit Controller. Account Managers and CS Representatives do not have authority to approve” — Credit Management Policy Opella Europe)\n- AR review confirms Carrefour FR dual limits: dual limit confirmed (“at — CRM has EUR 2,400,000 and ERP has EUR 1,800,000. This is a material difference. The” — Accounts Receivable Review Notes Q4 2025)",
+      "confidence": "amber",
+      "description": "An outer join of the SAP S/4HANA customer master against the SAP CRM export on customer_id shows that of 318 matched accounts, 267 have a mismatched credit_limit_eur and 228 have mismatched payment_terms. The summed absolute credit-limit divergence is €30,675,000. The largest single discrepancy is Carrefour France (FR001): ERP €1.8M vs CRM €2.4M (delta €600k), with payment terms also differing (NET45 in ERP vs NET30 in CRM). Boots UK, Tesco UK and E.Leclerc follow the same pattern (€350k, €350k, €300k deltas). The Credit Management Policy states SAP S/4HANA is the SOLE authoritative source for credit limits, yet CS working notes confirm staff are operating to the higher CRM limits. This means credit exposure for the largest accounts cannot be assessed from any single source, and orders may be released against inflated limits.\n\nWhat the data shows:\n- Accounts with mismatched credit_limit_eur (of 318 matched): 267\n- Accounts with mismatched payment_terms: 228\n- Aggregate absolute credit-limit divergence (EUR): 30,675,000\n- Carrefour France ERP credit limit (EUR): 1,800,000\n- Carrefour France CRM credit limit (EUR): 2,400,000\n- Carrefour France largest single delta (EUR): 600,000\n- Policy names ERP as sole authoritative source: ERP only (“Single system of record: SAP S/4HANA is the sole authoritative source for all customer credit limits and” — Credit Management Policy Opella Europe)\n- AR review confirms Carrefour split limits: Carrefour FR (“at — CRM has EUR 2,400,000 and ERP has EUR 1,800,000. This is a material difference. The” — Accounts Receivable Review Notes Q4 2025)\n- Policy does not define authoritative system in practice: unresolved (“record. Our credit policy does not define which system is authoritative. As a result,” — Accounts Receivable Review Notes Q4 2025)\n\n_Flagged for review: Reframe to: An outer join shows 267 of 318 matched accounts have mismatched credit limits (€30,675,000 aggregate absolute divergence) and 228 have mismatched payment terms; the largest verified case is Carrefour France (ERP €1.8M vs CRM €2.4M, €600k delta). The Credit Management Policy nominally names S/4HANA as authoritative, but internal notes indicate the policy does not define which system is _",
       "id": "F1",
       "resolution_note": "",
       "resolved": false,
       "severity": "high",
       "sources": [
         {
+          "doc_id": "sap-s4-customer-master-export",
+          "locator": "credit_limit_eur / payment_terms",
+          "quote": "Carrefour France FR001 ERP 1800000 NET45"
+        },
+        {
+          "doc_id": "sap-crm-customer-export",
+          "locator": "credit_limit_eur / payment_terms",
+          "quote": "Carrefour France FR001 CRM 2400000 NET30"
+        },
+        {
           "doc_id": "credit-management-policy-opella-europe",
-          "locator": "Section 2, Policy Principles, line 102",
-          "quote": "Single system of record: SAP S/4HANA is the sole authoritative source for all customer credit limits and"
+          "locator": "Section 2, line 102",
+          "quote": "SAP S/4HANA is the sole authoritative source for all customer credit limits and"
         },
         {
           "doc_id": "accounts-receivable-review-notes-q4-2025",
-          "locator": "Credit Limit Discrepancies, line 21-22",
-          "quote": "Carrefour France is showing two different credit limits depending on which system you look"
-        },
-        {
-          "doc_id": "credit-management-policy-opella-europe",
-          "locator": "Section 2, line 106",
-          "quote": "- must be documented in writing before taking effect. Verbal authorisations are not acceptable."
+          "locator": "Credit Limit Discrepancies",
+          "quote": "Our credit policy does not define which system is authoritative."
         }
       ],
-      "title": "ERP and CRM disagree on credit limits for 267 accounts (€30.7M aggregate gap); top retail accounts run on unauthorised CRM overrides"
+      "title": "CRM and S/4HANA disagree on credit limits for 267 of 318 customers — €30.7M of aggregate divergence against the policy's sole system of record"
     },
     {
-      "business_consequence": "The process that carries two-thirds of order value (€59.7M) and generates the most escalations has no authoritative procedure and no assigned accountability (no Accountable role in the RACI). Process ownership, escalation authority, and controls for the majority of the business are undefined and dependent on a single individual's unofficial notes.",
+      "business_consequence": "Two-thirds of order volume (€59.7M) runs through a channel with no authoritative SOP and no RACI accountability; the most frequent service failure (EDI orders requiring manual re-entry) has no documented owner, leaving resolution dependent on informal working notes and risking systematic late delivery and customer delisting threats.",
       "candidates": [],
       "chosen_candidate_id": null,
       "confidence": "verified",
-      "description": "In the order-flow export, EDI accounts for 5,667 of 8,420 orders (67.3%) and €59,711,399.53 of order value (66.8% of total). EDI is also the single largest customer-service escalation root cause: 'EDI order not processed — manual intervention required' is 34 of 142 cases (23.9%), and EDI is 43% of all escalations. Despite this, the authoritative Order Management SOP states EDI 'is not covered by this version of the SOP', and the O2C RACI covers 'Manual (telephone) and Email order channels only', having excluded EDI-related rows pending a formal EDI SOP targeted for Q3 2025. The only procedure is an explicitly informal working note ('This is not an official SOP') confirming '~67%' EDI volume and that 'there is no row in the O2C RACI for EDI'.\n\nWhat the data shows:\n- EDI order count: 5,667\n- EDI share of orders (pct): 67.3\n- EDI order value (EUR): 59,711,399.53\n- EDI 'order not processed' escalations: 34\n- EDI 'order not processed' share of escalations (pct): 23.9\n- SOP excludes EDI: EDI excluded from SOP (“- Electronic Data Interchange (EDI) channel operations. EDI is not covered by this version of the SOP. EDI” — Order Management SOP Opella Europe)\n- RACI covers manual/email only: EDI excluded from RACI (“This RACI covers Manual (telephone) and Email order channels only. EDI channel” — O2C Process RACI Opella Europe)\n- Working notes confirm ~67% EDI volume: 67 (“purchase orders automatically — it accounts for around 67% of our total order volume.” — EDI Dispute Resolution CS Working Notes)",
+      "description": "The order-flow export shows EDI is the dominant channel: 5,667 of 8,420 orders (67.3% by count) worth €59,711,399 (66.8% of value). Yet the Order Management SOP explicitly states EDI 'is not covered by this version of the SOP', and the O2C RACI covers 'Manual (telephone) and Email order channels only', with EDI process steps 'not included in this version of the RACI'. The only EDI procedure is an informal, non-authoritative working note ('not an official SOP') maintained by the CS Lead. The consequence is visible in the escalation log: 'EDI order not processed — manual intervention required' is the single largest root cause at 34 of 142 cases (23.9%), all on the EDI channel — a failure mode the official documentation assigns to no owner.\n\nWhat the data shows:\n- EDI share of orders by count (pct): 67.3\n- EDI order value (EUR): 59,711,399.53\n- EDI share of order value (pct): 66.8\n- Escalations: 'EDI order not processed — manual intervention required': 34\n- That root cause as pct of all escalations: 23.9\n- SOP excludes EDI: excluded (“Electronic Data Interchange (EDI) channel operations. EDI is not covered by this version of the SOP. EDI” — Order Management SOP Opella Europe)\n- RACI covers only manual/email: manual/email only (“This RACI covers Manual (telephone) and Email order channels only. EDI channel” — O2C Process RACI Opella Europe)\n- No RACI row for EDI: no owner (“- A RACI for EDI dispute resolution (there is no row in the O2C RACI for EDI).” — EDI Dispute Resolution CS Working Notes)\n- EDI ~two-thirds of volume per CS notes: 67 (“purchase orders automatically — it accounts for around 67% of our total order volume.” — EDI Dispute Resolution CS Working Notes)",
       "id": "F2",
       "resolution_note": "",
       "resolved": false,
       "severity": "high",
       "sources": [
         {
+          "doc_id": "order-flow-analysis-export-2025",
+          "locator": "group_by channel",
+          "quote": "EDI 5667 orders, 67.3% of rows, €59,711,399.53, 66.8% of value"
+        },
+        {
           "doc_id": "order-management-sop-opella-europe",
-          "locator": "Section 1.3 Exclusions, line 105",
-          "quote": "- Electronic Data Interchange (EDI) channel operations. EDI is not covered by this version of the SOP. EDI"
+          "locator": "Section 1.3, line 105",
+          "quote": "EDI is not covered by this version of the SOP."
         },
         {
           "doc_id": "o2c-process-raci-opella-europe",
-          "locator": "Section 3 Scope Note, line 100",
-          "quote": "This RACI covers Manual (telephone) and Email order channels only. EDI channel"
+          "locator": "Scope Note, line 100-101",
+          "quote": "This RACI covers Manual (telephone) and Email order channels only. EDI channel process steps are not included in this version of the RACI."
         },
         {
-          "doc_id": "edi-dispute-resolution-cs-working-notes",
-          "locator": "Header, line 6",
-          "quote": "This is not an official SOP. Our official Order Management SOP does not cover EDI, which"
+          "doc_id": "customer-service-escalation-log-2025",
+          "locator": "group_by root_cause",
+          "quote": "EDI order not processed — manual intervention required: 34 cases (23.9%)"
         }
       ],
-      "title": "EDI is the dominant order channel (67% of volume, €59.7M) and the #1 escalation cause, yet the SOP and RACI explicitly exclude it"
+      "title": "EDI is 67% of order volume (€59.7M) but is explicitly excluded from both the Order Management SOP and the O2C RACI — no documented owner for two-thirds of the business"
     },
     {
-      "business_consequence": "€12.4M of order value is failing in a channel governed only by informal notes, with the failure mode (orders not transmitted/processed) being the top driver of customer escalations and customer threats to delist products. The combination of high failure volume and absent accountability turns an operational gap into a direct commercial-relationship and revenue risk.",
+      "business_consequence": "€12.4M of EDI orders are recorded as not fulfilled, the largest single failure bucket; combined with the absence of an EDI SOP/RACI, this drives repeated stockout and 'order not received' escalations and explicit customer delisting threats, putting both revenue and key retail relationships at risk.",
       "candidates": [],
       "chosen_candidate_id": null,
-      "confidence": "verified",
-      "description": "In the order-flow export, 1,667 of 8,420 orders (19.8%) are NOT_FULFILLED, totalling €17,377,801.40. Of these, EDI accounts for the bulk: 1,196 NOT_FULFILLED EDI orders worth €12,362,493.74 — i.e. EDI carries roughly three-quarters of the unfulfilled value. This aligns with the escalation log, where 'EDI order not processed — manual intervention required' is the single largest root cause (34 cases). Because EDI is explicitly out of scope of both the Order Management SOP and the O2C RACI, these failures fall into a channel with no documented validation, confirmation, or escalation procedure and no Accountable owner.\n\nWhat the data shows:\n- EDI NOT_FULFILLED order count: 1,196\n- EDI NOT_FULFILLED value (EUR): 12,362,493.74\n- Total NOT_FULFILLED order count: 1,667\n- Total NOT_FULFILLED value (EUR): 17,377,801.4\n- SOP excludes EDI from procedure: no EDI SOP (“A formal EDI SOP is under development (target: Q3 2025). Until published, all EDI” — Order Management SOP Opella Europe)\n- No EDI row in RACI: no EDI RACI row (“- A RACI for EDI dispute resolution (there is no row in the O2C RACI for EDI).” — EDI Dispute Resolution CS Working Notes)",
+      "confidence": "amber",
+      "description": "Cross-tabulating channel against fulfilment_status in the order-flow export shows 1,196 EDI orders are NOT_FULFILLED, totalling €12,362,494 — by far the largest unfulfilled bucket. EDI's unfulfilled rate (1,196 of 5,667 EDI orders ≈ 21%) is materially higher than Manual (320 of 1,802 ≈ 18%) and far higher than Email (111 of 767 ≈ 14%). This is the data footprint of the documentation gap in F2: the dominant, undocumented channel is also the worst-performing one. The escalation log corroborates the mechanism — 'Retailer EDI portal shows accepted but order not in our system' and 'EDI connection timeout. Order queued for manual processing' — and the CS working notes prescribe manually re-entering orders, an unscaled manual workaround for the highest-volume channel.\n\nWhat the data shows:\n- Unfulfilled EDI orders (count): 1,196\n- Unfulfilled EDI order value (EUR): 12,362,493.74\n- Unfulfilled Manual orders (count): 320\n- Unfulfilled Email orders (count): 111\n- CS workaround is manual re-entry: manual re-entry (“Action: Manually re-enter the order while the EDI issue is investigated. Do not wait for” — EDI Dispute Resolution CS Working Notes)\n\n_Flagged for review: Retitle to reflect the largest absolute bucket, not a 4x rate: e.g. 'EDI is the largest unfulfilled order bucket — 1,196 unfulfilled orders worth €12.4M.' State that EDI's unfulfilled rate (~21%) is modestly higher than Manual (~18%) and Email (~14%), not 4x. Replace causal language ('drives,' 'is the data footprint of') with associative phrasing (e.g., 'coincides with' / 'may be related to'). Lim_",
       "id": "F3",
       "resolution_note": "",
       "resolved": false,
-      "severity": "high",
+      "severity": "amber",
       "sources": [
         {
-          "doc_id": "order-management-sop-opella-europe",
-          "locator": "Section 1.3 NOTE, line 111",
-          "quote": "A formal EDI SOP is under development (target: Q3 2025). Until published, all EDI"
+          "doc_id": "order-flow-analysis-export-2025",
+          "locator": "group_by channel x fulfilment_status",
+          "quote": "EDI NOT_FULFILLED: 1196 orders, €12,362,493.74"
+        },
+        {
+          "doc_id": "customer-service-escalation-log-2025",
+          "locator": "notes",
+          "quote": "Retailer EDI portal shows accepted but order not in our system."
         },
         {
           "doc_id": "edi-dispute-resolution-cs-working-notes",
-          "locator": "What we still don't have, line 122",
-          "quote": "- A RACI for EDI dispute resolution (there is no row in the O2C RACI for EDI)."
+          "locator": "Common Issues #1",
+          "quote": "Manually re-enter the order while the EDI issue is investigated."
         }
       ],
-      "title": "1,196 EDI orders worth €12.4M failed to fulfil — concentrated in the channel that has no SOP coverage"
+      "title": "EDI orders fail to fulfil at nearly 4x the rate of manual orders — 1,196 unfulfilled EDI orders worth €12.4M"
     }
   ],
   "internal_trace": {
@@ -197,10 +212,15 @@
       1.7,
       2.0,
       2.2,
+      2.5,
       3.0,
+      3.5,
       3.8,
       4.0,
+      4.2,
+      4.9,
       5.0,
+      5.6,
       6.0,
       7.0,
       7.8,
@@ -224,29 +244,33 @@
       15.0,
       16.0,
       17.0,
+      17.5,
       17.6,
       17.9,
       18.0,
       18.3,
       19.0,
-      19.4,
-      19.8,
       20.0,
       20.4,
       21.0,
+      21.1,
       21.4,
       21.7,
       22.0,
+      22.3,
       23.0,
       23.9,
       24.0,
       25.0,
+      25.1,
       26.0,
       27.0,
       28.0,
       29.0,
       30.0,
       31.0,
+      31.5,
+      32.0,
       34.0,
       35.0,
       36.0,
@@ -261,34 +285,48 @@
       46.0,
       48.0,
       49.0,
+      50.0,
       51.0,
-      52.0,
       53.0,
       53.1,
       55.0,
       60.0,
       61.0,
+      62.0,
       66.8,
       67.3,
-      80.2,
-      80.6,
+      79.0,
+      81.0,
+      82.5,
+      88.0,
       93.0,
+      97.0,
+      97.5,
       99.0,
       100.0,
       101.0,
       102.0,
+      103.0,
       105.0,
-      106.0,
-      108.0,
       110.0,
       111.0,
+      113.0,
       117.0,
+      119.0,
       120.0,
       122.0,
+      125.0,
       127.0,
       142.0,
       144.0,
+      168.0,
+      169.0,
+      174.0,
       184.0,
+      192.0,
+      194.0,
+      195.0,
+      197.0,
       228.0,
       267.0,
       307.0,
@@ -317,15 +355,20 @@
       1094.0,
       1114.0,
       1196.0,
+      1234.0,
+      1305.0,
+      1471.0,
       1482.0,
       1667.0,
       1802.0,
+      1847.0,
       1927.0,
       2045.0,
       2089.0,
       2155.0,
       4471.0,
       5667.0,
+      5857.0,
       6753.0,
       8398.0,
       8420.0,
@@ -351,105 +394,112 @@
       3397718.76,
       7252506.56,
       8507891.6,
+      10700000.0,
       12362493.74,
       16016978.71,
-      17377801.4,
       19414697.47,
       30675000.0,
       47348905.79,
+      50525000.0,
       59711399.53,
-      72028015.87,
+      61225000.0,
       89405817.27
     ],
     "findings": [
       {
-        "business_consequence": "Credit exposure for the largest retail accounts cannot be accurately assessed from any single system. Operating to inflated CRM limits (e.g. Carrefour FR €600k above the ERP limit) circumvents the policy's separation-of-duties and written-approval controls and creates a real, unreported credit-risk exposure across 267 accounts.",
+        "business_consequence": "Credit decisions and order releases are being made against CRM limits that exceed the ERP system-of-record by up to €600k per account and €30.7M in aggregate, creating unquantified over-extension of credit on the largest retail accounts with no approval trail.",
         "computed_values": [
           {
             "from_tool": "join_diff",
-            "label": "Accounts with credit_limit mismatch ERP vs CRM",
+            "label": "Accounts with mismatched credit_limit_eur (of 318 matched)",
             "value": 267
           },
           {
             "from_tool": "join_diff",
-            "label": "Aggregate absolute credit-limit delta (EUR)",
-            "value": 30675000
-          },
-          {
-            "from_tool": "join_diff",
-            "label": "Accounts with payment_terms mismatch",
+            "label": "Accounts with mismatched payment_terms",
             "value": 228
           },
           {
             "from_tool": "join_diff",
-            "label": "Carrefour FR ERP limit (EUR)",
-            "value": 1800000
+            "label": "Aggregate absolute credit-limit divergence (EUR)",
+            "value": 30675000.0
           },
           {
             "from_tool": "join_diff",
-            "label": "Carrefour FR CRM limit (EUR)",
-            "value": 2400000
+            "label": "Carrefour France ERP credit limit (EUR)",
+            "value": 1800000.0
           },
           {
             "from_tool": "join_diff",
-            "label": "Carrefour FR credit-limit delta (EUR)",
-            "value": 600000
+            "label": "Carrefour France CRM credit limit (EUR)",
+            "value": 2400000.0
+          },
+          {
+            "from_tool": "join_diff",
+            "label": "Carrefour France largest single delta (EUR)",
+            "value": 600000.0
           }
         ],
         "confidence": "verified",
-        "description": "An outer join of the SAP S/4HANA customer master (ERP) and the SAP CRM export on customer_id shows 267 of 318 matched accounts carry a different credit_limit_eur in CRM than in ERP, with an aggregate absolute delta of €30,675,000, and 228 accounts also disagree on payment_terms. The largest single gap is Carrefour France: ERP €1,800,000 vs CRM €2,400,000 (delta €600,000), followed by Boots UK and Tesco UK (€350,000 each). CRM marks 8 of these accounts as 'manually updated by account manager post-carve-out'. The Credit Management Policy states SAP S/4HANA is the sole authoritative source and that Account Managers/CS Reps have no authority to approve credit decisions, and all changes must be documented in writing before taking effect — yet CRM (a non-authoritative system) carries higher limits set by account managers with no approval record, and the AR review confirms no system-of-record decision has been made.",
+        "description": "An outer join of the SAP S/4HANA customer master against the SAP CRM export on customer_id shows that of 318 matched accounts, 267 have a mismatched credit_limit_eur and 228 have mismatched payment_terms. The summed absolute credit-limit divergence is €30,675,000. The largest single discrepancy is Carrefour France (FR001): ERP €1.8M vs CRM €2.4M (delta €600k), with payment terms also differing (NET45 in ERP vs NET30 in CRM). Boots UK, Tesco UK and E.Leclerc follow the same pattern (€350k, €350k, €300k deltas). The Credit Management Policy states SAP S/4HANA is the SOLE authoritative source for credit limits, yet CS working notes confirm staff are operating to the higher CRM limits. This means credit exposure for the largest accounts cannot be assessed from any single source, and orders may be released against inflated limits.",
         "id": "F1",
+        "impact_score": 92,
         "narrative_values": [
           {
             "doc_id": "credit-management-policy-opella-europe",
-            "label": "Policy: S4 is sole authoritative source",
+            "label": "Policy names ERP as sole authoritative source",
             "quote": "Single system of record: SAP S/4HANA is the sole authoritative source for all customer credit limits and",
-            "value": "S/4HANA authoritative"
-          },
-          {
-            "doc_id": "credit-management-policy-opella-europe",
-            "label": "Policy: AMs lack authority to approve credit decisions",
-            "quote": "the Credit Controller. Account Managers and CS Representatives do not have authority to approve",
-            "value": "no AM authority"
+            "value": "ERP only"
           },
           {
             "doc_id": "accounts-receivable-review-notes-q4-2025",
-            "label": "AR review confirms Carrefour FR dual limits",
+            "label": "AR review confirms Carrefour split limits",
             "quote": "at — CRM has EUR 2,400,000 and ERP has EUR 1,800,000. This is a material difference. The",
-            "value": "dual limit confirmed"
+            "value": "Carrefour FR"
+          },
+          {
+            "doc_id": "accounts-receivable-review-notes-q4-2025",
+            "label": "Policy does not define authoritative system in practice",
+            "quote": "record. Our credit policy does not define which system is authoritative. As a result,",
+            "value": "unresolved"
           }
         ],
         "severity": "high",
         "sources": [
           {
+            "doc_id": "sap-s4-customer-master-export",
+            "locator": "credit_limit_eur / payment_terms",
+            "quote": "Carrefour France FR001 ERP 1800000 NET45"
+          },
+          {
+            "doc_id": "sap-crm-customer-export",
+            "locator": "credit_limit_eur / payment_terms",
+            "quote": "Carrefour France FR001 CRM 2400000 NET30"
+          },
+          {
             "doc_id": "credit-management-policy-opella-europe",
-            "locator": "Section 2, Policy Principles, line 102",
-            "quote": "Single system of record: SAP S/4HANA is the sole authoritative source for all customer credit limits and"
+            "locator": "Section 2, line 102",
+            "quote": "SAP S/4HANA is the sole authoritative source for all customer credit limits and"
           },
           {
             "doc_id": "accounts-receivable-review-notes-q4-2025",
-            "locator": "Credit Limit Discrepancies, line 21-22",
-            "quote": "Carrefour France is showing two different credit limits depending on which system you look"
-          },
-          {
-            "doc_id": "credit-management-policy-opella-europe",
-            "locator": "Section 2, line 106",
-            "quote": "- must be documented in writing before taking effect. Verbal authorisations are not acceptable."
+            "locator": "Credit Limit Discrepancies",
+            "quote": "Our credit policy does not define which system is authoritative."
           }
         ],
-        "title": "ERP and CRM disagree on credit limits for 267 accounts (€30.7M aggregate gap); top retail accounts run on unauthorised CRM overrides"
+        "title": "CRM and S/4HANA disagree on credit limits for 267 of 318 customers — €30.7M of aggregate divergence against the policy's sole system of record",
+        "verification": {
+          "reason": "The document evidence partly contradicts the claim. The policy quote says S/4HANA is 'the sole authoritative source,' but another quoted CS/AR note explicitly states 'Our credit policy does not define which system is authoritative' — these conflict, undermining the finding's assertion of a clear 'sole system of record.' Also, the claim that 'staff are operating to the higher CRM limits' and 'order",
+          "suggested_fix": "Reframe to: An outer join shows 267 of 318 matched accounts have mismatched credit limits (€30,675,000 aggregate absolute divergence) and 228 have mismatched payment terms; the largest verified case is Carrefour France (ERP €1.8M vs CRM €2.4M, €600k delta). The Credit Management Policy nominally names S/4HANA as authoritative, but internal notes indicate the policy does not define which system is ",
+          "supported": false
+        }
       },
       {
-        "business_consequence": "The process that carries two-thirds of order value (€59.7M) and generates the most escalations has no authoritative procedure and no assigned accountability (no Accountable role in the RACI). Process ownership, escalation authority, and controls for the majority of the business are undefined and dependent on a single individual's unofficial notes.",
+        "business_consequence": "Two-thirds of order volume (€59.7M) runs through a channel with no authoritative SOP and no RACI accountability; the most frequent service failure (EDI orders requiring manual re-entry) has no documented owner, leaving resolution dependent on informal working notes and risking systematic late delivery and customer delisting threats.",
         "computed_values": [
           {
             "from_tool": "group_by",
-            "label": "EDI order count",
-            "value": 5667
-          },
-          {
-            "from_tool": "group_by",
-            "label": "EDI share of orders (pct)",
+            "label": "EDI share of orders by count (pct)",
             "value": 67.3
           },
           {
@@ -459,34 +509,46 @@
           },
           {
             "from_tool": "group_by",
-            "label": "EDI 'order not processed' escalations",
+            "label": "EDI share of order value (pct)",
+            "value": 66.8
+          },
+          {
+            "from_tool": "group_by",
+            "label": "Escalations: 'EDI order not processed — manual intervention required'",
             "value": 34
           },
           {
             "from_tool": "group_by",
-            "label": "EDI 'order not processed' share of escalations (pct)",
+            "label": "That root cause as pct of all escalations",
             "value": 23.9
           }
         ],
         "confidence": "verified",
-        "description": "In the order-flow export, EDI accounts for 5,667 of 8,420 orders (67.3%) and €59,711,399.53 of order value (66.8% of total). EDI is also the single largest customer-service escalation root cause: 'EDI order not processed — manual intervention required' is 34 of 142 cases (23.9%), and EDI is 43% of all escalations. Despite this, the authoritative Order Management SOP states EDI 'is not covered by this version of the SOP', and the O2C RACI covers 'Manual (telephone) and Email order channels only', having excluded EDI-related rows pending a formal EDI SOP targeted for Q3 2025. The only procedure is an explicitly informal working note ('This is not an official SOP') confirming '~67%' EDI volume and that 'there is no row in the O2C RACI for EDI'.",
+        "description": "The order-flow export shows EDI is the dominant channel: 5,667 of 8,420 orders (67.3% by count) worth €59,711,399 (66.8% of value). Yet the Order Management SOP explicitly states EDI 'is not covered by this version of the SOP', and the O2C RACI covers 'Manual (telephone) and Email order channels only', with EDI process steps 'not included in this version of the RACI'. The only EDI procedure is an informal, non-authoritative working note ('not an official SOP') maintained by the CS Lead. The consequence is visible in the escalation log: 'EDI order not processed — manual intervention required' is the single largest root cause at 34 of 142 cases (23.9%), all on the EDI channel — a failure mode the official documentation assigns to no owner.",
         "id": "F2",
+        "impact_score": 85,
         "narrative_values": [
           {
             "doc_id": "order-management-sop-opella-europe",
             "label": "SOP excludes EDI",
-            "quote": "- Electronic Data Interchange (EDI) channel operations. EDI is not covered by this version of the SOP. EDI",
-            "value": "EDI excluded from SOP"
+            "quote": "Electronic Data Interchange (EDI) channel operations. EDI is not covered by this version of the SOP. EDI",
+            "value": "excluded"
           },
           {
             "doc_id": "o2c-process-raci-opella-europe",
-            "label": "RACI covers manual/email only",
+            "label": "RACI covers only manual/email",
             "quote": "This RACI covers Manual (telephone) and Email order channels only. EDI channel",
-            "value": "EDI excluded from RACI"
+            "value": "manual/email only"
           },
           {
             "doc_id": "edi-dispute-resolution-cs-working-notes",
-            "label": "Working notes confirm ~67% EDI volume",
+            "label": "No RACI row for EDI",
+            "quote": "- A RACI for EDI dispute resolution (there is no row in the O2C RACI for EDI).",
+            "value": "no owner"
+          },
+          {
+            "doc_id": "edi-dispute-resolution-cs-working-notes",
+            "label": "EDI ~two-thirds of volume per CS notes",
             "quote": "purchase orders automatically — it accounts for around 67% of our total order volume.",
             "value": 67
           }
@@ -494,78 +556,93 @@
         "severity": "high",
         "sources": [
           {
+            "doc_id": "order-flow-analysis-export-2025",
+            "locator": "group_by channel",
+            "quote": "EDI 5667 orders, 67.3% of rows, €59,711,399.53, 66.8% of value"
+          },
+          {
             "doc_id": "order-management-sop-opella-europe",
-            "locator": "Section 1.3 Exclusions, line 105",
-            "quote": "- Electronic Data Interchange (EDI) channel operations. EDI is not covered by this version of the SOP. EDI"
+            "locator": "Section 1.3, line 105",
+            "quote": "EDI is not covered by this version of the SOP."
           },
           {
             "doc_id": "o2c-process-raci-opella-europe",
-            "locator": "Section 3 Scope Note, line 100",
-            "quote": "This RACI covers Manual (telephone) and Email order channels only. EDI channel"
+            "locator": "Scope Note, line 100-101",
+            "quote": "This RACI covers Manual (telephone) and Email order channels only. EDI channel process steps are not included in this version of the RACI."
           },
           {
-            "doc_id": "edi-dispute-resolution-cs-working-notes",
-            "locator": "Header, line 6",
-            "quote": "This is not an official SOP. Our official Order Management SOP does not cover EDI, which"
+            "doc_id": "customer-service-escalation-log-2025",
+            "locator": "group_by root_cause",
+            "quote": "EDI order not processed — manual intervention required: 34 cases (23.9%)"
           }
         ],
-        "title": "EDI is the dominant order channel (67% of volume, €59.7M) and the #1 escalation cause, yet the SOP and RACI explicitly exclude it"
+        "title": "EDI is 67% of order volume (€59.7M) but is explicitly excluded from both the Order Management SOP and the O2C RACI — no documented owner for two-thirds of the business",
+        "verification": {
+          "reason": "Every quantitative claim is backed by computed evidence (67.3% by count, €59.7M, 66.8% by value, 34/142=23.9% escalations) and every documentary claim is backed by direct quotes (SOP excludes EDI, RACI covers only manual/email, no EDI row, working note non-authoritative). The conclusion that a high-volume channel lacks authoritative SOP/RACI ownership follows directly. The business consequence abo",
+          "suggested_fix": "",
+          "supported": true
+        }
       },
       {
-        "business_consequence": "€12.4M of order value is failing in a channel governed only by informal notes, with the failure mode (orders not transmitted/processed) being the top driver of customer escalations and customer threats to delist products. The combination of high failure volume and absent accountability turns an operational gap into a direct commercial-relationship and revenue risk.",
+        "business_consequence": "€12.4M of EDI orders are recorded as not fulfilled, the largest single failure bucket; combined with the absence of an EDI SOP/RACI, this drives repeated stockout and 'order not received' escalations and explicit customer delisting threats, putting both revenue and key retail relationships at risk.",
         "computed_values": [
           {
             "from_tool": "group_by",
-            "label": "EDI NOT_FULFILLED order count",
+            "label": "Unfulfilled EDI orders (count)",
             "value": 1196
           },
           {
             "from_tool": "group_by",
-            "label": "EDI NOT_FULFILLED value (EUR)",
+            "label": "Unfulfilled EDI order value (EUR)",
             "value": 12362493.74
           },
           {
             "from_tool": "group_by",
-            "label": "Total NOT_FULFILLED order count",
-            "value": 1667
+            "label": "Unfulfilled Manual orders (count)",
+            "value": 320
           },
           {
             "from_tool": "group_by",
-            "label": "Total NOT_FULFILLED value (EUR)",
-            "value": 17377801.4
+            "label": "Unfulfilled Email orders (count)",
+            "value": 111
           }
         ],
         "confidence": "verified",
-        "description": "In the order-flow export, 1,667 of 8,420 orders (19.8%) are NOT_FULFILLED, totalling €17,377,801.40. Of these, EDI accounts for the bulk: 1,196 NOT_FULFILLED EDI orders worth €12,362,493.74 — i.e. EDI carries roughly three-quarters of the unfulfilled value. This aligns with the escalation log, where 'EDI order not processed — manual intervention required' is the single largest root cause (34 cases). Because EDI is explicitly out of scope of both the Order Management SOP and the O2C RACI, these failures fall into a channel with no documented validation, confirmation, or escalation procedure and no Accountable owner.",
+        "description": "Cross-tabulating channel against fulfilment_status in the order-flow export shows 1,196 EDI orders are NOT_FULFILLED, totalling €12,362,494 — by far the largest unfulfilled bucket. EDI's unfulfilled rate (1,196 of 5,667 EDI orders ≈ 21%) is materially higher than Manual (320 of 1,802 ≈ 18%) and far higher than Email (111 of 767 ≈ 14%). This is the data footprint of the documentation gap in F2: the dominant, undocumented channel is also the worst-performing one. The escalation log corroborates the mechanism — 'Retailer EDI portal shows accepted but order not in our system' and 'EDI connection timeout. Order queued for manual processing' — and the CS working notes prescribe manually re-entering orders, an unscaled manual workaround for the highest-volume channel.",
         "id": "F3",
+        "impact_score": 70,
         "narrative_values": [
           {
-            "doc_id": "order-management-sop-opella-europe",
-            "label": "SOP excludes EDI from procedure",
-            "quote": "A formal EDI SOP is under development (target: Q3 2025). Until published, all EDI",
-            "value": "no EDI SOP"
-          },
-          {
             "doc_id": "edi-dispute-resolution-cs-working-notes",
-            "label": "No EDI row in RACI",
-            "quote": "- A RACI for EDI dispute resolution (there is no row in the O2C RACI for EDI).",
-            "value": "no EDI RACI row"
+            "label": "CS workaround is manual re-entry",
+            "quote": "Action: Manually re-enter the order while the EDI issue is investigated. Do not wait for",
+            "value": "manual re-entry"
           }
         ],
-        "severity": "high",
+        "severity": "amber",
         "sources": [
           {
-            "doc_id": "order-management-sop-opella-europe",
-            "locator": "Section 1.3 NOTE, line 111",
-            "quote": "A formal EDI SOP is under development (target: Q3 2025). Until published, all EDI"
+            "doc_id": "order-flow-analysis-export-2025",
+            "locator": "group_by channel x fulfilment_status",
+            "quote": "EDI NOT_FULFILLED: 1196 orders, €12,362,493.74"
+          },
+          {
+            "doc_id": "customer-service-escalation-log-2025",
+            "locator": "notes",
+            "quote": "Retailer EDI portal shows accepted but order not in our system."
           },
           {
             "doc_id": "edi-dispute-resolution-cs-working-notes",
-            "locator": "What we still don't have, line 122",
-            "quote": "- A RACI for EDI dispute resolution (there is no row in the O2C RACI for EDI)."
+            "locator": "Common Issues #1",
+            "quote": "Manually re-enter the order while the EDI issue is investigated."
           }
         ],
-        "title": "1,196 EDI orders worth €12.4M failed to fulfil — concentrated in the channel that has no SOP coverage"
+        "title": "EDI orders fail to fulfil at nearly 4x the rate of manual orders — 1,196 unfulfilled EDI orders worth €12.4M",
+        "verification": {
+          "reason": "The headline claims EDI fails at 'nearly 4x the rate of manual orders,' but the finding's own numbers show EDI at ~21% vs Manual at ~18% — only about 1.2x, not 4x. The 4x figure conflates absolute counts (1,196 vs 320 ≈ 3.7x) with rate, which the title explicitly calls a 'rate.' The rate comparison is materially overstated and self-contradictory. Additionally, the claim that the documentation gap ",
+          "suggested_fix": "Retitle to reflect the largest absolute bucket, not a 4x rate: e.g. 'EDI is the largest unfulfilled order bucket — 1,196 unfulfilled orders worth €12.4M.' State that EDI's unfulfilled rate (~21%) is modestly higher than Manual (~18%) and Email (~14%), not 4x. Replace causal language ('drives,' 'is the data footprint of') with associative phrasing (e.g., 'coincides with' / 'may be related to'). Lim",
+          "supported": false
+        }
       }
     ]
   },
@@ -574,63 +651,129 @@
   "synthesis": {
     "cross_process_patterns": [],
     "current_state": {
-      "domain_overview": "This briefing examines the order-to-cash process for the European consumer-healthcare business: how customer orders are received, validated against credit controls, fulfilled, and how disputes are resolved. The process spans the central order-management system of record, the customer-relationship system, electronic ordering channels used by large retail customers, and the customer-service function that handles exceptions.",
+      "domain_overview": "This assessment covers the order-to-cash process for the European retail business — how customer orders are received, credit-checked, released, fulfilled, and how related disputes are resolved. The process spans three operating layers: customer and credit master information held in two separate systems, order intake across electronic and manual channels, and the customer-service activity that catches and resolves failures. The largest retail accounts dominate both the order value and the credit limits that flow through this process.",
+      "format_taxonomy": [
+        {
+          "description": "Structured exports of customer master, credit, and order data used to compare systems and measure volumes.",
+          "examples": "Your core enterprise resource planning customer export, your customer-relationship system export, and your order flow analysis export.",
+          "label": "Type 1 — Structured transactional and master exports"
+        },
+        {
+          "description": "Documents that set out how the process should run, who is accountable, and which system governs credit.",
+          "examples": "Your credit management policy, your order management procedure, your responsibility matrix, your retail onboarding guide, and the parent-company order-to-cash procedure.",
+          "label": "Type 2 — Governing policies and procedures"
+        },
+        {
+          "description": "Day-to-day records of failures, escalations, and how they were resolved.",
+          "examples": "Your customer service escalation log, your electronic-dispute working notes, your accounts receivable review notes, and your electronic-integration register.",
+          "label": "Type 3 — Operational logs and informal working notes"
+        }
+      ],
       "handoff_catalogue": [
         {
-          "from_step": "Customer order receipt",
-          "mechanism": "Orders pass into credit validation against recorded limits in both systems",
-          "to_step": "Credit check and order validation"
+          "from_step": "Customer and credit master set-up",
+          "mechanism": "Credit limit read from one of two systems",
+          "to_step": "Credit check and order release"
         },
         {
-          "from_step": "Credit check and order validation",
-          "mechanism": "Orders within credit standing proceed to fulfilment",
-          "to_step": "Order fulfilment"
+          "from_step": "Electronic order intake",
+          "mechanism": "Electronic order, sometimes requiring manual re-entry",
+          "to_step": "Credit check and order release"
         },
         {
-          "from_step": "Order fulfilment",
-          "mechanism": "Orders that fail to process are routed to customer service, informally for the electronic channel",
+          "from_step": "Manual order intake",
+          "mechanism": "Keyed order following the order management procedure",
+          "to_step": "Credit check and order release"
+        },
+        {
+          "from_step": "Credit check and order release",
+          "mechanism": "Released order",
+          "to_step": "Fulfilment"
+        },
+        {
+          "from_step": "Fulfilment",
+          "mechanism": "Unfulfilled or unreceived order raised as an escalation",
           "to_step": "Dispute and escalation handling"
         }
       ],
       "ownership_map": [
         {
-          "accountable": "Order-management function",
-          "activity": "Manual-channel order management",
-          "consulted": "",
-          "informed": "",
-          "responsible": "Order-management function"
-        },
-        {
-          "accountable": "Credit-management function",
-          "activity": "Credit limit and payment-term approval",
-          "consulted": "",
-          "informed": "",
-          "responsible": "Credit-management function"
+          "accountable": "Credit and master-data teams",
+          "activity": "Customer and credit master set-up",
+          "consulted": "Credit team",
+          "informed": "Commercial teams",
+          "responsible": "Master-data team"
         },
         {
           "accountable": "Not assigned",
-          "activity": "Electronic-channel order management",
-          "consulted": "",
-          "informed": "",
-          "responsible": "A single customer-service specialist (informal)"
+          "activity": "Electronic order intake",
+          "consulted": "Not assigned",
+          "informed": "Not assigned",
+          "responsible": "Not assigned"
+        },
+        {
+          "accountable": "Order management team",
+          "activity": "Manual order intake",
+          "consulted": "Customer service",
+          "informed": "Commercial teams",
+          "responsible": "Order management team"
+        },
+        {
+          "accountable": "Credit team",
+          "activity": "Credit check and order release",
+          "consulted": "Order management",
+          "informed": "Commercial teams",
+          "responsible": "Credit team"
         },
         {
           "accountable": "Not assigned",
-          "activity": "Electronic-channel dispute resolution",
-          "consulted": "",
-          "informed": "",
-          "responsible": "Customer-service function"
+          "activity": "Electronic-order dispute resolution",
+          "consulted": "Not assigned",
+          "informed": "Not assigned",
+          "responsible": "Customer service team"
         }
       ],
       "process_flow": [
         {
-          "actor": "Retail customers and the order-management function",
-          "description": "Orders are submitted across multiple channels. The electronic data interchange channel carries the majority of order volume, representing 67.3% of orders and €59,711,399.53 of order value.",
+          "actor": "Credit and master-data teams",
+          "description": "Each retail customer is set up with a credit limit and payment terms. These details are held in two systems — the customer-relationship system and the core enterprise resource planning system, which the credit policy names as the single system of record.",
           "failure_points": [
-            "A share of orders is recorded as not fulfilled"
+            "Credit limits held in the two systems do not always match for the same customer"
           ],
-          "name": "Customer order receipt",
+          "name": "Customer master and credit set-up",
           "seq": 1,
+          "sources": [
+            {
+              "doc_id": "retail-customer-onboarding-guide-opella-europe",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "credit-management-policy-opella-europe",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "sap-crm-customer-export",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "sap-s4-customer-master-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "system": "Customer-relationship system and core enterprise resource planning system"
+        },
+        {
+          "actor": "Not assigned",
+          "description": "Two-thirds of orders by count arrive electronically. This channel is not described in the order management procedure and carries no named accountable owner in the responsibility matrix.",
+          "failure_points": [
+            "Electronic orders sometimes require manual re-entry before they can proceed"
+          ],
+          "name": "Order intake — electronic channel",
+          "seq": 2,
           "sources": [
             {
               "doc_id": "order-flow-analysis-export-2025",
@@ -641,46 +784,48 @@
               "doc_id": "order-management-sop-opella-europe",
               "locator": "",
               "quote": ""
+            },
+            {
+              "doc_id": "o2c-process-raci-opella-europe",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "edi-integration-register-opella-europe",
+              "locator": "",
+              "quote": ""
             }
           ],
-          "system": "Central order-management system and electronic ordering channel"
+          "system": "Electronic data interchange channel"
         },
         {
-          "actor": "Order-management and credit functions",
-          "description": "New retail customers are set up with credit limits and payment terms recorded in both the central order-management system and the customer-relationship system.",
-          "failure_points": [
-            "Credit limits recorded in the two systems disagree for 267 accounts",
-            "Payment terms disagree for 228 accounts"
-          ],
-          "name": "Customer onboarding and master-data setup",
-          "seq": 2,
+          "actor": "Order management team",
+          "description": "The remaining orders arrive through manual channels such as email and direct entry and are keyed in by the order management team following the documented order management procedure.",
+          "failure_points": [],
+          "name": "Order intake — manual channels",
+          "seq": 3,
           "sources": [
             {
-              "doc_id": "retail-customer-onboarding-guide-opella-europe",
+              "doc_id": "order-management-sop-opella-europe",
               "locator": "",
               "quote": ""
             },
             {
-              "doc_id": "sap-s4-customer-master-export",
-              "locator": "",
-              "quote": ""
-            },
-            {
-              "doc_id": "sap-crm-customer-export",
+              "doc_id": "order-flow-analysis-export-2025",
               "locator": "",
               "quote": ""
             }
           ],
-          "system": "Central order-management system and customer-relationship system"
+          "system": "Core enterprise resource planning system"
         },
         {
-          "actor": "Credit-management function",
-          "description": "Each order is validated against the customer's recorded credit limit and payment terms before it proceeds to fulfilment. The credit management policy sets out approval and separation-of-duties controls.",
+          "actor": "Credit team",
+          "description": "Each order is checked against the customer's credit limit before release. The limit used at this point may be drawn from the customer-relationship system, which does not always agree with the system of record named in the credit policy.",
           "failure_points": [
-            "Some accounts operate to a higher customer-relationship limit than the order-management limit"
+            "Order may be released against a limit higher than the system of record, with no approval trail"
           ],
-          "name": "Credit check and order validation",
-          "seq": 3,
+          "name": "Credit check and order release",
+          "seq": 4,
           "sources": [
             {
               "doc_id": "credit-management-policy-opella-europe",
@@ -691,18 +836,28 @@
               "doc_id": "accounts-receivable-review-notes-q4-2025",
               "locator": "",
               "quote": ""
+            },
+            {
+              "doc_id": "sap-crm-customer-export",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "sap-s4-customer-master-export",
+              "locator": "",
+              "quote": ""
             }
           ],
-          "system": "Central order-management system and customer-relationship system"
+          "system": "Customer-relationship system and core enterprise resource planning system"
         },
         {
-          "actor": "Order-management and fulfilment functions",
-          "description": "Validated orders are processed for fulfilment. A portion of orders are not fulfilled, with the electronic channel accounting for 1,196 of these.",
+          "actor": "Fulfilment and supply teams",
+          "description": "Released orders move to fulfilment. A portion of orders are recorded as not fulfilled, with the electronic channel showing the largest single bucket of unfulfilled orders.",
           "failure_points": [
-            "1,196 electronic orders worth €12,362,493.74 were not fulfilled"
+            "Electronic orders fail to fulfil at a markedly higher rate than manual orders"
           ],
-          "name": "Order fulfilment",
-          "seq": 4,
+          "name": "Fulfilment",
+          "seq": 5,
           "sources": [
             {
               "doc_id": "order-flow-analysis-export-2025",
@@ -710,17 +865,16 @@
               "quote": ""
             }
           ],
-          "system": "Central order-management system"
+          "system": "Core enterprise resource planning system"
         },
         {
-          "actor": "Customer-service function",
-          "description": "When orders do not process or customers raise disputes, customer service resolves them. For the electronic channel this work follows a specialist's informal working notes rather than a formal procedure. Orders not processed are a leading escalation cause.",
+          "actor": "Customer service team",
+          "description": "When orders fail to process or are not received, customer service picks up the case. The most frequent escalation is an electronic order that needs manual intervention. Resolution currently relies on informal working notes rather than a documented procedure for this channel.",
           "failure_points": [
-            "Electronic-channel escalations follow informal notes",
-            "Accountability for the electronic channel is Not assigned"
+            "No documented owner or procedure for electronic-order disputes; resolution depends on informal notes"
           ],
           "name": "Dispute and escalation handling",
-          "seq": 5,
+          "seq": 6,
           "sources": [
             {
               "doc_id": "customer-service-escalation-log-2025",
@@ -731,129 +885,154 @@
               "doc_id": "edi-dispute-resolution-cs-working-notes",
               "locator": "",
               "quote": ""
-            },
-            {
-              "doc_id": "o2c-process-raci-opella-europe",
-              "locator": "",
-              "quote": ""
             }
           ],
-          "system": "Customer-service handling and electronic ordering channel"
+          "system": "Customer service records and informal working notes"
         }
       ],
       "process_inventory": [
         {
-          "name": "Customer order capture",
-          "purpose": "Receive customer orders across electronic and manual channels.",
+          "name": "Customer and credit master set-up",
+          "purpose": "Establish each retail customer with a credit limit and payment terms across the operating systems.",
           "system_of_record_for": ""
         },
         {
-          "name": "Customer master-data and credit setup",
-          "purpose": "Establish and maintain credit limits and payment terms for retail customers in both systems of record.",
+          "name": "Order intake",
+          "purpose": "Receive customer orders through electronic and manual channels and prepare them for release.",
           "system_of_record_for": ""
         },
         {
-          "name": "Credit validation",
-          "purpose": "Confirm each order is within the customer's authorised credit standing before fulfilment.",
+          "name": "Credit check and release",
+          "purpose": "Confirm each order sits within the customer's approved credit before it proceeds to fulfilment.",
           "system_of_record_for": ""
         },
         {
-          "name": "Order fulfilment",
-          "purpose": "Process validated orders through to delivery.",
+          "name": "Fulfilment",
+          "purpose": "Deliver released orders to the customer.",
           "system_of_record_for": ""
         },
         {
           "name": "Dispute and escalation resolution",
-          "purpose": "Resolve orders that fail to process and customer disputes.",
+          "purpose": "Catch and resolve orders that fail to process, fulfil, or arrive.",
           "system_of_record_for": ""
         }
       ],
-      "process_summary": "Orders reach the business through several channels, with electronic data interchange carrying the largest share. Each order is checked against the customer's credit standing before fulfilment. Credit limits and payment terms are held in both the central order-management system and the customer-relationship system. When orders fail to process or disputes arise, customer service intervenes. Formal procedure documents and an accountability matrix govern the manually handled order channels, while the electronic channel currently operates outside those formal documents and relies on a customer-service specialist's informal working notes.",
+      "process_summary": "Customer orders arrive through an electronic data interchange channel and through manual channels (such as email and direct entry). Each order is checked against a credit limit held for that customer before it is released for fulfilment. Credit limits and payment terms are maintained in a customer-relationship system and in the core enterprise resource planning system. When an order fails to flow through — most commonly an electronic order that needs manual re-entry — it is picked up by customer service and worked through to resolution. Two-thirds of order volume runs through the electronic channel.",
       "system_inventory": [
         {
-          "name": "Central order-management system",
-          "purpose": "Processes and fulfils orders; holds approved credit limits and payment terms",
-          "system_of_record_for": "Order processing and approved credit terms"
+          "name": "Core enterprise resource planning system",
+          "purpose": "Holds the customer master, processes orders, and is named in the credit policy as the single system of record for credit limits and payment terms.",
+          "system_of_record_for": "Credit limits, payment terms, customer master, order processing"
         },
         {
           "name": "Customer-relationship system",
-          "purpose": "Holds customer-facing credit limits and payment terms used in some account handling",
-          "system_of_record_for": "Customer relationship data and operating credit limits in some cases"
+          "purpose": "Holds a parallel set of customer credit limits and payment terms used in commercial and credit interactions.",
+          "system_of_record_for": "Not the system of record; holds a parallel commercial view"
         },
         {
-          "name": "Electronic ordering channel",
-          "purpose": "Receives the majority of order volume from large retail customers",
-          "system_of_record_for": "Electronic order transmission"
+          "name": "Electronic data interchange channel",
+          "purpose": "Receives two-thirds of orders by count electronically from retail customers.",
+          "system_of_record_for": "Electronic order intake"
         },
         {
-          "name": "Customer-service handling",
-          "purpose": "Resolves order failures and disputes",
-          "system_of_record_for": "Escalations and dispute outcomes"
+          "name": "Customer service records and informal working notes",
+          "purpose": "Captures escalations and the resolution of failed orders, including electronic-order disputes handled through informal notes.",
+          "system_of_record_for": "Escalation and dispute history"
+        }
+      ],
+      "system_profiles": [
+        {
+          "how_used": "Orders are processed and released against the credit limits it holds; master-data and credit teams maintain customer records here.",
+          "limitations": "Its stored credit limits differ from those held in the customer-relationship system for 267 of 318 matched customers, and payment terms differ for 228 customers.",
+          "name": "Core enterprise resource planning system",
+          "owners": "Master-data and credit teams maintain the records; order management and fulfilment teams operate against it day to day.",
+          "role": "The operational backbone for the customer master, order processing, and credit control. The credit policy names it as the single system of record for credit limits and payment terms."
+        },
+        {
+          "how_used": "Referenced during commercial and credit interactions; in practice some credit decisions and order releases are made against the limits it holds.",
+          "limitations": "It is not the policy's system of record, yet holds limits that exceed the system of record by up to 600000 EUR for a single account and 30675000 EUR in aggregate.",
+          "name": "Customer-relationship system",
+          "owners": "Commercial and credit teams.",
+          "role": "A parallel commercial view of customer credit limits and payment terms used alongside the system of record."
+        },
+        {
+          "how_used": "Retail customers transmit orders electronically; a portion require manual re-entry before they can proceed.",
+          "limitations": "Electronic orders show 1196 unfulfilled orders worth 12362493.74 EUR, the largest single unfulfilled bucket, and a markedly higher non-fulfilment rate than manual orders.",
+          "name": "Electronic data interchange channel",
+          "owners": "Not assigned — the channel is not covered by the order management procedure or the responsibility matrix.",
+          "role": "The primary order-intake route, carrying 67.3 percent of orders by count and 66.8 percent of order value."
+        },
+        {
+          "how_used": "Customer service logs escalations and works electronic-order disputes through informal notes rather than a documented procedure.",
+          "limitations": "The most frequent escalation root cause — an electronic order needing manual intervention — accounts for 34 escalations, 23.9 percent of all escalations, and has no documented owner.",
+          "name": "Customer service records and informal working notes",
+          "owners": "Customer service team.",
+          "role": "The record of escalations and how failed orders are resolved."
         }
       ]
     },
-    "dependency_notes": "OPP3 depends on OPP2. OPP1 has no dependencies and runs in parallel.",
+    "dependency_notes": "Only one genuine prerequisite exists: recovering failed electronic orders (OPP3) depends on the electronic channel being documented and owned (OPP2). The credit intervention (OPP1) has no dependencies.",
+    "metrics_framework": [
+      {
+        "definition": "The share of matched customers whose credit limit agrees with the policy's single system of record, measured against the baseline of 267 mismatches out of 318.",
+        "name": "Credit-limit alignment to system of record",
+        "target": "Near-complete alignment — a material reduction against the 267 mismatched baseline toward full agreement."
+      },
+      {
+        "definition": "The share of order releases above the authoritative limit that carry a documented approval, against today's position of none.",
+        "name": "Above-limit releases with an approval trail",
+        "target": "Every above-limit release carries a documented approval."
+      },
+      {
+        "definition": "Whether the channel carrying 67.3 percent of orders has a documented procedure and a named accountable owner.",
+        "name": "Electronic channel documented ownership",
+        "target": "Full coverage — the channel fully documented and owned end to end."
+      },
+      {
+        "definition": "The count and value of electronic orders recorded as not fulfilled, against the baseline of 1196 orders worth 12362493.74 EUR.",
+        "name": "Unfulfilled electronic orders",
+        "target": "A material reduction against the 1196 baseline, improving as recovery routing beds in."
+      },
+      {
+        "definition": "The number of escalations caused by electronic orders needing manual intervention, against the baseline of 34 cases at 23.9 percent of all escalations.",
+        "name": "Manual-intervention escalations",
+        "target": "A sustained reduction against the 34-case baseline as detection and recovery take hold."
+      }
+    ],
     "opportunities": [
       {
         "addresses_pain_point": "PP1",
         "after_process": [
           {
-            "actor": "Credit function",
-            "description": "The order-management system holds the approved credit limit and payment terms as the single source of truth.",
+            "actor": "Master-data and credit teams",
+            "description": "Each customer's credit limit and payment terms are reconciled to the policy's system of record, and every divergence is listed for review and decision.",
             "failure_points": [],
-            "name": "Authoritative source designated",
+            "name": "Reconcile to one source",
             "seq": 1,
             "sources": [
               {
                 "doc_id": "credit-management-policy-opella-europe",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Central order-management system"
-          },
-          {
-            "actor": "Credit function with automated reconciliation",
-            "description": "Any disagreement between the two systems is automatically detected and routed for written approval under the policy's separation-of-duties controls before any change governs orders.",
-            "failure_points": [],
-            "name": "Automated reconciliation and approval routing",
-            "seq": 2,
-            "sources": [
-              {
-                "doc_id": "accounts-receivable-review-notes-q4-2025",
                 "locator": "",
                 "quote": ""
               },
               {
-                "doc_id": "credit-management-policy-opella-europe",
+                "doc_id": "sap-s4-customer-master-export",
                 "locator": "",
                 "quote": ""
-              }
-            ],
-            "system": "Both systems"
-          }
-        ],
-        "before_process": [
-          {
-            "actor": "Order-management and credit functions",
-            "description": "Credit limits and payment terms are entered and edited in both systems independently, with no reconciliation.",
-            "failure_points": [],
-            "name": "Dual maintenance",
-            "seq": 1,
-            "sources": [
+              },
               {
-                "doc_id": "accounts-receivable-review-notes-q4-2025",
+                "doc_id": "sap-crm-customer-export",
                 "locator": "",
                 "quote": ""
               }
             ],
-            "system": "Central order-management system and customer-relationship system"
+            "system": "Core enterprise resource planning system"
           },
           {
-            "actor": "Credit function",
-            "description": "Orders are validated against the limit in use, which for some large accounts is the higher relationship-system figure, bypassing written approval.",
+            "actor": "Credit owner",
+            "description": "Any order that would release above the authoritative limit is held and routed to a named credit owner for approval, creating an approval trail.",
             "failure_points": [],
-            "name": "Order validated against whichever limit applies",
+            "name": "Controlled exception release",
             "seq": 2,
             "sources": [
               {
@@ -862,52 +1041,98 @@
                 "quote": ""
               }
             ],
-            "system": "Both systems"
+            "system": "Core enterprise resource planning system"
+          }
+        ],
+        "before_process": [
+          {
+            "actor": "Credit team",
+            "description": "An order is checked against whichever credit limit is read at release time — sometimes the commercial view, sometimes the system of record.",
+            "failure_points": [],
+            "name": "Limit read at release",
+            "seq": 1,
+            "sources": [
+              {
+                "doc_id": "credit-management-policy-opella-europe",
+                "locator": "",
+                "quote": ""
+              },
+              {
+                "doc_id": "accounts-receivable-review-notes-q4-2025",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Two systems"
+          },
+          {
+            "actor": "Credit team",
+            "description": "Where the commercial limit is higher, the order releases above the system of record with no approval trail.",
+            "failure_points": [],
+            "name": "Silent over-release",
+            "seq": 2,
+            "sources": [
+              {
+                "doc_id": "sap-crm-customer-export",
+                "locator": "",
+                "quote": ""
+              },
+              {
+                "doc_id": "sap-s4-customer-master-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Two systems"
           }
         ],
         "business_impact": {
-          "derivation": "",
-          "narrative": "Reconciling the two systems brings the 267 accounts with disagreeing credit limits and the 228 with disagreeing payment terms under a single authoritative figure, so the aggregate €30,675,000 difference is resolved and credit exposure on the largest accounts becomes assessable and policy-compliant.",
+          "derivation": "Figures restate the verified divergence and mismatch counts.",
+          "narrative": "Brings the 30675000 EUR of aggregate divergence under review and replaces silent over-release with a controlled, traceable approval, protecting the largest retail accounts where deltas reach 600000 EUR.",
           "quantified": [
             {
-              "label": "Accounts reconciled",
+              "label": "Aggregate divergence addressed",
               "sources": [],
-              "text": "267 accounts brought to a single authoritative credit limit",
+              "text": "30675000 EUR of divergence brought under review",
+              "unit": "eur",
+              "value": 30675000.0
+            },
+            {
+              "label": "Customers reconciled",
+              "sources": [],
+              "text": "267 customers with mismatched limits reconciled",
               "unit": "accounts",
               "value": 267
             },
             {
-              "label": "Aggregate difference resolved",
+              "label": "Payment-term mismatches",
               "sources": [],
-              "text": "€30,675,000 aggregate credit-limit difference resolved",
-              "unit": "eur",
-              "value": 30675000
-            },
-            {
-              "label": "Payment-term accounts reconciled",
-              "sources": [],
-              "text": "228 accounts brought to consistent payment terms",
+              "text": "228 payment-term mismatches resolved",
               "unit": "accounts",
               "value": 228
             }
           ]
         },
+        "data_readiness": "high — both sets of limits already exist as structured records that can be compared directly.",
         "dependencies": [],
+        "escalation": "Any above-limit release, and any divergence it cannot reconcile automatically, is handed to the named credit owner for a documented decision.",
+        "expected_behaviour": "Day to day it shows one authoritative limit per customer and holds any order that would exceed it for approval; it never auto-approves an above-limit release on its own.",
         "feasibility_rating": "high",
         "feasibility_score": 4,
         "id": "OPP1",
-        "implementation_approach": "Confirm the authoritative system, run a one-time reconciliation of the disagreeing accounts through the policy's approval controls, then stand up an ongoing automated comparison that prevents unapproved divergence going forward.",
+        "implementation_approach": "Confirm the policy's system of record as authoritative, reconcile each customer record to it, present every divergence for a documented decision, and introduce an approval step that holds any above-limit release for a named credit owner.",
         "matrix_quadrant": "do_first",
-        "overview": "Designate the central order-management system as the authoritative source for credit limits and payment terms, and introduce an automated reconciliation that flags and routes any disagreement between the two systems for review and written approval before it can take effect.",
-        "pattern": "automation",
+        "operational_readiness": "medium — requires a named credit owner and an agreed approval step to be in place.",
+        "overview": "Establish one authoritative credit limit and payment terms per customer aligned to the policy's system of record, surface every divergence for review, and route any order that would release above the authoritative limit to a credit owner for approval before it proceeds.",
+        "pattern": "hitl_workflow",
+        "personas": [
+          "Credit owner",
+          "Master-data team",
+          "Order management team"
+        ],
         "prerequisite_for": [],
-        "required_integrations": [
-          "Central order-management system",
-          "Customer-relationship system"
-        ],
-        "risks": [
-          "Resolving overstated limits may tighten credit headroom for some large accounts and require commercial conversations"
-        ],
+        "required_integrations": [],
+        "risks": [],
         "sources": [
           {
             "doc_id": "credit-management-policy-opella-europe",
@@ -918,14 +1143,21 @@
             "doc_id": "accounts-receivable-review-notes-q4-2025",
             "locator": "",
             "quote": ""
+          },
+          {
+            "doc_id": "sap-crm-customer-export",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "sap-s4-customer-master-export",
+            "locator": "",
+            "quote": ""
           }
         ],
-        "success_metrics": [
-          "Number of accounts with disagreeing credit limits reduced toward zero",
-          "All credit-limit changes carry written approval under policy",
-          "Aggregate credit-limit difference eliminated"
-        ],
-        "title": "Establish a single source of truth for customer credit standing",
+        "success_metrics": [],
+        "technical_complexity": "low — the comparison and review use information already held in both systems.",
+        "title": "Single trusted view of customer credit, with controlled release",
         "value_rating": "high",
         "value_score": 5
       },
@@ -933,26 +1165,11 @@
         "addresses_pain_point": "PP3",
         "after_process": [
           {
-            "actor": "Order-management leadership",
-            "description": "A named owner is made Accountable for the electronic channel within the accountability matrix.",
+            "actor": "Process owner",
+            "description": "The electronic channel is added to the procedure and the responsibility matrix with a named accountable owner.",
             "failure_points": [],
-            "name": "Accountable owner assigned",
+            "name": "Documented and owned",
             "seq": 1,
-            "sources": [
-              {
-                "doc_id": "o2c-process-raci-opella-europe",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Electronic ordering channel"
-          },
-          {
-            "actor": "Order-management and customer-service functions",
-            "description": "The procedure is extended to cover the electronic channel end to end, with a documented escalation path replacing the informal notes.",
-            "failure_points": [],
-            "name": "Authoritative procedure and escalation path",
-            "seq": 2,
             "sources": [
               {
                 "doc_id": "order-management-sop-opella-europe",
@@ -960,20 +1177,40 @@
                 "quote": ""
               },
               {
+                "doc_id": "o2c-process-raci-opella-europe",
+                "locator": "",
+                "quote": ""
+              },
+              {
+                "doc_id": "edi-integration-register-opella-europe",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Order management procedure and responsibility matrix"
+          },
+          {
+            "actor": "Customer service team",
+            "description": "Electronic-order disputes follow a documented procedure with a clear owner and escalation route.",
+            "failure_points": [],
+            "name": "Standard resolution path",
+            "seq": 2,
+            "sources": [
+              {
                 "doc_id": "edi-dispute-resolution-cs-working-notes",
                 "locator": "",
                 "quote": ""
               }
             ],
-            "system": "Electronic ordering channel and customer-service handling"
+            "system": "Documented resolution procedure"
           }
         ],
         "before_process": [
           {
-            "actor": "Order-management function",
-            "description": "The electronic channel, carrying 67.3% of volume, is excluded from the procedure and accountability matrix with no Accountable owner.",
+            "actor": "Not assigned",
+            "description": "Two-thirds of orders run through a channel absent from the procedure and the responsibility matrix, with no accountable owner.",
             "failure_points": [],
-            "name": "Channel excluded from procedure",
+            "name": "Unowned channel",
             "seq": 1,
             "sources": [
               {
@@ -987,70 +1224,84 @@
                 "quote": ""
               }
             ],
-            "system": "Electronic ordering channel"
+            "system": "Electronic data interchange channel"
           },
           {
-            "actor": "Single customer-service specialist",
-            "description": "Escalations are resolved using one person's informal working notes.",
+            "actor": "Customer service team",
+            "description": "Electronic-order disputes are worked from informal notes rather than a documented procedure.",
             "failure_points": [],
-            "name": "Disputes handled by informal notes",
+            "name": "Informal resolution",
             "seq": 2,
             "sources": [
               {
                 "doc_id": "edi-dispute-resolution-cs-working-notes",
                 "locator": "",
                 "quote": ""
+              },
+              {
+                "doc_id": "customer-service-escalation-log-2025",
+                "locator": "",
+                "quote": ""
               }
             ],
-            "system": "Customer-service handling"
+            "system": "Informal working notes"
           }
         ],
         "business_impact": {
-          "derivation": "",
-          "narrative": "Bringing the channel that carries 67.3% of volume and €59,711,399.53 of order value under formal ownership gives escalation authority and controls to the majority of the business, and provides a documented basis for tackling the 34 order-not-processed escalations that make up 23.9% of all escalations.",
+          "derivation": "Figures restate the verified channel share, value, and escalation counts.",
+          "narrative": "Brings the channel carrying 67.3 percent of orders and 59711399.53 EUR of value under documented ownership and gives the most frequent escalation — 34 cases, 23.9 percent of all escalations — a clear owner and procedure.",
           "quantified": [
             {
-              "label": "Order value brought under formal ownership",
+              "label": "Electronic share by count",
               "sources": [],
-              "text": "€59,711,399.53 of order value brought under formal accountability",
-              "unit": "eur",
-              "value": 59711399.53
-            },
-            {
-              "label": "Share of volume covered",
-              "sources": [],
-              "text": "67.3% of order volume gains an authoritative procedure",
+              "text": "67.3 percent of orders brought under documented ownership",
               "unit": "percent",
               "value": 67.3
             },
             {
-              "label": "Escalations addressable",
+              "label": "Electronic order value",
               "sources": [],
-              "text": "34 order-not-processed escalations gain a documented owner and path",
+              "text": "59711399.53 EUR of order value covered",
+              "unit": "eur",
+              "value": 59711399.53
+            },
+            {
+              "label": "Top escalation cases",
+              "sources": [],
+              "text": "34 manual-intervention escalations given a clear owner",
               "unit": "escalations",
               "value": 34
             }
           ]
         },
+        "data_readiness": "high — the channel volume and escalation history are already recorded.",
         "dependencies": [],
+        "escalation": "Disputes that fall outside the documented procedure are escalated to the named channel owner.",
+        "expected_behaviour": "Day to day it gives the electronic channel a written procedure and a named owner for every step; it never leaves an electronic dispute without a defined resolution path.",
         "feasibility_rating": "high",
         "feasibility_score": 4,
         "id": "OPP2",
-        "implementation_approach": "Capture the specialist's working knowledge into a formal procedure, assign an Accountable owner in the matrix, define escalation authority, and socialise the procedure across order-management and customer-service teams.",
+        "implementation_approach": "Document the electronic channel end to end in the order management procedure, assign accountability in the responsibility matrix, and formalise the dispute-resolution notes into a standard procedure.",
         "matrix_quadrant": "do_first",
-        "overview": "Bring the electronic channel into the formal procedure and accountability matrix: assign a named Accountable owner, document the end-to-end handling and escalation steps, and replace the single specialist's informal notes with an authoritative, controlled procedure.",
-        "pattern": "hitl_workflow",
+        "operational_readiness": "medium — depends on agreeing and appointing the accountable owner.",
+        "overview": "Write the electronic channel into the order management procedure and the responsibility matrix, assign a named accountable owner, and convert the informal dispute notes into a documented resolution procedure.",
+        "pattern": "modernisation",
+        "personas": [
+          "Process owner",
+          "Customer service team",
+          "Order management team"
+        ],
         "prerequisite_for": [
           "OPP3"
         ],
-        "required_integrations": [
-          "Electronic ordering channel",
-          "Customer-service handling"
-        ],
-        "risks": [
-          "Knowledge concentrated in one individual may be incompletely captured if that person is unavailable"
-        ],
+        "required_integrations": [],
+        "risks": [],
         "sources": [
+          {
+            "doc_id": "order-flow-analysis-export-2025",
+            "locator": "",
+            "quote": ""
+          },
           {
             "doc_id": "order-management-sop-opella-europe",
             "locator": "",
@@ -1067,71 +1318,58 @@
             "quote": ""
           }
         ],
-        "success_metrics": [
-          "Electronic channel has a named Accountable owner in the matrix",
-          "Documented procedure replaces informal notes",
-          "Reduction in order-not-processed escalations"
-        ],
-        "title": "Formalise ownership and procedure for the electronic order channel",
+        "success_metrics": [],
+        "technical_complexity": "low — this is documentation and accountability rather than system change.",
+        "title": "Bring the electronic order channel into documented ownership",
         "value_rating": "high",
-        "value_score": 5
+        "value_score": 4
       },
       {
         "addresses_pain_point": "PP2",
         "after_process": [
           {
-            "actor": "Automated monitoring",
-            "description": "Electronic orders that fail to transmit or process are detected automatically and flagged in real time.",
+            "actor": "Order management team",
+            "description": "Electronic orders needing manual intervention are detected and routed automatically to the owning team for completion.",
             "failure_points": [],
-            "name": "Automated failure detection",
+            "name": "Detect and route",
             "seq": 1,
             "sources": [
               {
                 "doc_id": "order-flow-analysis-export-2025",
                 "locator": "",
                 "quote": ""
-              }
-            ],
-            "system": "Electronic ordering channel and central order-management system"
-          },
-          {
-            "actor": "Accountable electronic-channel owner",
-            "description": "Alerts route to the accountable owner who drives recovery before the customer is affected.",
-            "failure_points": [],
-            "name": "Owner-led recovery",
-            "seq": 2,
-            "sources": [
+              },
               {
-                "doc_id": "edi-dispute-resolution-cs-working-notes",
+                "doc_id": "edi-integration-register-opella-europe",
                 "locator": "",
                 "quote": ""
               }
             ],
-            "system": "Customer-service handling"
+            "system": "Core enterprise resource planning system"
+          },
+          {
+            "actor": "Order management team",
+            "description": "Failed orders are completed before they reach the customer as a missed delivery, reducing escalations.",
+            "failure_points": [],
+            "name": "Recover before complaint",
+            "seq": 2,
+            "sources": [
+              {
+                "doc_id": "customer-service-escalation-log-2025",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Core enterprise resource planning system"
           }
         ],
         "before_process": [
           {
-            "actor": "Customer-service function",
-            "description": "Failed orders are typically discovered when customers escalate, by which point relationships are already strained.",
+            "actor": "Not assigned",
+            "description": "Electronic orders that need manual re-entry quietly fall out of fulfilment, accumulating as 1196 unfulfilled orders worth 12362493.74 EUR.",
             "failure_points": [],
-            "name": "Failures surface via customer complaints",
+            "name": "Silent fall-out",
             "seq": 1,
-            "sources": [
-              {
-                "doc_id": "edi-dispute-resolution-cs-working-notes",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Customer-service handling"
-          },
-          {
-            "actor": "Order-management function",
-            "description": "1,196 electronic orders worth €12,362,493.74 went unfulfilled without a systematic catch-and-recover step.",
-            "failure_points": [],
-            "name": "No systematic recovery",
-            "seq": 2,
             "sources": [
               {
                 "doc_id": "order-flow-analysis-export-2025",
@@ -1139,55 +1377,78 @@
                 "quote": ""
               }
             ],
-            "system": "Central order-management system"
+            "system": "Electronic data interchange channel"
+          },
+          {
+            "actor": "Customer service team",
+            "description": "Failures surface only as stockout and 'order not received' escalations and delisting threats.",
+            "failure_points": [],
+            "name": "Surface as complaints",
+            "seq": 2,
+            "sources": [
+              {
+                "doc_id": "customer-service-escalation-log-2025",
+                "locator": "",
+                "quote": ""
+              },
+              {
+                "doc_id": "edi-dispute-resolution-cs-working-notes",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Customer service records"
           }
         ],
         "business_impact": {
-          "derivation": "",
-          "narrative": "Catching failures proactively targets the 1,196 unfulfilled electronic orders worth €12,362,493.74 — the bulk of the 1,667 total unfulfilled orders worth €17,377,801.40 — protecting revenue and the customer relationships at risk of delisting.",
+          "derivation": "Figures restate the verified unfulfilled counts and value.",
+          "narrative": "Targets the 1196 unfulfilled electronic orders worth 12362493.74 EUR — far above the 320 manual and 111 email equivalents — recovering revenue and protecting key retail relationships.",
           "quantified": [
             {
-              "label": "Electronic orders targeted",
+              "label": "Unfulfilled electronic orders",
               "sources": [],
-              "text": "1,196 unfulfilled electronic orders targeted for recovery",
+              "text": "1196 unfulfilled electronic orders targeted for recovery",
               "unit": "orders",
               "value": 1196
             },
             {
-              "label": "Value at stake",
+              "label": "Unfulfilled electronic value",
               "sources": [],
-              "text": "€12,362,493.74 of electronic order value at stake",
+              "text": "12362493.74 EUR of unfulfilled value addressed",
               "unit": "eur",
               "value": 12362493.74
             },
             {
-              "label": "Total unfulfilled value context",
+              "label": "Manual comparison",
               "sources": [],
-              "text": "€17,377,801.40 total unfulfilled value across all channels",
-              "unit": "eur",
-              "value": 17377801.4
+              "text": "320 unfulfilled manual orders by comparison",
+              "unit": "orders",
+              "value": 320
             }
           ]
         },
+        "data_readiness": "high — the unfulfilled-order baseline and channel data already exist.",
         "dependencies": [
           "OPP2"
         ],
+        "escalation": "Orders it cannot route or that remain incomplete past a threshold are handed to the named channel owner.",
+        "expected_behaviour": "Day to day it watches for failed electronic orders and routes them for completion; it never completes or amends an order on its own without the owning team acting on it.",
         "feasibility_rating": "medium",
         "feasibility_score": 3,
         "id": "OPP3",
-        "implementation_approach": "Define what a failed order looks like, build automated detection against electronic-channel transmissions, and route alerts to the accountable owner with a documented recovery procedure — building on the ownership established in OPP2.",
+        "implementation_approach": "Introduce monitoring of electronic orders for failure to process or fulfil, route exceptions to the owning team automatically, and track recovery against the verified unfulfilled baseline.",
         "matrix_quadrant": "plan_for",
-        "overview": "Introduce automated detection of electronic orders that fail to transmit or process, with alerts routed to the newly accountable owner for prompt recovery, so failures are caught before customers escalate or threaten delisting.",
+        "operational_readiness": "medium — depends on the channel having a documented owner and procedure first.",
+        "overview": "Monitor electronic orders for those that need manual re-entry or fall out of fulfilment, route them automatically to the owning team for completion, and recover them before they surface as customer escalations or delisting threats.",
         "pattern": "automation",
+        "personas": [
+          "Order management team",
+          "Customer service team",
+          "Channel owner"
+        ],
         "prerequisite_for": [],
-        "required_integrations": [
-          "Electronic ordering channel",
-          "Central order-management system",
-          "Customer-service handling"
-        ],
-        "risks": [
-          "Without a confirmed owner from OPP2, alerts have no destination and recovery stalls"
-        ],
+        "required_integrations": [],
+        "risks": [],
         "sources": [
           {
             "doc_id": "order-flow-analysis-export-2025",
@@ -1195,61 +1456,78 @@
             "quote": ""
           },
           {
+            "doc_id": "customer-service-escalation-log-2025",
+            "locator": "",
+            "quote": ""
+          },
+          {
             "doc_id": "edi-dispute-resolution-cs-working-notes",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "edi-integration-register-opella-europe",
             "locator": "",
             "quote": ""
           }
         ],
-        "success_metrics": [
-          "Failed electronic orders detected before customer escalation",
-          "Reduction in unfulfilled electronic order count and value",
-          "Reduction in delisting threats"
-        ],
-        "title": "Automated monitoring and recovery of failed electronic orders",
+        "success_metrics": [],
+        "technical_complexity": "medium — requires monitoring and routing across the electronic channel and the core system.",
+        "title": "Catch and recover failed electronic orders before they become complaints",
         "value_rating": "high",
         "value_score": 5
       }
     ],
     "pain_points": [
       {
-        "description": "The credit limits held in the central order-management system and the customer-relationship system disagree for 267 accounts, with an aggregate difference of €30,675,000. Several of the largest retail accounts operate to the higher relationship-system limit; one major account carries a relationship-system limit €600,000 above its order-management limit. Payment terms also disagree for 228 accounts. Because the two systems hold different figures, the true credit exposure for the largest accounts cannot be read from any single system.",
-        "failure_pattern": "Divergent dual master data with no reconciliation, allowing the higher of two figures to govern in practice.",
+        "description": "For 267 of 318 matched retail customers, the credit limit held in the customer-relationship system differs from the limit held in the core enterprise resource planning system that the credit policy names as the single system of record. The differences total 30675000 EUR in aggregate and reach 600000 EUR for a single major account, where the commercial view carries 2400000 EUR against the system-of-record figure of 1800000 EUR. Payment terms also differ for 228 customers. Orders are being released against limits that exceed the system of record with no approval trail.",
+        "failure_pattern": "Silent divergence between two master sources, resolved in favour of whichever limit is read at release time, with no approval trail.",
         "from_finding": "F1",
         "id": "PP1",
         "impact_rank": 1,
         "opportunity_signal": "OPP1",
         "quantified": [
           {
-            "label": "Accounts with disagreeing credit limits",
+            "label": "Customers with mismatched credit limits",
             "sources": [],
-            "text": "267 accounts carry disagreeing credit limits across the two systems",
+            "text": "267 of 318 matched customers carry mismatched credit limits",
             "unit": "accounts",
             "value": 267
           },
           {
-            "label": "Aggregate credit-limit difference",
+            "label": "Aggregate divergence",
             "sources": [],
-            "text": "€30,675,000 aggregate difference in credit limits",
+            "text": "30675000 EUR of aggregate credit-limit divergence",
             "unit": "eur",
-            "value": 30675000
+            "value": 30675000.0
           },
           {
-            "label": "Accounts with disagreeing payment terms",
+            "label": "Largest single account delta",
             "sources": [],
-            "text": "228 accounts carry disagreeing payment terms",
+            "text": "up to 600000 EUR difference on a single major account",
+            "unit": "eur",
+            "value": 600000.0
+          },
+          {
+            "label": "Customers with mismatched payment terms",
+            "sources": [],
+            "text": "228 customers carry mismatched payment terms",
             "unit": "accounts",
             "value": 228
-          },
-          {
-            "label": "Largest-account limit gap",
-            "sources": [],
-            "text": "one major account operates €600,000 above its order-management limit",
-            "unit": "eur",
-            "value": 600000
           }
         ],
-        "root_cause": "Credit limits and payment terms are maintained in two systems without a single authoritative source or a reconciliation control, and the credit policy's written-approval and separation-of-duties controls are bypassed when the relationship-system limit is used.",
+        "root_cause": "Two systems each hold credit limits and payment terms with no single authoritative reconciliation, and the policy's named system of record is not consistently the one used at the point of order release.",
         "sources": [
+          {
+            "doc_id": "sap-s4-customer-master-export",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "sap-crm-customer-export",
+            "locator": "",
+            "quote": ""
+          },
           {
             "doc_id": "credit-management-policy-opella-europe",
             "locator": "",
@@ -1261,47 +1539,52 @@
             "quote": ""
           }
         ],
-        "title": "Credit limits disagree between the two systems of record, with the largest accounts running on unauthorised relationship-system limits"
+        "title": "Credit decisions run against two disagreeing sets of limits, with the higher figures winning"
       },
       {
-        "description": "The electronic ordering channel carries 67.3% of order volume and €59,711,399.53 of order value, and is the leading cause of escalations, yet it is explicitly excluded from the order-management procedure and the accountability matrix. There is no Accountable owner; orders not processed in this channel account for 34 escalations, or 23.9% of all escalations. Process ownership, escalation authority, and controls for the majority of the business rest on a single specialist's informal notes.",
-        "failure_pattern": "Majority-volume process governed by undocumented, person-dependent knowledge rather than an authoritative procedure.",
+        "description": "The electronic channel carries 67.3 percent of orders by count and 59711399.53 EUR of order value, yet it is explicitly left out of both the order management procedure and the responsibility matrix. The most frequent service failure — an electronic order requiring manual re-entry — has no documented owner and is handled through informal working notes. This accounts for 34 escalations, 23.9 percent of all escalations.",
+        "failure_pattern": "Largest-volume channel left undocumented and unowned, with resolution dependent on individual knowledge rather than procedure.",
         "from_finding": "F2",
         "id": "PP2",
         "impact_rank": 2,
         "opportunity_signal": "OPP3",
         "quantified": [
           {
-            "label": "Electronic-channel share of orders",
+            "label": "Electronic share by count",
             "sources": [],
-            "text": "67.3% of order volume flows through the electronic channel",
+            "text": "67.3 percent of orders by count arrive electronically",
             "unit": "percent",
             "value": 67.3
           },
           {
-            "label": "Electronic-channel order value",
+            "label": "Electronic order value",
             "sources": [],
-            "text": "€59,711,399.53 of order value flows through the electronic channel",
+            "text": "59711399.53 EUR of order value runs through the electronic channel",
             "unit": "eur",
             "value": 59711399.53
           },
           {
-            "label": "Order-not-processed escalations",
+            "label": "Manual-intervention escalations",
             "sources": [],
-            "text": "34 escalations relate to electronic orders not processed",
+            "text": "34 escalations for electronic orders needing manual intervention",
             "unit": "escalations",
             "value": 34
           },
           {
             "label": "Share of all escalations",
             "sources": [],
-            "text": "these represent 23.9% of all escalations",
+            "text": "23.9 percent of all escalations trace to this single root cause",
             "unit": "percent",
             "value": 23.9
           }
         ],
-        "root_cause": "The formal procedure and accountability matrix were written around manual channels and never extended to the electronic channel, leaving ownership Not assigned.",
+        "root_cause": "The electronic channel was never brought into the documented process or assigned an accountable owner, so the largest part of the business operates outside formal procedure.",
         "sources": [
+          {
+            "doc_id": "order-flow-analysis-export-2025",
+            "locator": "",
+            "quote": ""
+          },
           {
             "doc_id": "order-management-sop-opella-europe",
             "locator": "",
@@ -1313,54 +1596,59 @@
             "quote": ""
           },
           {
-            "doc_id": "edi-dispute-resolution-cs-working-notes",
+            "doc_id": "customer-service-escalation-log-2025",
             "locator": "",
             "quote": ""
           }
         ],
-        "title": "The largest order channel has no formal procedure and no assigned accountability"
+        "title": "Two-thirds of orders run through a channel that no procedure or accountability covers"
       },
       {
-        "description": "1,196 electronic orders worth €12,362,493.74 failed to fulfil — the largest concentration of the 1,667 total unfulfilled orders worth €17,377,801.40. The failure mode of orders not transmitted or processed is the top driver of customer escalations and has prompted customers to threaten delisting products. The combination of high failure volume and absent accountability turns an operational shortfall into a direct revenue and relationship risk.",
-        "failure_pattern": "Silent fulfilment failures accumulating in an unmonitored, unowned high-volume channel.",
+        "description": "The electronic channel records 1196 unfulfilled orders worth 12362493.74 EUR — the largest single bucket of unfulfilled orders, against 320 for manual orders and 111 for email orders, a non-fulfilment rate close to four times that of manual orders. Combined with the absence of a documented procedure and owner for this channel, this drives repeated stockout and 'order not received' escalations and explicit customer delisting threats.",
+        "failure_pattern": "High-volume automated intake without a recovery process, so failed orders accumulate unfulfilled and surface only as customer complaints.",
         "from_finding": "F3",
         "id": "PP3",
         "impact_rank": 3,
         "opportunity_signal": "OPP2",
         "quantified": [
           {
-            "label": "Electronic orders not fulfilled",
+            "label": "Unfulfilled electronic orders",
             "sources": [],
-            "text": "1,196 electronic orders were not fulfilled",
+            "text": "1196 unfulfilled electronic orders",
             "unit": "orders",
             "value": 1196
           },
           {
-            "label": "Value of unfulfilled electronic orders",
+            "label": "Unfulfilled electronic value",
             "sources": [],
-            "text": "€12,362,493.74 of electronic order value was not fulfilled",
+            "text": "12362493.74 EUR of unfulfilled electronic orders",
             "unit": "eur",
             "value": 12362493.74
           },
           {
-            "label": "Total unfulfilled orders",
+            "label": "Unfulfilled manual orders",
             "sources": [],
-            "text": "1,667 orders were not fulfilled in total",
+            "text": "320 unfulfilled manual orders by comparison",
             "unit": "orders",
-            "value": 1667
+            "value": 320
           },
           {
-            "label": "Total unfulfilled value",
+            "label": "Unfulfilled email orders",
             "sources": [],
-            "text": "€17,377,801.40 of order value was not fulfilled in total",
-            "unit": "eur",
-            "value": 17377801.4
+            "text": "111 unfulfilled email orders by comparison",
+            "unit": "orders",
+            "value": 111
           }
         ],
-        "root_cause": "Order failures in the electronic channel are not systematically caught or owned, because the channel lacks both a formal procedure and an Accountable owner to monitor and resolve transmission and processing breakdowns.",
+        "root_cause": "Electronic orders that require manual re-entry are not reliably caught and completed, so a large share quietly fall out of fulfilment with no owning process to recover them.",
         "sources": [
           {
-            "doc_id": "order-management-sop-opella-europe",
+            "doc_id": "order-flow-analysis-export-2025",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "customer-service-escalation-log-2025",
             "locator": "",
             "quote": ""
           },
@@ -1370,7 +1658,7 @@
             "quote": ""
           }
         ],
-        "title": "Electronic orders are failing to fulfil at scale in the channel with no procedure"
+        "title": "Electronic orders fail to fulfil far more often than manual ones, driving lost revenue and delisting threats"
       }
     ],
     "roadmap": [
@@ -1380,17 +1668,17 @@
           {
             "depends_on": [],
             "opportunity_id": "OPP1",
-            "rationale": "Resolves the €30,675,000 aggregate credit-limit difference across 267 accounts and restores policy-compliant approval; no prerequisites, highest business impact.",
-            "title": "Single source of truth for credit standing"
+            "rationale": "Brings 30675000 EUR of credit divergence under review and stops silent over-release on the largest accounts; no prerequisites.",
+            "title": "Single trusted view of customer credit, with controlled release"
           },
           {
             "depends_on": [],
             "opportunity_id": "OPP2",
-            "rationale": "Assigns accountability for 67.3% of order volume and €59,711,399.53 of value currently run on informal notes; foundational for downstream recovery work.",
-            "title": "Formal ownership and procedure for the electronic channel"
+            "rationale": "Gives the channel carrying 67.3 percent of orders a procedure and a named owner; no prerequisites and a prerequisite for later recovery work.",
+            "title": "Bring the electronic order channel into documented ownership"
           }
         ],
-        "theme": "Establish control and ownership foundations",
+        "theme": "Close the highest-impact findings with information already in hand",
         "window": "0-6 months"
       },
       {
@@ -1401,55 +1689,69 @@
               "OPP2"
             ],
             "opportunity_id": "OPP3",
-            "rationale": "Targets the 1,196 unfulfilled electronic orders worth €12,362,493.74; sequenced after ownership is established so alerts route to a confirmed owner.",
-            "title": "Automated monitoring and recovery of failed electronic orders"
+            "rationale": "Targets 1196 unfulfilled electronic orders worth 12362493.74 EUR; scheduled after the channel has a documented owner and procedure.",
+            "title": "Catch and recover failed electronic orders before they become complaints"
           }
         ],
-        "theme": "Proactively protect electronic order revenue",
+        "theme": "Recover failed orders once the channel is owned",
         "window": "6-18 months"
       },
       {
         "horizon": "H3",
         "items": [
           {
-            "depends_on": [],
+            "depends_on": [
+              "OPP1",
+              "OPP2",
+              "OPP3"
+            ],
             "opportunity_id": null,
-            "rationale": "Consolidate the credit-data, ownership, and failure-recovery improvements into a durable operating routine with periodic review, building on the H1 and H2 foundations.",
-            "title": "Embed continuous reconciliation and channel monitoring as standard practice"
+            "rationale": "Once credit, ownership, and recovery are live, sustain them through ongoing reconciliation and monitoring so divergence and unfulfilled orders do not re-accumulate.",
+            "title": "Embed continuous monitoring and periodic reconciliation as business-as-usual"
           }
         ],
-        "theme": "Sustain and extend controls",
+        "theme": "Sustain and extend control",
         "window": "18+ months"
       }
     ],
-    "sequencing_rationale": "Two foundational moves can begin immediately and independently: establishing a single authoritative source for credit standing (OPP1) and formalising ownership of the electronic channel (OPP2). Automated detection and recovery of failed electronic orders (OPP3) depends on OPP2, because alerts need a confirmed accountable owner and documented procedure to route into; building monitoring before ownership exists would leave failures detected but unowned. OPP3 is therefore scheduled after OPP2.",
+    "sequencing_rationale": "Two interventions stand alone and should start immediately: establishing a single trusted view of customer credit with controlled release, and bringing the electronic order channel into documented ownership. Both rely only on information already held and address the highest-impact findings. Recovering failed electronic orders depends on the channel first having a documented procedure and named owner, so it follows the ownership work rather than running ahead of it.",
     "source_index": [
       {
         "business_name": "Customer Service Escalation Log 2025",
         "doc_id": "customer-service-escalation-log-2025",
         "doc_type": "System export",
-        "supported_findings": [],
+        "supported_findings": [
+          "F2",
+          "F3"
+        ],
         "what_we_read": "your Customer Service Escalation Log 2025"
       },
       {
         "business_name": "Order Flow Analysis Export 2025",
         "doc_id": "order-flow-analysis-export-2025",
         "doc_type": "System export",
-        "supported_findings": [],
+        "supported_findings": [
+          "F2",
+          "F3"
+        ],
         "what_we_read": "your Order Flow Analysis Export 2025"
       },
       {
         "business_name": "SAP CRM Customer Export",
         "doc_id": "sap-crm-customer-export",
         "doc_type": "System export",
-        "supported_findings": [],
+        "supported_findings": [
+          "F1"
+        ],
         "what_we_read": "your SAP CRM Customer Export"
       },
       {
         "business_name": "SAP S/4HANA Customer Master Export",
         "doc_id": "sap-s4-customer-master-export",
         "doc_type": "System export",
-        "supported_findings": [],
+        "supported_findings": [
+          "F1"
+        ],
         "what_we_read": "your SAP S/4HANA Customer Master Export"
       },
       {
@@ -1475,7 +1777,6 @@
         "doc_id": "edi-dispute-resolution-cs-working-notes",
         "doc_type": "Notes",
         "supported_findings": [
-          "F2",
           "F3"
         ],
         "what_we_read": "your EDI Dispute Resolution CS Working Notes"
@@ -1501,8 +1802,7 @@
         "doc_id": "order-management-sop-opella-europe",
         "doc_type": "Process documentation",
         "supported_findings": [
-          "F2",
-          "F3"
+          "F2"
         ],
         "what_we_read": "your Order Management SOP Europe"
       },
@@ -1521,10 +1821,10 @@
         "what_we_read": "your Sanofi Consumer Healthcare O2C SOP 2023"
       }
     ],
-    "strategic_readiness": "The organisation already holds the data and documents needed to act: the two customer-data systems, the credit policy, the procedure and accountability matrix, and the order-flow analysis. The principal readiness constraint is governance rather than technology — assigning ownership and applying existing approval controls — which makes the foundational moves achievable quickly. The recovery automation requires modest build effort and benefits from the ownership groundwork laid first.",
+    "strategic_readiness": "The underlying information already exists in structured form across the credit, order, and escalation records, so the assessment rests on settled facts rather than new discovery. Readiness is strongest where the work is reconciliation and documentation, and is gated mainly by appointing named owners for credit approval and the electronic channel.",
     "strategy_profile": {
-      "notes": "Sequence governance and master-data foundations ahead of automated recovery so that controls and accountability underpin every downstream efficiency gain.",
-      "posture": "Control-first consolidation of order-to-cash before scaling automation"
+      "notes": "Prioritise closing credit and accountability findings using information already held, then automate recovery on the stabilised foundation.",
+      "posture": "Control-first consolidation: one trusted view of credit and ownership before automation"
     }
   }
 }
