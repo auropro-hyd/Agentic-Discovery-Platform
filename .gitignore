@@ -28,3 +28,8 @@ v1/htmlcov/
 # reference/handoff bundle. They contain the engagement org name in raw/internal layers — this repo
 # is treated as private reference. Only secrets (.env), the LLM response cache, the venv, and OS
 # noise are excluded.
+
+# ── spec-kit local tooling + specs (not committed by request) ─────
+.specify/
+specs/
+CLAUDE.md
