@@ -25,9 +25,10 @@
 <h3>Enforced second-approval checkpoint for large commitments<span class='pattern'>HITL Workflow</span></h3>
 <p>Introduce a controlled approval checkpoint that holds any purchase order above the large-spend threshold until a second Finance approval is recorded, turning the policy&#x27;s mandated dual-control from an advisory rule into an enforced step.</p>
 <div class='ba-grid'>
-<div class='col before'><h4>Before</h4><div class='step'><strong>1. Raise purchase order</strong><div class='who'>Requesting function · Commitments export</div><div>A large purchase order is raised and recorded with a single approval.</div></div>
+<div class='col before'><div class='ba-tag'>Today</div><div class='step'><strong>1. Raise purchase order</strong><div class='who'>Requesting function · Commitments export</div><div>A large purchase order is raised and recorded with a single approval.</div></div>
 <div class='step'><strong>2. Release on single approval</strong><div class='who'>Approver · Commitments export</div><div>The order is released with only one approval recorded, even though its value requires a second.</div><span class='failpoint'>Seven large orders worth EUR 557,000 released on a single approval</span></div></div>
-<div class='col after'><h4>After</h4><div class='step'><strong>1. Raise purchase order</strong><div class='who'>Requesting function · Commitments export</div><div>A large purchase order is raised and its value is checked against the large-spend threshold.</div></div>
+<div class='ba-arrow' aria-hidden='true'><svg viewBox='0 0 28 28'><path d='M4 14h16M15 8l6 6-6 6' fill='none' stroke='var(--accent)' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg></div>
+<div class='col after'><div class='ba-tag after'>With the change</div><div class='step'><strong>1. Raise purchase order</strong><div class='who'>Requesting function · Commitments export</div><div>A large purchase order is raised and its value is checked against the large-spend threshold.</div></div>
 <div class='step'><strong>2. Hold for second Finance approval</strong><div class='who'>Finance approver · Commitments export</div><div>Any order above the threshold is held and routed to a second Finance approver. It cannot be released until that second approval is recorded.</div></div>
 <div class='step'><strong>3. Release on dual control</strong><div class='who'>Finance approver · Commitments export</div><div>The order releases only once both approvals are recorded.</div></div></div>
 </div>
@@ -42,15 +43,16 @@
 <p><strong>Escalation &amp; human fallback.</strong> If a held order is not approved within the agreed window, it is escalated to the Finance approver&#x27;s manager for a decision; the system never auto-approves.</p>
 <p><strong>Sources.</strong> The commitments record, The procurement policy&#x27;s threshold and approval rules &nbsp; <strong>Formats.</strong> Structured transactional record, Governing policy document</p>
 </div>
-<p><strong>Dependencies:</strong> Independent — can start immediately. Prerequisite for the AI Credit Decisioning step.</p>
+<p><strong>Dependencies:</strong> Independent — can start immediately. Prerequisite for Purchase-order-first ordering gate, Exception monitoring and ownership for recorded exceptions.</p>
 <p class='prov'>Where this comes from: <a href='sources/procurement-policy.html'>Procurement Policy</a> and <a href='sources/purchase-order-export.html'>Purchase Order Export</a></p>
 </div>
 <div class='card'>
 <h3>Purchase-order-first ordering gate<span class='pattern'>Automation Pipeline</span></h3>
 <p>Introduce a control that prevents an order from being placed with a supplier unless a valid purchase order already exists, enforcing the policy&#x27;s absolute prohibition on maverick spend.</p>
 <div class='ba-grid'>
-<div class='col before'><h4>Before</h4><div class='step'><strong>1. Place order without a purchase order</strong><div class='who'>Requesting function · Commitments export</div><div>An order is placed with a supplier before any purchase order exists.</div><span class='failpoint'>Three orders worth EUR 216,000 placed outside the controlled process, all also lacking a second approval</span></div></div>
-<div class='col after'><h4>After</h4><div class='step'><strong>1. Check purchase order exists</strong><div class='who'>Requesting function · Commitments export</div><div>Before an order can be placed, the control confirms a valid purchase order is already in place.</div></div>
+<div class='col before'><div class='ba-tag'>Today</div><div class='step'><strong>1. Place order without a purchase order</strong><div class='who'>Requesting function · Commitments export</div><div>An order is placed with a supplier before any purchase order exists.</div><span class='failpoint'>Three orders worth EUR 216,000 placed outside the controlled process, all also lacking a second approval</span></div></div>
+<div class='ba-arrow' aria-hidden='true'><svg viewBox='0 0 28 28'><path d='M4 14h16M15 8l6 6-6 6' fill='none' stroke='var(--accent)' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg></div>
+<div class='col after'><div class='ba-tag after'>With the change</div><div class='step'><strong>1. Check purchase order exists</strong><div class='who'>Requesting function · Commitments export</div><div>Before an order can be placed, the control confirms a valid purchase order is already in place.</div></div>
 <div class='step'><strong>2. Block order without a purchase order</strong><div class='who'>Procurement lead · Commitments export</div><div>If no purchase order exists, the order cannot proceed and is returned to the requesting function to raise one first.</div></div></div>
 </div>
 <p><strong>Business impact.</strong> This addresses the EUR 216,000 of orders placed entirely outside the controlled process — 4.7 percent of total purchase order value — by requiring a purchase order before any order can be committed. Because all three maverick orders also lacked a second approval, this gate works alongside the dual-control checkpoint to close the path that left these commitments with no preventive control at all.
@@ -64,15 +66,16 @@
 <p><strong>Escalation &amp; human fallback.</strong> Where a genuine urgent need exists, the blocked order is escalated to the Procurement lead for an authorised exception decision, recorded against the order; the control never grants the exception itself.</p>
 <p><strong>Sources.</strong> The commitments record, The procurement policy&#x27;s order-sequence rule &nbsp; <strong>Formats.</strong> Structured transactional record, Governing policy document</p>
 </div>
-<p><strong>Dependencies:</strong> Requires Customer Master Reconciliation first. Prerequisite for the AI Credit Decisioning step.</p>
+<p><strong>Dependencies:</strong> Requires Enforced second-approval checkpoint for large commitments first. Prerequisite for Exception monitoring and ownership for recorded exceptions.</p>
 <p class='prov'>Where this comes from: <a href='sources/procurement-policy.html'>Procurement Policy</a> and <a href='sources/purchase-order-export.html'>Purchase Order Export</a></p>
 </div>
 <div class='card'>
 <h3>Exception monitoring and ownership for recorded exceptions<span class='pattern'>HITL Workflow</span></h3>
 <p>Establish a routine that surfaces every order recorded in an exception state, assigns a clear owner, and drives each to remediation — filling the policy&#x27;s silence on exception handling.</p>
 <div class='ba-grid'>
-<div class='col before'><h4>Before</h4><div class='step'><strong>1. Exception recorded but unactioned</strong><div class='who'>Not assigned · Commitments export</div><div>The record marks orders as single-approval or placed before a purchase order existed, but no one is accountable for detecting or remediating them.</div><span class='failpoint'>EUR 557,000 and EUR 216,000 of recorded exceptions sit without an owner</span></div></div>
-<div class='col after'><h4>After</h4><div class='step'><strong>1. Surface recorded exceptions</strong><div class='who'>Procurement lead · Commitments export</div><div>A regular review surfaces every order recorded in a single-approval or maverick state.</div></div>
+<div class='col before'><div class='ba-tag'>Today</div><div class='step'><strong>1. Exception recorded but unactioned</strong><div class='who'>Not assigned · Commitments export</div><div>The record marks orders as single-approval or placed before a purchase order existed, but no one is accountable for detecting or remediating them.</div><span class='failpoint'>EUR 557,000 and EUR 216,000 of recorded exceptions sit without an owner</span></div></div>
+<div class='ba-arrow' aria-hidden='true'><svg viewBox='0 0 28 28'><path d='M4 14h16M15 8l6 6-6 6' fill='none' stroke='var(--accent)' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg></div>
+<div class='col after'><div class='ba-tag after'>With the change</div><div class='step'><strong>1. Surface recorded exceptions</strong><div class='who'>Procurement lead · Commitments export</div><div>A regular review surfaces every order recorded in a single-approval or maverick state.</div></div>
 <div class='step'><strong>2. Assign owner and remediate</strong><div class='who'>Finance approver · Commitments export</div><div>Each surfaced order is assigned to a named owner who drives it to remediation and records the outcome.</div></div></div>
 </div>
 <p><strong>Business impact.</strong> This makes the EUR 557,000 of single-approval commitments and the EUR 216,000 of maverick commitments visible and owned, so recorded exceptions are detected and actioned rather than persisting unaddressed. It closes the policy&#x27;s silence on exception handling by assigning accountability to the states the record already captures.
@@ -86,7 +89,7 @@
 <p><strong>Escalation &amp; human fallback.</strong> Exceptions not remediated within the agreed window are escalated to internal audit or the governance owner for review; the routine never marks an exception as resolved without a human decision.</p>
 <p><strong>Sources.</strong> The commitments record, The procurement policy&#x27;s controls &nbsp; <strong>Formats.</strong> Structured transactional record, Governing policy document</p>
 </div>
-<p><strong>Dependencies:</strong> Requires Customer Master Reconciliation first.</p>
+<p><strong>Dependencies:</strong> Requires Enforced second-approval checkpoint for large commitments, Purchase-order-first ordering gate first.</p>
 <p class='prov'>Where this comes from: <a href='sources/procurement-policy.html'>Procurement Policy</a> and <a href='sources/purchase-order-export.html'>Purchase Order Export</a></p>
 </div>
 </main></div></body></html>

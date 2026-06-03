@@ -669,6 +669,26 @@
         ],
         "title": "Unfulfilled orders by channel",
         "unit": "orders"
+      },
+      {
+        "key": "unfulfilled_share",
+        "kind": "donut",
+        "segments": [
+          {
+            "label": "Edi",
+            "value": 1196.0
+          },
+          {
+            "label": "Manual",
+            "value": 320.0
+          },
+          {
+            "label": "Email",
+            "value": 111.0
+          }
+        ],
+        "title": "Share of unfulfilled orders by channel",
+        "unit": "orders"
       }
     ],
     "cross_process_patterns": [],

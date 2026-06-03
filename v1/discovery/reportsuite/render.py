@@ -229,9 +229,13 @@ def r03(s: SynthesisContent, meta) -> str:
     h.append("<h2>Opportunity ratings</h2>"
              "<table><thead><tr><th>Opportunity</th><th>Pattern</th><th>Value</th>"
              "<th>Feasibility</th><th>Sequence</th></tr></thead><tbody>")
+    titles = {o.id: o.title for o in s.opportunities}
     for o in s.opportunities:
-        seq = ("Requires Customer Master Reconciliation first" if o.dependencies
-               else "Can start now")
+        if o.dependencies:
+            deps = ", ".join(titles.get(d, d) for d in o.dependencies)
+            seq = f"Requires {deps} first"
+        else:
+            seq = "Can start now"
         h.append(f"<tr><td>{esc(o.title)}</td><td>{_PATTERN_LABEL.get(o.pattern.value,'')}</td>"
                  f"<td>{esc(o.value_rating.title())}</td>"
                  f"<td>{esc(o.feasibility_rating.title())}</td><td>{esc(seq)}</td></tr>")
@@ -335,10 +339,14 @@ def r04(s: SynthesisContent, meta) -> str:
         if o.success_metrics:
             h.append("<p><strong>Success looks like:</strong></p><ul>" +
                      "".join(f"<li>{esc(x)}</li>" for x in o.success_metrics) + "</ul>")
-        dep = ("Requires Customer Master Reconciliation first." if o.dependencies
-               else "Independent — can start immediately.")
+        opp_titles = {x.id: x.title for x in s.opportunities}
+        if o.dependencies:
+            dep = "Requires " + ", ".join(opp_titles.get(d, d) for d in o.dependencies) + " first."
+        else:
+            dep = "Independent — can start immediately."
         if o.prerequisite_for:
-            dep += " Prerequisite for the AI Credit Decisioning step."
+            after = ", ".join(opp_titles.get(d, d) for d in o.prerequisite_for)
+            dep += f" Prerequisite for {after}."
         h.append(f"<p><strong>Dependencies:</strong> {esc(dep)}</p>")
         if o.risks:
             h.append("<p><strong>Risks:</strong></p><ul>" +
