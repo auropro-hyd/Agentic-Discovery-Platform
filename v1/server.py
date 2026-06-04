@@ -88,7 +88,9 @@ def _spawn(run: Run) -> None:
     """Launch run.py and translate its stdout into phase/activity events."""
     cmd = ["uv", "run", "python", "run.py", "--domain", run.domain, "--agent", "--auto-resolve"]
     if run.mode == "golden":
-        cmd.append("--golden")
+        cmd.append("--golden")          # offline cached replay — instant, $0
+    else:
+        cmd.append("--fresh")           # genuinely live — bypass the read-cache, hit the provider
     env = {**os.environ, "PYTHONUNBUFFERED": "1"}
     run.emit({"type": "stage", "stage": "upload", "state": "active"})
     try:

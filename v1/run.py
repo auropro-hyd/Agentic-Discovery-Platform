@@ -61,9 +61,16 @@ def main(argv=None) -> int:
                     help="skip the adversarial verification pass over findings")
     ap.add_argument("--refresh", action="store_true",
                     help="diff this run against the previous one for the domain (new/resolved/changed)")
+    ap.add_argument("--fresh", action="store_true",
+                    help="force a genuinely live run: bypass the LLM read-cache so every call hits "
+                         "the provider (slow, costs credits). Results are still cached for replay. "
+                         "Mutually exclusive with --golden.")
     args = ap.parse_args(argv)
     if args.provider:
         os.environ["DISCOVERY_PROVIDER"] = args.provider
+    if args.fresh and args.golden:
+        print("error: --fresh and --golden are mutually exclusive (fresh needs the network).")
+        return 2
 
     domain_dir = INPUTS / args.domain
     if not domain_dir.is_dir():
@@ -72,6 +79,9 @@ def main(argv=None) -> int:
     if args.golden:
         _activate_golden_cache(args.domain)
         os.environ["DISCOVERY_OFFLINE"] = "1"
+    if args.fresh:
+        os.environ["DISCOVERY_NO_CACHE"] = "1"
+        print("  (fresh run: bypassing the LLM cache — this will take minutes and spend credits)")
 
     print(f"Reading the {args.domain} landscape...")
     manifest = loader.load_manifest(domain_dir) or {}

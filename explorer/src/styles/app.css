@@ -403,3 +403,9 @@ table.dt td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .bctx-rels { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .bctx-rel { font-size: 0.68rem; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
 .bctx-kernel { margin-top: 12px; text-align: center; border: 1.5px solid var(--amber); background: var(--amber-bg); border-radius: 9px; padding: 11px 14px; color: #92400e; font-size: 0.86rem; }
+
+/* live/replay run pill in the feed header */
+.live-pill { float: right; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; color: var(--muted); background: var(--bg-alt); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; font-variant-numeric: tabular-nums; }
+.live-pill.is-live { color: #991b1b; background: var(--red-bg); border-color: var(--red-bd); animation: livepulse 1.6s ease infinite; }
+@keyframes livepulse { 0%,100% { opacity: 1; } 50% { opacity: 0.62; } }
+@media (prefers-reduced-motion: reduce) { .live-pill.is-live { animation: none; } }

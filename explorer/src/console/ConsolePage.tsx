@@ -50,6 +50,16 @@ export default function ConsolePage() {
     if (feedRef.current) feedRef.current.scrollTop = feedRef.current.scrollHeight;
   }, [activity]);
 
+  // elapsed timer while running, so a long live run visibly progresses (never looks frozen)
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!running) return;
+    const t0 = Date.now();
+    setElapsed(0);
+    const id = window.setInterval(() => setElapsed(Math.round((Date.now() - t0) / 1000)), 1000);
+    return () => window.clearInterval(id);
+  }, [running]);
+
   const activeStage: StageId | null =
     (STAGES.map((s) => s.id).reverse().find((id) => stageState[id] === "active") as StageId) ?? null;
 
@@ -199,11 +209,22 @@ export default function ConsolePage() {
       <div className="console-grid">
         {/* ── live activity feed ── */}
         <section className="panel feed-panel">
-          <h3>Live activity {activeStage && <span className="muted small">· {labelFor(activeStage)}</span>}</h3>
+          <h3>
+            Live activity {activeStage && <span className="muted small">· {labelFor(activeStage)}</span>}
+            {running && (
+              <span className={cx("live-pill", mode === "live" && "is-live")}>
+                {mode === "live" ? "● LIVE" : "● replay"} · {fmtElapsed(elapsed)}
+              </span>
+            )}
+          </h3>
           <div className="feed" ref={feedRef}>
             {activity.length === 0 ? (
               <p className="muted small">
-                {running ? "Starting…" : "Run discovery to watch the pipeline work in real time."}
+                {running
+                  ? mode === "live"
+                    ? "Live run started — the agent is reading the documents and calling tools. This takes a few minutes."
+                    : "Starting…"
+                  : "Run discovery to watch the pipeline work in real time."}
               </p>
             ) : (
               activity.map((line, i) => (
@@ -302,4 +323,10 @@ export default function ConsolePage() {
 
 function labelFor(id: StageId): string {
   return STAGES.find((s) => s.id === id)?.label ?? id;
+}
+
+function fmtElapsed(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m > 0 ? `${m}m ${String(s).padStart(2, "0")}s` : `${s}s`;
 }
