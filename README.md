@@ -92,35 +92,52 @@ Full rationale: [`v1/docs/`](v1/docs/) · competitive positioning: [`research/`]
 
 ## Quickstart
 
-First time on this repo? Two commands from the root — no API key, no cost:
+First time on this repo? Two commands from the root — **no API key, no cost**.
 
+**Prerequisites:** [`uv`](https://docs.astral.sh/uv/getting-started/installation/) (Python env manager)
+and [Node.js 20+](https://nodejs.org) (`npm`). The setup step tells you if either is missing.
+
+**macOS / Linux:**
 ```bash
-make setup      # Python env (v1/) + explorer deps. Needs `uv` and `npm`; tells you if either is missing.
-make run        # OFFLINE demo: golden replay → builds the explorer → opens the report suite.
+make setup      # Python env (v1/) + explorer deps
+make run        # OFFLINE demo: golden replay → builds the explorer → opens the report suite
 ```
 
-`make run` is a deterministic **golden replay** (the saved run, rendered offline), so it works with
-no credentials and can't hit the "no cached response" wall. Run `make` with no target to list everything.
+**Windows** (`make` isn't native — use the cross-platform runner; identical behaviour):
+```powershell
+python tasks.py setup
+python tasks.py run
+```
 
-Want a **live** run (real agent, spends credits)? Add a key, then:
+`run` is a deterministic **golden replay** (the saved run, rendered offline), so it needs no
+credentials and can't hit the "no cached response" wall. Run `make` (or `python tasks.py`) with no
+target to list every task.
+
+Want a **live** run (real agent, spends credits)? Add a key first:
 
 ```bash
-# put ANTHROPIC_API_KEY=… (or the AZURE_OPENAI_* vars) in v1/.env  — `make setup` seeds it from the template
-make doctor     # verify the provider is reachable (one tiny call)
+# put ANTHROPIC_API_KEY=… (or the AZURE_OPENAI_* vars) in v1/.env — setup seeds it from the template
+make doctor     # (or: python tasks.py doctor)  — verify the provider is reachable (one tiny call)
 make live       # the real pipeline — minutes, costs credits
 make console    # OR: the interactive 6-stage Console (backend + UI dev server)
 ```
 
-Run on any domain by dropping its documents in `v1/inputs/<domain>/`, then `make run DOMAIN=<slug>`.
+> A live run **preflights your credentials**: if `v1/.env` has no real key (or still has the
+> `.env.example` placeholder), it stops immediately with a one-line fix instead of a traceback or a
+> misleading "use the golden run" message. With no key, use `make run` for the full offline demo.
 
-<details><summary>Manual equivalent (without make)</summary>
+Run on any domain by dropping its documents in `v1/inputs/<domain>/`, then
+`make run DOMAIN=<slug>` (or `python tasks.py run --domain <slug>`).
+
+<details><summary>Manual equivalent (no make / no tasks.py)</summary>
 
 ```bash
 cd v1
 uv sync                                   # env + deps
-cp .env.example .env                      # add ANTHROPIC_API_KEY (or Azure vars)
-uv run python scripts/doctor.py           # check connectivity
-uv run python run.py --domain o2c --auto-resolve     # → opens out/o2c/index.html
+cp .env.example .env                      # add ANTHROPIC_API_KEY (or Azure vars) for live runs
+uv run python run.py --domain o2c --golden --auto-resolve   # offline demo → opens out/o2c/index.html
+uv run python scripts/doctor.py           # (live only) check connectivity
+uv run python run.py --domain o2c --auto-resolve            # live run (needs a key)
 ```
 </details>
 
