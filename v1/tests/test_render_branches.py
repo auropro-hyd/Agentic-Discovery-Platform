@@ -569,6 +569,20 @@ def test_rating_cell_variants():
     assert "rate-low" in _rating_cell("low: colon sep")
     assert "rate-na" in _rating_cell("unknown rating phrase")
     assert _rating_cell("high").strip().endswith("</span>")
+    # an all-caps (shouting) reason is down-cased for readability, preserving acronyms
+    cell = _rating_cell("high — BOTH VALUES EXIST IN THE ERP AND CRM TODAY")
+    assert "Both values exist in the ERP and CRM today" in cell
+
+
+def test_deshout():
+    from discovery.reportsuite.render import _deshout
+    # shouting → sentence-cased, acronyms preserved
+    assert _deshout("BOTH VALUES IN ERP AND SAP S/4HANA") == "Both values in ERP and SAP S/4HANA"
+    # normal text is left untouched
+    assert _deshout("Both values already exist") == "Both values already exist"
+    # no letters → unchanged (no crash)
+    assert _deshout("267 / 318") == "267 / 318"
+    assert _deshout("") == ""
 
 
 def test_cite_and_cite_links():

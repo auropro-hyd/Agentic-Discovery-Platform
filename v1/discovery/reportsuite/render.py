@@ -431,7 +431,7 @@ def r03(s: SynthesisContent, meta) -> str:
         d.h1("Appendix — traceability matrix")
         d.p("Each pain point traced through to the recommendation, opportunity, expected outcome "
             "and horizon that addresses it.")
-        tr = ["<table><thead><tr><th>Pain point</th><th>Summary</th><th>Severity</th>"
+        tr = ["<table class='trace'><thead><tr><th>Pain point</th><th>Summary</th><th>Severity</th>"
               "<th>Recommendation</th><th>Opportunity</th><th>Expected outcome</th><th>Horizon</th>"
               "</tr></thead><tbody>"]
         for t in s.traceability:
@@ -1559,6 +1559,21 @@ def _metric(n) -> str:
     return f"<span class='metric'>{esc(text)}</span>"
 
 
+_ACRONYM = re.compile(r"\b(ERP|EDI|CRM|SAP|RACI|SOP|O2C|P2P|AR|AP|KPI|TSA|SLA|PO|MOQ|FTE|"
+                      r"S/4HANA|NET\d+)\b", re.I)
+
+
+def _deshout(text: str) -> str:
+    """Down-case a SHOUTING (all-caps) reason for readability while preserving acronyms. A
+    cosmetic display fix for a model that occasionally writes a cell in CAPS — it changes only
+    casing, never words or numbers. Leaves normally-cased text untouched."""
+    letters = [c for c in text if c.isalpha()]
+    if not letters or sum(c.isupper() for c in letters) / len(letters) < 0.7:
+        return text                              # not shouting → leave as authored
+    out = _ACRONYM.sub(lambda m: m.group(0).upper(), text.lower())
+    return out[:1].upper() + out[1:]             # sentence-case the start
+
+
 def _rating_cell(raw: str) -> str:
     if not raw:
         return "—"
@@ -1570,7 +1585,7 @@ def _rating_cell(raw: str) -> str:
     level = rating.strip().lower()
     cls = level if level in ("high", "medium", "low") else "na"
     badge = f"<span class='rate rate-{cls}'>{esc(rating.strip().title() or '—')}</span>"
-    reason = reason.strip()
+    reason = _deshout(reason.strip())
     return f"{badge} {esc(reason)}" if reason else badge
 
 
