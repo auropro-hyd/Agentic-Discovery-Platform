@@ -26,26 +26,61 @@ async function main() {
   }
   await mkdir(DEST, { recursive: true });
   for (const f of jsons) {
-    const from = join(SRC, f);
-    const to = join(DEST, f);
-    const doc = JSON.parse(await readFile(from, "utf8"));
-
-    // CONFIDENTIALITY: scrub any names the run flagged as suppressed (e.g. a client name hidden
-    // for a demo) from the client-facing view, mirroring the print suite. The internal_trace
-    // (audit) is dropped entirely — the SPA never reads it and it carries the real name.
-    const conf = doc._confidential ?? { suppress_names: [], client_display: doc.domain_label };
-    const clean = {
-      domain: doc.domain,
-      domain_label: doc.domain_label,
-      synthesis: scrub(doc.synthesis, conf.suppress_names ?? [], conf.client_display),
-    };
-
-    await writeFile(to, JSON.stringify(clean), "utf8");
-    const { size } = await stat(to);
-    const note = (conf.suppress_names ?? []).length ? ` [scrubbed: ${conf.suppress_names.join(", ")}]` : "";
-    console.log(`sync-data: ${basename(from)} -> src/data/ (${(size / 1024).toFixed(0)} KB)${note}`);
+    try {
+      await syncOne(f);
+    } catch (e) {
+      // Per-file failures must name the file and STOP the build — a silent skip here could leave a
+      // stale or unscrubbed file in src/data/. Confidentiality > convenience.
+      console.error(`sync-data: FAILED on ${f}: ${e instanceof Error ? e.message : e}`);
+      process.exit(1);
+    }
   }
   console.log(`sync-data: ${jsons.length} domain file(s) synced.`);
+}
+
+async function syncOne(f) {
+  const from = join(SRC, f);
+  const to = join(DEST, f);
+  const doc = JSON.parse(await readFile(from, "utf8"));
+
+  // CONFIDENTIALITY CONTRACT (fail loud, never silently). The engine writes a _confidential block;
+  // a missing/malformed one is NOT treated as "nothing to scrub" — that was a silent-leak hole.
+  const conf = doc._confidential;
+  if (!conf || !Array.isArray(conf.suppress_names) || typeof conf.client_display !== "string") {
+    throw new Error(
+      `missing/malformed _confidential block (${JSON.stringify(conf)}). Re-run the engine; a ` +
+        `missing block could ship an unscrubbed client name.`,
+    );
+  }
+  // Suppression was requested but the engine detected no name to scrub: the org may still appear in
+  // the prose, so refuse rather than ship a possibly-named view. (Set an explicit manifest 'client'.)
+  if (conf.suppress_requested && conf.suppress_names.length === 0) {
+    throw new Error(
+      `suppress_client was requested but no name was detected to scrub. Set a manifest 'client' ` +
+        `name so the SPA can scrub it, or confirm the reports name no organisation.`,
+    );
+  }
+
+  // scrub the synthesis AND the domain_label (both client-facing); drop internal_trace entirely.
+  const clean = {
+    domain: doc.domain,
+    domain_label: scrub(doc.domain_label, conf.suppress_names, conf.client_display),
+    synthesis: scrub(doc.synthesis, conf.suppress_names, conf.client_display),
+  };
+
+  // DEFENSE IN DEPTH: verify no suppressed name survived anywhere in the client-facing output. If
+  // one does (a pattern edge case, a hyphenated form), abort — better a failed build than a leak.
+  const serialized = JSON.stringify(clean);
+  for (const name of conf.suppress_names) {
+    if (name && new RegExp(escapeRe(name), "i").test(serialized)) {
+      throw new Error(`suppressed name "${name}" still present after scrub. Aborting to avoid a leak.`);
+    }
+  }
+
+  await writeFile(to, serialized, "utf8");
+  const { size } = await stat(to);
+  const note = conf.suppress_names.length ? ` [scrubbed: ${conf.suppress_names.join(", ")}]` : "";
+  console.log(`sync-data: ${basename(from)} -> src/data/ (${(size / 1024).toFixed(0)} KB)${note}`);
 }
 
 // A raw SHOUTY_SNAKE enum value a model copied into prose (NOT_FULFILLED, ON_HOLD). Two+

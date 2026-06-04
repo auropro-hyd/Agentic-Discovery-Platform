@@ -33,11 +33,14 @@ export type FactEntity = NonNullable<FactStore["entities"]>[number];
 export type Tier = "verified" | "amber" | "gap" | string;
 
 /* ── the GROUNDING BRAND ──────────────────────────────────────────────────────────────────
- * A FactValue is the ONLY shape <GroundedNumber> will render. It is minted in exactly one
- * place (lib/store.ts `fact()`), straight from parsed JSON. Because the `__fact` brand is a
- * private symbol-like literal, no view-layer code can fabricate one — passing a raw computed
- * number to <GroundedNumber> is a COMPILE error. This is grounding enforced by the type system. */
-declare const FACT_BRAND: unique symbol;
+ * A FactValue is the ONLY shape <GroundedNumber> will render, and it can be minted in exactly one
+ * place (lib/store.ts) from a JSON source row — never from a view-computed number. The brand is a
+ * real runtime symbol (FACT_BRAND below): the minted object genuinely carries it, so no unsafe
+ * `as unknown as` cast is needed, and a plain object literal cannot satisfy FactValue (the symbol
+ * key is module-private). Combined with `mintFact` taking a {value} ROW (not a bare number) and
+ * not being exported for arbitrary use, a page cannot turn `x * y` into a FactValue. Together with
+ * the ESLint no-arithmetic rule in src/pages/**, displayed figures are grounded by construction. */
+export const FACT_BRAND: unique symbol = Symbol("fact");
 export interface FactValue {
   readonly [FACT_BRAND]: true;
   readonly value: number | string;

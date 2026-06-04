@@ -1,6 +1,8 @@
 import { useDomainData } from "../lib/useDomainData";
 import { Section, EmptyState } from "../primitives/EmptyState";
 import { TierBadge } from "../primitives/badges";
+import { GroundedNumber } from "../primitives/GroundedNumber";
+import { factFromQuant } from "../lib/store";
 
 /* The provenance hub. Everything here is rendered VERBATIM from the engine's JSON — the evidence
  * register, the source index, and the three fact_store stores (quantified facts, document quotes,
@@ -102,8 +104,7 @@ export default function EvidencePage() {
                 <tr key={i}>
                   <td>{q.label || "—"}</td>
                   <td className="num">
-                    {String(q.value)}
-                    {q.unit ? <span className="muted"> {q.unit}</span> : null}
+                    <GroundedNumber fact={factFromQuant(q)} cite={false} />
                   </td>
                   <td>{q.tier ? <TierBadge tier={q.tier} /> : "—"}</td>
                   <td className="small muted">

@@ -3,7 +3,8 @@
     "client_display": "the organisation",
     "suppress_names": [
       "Opella"
-    ]
+    ],
+    "suppress_requested": true
   },
   "documents": [
     {

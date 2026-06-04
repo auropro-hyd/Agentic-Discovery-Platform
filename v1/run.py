@@ -134,6 +134,13 @@ def main(argv=None) -> int:
     docnames.set_noise_words(suppress_names)
     print(f"  client: {client or '(none — neutral)'}"
           + (f"  [suppressed on screen: {detected}]" if suppress_names else ""))
+    # Loud warning for the dangerous case the review surfaced: suppression was REQUESTED but the
+    # detector found no name to suppress (it needs >= 3 mentions in >= 2 docs). The org name may
+    # still appear once or twice in the LLM-written synthesis prose — so silence here would be a
+    # silent confidentiality leak. Flag it so the operator knows protection did NOT engage.
+    if suppress and not detected:
+        print("  ! WARNING: suppress_client is set but no client name was auto-detected to scrub. "
+              "Set an explicit manifest 'client' name, or verify the reports name no organisation.")
 
     # ---- build the 6-report suite content -----------------------------------------
     # LIVE BY DEFAULT for every domain — the report content is generated from this run's findings.
@@ -177,6 +184,7 @@ def main(argv=None) -> int:
     # same so the suppressed name never even ships to a static host. (Internal trace keeps the
     # real text — this block only declares what to scrub for the client-facing view.)
     internal["_confidential"] = {
+        "suppress_requested": suppress,
         "suppress_names": suppress_names,
         "client_display": client or "the organisation",
     }

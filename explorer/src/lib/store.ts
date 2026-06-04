@@ -1,40 +1,57 @@
+import { FACT_BRAND } from "./types";
 import type {
   Synthesis,
   PainPoint,
   Opportunity,
   FactValue,
   FactQuant,
-  Tier,
+  NumberRef,
 } from "./types";
 
 /* The derived store for one domain. Built once per domain load. Holds:
  *  - id maps (painPointById / opportunityById) for O(1) cross-link resolution
  *  - oppByPainPoint: reverse index opportunity.addresses_pain_point -> opportunities[]
  *  - factByLabel: fact_store.quant indexed by lowercased label (for SourceCite provenance)
- *  - fact(): the SOLE mint of the FactValue brand (grounding chokepoint)
+ *  - factFrom*(): the SOLE mints of the FactValue brand (the grounding chokepoint)
  */
 
-const BRAND = "__fact" as const;
+/* A "source row" is the only thing a fact can be minted FROM — a shape that exists in the parsed
+ * JSON (a fact_store quant row or a pain-point/opportunity NumberRef). Because the mint takes a row
+ * (with its own `value`), not a bare number, a page cannot mint `fact(x * y)`: there is no public
+ * function that accepts a number. This is what makes the brand real rather than cosmetic. */
+type SourceRow = {
+  value?: number | string;
+  unit?: string;
+  label?: string;
+  sources?: string[];
+  tier?: string;
+};
 
-/** Mint a branded FactValue from data that came verbatim from the JSON. THE ONLY place a
- *  FactValue is created — so <GroundedNumber> can only ever show a JSON-sourced figure. */
-export function fact(
-  value: number | string,
-  opts: { unit?: string; label?: string; sources?: string[]; tier?: Tier } = {},
-): FactValue {
+/** The single brand-mint. Private to this module — pages/charts cannot call it. The object
+ *  genuinely carries the FACT_BRAND symbol, so no unsafe cast is needed. */
+function mintFact(row: SourceRow): FactValue {
   return {
-    [BRAND]: true,
-    value,
-    unit: opts.unit,
-    label: opts.label,
-    sources: opts.sources,
-    tier: opts.tier,
-  } as unknown as FactValue;
+    [FACT_BRAND]: true,
+    value: row.value ?? "",
+    unit: row.unit,
+    label: row.label,
+    sources: row.sources,
+    tier: row.tier,
+  };
 }
 
 /** Mint a FactValue from a fact_store quant row (carries unit/sources/tier provenance). */
 export function factFromQuant(q: FactQuant): FactValue {
-  return fact(q.value, { unit: q.unit, label: q.label, sources: q.sources, tier: q.tier });
+  return mintFact({ value: q.value, unit: q.unit, label: q.label, sources: q.sources, tier: q.tier });
+}
+
+/** Mint a FactValue from a pain-point / opportunity quantified NumberRef. NumberRef.sources may be
+ *  string[] or SourceRef[]; keep only the doc_id strings for the cite popover. */
+export function factFromNumberRef(n: NumberRef): FactValue {
+  const sources = (n.sources ?? [])
+    .map((s) => (typeof s === "string" ? s : s?.doc_id ?? ""))
+    .filter(Boolean);
+  return mintFact({ value: n.value, unit: n.unit, label: n.label, sources });
 }
 
 export interface DomainStore {
