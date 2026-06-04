@@ -119,12 +119,17 @@ Want a **live** run (real agent, spends credits)? Add a key first:
 # put ANTHROPIC_API_KEY=… (or the AZURE_OPENAI_* vars) in v1/.env — setup seeds it from the template
 make doctor     # (or: python tasks.py doctor)  — verify the provider is reachable (one tiny call)
 make live       # the real pipeline — minutes, costs credits
-make console    # OR: the interactive 6-stage Console (backend + UI dev server)
 ```
 
 > A live run **preflights your credentials**: if `v1/.env` has no real key (or still has the
 > `.env.example` placeholder), it stops immediately with a one-line fix instead of a traceback or a
 > misleading "use the golden run" message. With no key, use `make run` for the full offline demo.
+
+**Interactive Console** — the 6-stage operator flow with both servers running and the explorer
+embedded (`make console` / `python tasks.py console`). It starts the backend (`:8742`) and the
+explorer dev server together, **opens the app in your browser**, and keeps both running until you
+Ctrl-C (which stops both). No key needed — if no report data exists yet it renders the offline
+golden suite first; a live run is then a choice inside the Console UI.
 
 Run on any domain by dropping its documents in `v1/inputs/<domain>/`, then
 `make run DOMAIN=<slug>` (or `python tasks.py run --domain <slug>`).

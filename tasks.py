@@ -21,7 +21,9 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shutil
+import signal
 import subprocess
 import sys
 import webbrowser
@@ -122,22 +124,94 @@ def live(a) -> None:
     _uv(["run", "python", "run.py", "--domain", a.domain, "--fresh", "--auto-resolve"])
 
 
-def console(_a) -> None:
-    """Start the backend (server.py) then the Vite dev server. Ctrl-C stops both."""
+# Vite prints its real URL ("➜  Local:   http://localhost:5173/") and bumps to the next free port
+# if 5173 is taken — so we read the URL from its own output rather than guessing the port.
+_VITE_LOCAL_RE = re.compile(r"Local:\s*(https?://\S+?)/?\s*$")
+
+
+def _has_report_data() -> bool:
+    """True if the engine has produced at least one synthesis JSON for the explorer to render.
+    The explorer's predev step (sync-data) hard-fails without one, so the Console needs this first."""
+    out = V1 / "out"
+    return out.is_dir() and any(out.glob("discovery-*.json"))
+
+
+def _popen_group(cmd: list[str], **kw) -> subprocess.Popen:
+    """Start a child in its OWN process group so we can later kill it AND its grandchildren
+    (npm -> vite -> esbuild) in one shot. Without this, terminating npm orphans esbuild."""
+    if os.name == "nt":
+        kw["creationflags"] = kw.get("creationflags", 0) | subprocess.CREATE_NEW_PROCESS_GROUP
+    else:
+        kw["start_new_session"] = True   # setsid: child becomes its own process-group leader
+    return subprocess.Popen(cmd, **kw)
+
+
+def _kill_group(proc: subprocess.Popen) -> None:
+    """Terminate a child and every process in its group; fall back to a hard kill."""
+    if proc.poll() is not None:
+        return
+    try:
+        if os.name == "nt":
+            proc.terminate()
+        else:
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+    except (ProcessLookupError, PermissionError):
+        return
+    try:
+        proc.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        try:
+            if os.name == "nt":
+                proc.kill()
+            else:
+                os.killpg(os.getpgid(proc.pid), __import__("signal").SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
+
+
+def console(a) -> None:
+    """Run both localhosts and keep them alive: the backend (server.py, :8742) and the explorer
+    dev server (Vite). Tees Vite's output, opens the exact URL Vite reports (handles a bumped port),
+    then leaves both running so you drive it. Ctrl-C stops both."""
     _require("uv", "Install uv first: https://docs.astral.sh/uv/")
     _require("npm", "Install Node.js 20+ from https://nodejs.org")
+    # The explorer can't start without report data (its predev sync-data step exits 1 on an empty
+    # out/). If none exists yet, generate the offline golden suite first — no key, no cost — so a
+    # first `make console` just works instead of dying on a Node error.
+    if not _has_report_data():
+        print("→ No report data yet — rendering the offline golden suite first (no key, no cost)…")
+        report(a)
     print("→ Starting Discovery Console backend on http://127.0.0.1:8742 …")
-    backend = subprocess.Popen(["uv", "run", "python", "server.py"], cwd=str(V1), env=_uv_env())
+    backend = _popen_group(["uv", "run", "python", "server.py"], cwd=str(V1), env=_uv_env())
+
+    print("→ Starting the explorer dev server (Ctrl-C to stop both)…")
+    npm = shutil.which("npm") or "npm"
+    # Pipe stdout so we can read the real Local URL; tee every line straight back to the terminal so
+    # the dev server still looks/behaves normal (HMR logs, errors, the URL banner). Own process
+    # group so teardown reaps the grandchildren (vite/esbuild), not just npm.
+    vite = _popen_group([npm, "run", "dev"], cwd=str(UI),
+                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+    opened = False
     try:
-        print("→ Starting the explorer dev server (Ctrl-C to stop both)…")
-        npm = shutil.which("npm") or "npm"
-        subprocess.run([npm, "run", "dev"], cwd=str(UI))
+        assert vite.stdout is not None
+        for line in vite.stdout:
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            if not opened:
+                m = _VITE_LOCAL_RE.search(line)
+                if m:
+                    url = m.group(1)
+                    print(f"→ Opening {url} (both servers stay running; Ctrl-C to stop)…")
+                    webbrowser.open(url)
+                    opened = True
+        vite.wait()
+    except KeyboardInterrupt:
+        pass
     finally:
-        backend.terminate()
-        try:
-            backend.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            backend.kill()
+        print("\n→ Stopping both servers…")
+        _kill_group(vite)
+        _kill_group(backend)
 
 
 def doctor(_a) -> None:
