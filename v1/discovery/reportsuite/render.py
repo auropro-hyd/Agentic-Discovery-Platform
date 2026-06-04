@@ -13,6 +13,7 @@ themselves when their grounded data is absent (never fabricated).
 from __future__ import annotations
 
 import html
+import math
 import re
 from pathlib import Path
 
@@ -497,9 +498,11 @@ def r05(s: SynthesisContent, meta) -> str:
             items.append(f"<li><strong>{esc(it.title)}</strong>{tag} — {esc(it.rationale)}</li>")
         d.raw(f"<div class='horizon'><h4>{esc(hz.horizon)} — {esc(hz.theme)} "
               f"<span class='win'>({esc(hz.window)})</span></h4><ul>" + "".join(items) + "</ul></div>")
-    d.h1("How the work connects")
-    d.p("The enabling relationships between the opportunities — what unlocks what.")
-    d.raw(dependency_map_svg(s.opportunities))
+    depmap = dependency_map_svg(s.opportunities)
+    if depmap:                          # omit the whole section when there are no enabling edges
+        d.h1("How the work connects")
+        d.p("The enabling relationships between the opportunities — what unlocks what.")
+        d.raw(depmap)
     panel = _planning_panel(s.planning_assumptions)
     if panel:
         d.h1("Planning assumptions")
@@ -1084,18 +1087,27 @@ def value_matrix_svg(opportunities) -> str:
             (PAD + 6, PAD + plotH - 8, "start", "Reconsider")]:
         out.append(f"<text x='{qx}' y='{qy}' text-anchor='{anchor}' font-size='10' "
                    f"fill='#9aa7b6' font-weight='700'>{label}</text>")
-    placed: dict[tuple, int] = {}
+    # spread bubbles that share a coordinate around a small ring so neither circles nor labels
+    # overprint (a 6-opportunity cluster used to collapse into illegible "OPP?PP4" overlaps).
+    R = 15                                  # bubble radius
+    groups: dict[tuple, list] = {}
     for o in opps:
-        key = (o.feasibility_score, o.value_score)
-        k = placed.get(key, 0)
-        placed[key] = k + 1
-        ox = (k % 3 - 1) * 22 if k else 0
-        oy = (k // 3) * 22 if k else 0
-        cx, cy = px(o.feasibility_score) + ox, py(o.value_score) + oy
-        out.append(f"<circle cx='{cx}' cy='{cy}' r='17' fill='#2563eb' fill-opacity='0.16' "
-                   f"stroke='#2563eb'/>")
-        out.append(f"<text x='{cx}' y='{cy+4}' text-anchor='middle' font-size='11' "
-                   f"font-weight='700' fill='#1d4ed8'>{esc(o.id)}</text>")
+        groups.setdefault((o.feasibility_score, o.value_score), []).append(o)
+    for (fscore, vscore), members in groups.items():
+        n = len(members)
+        bx, by = px(fscore), py(vscore)
+        # ring radius grows with crowding so n circles of radius R never touch
+        ring = 0 if n == 1 else max(R + 6, int(R * n / math.pi) + 4)
+        for j, o in enumerate(members):
+            if n == 1:
+                cx, cy = bx, by
+            else:
+                ang = -math.pi / 2 + 2 * math.pi * j / n
+                cx, cy = bx + ring * math.cos(ang), by + ring * math.sin(ang)
+            out.append(f"<circle cx='{cx:.1f}' cy='{cy:.1f}' r='{R}' fill='#2563eb' "
+                       f"fill-opacity='0.16' stroke='#2563eb'/>")
+            out.append(f"<text x='{cx:.1f}' y='{cy+4:.1f}' text-anchor='middle' font-size='10' "
+                       f"font-weight='700' fill='#1d4ed8'>{esc(o.id)}</text>")
     out.append("</svg>")
     return _fig("Where each opportunity sits on value versus feasibility", "".join(out))
 
@@ -1267,7 +1279,9 @@ def data_flow_svg(steps) -> str:
     systems, seen = [], set()
     for st in steps or []:
         sysname = (getattr(st, "system", "") or "").strip()
-        for part in [p.strip() for p in sysname.replace(" / ", "/").split("/") if p.strip()]:
+        # split ONLY on a spaced separator (" / ", " & ", ", ") between distinct systems — never on a
+        # bare "/" inside a single name like "SAP S/4HANA".
+        for part in [p.strip() for p in re.split(r"\s+/\s+|\s+&\s+|,\s+", sysname) if p.strip()]:
             if part.lower() not in seen:
                 seen.add(part.lower())
                 systems.append(part)
@@ -1307,7 +1321,6 @@ def donut_svg(segments, caption: str) -> str:
     total = sum(v for _, v in segs)
     if not segs or total <= 0:
         return ""
-    import math
     cx, cy, r, rin = 90, 90, 78, 46
     out = [f"<svg class='chart donut' viewBox='0 0 380 184' width='100%' role='img' "
            f"aria-label='{esc(caption)}' xmlns='http://www.w3.org/2000/svg'>"]

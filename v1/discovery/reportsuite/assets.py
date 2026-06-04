@@ -69,13 +69,17 @@ table{ border-collapse:collapse; width:100%; margin:1rem 0; background:var(--pan
 thead th{ background:var(--navy); color:#fff; padding:.5rem .65rem; text-align:left;
           font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
 tbody td{ padding:.5rem .65rem; border-bottom:1px solid var(--line-soft); vertical-align:top;
-          line-height:1.5; color:var(--ink); }
+          line-height:1.5; color:var(--ink); overflow-wrap:anywhere; }
 tbody tr:nth-child(even) td{ background:var(--bg-alt); }
 tbody tr:last-child td{ border-bottom:none; }
 tr.sr td{ background:var(--navy); color:#fff; font-weight:700; font-size:.74rem;
           text-transform:uppercase; letter-spacing:.04em; }
 table.usecase td{ font-size:.8rem; }
-table.rationale td{ font-size:.82rem; }
+/* the readiness-rationale table has 3 prose columns that can carry long reasons — fix the layout so
+   columns share width and WRAP rather than overflowing the page edge */
+table.rationale{ table-layout:fixed; }
+table.rationale td{ font-size:.82rem; word-break:break-word; }
+table.rationale .rate{ white-space:normal; }    /* let the badge wrap with its reason if needed */
 .dt{ margin:1.2rem 0; }
 .dt h4{ margin:0 0 .2rem; }
 .dt-cap{ font-size:.82rem; color:var(--muted); margin-bottom:.2rem; }
