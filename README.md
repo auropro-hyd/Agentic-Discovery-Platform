@@ -92,6 +92,29 @@ Full rationale: [`v1/docs/`](v1/docs/) · competitive positioning: [`research/`]
 
 ## Quickstart
 
+First time on this repo? Two commands from the root — no API key, no cost:
+
+```bash
+make setup      # Python env (v1/) + explorer deps. Needs `uv` and `npm`; tells you if either is missing.
+make run        # OFFLINE demo: golden replay → builds the explorer → opens the report suite.
+```
+
+`make run` is a deterministic **golden replay** (the saved run, rendered offline), so it works with
+no credentials and can't hit the "no cached response" wall. Run `make` with no target to list everything.
+
+Want a **live** run (real agent, spends credits)? Add a key, then:
+
+```bash
+# put ANTHROPIC_API_KEY=… (or the AZURE_OPENAI_* vars) in v1/.env  — `make setup` seeds it from the template
+make doctor     # verify the provider is reachable (one tiny call)
+make live       # the real pipeline — minutes, costs credits
+make console    # OR: the interactive 6-stage Console (backend + UI dev server)
+```
+
+Run on any domain by dropping its documents in `v1/inputs/<domain>/`, then `make run DOMAIN=<slug>`.
+
+<details><summary>Manual equivalent (without make)</summary>
+
 ```bash
 cd v1
 uv sync                                   # env + deps
@@ -99,8 +122,7 @@ cp .env.example .env                      # add ANTHROPIC_API_KEY (or Azure vars
 uv run python scripts/doctor.py           # check connectivity
 uv run python run.py --domain o2c --auto-resolve     # → opens out/o2c/index.html
 ```
-
-Run on any domain by dropping its documents in `v1/inputs/<domain>/`.
+</details>
 
 ## Develop
 
