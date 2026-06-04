@@ -409,3 +409,7 @@ table.dt td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .live-pill.is-live { color: #991b1b; background: var(--red-bg); border-color: var(--red-bd); animation: livepulse 1.6s ease infinite; }
 @keyframes livepulse { 0%,100% { opacity: 1; } 50% { opacity: 0.62; } }
 @media (prefers-reduced-motion: reduce) { .live-pill.is-live { animation: none; } }
+
+/* AuroPro logo adapts to context: navy by default (light headers), white on the navy sidebar */
+.auropro-logo { color: var(--navy); }
+.sidebar .brand .auropro-logo { color: #fff; }
