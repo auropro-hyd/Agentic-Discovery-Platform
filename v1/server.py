@@ -268,9 +268,28 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, target.read_bytes(), ctype)
 
 
+class _Server(ThreadingHTTPServer):
+    # Avoid a TIME_WAIT socket from a just-stopped backend blocking an immediate restart.
+    allow_reuse_address = True
+
+
 def main() -> int:
-    srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    print(f"Discovery Console backend on http://127.0.0.1:{PORT}  (Ctrl-C to stop)")
+    try:
+        srv = _Server(("127.0.0.1", PORT), Handler)
+    except OSError as e:
+        # The usual cause: a previous Console backend is still running on this port. Fail with a
+        # clear, actionable message instead of a raw traceback (which the UI would see as a silent
+        # "Failed to fetch" — the backend never came up).
+        import errno
+        if e.errno == errno.EADDRINUSE:
+            print(f"error: port {PORT} is already in use — another Discovery Console backend is "
+                  f"probably running.\n"
+                  f"  Stop it (find it with:  lsof -ti tcp:{PORT} | xargs kill), or start this one "
+                  f"on a different port:  DISCOVERY_UI_PORT=8743 uv run python server.py",
+                  flush=True)
+            return 1
+        raise
+    print(f"Discovery Console backend on http://127.0.0.1:{PORT}  (Ctrl-C to stop)", flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
