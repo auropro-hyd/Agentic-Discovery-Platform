@@ -270,15 +270,20 @@ def run_report_fanout(llm, raw_payload: dict, reg: dict, strategy: StrategyProfi
     """Top-level live deep synthesis: build the grounded fact-store, fan out per report, expand one
     opportunity per pain point, and return (merged_payload, planning, fact_store, strategy). The
     caller maps merged_payload via build._from_payload and attaches fact_store/strategy/planning."""
+    from .synthesis import allowed_numbers
     fs = factstore.build_fact_store(raw_payload, reg)
     strat = strategy or factstore.strategy_from_manifest(reg.get("manifest"))
     dk = set(doc_keys or (reg.get("csv_ids", []) + reg.get("doc_ids", [])))
     specs = report_specs(dk)
+    # the AUTHORITATIVE grounding allow-list for this run (tool numbers + finding values + derived
+    # ratios) — same source the monolith gate uses; the fact-store slice only shapes the prompt.
+    allow = allowed_numbers(raw_payload)
     # first pass for the pain points (report 02) so we can seed one opportunity per pain point
-    pp_only, _ = run_synthesis_fanout(llm, fs, strat, dk,
+    pp_only, _ = run_synthesis_fanout(llm, fs, strat, dk, allow=allow,
                                       report_specs={"02-pain-points": specs["02-pain-points"]})
     seeds = opp_seeds_from_pain_points(pp_only)
-    merged, planning = run_synthesis_fanout(llm, fs, strat, dk, report_specs=specs, opp_seeds=seeds)
+    merged, planning = run_synthesis_fanout(llm, fs, strat, dk, allow=allow, report_specs=specs,
+                                            opp_seeds=seeds)
     # fold the first-pass pain points in (report_specs ran them again in the full pass too; merge
     # keeps the first, so they are consistent)
     for k, v in pp_only.items():

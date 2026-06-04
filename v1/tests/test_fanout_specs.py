@@ -100,8 +100,9 @@ def test_fanout_assembles_reference_depth_synthesis_content(monkeypatch):
     monkeypatch.setattr(fspec.factstore, "build_fact_store", lambda raw, reg: _fs())
     llm = Fake()
     reg = {"csv_ids": ["flow"], "doc_ids": [], "manifest": {}}
+    raw = {"_tool_numbers": [1196], "findings": []}
     merged, planning, fs, strat = fspec.run_report_fanout(
-        llm, {"findings": []}, reg, strategy=m.StrategyProfile(direction_type="consolidate"),
+        llm, raw, reg, strategy=m.StrategyProfile(direction_type="consolidate"),
         doc_keys={"flow"})
     c = _from_payload(merged)
     assert len(c.pain_points) == 1 and c.pain_points[0].severity == "high"
@@ -159,6 +160,7 @@ def test_planning_panel_renders_in_suite(tmp_path):
 def test_fanout_determinism(monkeypatch):
     monkeypatch.setattr(fspec.factstore, "build_fact_store", lambda raw, reg: _fs())
     reg = {"csv_ids": ["flow"], "doc_ids": [], "manifest": {}}
-    a, _, _, _ = fspec.run_report_fanout(Fake(), {"findings": []}, reg, doc_keys={"flow"})
-    b, _, _, _ = fspec.run_report_fanout(Fake(), {"findings": []}, reg, doc_keys={"flow"})
+    raw = {"_tool_numbers": [1196], "findings": []}
+    a, _, _, _ = fspec.run_report_fanout(Fake(), raw, reg, doc_keys={"flow"})
+    b, _, _, _ = fspec.run_report_fanout(Fake(), raw, reg, doc_keys={"flow"})
     assert a == b

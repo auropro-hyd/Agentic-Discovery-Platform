@@ -177,20 +177,23 @@ def _facts_brief(fs: FactStore) -> str:
 # (Phase 1 wires the control flow + gate + planning channel; Phase 2 fills the per-report schemas to
 # reference depth.) The seed names a small number of opportunities to expand individually for r04.
 def run_synthesis_fanout(llm, fact_store: FactStore, strategy: StrategyProfile, doc_keys, *,
-                         report_specs=None, opp_seeds=None, model=None):
+                         report_specs=None, opp_seeds=None, model=None, allow=None):
     """Run the fan-out and return (merged_payload: dict, planning: list[PlanningAssumption]).
 
     `report_specs`: {report_key: {"tool", "schema", "instruction", "slice"(terms)}} — what each
     report generates. `opp_seeds`: [{"id","title","topic"}] — opportunities expanded individually for
-    report 04. Both are injected (Phase 2 supplies the real specs); this keeps Phase 1 testable and
-    the orchestration logic independent of the schema detail."""
+    report 04. `allow`: the authoritative grounding allow-list to gate every section against — pass
+    the RUN'S full allow-list (synthesis.allowed_numbers over the raw payload: tool numbers + finding
+    values + derived ratios) so legitimately-grounded figures aren't rejected; falls back to the
+    fact-store's own numbers when not given (tests / no raw payload)."""
     report_specs = report_specs or {}
     opp_seeds = opp_seeds or []
     merged: dict = {}
     planning: list[PlanningAssumption] = []
-    # numbers are grounded RUN-WIDE; the per-section slice only shapes the prompt, so always gate
-    # against the full store's allow-list (a focused slice must never starve the gate).
-    allow = fact_store.numbers_allow()
+    # numbers are grounded RUN-WIDE; the per-section slice only shapes the prompt. Gate against the
+    # full run allow-list (not the narrow fact-store slice) so a focused prompt never starves the gate.
+    if allow is None:
+        allow = fact_store.numbers_allow()
 
     for key in REPORT_KEYS:
         spec = report_specs.get(key)
