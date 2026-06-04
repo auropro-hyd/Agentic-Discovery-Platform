@@ -94,6 +94,9 @@ table.rationale td{ font-size:.82rem; }
 .b-qw{ background:rgba(13,148,136,.12); color:#0f766e; }
 .b-pat{ background:#eef2f7; color:var(--blue-mid); border:1px solid var(--line); }
 .b-cat{ background:#f3f0ff; color:var(--purple); border:1px solid #c4b5fd; }
+/* planning-assumption marker — deliberately NOT a fact colour (dashed amber) so a reader never
+   mistakes forward-looking planning content for measured data */
+.b-plan{ background:#fffbeb; color:#92400e; border:1px dashed var(--amber); }
 .trace{ font-size:.74rem; color:var(--muted); }
 
 /* ── stat tiles (4-up big numbers) ── */

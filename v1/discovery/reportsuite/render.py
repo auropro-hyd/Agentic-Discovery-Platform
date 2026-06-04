@@ -500,7 +500,38 @@ def r05(s: SynthesisContent, meta) -> str:
     d.h1("How the work connects")
     d.p("The enabling relationships between the opportunities — what unlocks what.")
     d.raw(dependency_map_svg(s.opportunities))
+    panel = _planning_panel(s.planning_assumptions)
+    if panel:
+        d.h1("Planning assumptions")
+        d.p("The forward-looking elements of this roadmap — dates, owners, service levels, targets, "
+            "cadence and sequence — are planning assumptions, not measured findings. They are shown "
+            "here explicitly so they can be confirmed before delivery.")
+        d.raw(panel)
     return d.toc_html() + d.body()
+
+
+_PLANNING_LABEL = {"date": "Timing", "owner": "Ownership", "sla": "Service level",
+                   "threshold": "Target", "cadence": "Cadence", "cost": "Cost",
+                   "sequence": "Sequencing"}
+
+
+def _planning_panel(assumptions) -> str:
+    """Render the labelled planning-assumption channel: a table of forward-looking statements with
+    their kind and the grounded basis each rests on, clearly marked as assumptions (not facts).
+    Empty → ''."""
+    rows = []
+    for pa in assumptions or []:
+        kind = _PLANNING_LABEL.get(getattr(pa, "kind", ""), "Planning")
+        basis = f"<span class='prov'>{esc(pa.basis)}</span>" if getattr(pa, "basis", "") else "—"
+        rows.append(f"<tr><td><span class='badge b-plan'>{esc(kind)}</span></td>"
+                    f"<td>{esc(pa.statement)}</td><td>{basis}</td></tr>")
+    if not rows:
+        return ""
+    return ("<div class='note-box'><div class='nb-title'>Planning assumption — confirm before "
+            "delivery</div><div class='nb-text'>These forward-looking items are recommendations, "
+            "not measured facts.</div></div>"
+            "<table><thead><tr><th>Type</th><th>Assumption</th><th>Basis</th></tr></thead><tbody>"
+            + "".join(rows) + "</tbody></table>")
 
 
 def r06(s: SynthesisContent, meta) -> str:

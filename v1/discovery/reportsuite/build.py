@@ -1061,9 +1061,17 @@ def fixture_o2c() -> SynthesisContent:
                      "release, so the volume that flows through EDI is no longer a blind spot.")
 
 
+def _table(t) -> DataTable:
+    return DataTable(title=t.get("title", ""), columns=list(t.get("columns", [])),
+                     rows=[list(r) for r in t.get("rows", [])], caption=t.get("caption", ""),
+                     note=t.get("note", ""), sources=[_sref(s) for s in t.get("sources", [])])
+
+
 def _from_payload(payload: dict) -> SynthesisContent:
-    """Map a live emit_synthesis payload onto the dataclasses. Defensive: tolerates missing
-    optional keys so a partial emit degrades rather than crashes."""
+    """Map a live emit_synthesis / fan-out payload onto the dataclasses. Defensive: tolerates missing
+    optional keys so a partial emit degrades rather than crashes. Maps the DEEP fields too (data
+    tables, process detail, per-PP detail tables, evidence/risk/traceability registers, baseline
+    stats) so the fan-out's merged payload reconstructs a reference-depth SynthesisContent."""
     cs = payload.get("current_state", {})
     current = CurrentState(
         domain_overview=cs.get("domain_overview", ""),
@@ -1086,12 +1094,22 @@ def _from_payload(payload: dict) -> SynthesisContent:
                          for p in cs.get("system_profiles", [])],
         format_taxonomy=[FormatPattern(label=f["label"], description=f.get("description", ""),
                                        examples=f.get("examples", ""))
-                         for f in cs.get("format_taxonomy", [])])
+                         for f in cs.get("format_taxonomy", [])],
+        baseline_stats=[KeyStat(value=str(k.get("value", "")), label=k.get("label", ""),
+                                sublabel=k.get("sublabel", "")) for k in cs.get("baseline_stats", [])],
+        data_tables=[_table(t) for t in cs.get("data_tables", [])],
+        process_detail=[ProcessDetail(title=p.get("title", ""), body=p.get("body", ""),
+                                      actor=p.get("actor", ""), system=p.get("system", ""),
+                                      sources=[_sref(s) for s in p.get("sources", [])])
+                        for p in cs.get("process_detail", [])])
     pain_points = [PainPoint(
         id=p["id"], title=p["title"], impact_rank=p.get("impact_rank", 1),
         from_finding=p.get("from_finding", ""), description=p.get("description", ""),
         root_cause=p.get("root_cause", ""), failure_pattern=p.get("failure_pattern", ""),
+        business_consequence=p.get("business_consequence", ""), category=p.get("category", ""),
+        severity=p.get("severity", ""),
         quantified=[_num(n) for n in p.get("quantified", [])],
+        detail_table=_table(p["detail_table"]) if p.get("detail_table") else None,
         sources=[_sref(s) for s in p.get("sources", [])]) for p in payload.get("pain_points", [])]
     opps = [_opp(o) for o in payload.get("opportunities", [])]
     tr = payload.get("transformation", {})
@@ -1113,7 +1131,21 @@ def _from_payload(payload: dict) -> SynthesisContent:
                                       target=m.get("target", ""))
                            for m in payload.get("metrics_framework", [])],
         executive_summary=_exec_summary(payload.get("executive_summary", {})),
-        target_state=payload.get("target_state", ""))
+        target_state=payload.get("target_state", ""),
+        evidence_register=[EvidenceRow(finding=e.get("finding", ""), source=e.get("source", ""),
+                                       evidence_type=e.get("evidence_type", ""),
+                                       data_point=e.get("data_point", ""),
+                                       confidence=e.get("confidence", ""))
+                           for e in payload.get("evidence_register", [])],
+        risk_register=[RiskItem(risk=r.get("risk", ""), likelihood=r.get("likelihood", ""),
+                                impact=r.get("impact", ""), mitigation=r.get("mitigation", ""),
+                                owner=r.get("owner", "")) for r in payload.get("risk_register", [])],
+        traceability=[TraceRow(pain_point=t.get("pain_point", ""), summary=t.get("summary", ""),
+                               severity=t.get("severity", ""),
+                               recommendation=t.get("recommendation", ""),
+                               opportunity=t.get("opportunity", ""),
+                               expected_outcome=t.get("expected_outcome", ""),
+                               horizon=t.get("horizon", "")) for t in payload.get("traceability", [])])
 
 
 def _exec_summary(es: dict) -> ExecutiveSummary:

@@ -106,11 +106,15 @@ SECTION_SYSTEM = (
 def synth_section(llm, *, tool_name: str, schema: dict, fact_store: FactStore,
                   strategy: StrategyProfile | None, instruction: str, doc_keys: set[str],
                   factual: bool = False, max_tokens: int = 6000, model=None,
-                  attempts: int = 2) -> dict | None:
+                  attempts: int = 2, allow: set[float] | None = None) -> dict | None:
     """Generate one report section via a bounded, cache-keyed LLM call, then gate it. Returns the
     section dict, or None if it cannot be grounded after `attempts` (the suite omits it rather than
-    aborting). Determinism inherited from llm.messages_with_tools."""
-    allow = fact_store.numbers_allow()
+    aborting). `fact_store` is the SLICE shown in the prompt; `allow` (when given) is the grounding
+    allow-list to gate against — pass the FULL run's allow-list here so a focused prompt slice never
+    starves the gate of a legitimately-grounded number. Determinism inherited from
+    llm.messages_with_tools."""
+    if allow is None:
+        allow = fact_store.numbers_allow()
     brief = strategy.brief() if strategy else ""
     user = (f"VERIFIED FACTS (use ONLY these numbers):\n{_facts_brief(fact_store)}\n\n"
             + (f"STRATEGY (shape this section to this direction):\n{brief}\n\n" if brief else "")
@@ -184,6 +188,9 @@ def run_synthesis_fanout(llm, fact_store: FactStore, strategy: StrategyProfile, 
     opp_seeds = opp_seeds or []
     merged: dict = {}
     planning: list[PlanningAssumption] = []
+    # numbers are grounded RUN-WIDE; the per-section slice only shapes the prompt, so always gate
+    # against the full store's allow-list (a focused slice must never starve the gate).
+    allow = fact_store.numbers_allow()
 
     for key in REPORT_KEYS:
         spec = report_specs.get(key)
@@ -191,7 +198,7 @@ def run_synthesis_fanout(llm, fact_store: FactStore, strategy: StrategyProfile, 
             continue
         fs = fact_store.slice_for(*spec.get("slice", [])) if spec.get("slice") else fact_store
         section = synth_section(
-            llm, tool_name=spec["tool"], schema=spec["schema"], fact_store=fs,
+            llm, tool_name=spec["tool"], schema=spec["schema"], fact_store=fs, allow=allow,
             strategy=strategy if key in _STRATEGIC else None,
             instruction=spec["instruction"], doc_keys=doc_keys,
             factual=key in _FACTUAL, max_tokens=spec.get("max_tokens", 6000), model=model)
@@ -205,7 +212,7 @@ def run_synthesis_fanout(llm, fact_store: FactStore, strategy: StrategyProfile, 
         opp = synth_section(
             llm, tool_name="emit_opportunity", schema=spec.get("opp_schema", _MIN_OPP_SCHEMA),
             fact_store=fact_store.slice_for(*([seed.get("topic")] if seed.get("topic") else [])),
-            strategy=None, instruction=_opp_instruction(seed), doc_keys=doc_keys,
+            allow=allow, strategy=None, instruction=_opp_instruction(seed), doc_keys=doc_keys,
             max_tokens=spec.get("opp_max_tokens", 6000), model=model)
         if opp is not None:
             planning += collect_planning(opp)
