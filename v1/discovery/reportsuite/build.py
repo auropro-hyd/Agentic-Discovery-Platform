@@ -10,11 +10,14 @@ deterministic source index.
 """
 from __future__ import annotations
 
+import re
+
 from .. import docnames
 from ..models import (
-    BusinessImpact, CurrentState, ExecutiveSummary, FormatPattern, Handoff, InventoryItem,
-    MatrixQuadrant, MetricItem, NumberRef, Opportunity, OppPattern, PainPoint, ProcessStep, RaciRow,
-    RoadmapHorizon, RoadmapItem, SourceDoc, SourceRef, SynthesisContent, SystemProfile,
+    BoundedContext, BusinessImpact, ContextRelationship, CurrentState, DataTable, EvidenceRow,
+    ExecutiveSummary, FormatPattern, Handoff, InventoryItem, KeyStat, MatrixQuadrant, MetricItem,
+    NumberRef, Opportunity, OppPattern, PainPoint, ProcessDetail, ProcessStep, RaciRow, RiskItem,
+    RoadmapHorizon, RoadmapItem, SourceDoc, SourceRef, SynthesisContent, SystemProfile, TraceRow,
 )
 from ..synthesis import OPP_TO_PP, PP_TO_OPP, allowed_numbers, validate_synthesis
 
@@ -33,8 +36,24 @@ class NoFixtureForDomain(Exception):
 
 
 def build_synthesis(raw_payload: dict, *, domain: str = "o2c", live=False, llm=None,
-                    doc_keys=None, model=None, suppress_names=None) -> SynthesisContent:
-    if live:
+                    doc_keys=None, model=None, suppress_names=None, reg=None,
+                    fanout=True) -> SynthesisContent:
+    """Build the report content. Live runs use the DEEP per-report fan-out by default (fact-store →
+    per-report/per-opportunity generation → reference-depth SynthesisContent); pass fanout=False for
+    the legacy single-emit path. `reg` (the domain registry) is required by the fan-out to build the
+    grounded fact-store; it falls back to the legacy path when absent."""
+    if live and fanout and reg is not None:
+        from .. import fanout_specs
+        merged, planning, fs, strat = fanout_specs.run_report_fanout(
+            llm, raw_payload, reg, doc_keys=doc_keys, model=model)
+        content = _from_payload(merged)
+        content.fact_store = fs
+        content.strategy = strat
+        content.planning_assumptions = planning
+        # surface only the NON-EMPTY strategy fields alongside r05's posture (don't blank anything)
+        content.strategy_profile = {**content.strategy_profile,
+                                    **{k: v for k, v in strat.to_dict().items() if v}}
+    elif live:
         from .. import synthesis
         payload = synthesis.run_synthesis(llm, raw_payload, doc_keys or [], model=model,
                                           suppress_names=suppress_names)
@@ -48,39 +67,130 @@ def build_synthesis(raw_payload: dict, *, domain: str = "o2c", live=False, llm=N
             f"(a fixture from another domain must never be reused here).")
     _apply_derived_links(content)
     content.source_index = build_source_index(raw_payload, doc_keys)
-    content.charts = derive_charts(raw_payload)
+    content.charts = derive_charts(raw_payload, content.current_state)
     return content
 
 
-def derive_charts(raw_payload: dict) -> list[dict]:
-    """Code-owned chart series, built ONLY from the grounded numbers the tools returned this run
-    (findings' computed_values). Never model-set, so a chart can't carry a fabricated figure. Each
-    series is included only if its components are all present — otherwise it is silently omitted
-    (graceful, generic; no domain constants). Returns [] when nothing chartable is found."""
-    # index every computed value by a normalised label substring -> value
-    vals: dict[str, float] = {}
-    for f in raw_payload.get("findings", []):
-        for cv in f.get("computed_values", []):
-            label = str(cv.get("label", "")).lower()
-            try:
-                vals[label] = float(cv["value"])
-            except (TypeError, ValueError, KeyError):
-                continue
+def derive_charts(raw_payload: dict, current_state: CurrentState | None = None) -> list[dict]:
+    """Code-owned chart series, built ONLY from grounded numbers (the tools' computed_values AND the
+    synthesis data tables). Never model-set, so a chart can't carry a fabricated figure — every
+    segment value is copied verbatim from a real cell/computed value. Domain-agnostic and graceful:
+    a chart is included only when it has >= 2 real numeric segments; otherwise omitted.
 
+    Two sources, in order of richness:
+      1. data_tables — any table with a categorical first column + a numeric column becomes a chart
+         (the natural business breakdowns: channel mix, credit CRM-vs-ERP, escalations by cause…).
+      2. findings' computed_values — the legacy "unfulfilled by channel" pattern, as a fallback."""
     charts: list[dict] = []
-    # unfulfilled orders by channel — a fully-grounded multi-category whole (every segment is a
-    # real count from the tools; nothing derived/subtracted). Render BOTH a magnitude bar and a
-    # share-of-failures donut — bars show "how much more", donuts show "what share".
-    unf = [(lbl.split("unfulfilled")[1].split("order")[0].strip().title() or "Channel", v)
-           for lbl, v in vals.items() if "unfulfilled" in lbl and "order" in lbl and "value" not in lbl]
-    unf = [(c, v) for c, v in unf if v > 0]
-    if len(unf) >= 2:
-        seg = [{"label": c, "value": v} for c, v in sorted(unf, key=lambda x: -x[1])]
-        charts.append({"key": "unfulfilled_by_channel", "unit": "orders", "kind": "bar",
-                       "title": "Unfulfilled orders by channel", "segments": seg})
-        charts.append({"key": "unfulfilled_share", "unit": "orders", "kind": "donut",
-                       "title": "Share of unfulfilled orders by channel", "segments": seg})
+    seen_titles: set[str] = set()
+
+    # ---- 1. charts from the grounded data tables ----
+    for t in (current_state.data_tables if current_state else []):
+        cols = [str(c) for c in (t.columns or [])]
+        rows = t.rows or []
+        if len(cols) < 2 or len(rows) < 2:
+            continue
+        label_col = 0
+        # only chart tables whose first column is a real CATEGORY (channel, system, measure…), not
+        # a date or a per-row id/log — those produce noise, not a useful business breakdown.
+        if not _is_categorical(cols[label_col], [r[label_col] for r in rows if r]):
+            continue
+        # pick the FIRST numeric column (most tables lead with a name then a count/amount)
+        num_col = _first_numeric_col(cols, rows)
+        if num_col is None or num_col == label_col:
+            continue
+        segs = []
+        for r in rows:
+            if num_col >= len(r) or label_col >= len(r):
+                continue
+            v = _num_cell(r[num_col])
+            lab = str(r[label_col]).strip()
+            if v is None or not lab:
+                continue
+            segs.append({"label": lab, "value": v})
+        if len(segs) < 2:
+            continue
+        title = (t.title or t.caption or cols[num_col]).strip()
+        if title.lower() in seen_titles:
+            continue
+        seen_titles.add(title.lower())
+        unit = _unit_from_col(cols[num_col])
+        # a small set of categories → donut (share); more → bar (magnitude). Cap at the top 8.
+        segs = sorted(segs, key=lambda s: -s["value"])[:8]
+        kind = "donut" if 2 <= len(segs) <= 5 else "bar"
+        charts.append({"key": f"tbl-{len(charts)}", "unit": unit, "kind": kind,
+                       "title": title, "segments": segs})
+        if len(charts) >= 4:           # keep the suite focused — the richest few, not every table
+            break
+
+    # ---- 2. fallback: unfulfilled-by-channel from computed_values (only if tables gave nothing) ----
+    if not charts:
+        vals: dict[str, float] = {}
+        for f in raw_payload.get("findings", []):
+            for cv in f.get("computed_values", []):
+                try:
+                    vals[str(cv.get("label", "")).lower()] = float(cv["value"])
+                except (TypeError, ValueError, KeyError):
+                    continue
+        unf = [(lbl.split("unfulfilled")[1].split("order")[0].strip().title() or "Channel", v)
+               for lbl, v in vals.items()
+               if "unfulfilled" in lbl and "order" in lbl and "value" not in lbl]
+        unf = [(c, v) for c, v in unf if v > 0]
+        if len(unf) >= 2:
+            seg = [{"label": c, "value": v} for c, v in sorted(unf, key=lambda x: -x[1])]
+            charts.append({"key": "unfulfilled_by_channel", "unit": "orders", "kind": "bar",
+                           "title": "Unfulfilled orders by channel", "segments": seg})
+            charts.append({"key": "unfulfilled_share", "unit": "orders", "kind": "donut",
+                           "title": "Share of unfulfilled orders by channel", "segments": seg})
     return charts
+
+
+def _num_cell(cell) -> float | None:
+    """Parse a numeric value out of a table cell ("5,667", "EUR 61,225,000", "67.3%"). Returns the
+    bare number (verbatim magnitude) or None if the cell isn't numeric."""
+    if cell is None:
+        return None
+    s = str(cell).strip().replace(",", "")
+    m = re.search(r"-?\d+(?:\.\d+)?", s)
+    return float(m.group()) if m else None
+
+
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}|^\d{1,2}[/-]\d{1,2}")
+
+
+def _is_categorical(header: str, cells: list) -> bool:
+    """True if a label column is a genuine category to group by (Channel, System, Measure…), not a
+    date column or a per-row log/id. Heuristic: reject date-headed/date-valued columns, and reject
+    columns where almost every value is unique (a log, not a breakdown)."""
+    lo = header.lower()
+    if lo in ("date", "datetime", "timestamp", "time", "id", "order id", "po id"):
+        return False
+    vals = [str(c).strip() for c in cells if str(c).strip()]
+    if not vals:
+        return False
+    if sum(1 for v in vals if _DATE_RE.match(v)) > len(vals) // 2:
+        return False
+    # a useful breakdown repeats categories OR has a small fixed set; a log is nearly all-unique
+    uniq = len(set(v.lower() for v in vals))
+    return uniq <= 8 or uniq <= len(vals) * 0.6
+
+
+def _first_numeric_col(cols: list[str], rows: list) -> int | None:
+    """The index of the first column (after col 0) whose cells are predominantly numeric."""
+    for c in range(1, len(cols)):
+        nums = sum(1 for r in rows if c < len(r) and _num_cell(r[c]) is not None)
+        if nums >= max(2, len(rows) // 2):
+            return c
+    return None
+
+
+def _unit_from_col(col: str) -> str:
+    lo = col.lower()
+    if "%" in col or "share" in lo or "percent" in lo:
+        return "percent"
+    if "eur" in lo or "value" in lo or "€" in col or "amount" in lo:
+        return "eur"
+    return ""
 
 
 # ---------------------------------------------------------------------------
@@ -246,48 +356,248 @@ def fixture_o2c() -> SynthesisContent:
                             "notes — the lived reality of how exceptions are actually handled.",
                 examples="Customer-service escalation log, EDI dispute-resolution working notes."),
         ],
+        baseline_stats=[
+            KeyStat(value="8,420", label="Total orders processed", sublabel="calendar year 2025"),
+            KeyStat(value="67.3%", label="Orders received via EDI", sublabel="5,667 of 8,420"),
+            KeyStat(value="14", label="Active EDI connections", sublabel="8 owned + 6 under TSA"),
+            KeyStat(value="340", label="Active customer accounts", sublabel="in the ERP master"),
+        ],
+        data_tables=[
+            DataTable(
+                title="Order channel mix — 2025",
+                columns=["Channel", "Orders", "Share", "Entry method", "Not fulfilled"],
+                rows=[
+                    ["EDI", "5,667", "67.3%", "Automated into order management", "1,196"],
+                    ["Telephone / manual", "1,802", "21.4%", "Keyed into the ERP by an agent", "320"],
+                    ["Email", "767", "9.1%", "Keyed in within one business day", "111"],
+                    ["Fax", "184", "2.2%", "Keyed in; by exception agreement only", "40"],
+                    ["Total", "8,420", "100%", "—", "1,667"],
+                ],
+                caption="Volumes and shares are counted directly from the order-flow export.",
+                note="Fax appears in the order data although the Order Management SOP lists only "
+                     "telephone and email as standard channels.",
+                sources=[SourceRef(doc_id=FLOW)]),
+            DataTable(
+                title="Standard fulfilment lead times by market",
+                columns=["Market", "Lead time", "Primary distribution centre"],
+                rows=[
+                    ["France", "2 business days", "Chartres, FR"],
+                    ["United Kingdom", "3 business days", "Swindon, UK"],
+                    ["Germany", "2 business days", "Frankfurt, DE"],
+                    ["Austria / Switzerland", "3 business days", "Frankfurt, DE"],
+                    ["Spain", "3 business days", "Barcelona, ES"],
+                    ["Portugal", "4 business days", "Barcelona, ES"],
+                    ["Benelux", "2 business days", "Antwerp, BE"],
+                    ["Italy", "3 business days", "Milan, IT (third-party operated)"],
+                ],
+                caption="Documented standard lead times and the distribution centre serving each "
+                        "market.",
+                sources=[SourceRef(doc_id=SOP)]),
+            DataTable(
+                title="Credit limit approval authority",
+                columns=["Credit limit band", "New account", "Limit increase"],
+                rows=[
+                    ["Up to €250,000", "Credit Controller", "Credit Controller"],
+                    ["€250,001 – €500,000", "Finance Director", "Finance Director"],
+                    ["€500,001 – €1,000,000", "Finance Director + VP Commercial",
+                     "Finance Director"],
+                    ["Above €1,000,000", "Finance Director + VP Commercial + CEO",
+                     "Finance Director + VP Commercial"],
+                ],
+                caption="Approval authority for setting and changing credit limits, by band.",
+                sources=[SourceRef(doc_id=POLICY)]),
+            DataTable(
+                title="Collections escalation ladder",
+                columns=["Overdue", "Action", "Owner"],
+                rows=[
+                    ["1–30 days", "Automated payment reminder on day 5", "System"],
+                    ["31–60 days", "Formal payment demand; account flagged", "Credit Controller"],
+                    ["61–90 days", "Second demand; credit-hold proposed", "Credit Controller"],
+                    ["91+ days", "Account on hold; new orders suspended; agency referral considered",
+                     "Finance Director"],
+                ],
+                caption="The documented overdue-collections escalation ladder.",
+                sources=[SourceRef(doc_id=POLICY)]),
+            DataTable(
+                title="EDI connection inventory",
+                columns=["#", "Trading partner", "Country", "Managed by", "Transition status"],
+                rows=[
+                    ["1", "Tesco", "UK", "Own platform", "Owned"],
+                    ["2", "Mercadona", "ES", "Own platform", "Owned"],
+                    ["3", "REWE Group", "DE", "Own platform", "Owned"],
+                    ["4", "Boots (new)", "UK", "Own platform", "Owned (live Aug 2025)"],
+                    ["5", "Alliance Healthcare", "EU", "Own platform", "Owned"],
+                    ["6", "Rite Aid Europe", "EU", "Own platform", "Owned"],
+                    ["7", "Aldi Europe", "EU", "Own platform", "Owned"],
+                    ["8", "Coop Group (new)", "EU", "Own platform", "Owned"],
+                    ["9", "Carrefour France", "FR", "Parent (TSA)", "Target Q4 2025"],
+                    ["10", "Boots (legacy)", "UK", "Parent (TSA)", "Target Q1 2026"],
+                    ["11", "dm (Drogerie Markt)", "DE", "Parent (TSA)", "Target Q1 2026"],
+                    ["12", "E.Leclerc", "FR", "Parent (TSA)", "Target Q2 2026 (provisional)"],
+                    ["13", "Lidl Europe", "EU", "Parent (TSA)", "Target Q2 2026 (provisional)"],
+                    ["14", "Coop Group (legacy)", "EU", "Parent (TSA)", "Target Q3 2026 (provisional)"],
+                ],
+                caption="All 14 live EDI connections: 8 on the organisation's own platform, 6 still "
+                        "operated by the former parent under the transitional service arrangement.",
+                note="Migration targets for connections 12–14 are provisional pending technical "
+                     "scoping; the governing service terms sit in a schedule not included in the "
+                     "pack.",
+                sources=[SourceRef(doc_id="edi-integration-register-opella-europe")]),
+            DataTable(
+                title="Top trading accounts — credit baseline",
+                columns=["Account", "Country", "ERP credit limit", "Payment terms", "Status"],
+                rows=[
+                    ["Carrefour France", "FR", "€1,800,000", "NET45", "Active"],
+                    ["Boots UK", "UK", "€1,200,000", "NET45", "Active"],
+                    ["E.Leclerc", "FR", "€1,100,000", "NET45", "Active"],
+                    ["Tesco UK", "UK", "€1,000,000", "NET45", "Active"],
+                    ["dm (Drogerie Markt)", "DE", "€950,000", "NET45", "Active"],
+                    ["Lidl Europe", "EU", "€850,000", "NET45", "Active"],
+                    ["Coop Group", "EU", "€800,000", "NET45", "Active"],
+                    ["Mercadona", "ES", "€750,000", "NET45", "Active"],
+                ],
+                caption="The eight accounts that trade across all channels, with their ERP credit "
+                        "baseline.",
+                sources=[SourceRef(doc_id=ERP)]),
+            DataTable(
+                title="Systems in scope",
+                columns=["System", "Role", "Hosting"],
+                rows=[
+                    ["SAP S/4HANA", "Core ERP; authoritative for credit limits and balances",
+                     "Enterprise"],
+                    ["SAP CRM", "Customer relationship records (not authoritative for credit)",
+                     "Enterprise"],
+                    ["Own EDI platform", "Routes the 8 owned connections",
+                     "Own private cloud, Frankfurt"],
+                    ["Former parent's EDI platform", "Routes the 6 connections still under the "
+                     "arrangement", "Former parent"],
+                ],
+                caption="The systems the order-to-cash process touches and who hosts them.",
+                sources=[SourceRef(doc_id="edi-integration-register-opella-europe"),
+                         SourceRef(doc_id=POLICY)]),
+        ],
+        process_detail=[
+            ProcessDetail(
+                title="Order receipt",
+                actor="Customer Service", system="EDI / ERP",
+                body="EDI orders flow automatically into order management across 14 connections (8 "
+                     "on the organisation's own platform, 6 still operated by the former parent). "
+                     "Telephone orders are keyed into the ERP within 30 minutes of the call; email "
+                     "orders within one business day, against per-market cut-off times.",
+                sources=[SourceRef(doc_id=SOP),
+                         SourceRef(doc_id="edi-integration-register-opella-europe")]),
+            ProcessDetail(
+                title="Order validation",
+                actor="Customer Service", system="SAP S/4HANA",
+                body="A mandatory sequence runs in the ERP: customer account status, credit-limit "
+                     "verification against the outstanding balance, product availability at the "
+                     "allocated distribution centre, minimum-order-quantity compliance, and pricing "
+                     "validation (a variance under 2% is processed at the system price; 2% or more "
+                     "is referred to the account manager).",
+                sources=[SourceRef(doc_id=SOP)]),
+            ProcessDetail(
+                title="Credit assessment",
+                actor="Credit Control", system="SAP S/4HANA",
+                body="The ERP places an order on credit hold automatically where it would take the "
+                     "account past its approved limit, or where an invoice is more than 60 days "
+                     "overdue. The agent notifies the Credit Controller within four business hours; "
+                     "release authority follows the approval-authority bands.",
+                sources=[SourceRef(doc_id=POLICY), SourceRef(doc_id=SOP)]),
+            ProcessDetail(
+                title="Order confirmation & fulfilment",
+                actor="Customer Service / Distribution", system="ERP / order management",
+                body="Confirmation issues within four business hours for telephone orders and two "
+                     "for email orders. Released orders are picked, packed and dispatched from the "
+                     "market's distribution centre against the documented standard lead times.",
+                sources=[SourceRef(doc_id=SOP)]),
+            ProcessDetail(
+                title="Invoicing",
+                actor="Finance", system="SAP S/4HANA",
+                body="Invoices generate automatically on dispatch confirmation. Payment terms follow "
+                     "the account tier: major retail on NET 45 with a 1% early-payment discount, "
+                     "pharmacy and wholesale on NET 30, and new accounts on NET 14 or cash with "
+                     "order for the first six months.",
+                sources=[SourceRef(doc_id=SOP), SourceRef(doc_id=POLICY)]),
+            ProcessDetail(
+                title="Accounts receivable & collections",
+                actor="Accounts Receivable", system="SAP S/4HANA",
+                body="Aged-debtor reporting runs monthly; balances over 60 days are reviewed "
+                     "individually. Collections follow the overdue escalation ladder, and the team "
+                     "completes a quarterly self-assessment of compliance.",
+                sources=[SourceRef(doc_id=POLICY)]),
+        ],
     )
 
     pain_points = [
         PainPoint(
             id="PP1", title="Two customer systems disagree on credit limits", impact_rank=1,
-            from_finding="F1",
+            from_finding="F1", category="Data Governance", severity="high",
             description="Your ERP and CRM hold different credit limits and payment terms for the "
                         "same major retail accounts, with no single agreed source of truth.",
             root_cause="Both systems were carried over at carve-out and were never reconciled; CRM "
                        "limits were updated by hand without an approval trail.",
             failure_pattern="Orders are released against whichever limit the system resolves first, "
                             "so the same account can trade on two different limits.",
+            business_consequence="Credit can be extended beyond the policy-approved limit, and the "
+                                 "same account can be invoiced on two different payment terms.",
             quantified=[
                 NumberRef(value=267, unit="accounts", label="accounts with different credit limits",
                           text="267 of the shared accounts", sources=_src(ERP, CRM)),
                 NumberRef(value=600000, unit="eur", label="largest single gap (Carrefour France)",
                           text="€600,000", sources=_src(ERP, CRM, AR)),
             ],
+            detail_table=DataTable(
+                title="Credit-limit discrepancy register — top accounts",
+                columns=["Account", "Country", "ERP limit", "CRM limit", "ERP terms", "CRM terms"],
+                rows=[
+                    ["Carrefour France", "FR", "€1,800,000", "€2,400,000", "NET45", "NET30"],
+                    ["Boots UK", "UK", "€1,200,000", "€1,550,000", "NET45", "NET30"],
+                    ["E.Leclerc", "FR", "€1,100,000", "€1,400,000", "NET45", "NET30"],
+                    ["Tesco UK", "UK", "€1,000,000", "€1,350,000", "NET45", "NET30"],
+                    ["dm (Drogerie Markt)", "DE", "€950,000", "€1,150,000", "NET45", "NET30"],
+                ],
+                caption="Where the two systems disagree, account by account — limits and terms.",
+                sources=[SourceRef(doc_id=ERP), SourceRef(doc_id=CRM)]),
             sources=_src(ERP, CRM, AR, POLICY)),
         PainPoint(
             id="PP2", title="Two-thirds of orders run on an undocumented channel", impact_rank=2,
-            from_finding="F2",
+            from_finding="F2", category="Process Coverage", severity="high",
             description="EDI carries most of your order volume, yet it is not covered by the Order "
                         "Management SOP and has no owner in the Order-to-Cash RACI.",
             root_cause="The documented process was written for manual and email orders; EDI grew "
                        "to dominate without the procedure or accountability catching up.",
             failure_pattern="EDI orders that fail are handled informally, with no governed process "
                             "or named owner.",
+            business_consequence="The channel carrying most of the order value runs with no "
+                                 "documented procedure and no accountable owner.",
             quantified=[
                 NumberRef(value=67, unit="percent", label="EDI share of orders",
                           text="67% of orders (5,667 of 8,420)", sources=_src(FLOW, NOTES)),
             ],
+            detail_table=DataTable(
+                title="Document-level evidence",
+                columns=["Document", "How it treats EDI"],
+                rows=[
+                    ["Order Management SOP", "Lists telephone and email as the standard channels; "
+                     "EDI is out of scope."],
+                    ["Order-to-Cash RACI", "Covers manual and email steps only; no EDI rows."],
+                    ["EDI dispute working notes", "Informal notes, explicitly 'not an official "
+                     "SOP'."],
+                ],
+                caption="Where each governing document leaves the EDI channel.",
+                sources=[SourceRef(doc_id=SOP), SourceRef(doc_id=RACI), SourceRef(doc_id=NOTES)]),
             sources=_src(FLOW, RACI, SOP, NOTES)),
         PainPoint(
             id="PP3", title="EDI order failures concentrate on the unowned channel", impact_rank=3,
-            from_finding="F3",
+            from_finding="F3", category="Operational Resilience", severity="high",
             description="A large block of EDI orders is not fulfilled, on the same channel that has "
                         "no documented process or owner.",
             root_cause="Without a governed EDI process, failures are absorbed reactively through "
                        "manual re-entry rather than prevented.",
             failure_pattern="EDI orders not processed is the single most common customer-service "
                             "escalation.",
+            business_consequence="The largest single block of unfulfilled orders — and the most "
+                                 "frequent escalation — sits on the channel nobody owns.",
             quantified=[
                 NumberRef(value=1196, unit="orders", label="EDI orders not fulfilled",
                           text="1,196 EDI orders", sources=_src(FLOW)),
@@ -296,7 +606,71 @@ def fixture_o2c() -> SynthesisContent:
                 NumberRef(value=34, unit="escalations", label="EDI-not-processed escalations",
                           text="34 escalations", sources=_src(ESC, NOTES)),
             ],
+            detail_table=DataTable(
+                title="Unfulfilled orders by channel",
+                columns=["Channel", "Orders not fulfilled"],
+                rows=[["EDI", "1,196"], ["Telephone / manual", "320"], ["Email", "111"],
+                      ["Fax", "40"]],
+                caption="Unfulfilled orders cluster on the EDI channel.",
+                sources=[SourceRef(doc_id=FLOW)]),
             sources=_src(FLOW, ESC, NOTES)),
+        PainPoint(
+            id="PP4", title="Six EDI connections still run on the former parent's platform",
+            impact_rank=2, from_finding="F2", category="Third-Party Dependency", severity="medium",
+            description="Six of the fourteen live EDI connections are still operated by the former "
+                        "parent under a transitional service arrangement, with the service terms "
+                        "held in a schedule that is not in the document pack.",
+            root_cause="At carve-out, eight connections moved to the organisation's own platform "
+                       "while six remained on the parent's; the migration is partly complete.",
+            failure_pattern="When one of these six connections has an incident, resolution depends "
+                            "on the parent's team and a transitional agreement the organisation does "
+                            "not control.",
+            business_consequence="The organisation cannot guarantee its own response times on the "
+                                 "connections carrying several of its largest retail accounts.",
+            quantified=[
+                NumberRef(value=6, unit="count", label="connections still under the arrangement",
+                          text="6 of 14 connections", sources=_src(NOTES)),
+            ],
+            detail_table=DataTable(
+                title="Connections still under the transitional arrangement",
+                columns=["Trading partner", "Country", "Migration target"],
+                rows=[
+                    ["Carrefour France", "FR", "Q4 2025"],
+                    ["Boots (legacy)", "UK", "Q1 2026"],
+                    ["dm (Drogerie Markt)", "DE", "Q1 2026"],
+                    ["E.Leclerc", "FR", "Q2 2026 (provisional)"],
+                    ["Lidl Europe", "EU", "Q2 2026 (provisional)"],
+                    ["Coop Group (legacy)", "EU", "Q3 2026 (provisional)"],
+                ],
+                caption="The six connections to bring onto the organisation's own platform.",
+                note="The governing service terms sit in a schedule not included in the document "
+                     "pack; the migration dates are the register's stated targets.",
+                sources=[SourceRef(doc_id="edi-integration-register-opella-europe"),
+                         SourceRef(doc_id=NOTES)]),
+            sources=_src("edi-integration-register-opella-europe", NOTES)),
+        PainPoint(
+            id="PP5", title="The two customer masters are not aligned on which accounts exist",
+            impact_rank=3, from_finding="F1", category="Data Governance", severity="medium",
+            description="The ERP holds more customer accounts than the CRM, so the two systems do "
+                        "not even agree on which accounts exist, let alone their credit terms.",
+            root_cause="Accounts were created in the ERP without a matching record being maintained "
+                       "in the CRM after carve-out.",
+            failure_pattern="Twenty-two accounts exist in the ERP with no CRM counterpart, so any "
+                            "process that reads the CRM misses them entirely.",
+            business_consequence="A clean reconciliation cannot be completed until the account "
+                                 "populations themselves are aligned.",
+            quantified=[
+                NumberRef(value=22, unit="accounts", label="accounts in the ERP but not the CRM",
+                          text="22 accounts", sources=_src(ERP, CRM)),
+            ],
+            detail_table=DataTable(
+                title="Customer-master population",
+                columns=["System", "Active accounts"],
+                rows=[["ERP customer master", "340"], ["CRM customer records", "318"],
+                      ["In the ERP only", "22"]],
+                caption="The two masters hold different account populations.",
+                sources=[SourceRef(doc_id=ERP), SourceRef(doc_id=CRM)]),
+            sources=_src(ERP, CRM)),
     ]
 
     cross = [{"pattern": "Undocumented EDI channel drives both volume and failure",
@@ -483,23 +857,135 @@ def fixture_o2c() -> SynthesisContent:
         value_rating="high", feasibility_rating="low", value_score=5, feasibility_score=2,
         matrix_quadrant=MatrixQuadrant.PLAN_FOR, sources=_src(FLOW, RACI))
 
+    REG = "edi-integration-register-opella-europe"
+    opp4 = Opportunity(
+        id="OPP4", title="EDI Connection Transition Programme", pattern=OppPattern.MODERNISATION,
+        overview="Bring the six EDI connections still operated by the former parent onto the "
+                 "organisation's own platform, so it controls the service end to end.",
+        before_process=[
+            ProcessStep(seq=1, name="Incident on a parent-run connection", actor="Customer Service",
+                        description="An EDI incident occurs on one of the six connections operated "
+                                    "by the former parent."),
+            ProcessStep(seq=2, name="Resolution waits on the parent", actor="Former parent IT",
+                        description="Resolution depends on the parent's team under the transitional "
+                                    "arrangement.",
+                        failure_points=["No control over response times on these connections",
+                                        "Governing service terms are not in the organisation's "
+                                        "hands"]),
+        ],
+        after_process=[
+            ProcessStep(seq=1, name="Connection migrated", actor="EDI integration team",
+                        system="Own EDI platform",
+                        description="Each connection is migrated onto the organisation's own EDI "
+                                    "platform on the published schedule."),
+            ProcessStep(seq=2, name="Service owned end to end", actor="EDI integration team",
+                        description="Incidents are resolved under the organisation's own service "
+                                    "levels, with no dependency on the former parent."),
+        ],
+        business_impact=BusinessImpact(
+            narrative="Removes the dependency on the former parent for the connections carrying "
+                      "several of the largest retail accounts.",
+            quantified=[NumberRef(value=6, unit="count", label="connections brought in-house",
+                                  text="6 of 14 connections", sources=_src(NOTES))],
+            derivation="Six of the fourteen live connections remain under the transitional "
+                       "arrangement today."),
+        implementation_approach="A phased migration on the published schedule, one connection at a "
+                                "time, validated against live order flow before the parent's "
+                                "connection is decommissioned.",
+        required_integrations=["Own EDI platform", "Former parent's EDI platform (during cutover)"],
+        success_metrics=["All connections operated on the organisation's own platform",
+                         "Incident resolution under the organisation's own service levels"],
+        dependencies=[],
+        risks=["The governing service terms are not in the document pack",
+               "Migration dates for the later connections are provisional"],
+        personas=["EDI integration team", "Customer Service", "Commercial / account managers"],
+        knowledge_sources=["EDI integration register", "EDI dispute working notes"],
+        document_formats=["Technical register", "Operational working notes"],
+        expected_behaviour="Each of the six connections is migrated to the organisation's own "
+                           "platform on the schedule and validated against live order flow before "
+                           "the parent's connection is retired. The programme touches one connection "
+                           "at a time so order flow is never interrupted.",
+        escalation="Where a connection's service terms or migration date are unclear, the item is "
+                   "held for the EDI integration lead and the transition programme office rather "
+                   "than migrated blind.",
+        data_readiness="medium — the connection inventory and managing entity are documented, but "
+                       "the governing service terms sit in a schedule not included in the pack.",
+        technical_complexity="high — a live cutover of production EDI connections between two "
+                             "platforms, coordinated with an external party.",
+        operational_readiness="medium — the organisation owns eight connections already and has run "
+                              "two migrations, but the remaining six depend on the former parent's "
+                              "cooperation.",
+        value_rating="medium", feasibility_rating="medium", value_score=3, feasibility_score=3,
+        matrix_quadrant=MatrixQuadrant.PLAN_FOR, sources=_src(REG, NOTES))
+
+    opp5 = Opportunity(
+        id="OPP5", title="Customer Master Population Alignment", pattern=OppPattern.HITL,
+        overview="Align the two customer masters on which accounts exist, so the credit "
+                 "reconciliation has a clean, complete population to work from.",
+        before_process=[
+            ProcessStep(seq=1, name="Account created in the ERP", actor="Customer Service",
+                        description="A new account is set up in the ERP."),
+            ProcessStep(seq=2, name="No matching CRM record", actor="—",
+                        description="No matching record is maintained in the CRM.",
+                        failure_points=["22 accounts exist in the ERP with no CRM counterpart",
+                                        "Any process reading the CRM misses them"]),
+        ],
+        after_process=[
+            ProcessStep(seq=1, name="Populations compared", actor="Data steward",
+                        system="ERP / CRM",
+                        description="The two masters are compared and the missing accounts "
+                                    "surfaced for review."),
+            ProcessStep(seq=2, name="Records aligned & governed", actor="Data steward",
+                        description="Missing records are created or retired under a maintained "
+                                    "onboarding rule so the populations stay aligned."),
+        ],
+        business_impact=BusinessImpact(
+            narrative="Aligns the account populations so the credit reconciliation works from a "
+                      "complete, agreed set of accounts.",
+            quantified=[NumberRef(value=22, unit="accounts", label="accounts to align",
+                                  text="22 accounts", sources=_src(ERP, CRM))],
+            derivation="The ERP holds 340 active accounts to the CRM's 318 — a 22-account "
+                       "difference."),
+        implementation_approach="A human-in-the-loop alignment: the platform surfaces the population "
+                                "difference and a data steward confirms each create-or-retire "
+                                "decision.",
+        required_integrations=["SAP S/4HANA customer master", "SAP CRM customer records"],
+        success_metrics=["The two masters hold the same active-account population",
+                         "A maintained rule keeps them aligned at onboarding"],
+        dependencies=[],
+        prerequisite_for=[],
+        risks=["Some ERP-only accounts may be legitimately inactive and need retiring, not adding"],
+        personas=["Data steward", "Commercial / account managers", "Finance Systems"],
+        knowledge_sources=["SAP S/4HANA customer master", "SAP CRM customer records"],
+        document_formats=["Structured master-data export"],
+        expected_behaviour="The platform lists the accounts present in one master but not the other "
+                           "and proposes a create-or-retire action for each; a data steward confirms "
+                           "every decision. It never creates or retires a record on its own.",
+        escalation="Any account whose status is ambiguous (e.g. possibly inactive) is held for the "
+                   "data steward and the account manager to decide rather than auto-aligned.",
+        data_readiness="high — both account populations are structured fields; the 22-account "
+                       "difference is computable directly from the two extracts.",
+        technical_complexity="low — a compare-and-confirm over two master-data extracts.",
+        operational_readiness="medium — the alignment needs a named data steward and a maintained "
+                              "onboarding rule, which do not exist today.",
+        value_rating="medium", feasibility_rating="high", value_score=3, feasibility_score=4,
+        matrix_quadrant=MatrixQuadrant.PLAN_FOR, sources=_src(ERP, CRM))
+
     roadmap = [
         RoadmapHorizon(horizon="H1", window="0-6 months", theme="Stabilise the foundations", items=[
             RoadmapItem(title="Customer Master Reconciliation", opportunity_id="OPP1",
                         rationale="Establishes the single source of truth the rest depends on."),
             RoadmapItem(title="EDI Order Exception Handling", opportunity_id="OPP2",
                         rationale="Cuts the most frequent escalation; independent, can run now."),
-            RoadmapItem(title="Transition the EDI connections still operated under the transitional "
-                              "service arrangement", rationale="Brings the inherited connections "
-                              "under the organisation's own control as part of standing up "
-                              "independently."),
+            RoadmapItem(title="Customer Master Population Alignment", opportunity_id="OPP5",
+                        rationale="Aligns the account populations so the reconciliation is clean."),
         ]),
-        RoadmapHorizon(horizon="H2", window="6-18 months", theme="Close the credit gap", items=[
+        RoadmapHorizon(horizon="H2", window="6-18 months", theme="Close the gaps", items=[
             RoadmapItem(title="AI Credit Decisioning", opportunity_id="OPP3",
                         rationale="Credit-checks the dominant EDI channel; needs OPP1 first.",
                         depends_on=["OPP1"]),
-            RoadmapItem(title="EDI middleware assessment",
-                        rationale="Assess the EDI integration layer ahead of modernisation."),
+            RoadmapItem(title="EDI Connection Transition Programme", opportunity_id="OPP4",
+                        rationale="Brings the six parent-run connections onto the own platform."),
         ]),
         RoadmapHorizon(horizon="H3", window="18+ months", theme="Rationalise the landscape", items=[
             RoadmapItem(title="CRM consolidation",
@@ -513,15 +999,18 @@ def fixture_o2c() -> SynthesisContent:
 
     return SynthesisContent(
         current_state=current, pain_points=pain_points, cross_process_patterns=cross,
-        opportunities=[opp1, opp2, opp3],
+        opportunities=[opp1, opp2, opp3, opp4, opp5],
         sequencing_rationale="Customer Master Reconciliation (OPP1) comes first because AI Credit "
                              "Decisioning (OPP3) needs a clean, single credit limit per account to "
-                             "work. EDI Order Exception Handling (OPP2) is independent and runs in "
-                             "parallel from the start.",
+                             "work. EDI Order Exception Handling (OPP2) and the population alignment "
+                             "(OPP5) are independent and run in parallel from the start; the "
+                             "connection transition (OPP4) follows on the published migration "
+                             "schedule.",
         strategic_readiness="The current state can support the near-term moves once the customer "
                             "master is reconciled; the credit decisioning step is the main capability "
                             "to build toward.",
-        dependency_notes="OPP3 depends on OPP1. OPP1 and OPP2 are independent of each other.",
+        dependency_notes="OPP3 depends on OPP1. OPP1, OPP2, OPP4 and OPP5 are independent of each "
+                         "other and can run in parallel.",
         roadmap=roadmap,
         strategy_profile={"posture": "consolidate_modernize",
                           "notes": "Consolidate the inherited landscape while modernising for the "
@@ -557,6 +1046,110 @@ def fixture_o2c() -> SynthesisContent:
                            "analyst confirms as correct on review.",
                 target="A high confirmation rate at go-live, improving through tuning; tracked "
                        "against analyst review."),
+            MetricItem(
+                name="EDI connection ownership",
+                definition="Share of the 14 live EDI connections operated on the organisation's own "
+                           "platform rather than the former parent's (8 of 14 today).",
+                target="All 14 connections on the organisation's own platform on the published "
+                       "migration schedule."),
+            MetricItem(
+                name="Customer-master population alignment",
+                definition="Whether the ERP and CRM hold the same active-account population (a "
+                           "22-account difference today).",
+                target="A single agreed active-account population across both systems, kept aligned "
+                       "at onboarding."),
+        ],
+        evidence_register=[
+            EvidenceRow(finding="PP1", source="ERP and CRM customer exports",
+                        evidence_type="Structured data",
+                        data_point="267 of 318 shared accounts hold a different credit limit; "
+                                   "Carrefour France differs by €600,000.", confidence="Verified"),
+            EvidenceRow(finding="PP1", source="Credit Policy",
+                        evidence_type="Policy document",
+                        data_point="The ERP is named the sole authoritative system for credit "
+                                   "limits.", confidence="Verified"),
+            EvidenceRow(finding="PP1", source="Accounts Receivable review notes",
+                        evidence_type="Review note",
+                        data_point="'Our credit policy does not define which system is "
+                                   "authoritative.'", confidence="Amber"),
+            EvidenceRow(finding="PP2", source="Order flow export",
+                        evidence_type="Structured data",
+                        data_point="EDI carries 67.3% of orders (5,667 of 8,420).",
+                        confidence="Verified"),
+            EvidenceRow(finding="PP2", source="Order Management SOP; Order-to-Cash RACI",
+                        evidence_type="Policy documents",
+                        data_point="Neither the SOP nor the RACI covers the EDI channel.",
+                        confidence="Verified"),
+            EvidenceRow(finding="PP3", source="Order flow export; escalation log",
+                        evidence_type="Structured data",
+                        data_point="1,196 unfulfilled EDI orders (€12.4M); 34 'EDI not processed' "
+                                   "escalations.", confidence="Verified"),
+            EvidenceRow(finding="PP4", source="EDI integration register",
+                        evidence_type="Technical register",
+                        data_point="6 of 14 connections remain under the transitional service "
+                                   "arrangement.", confidence="Verified"),
+            EvidenceRow(finding="PP4", source="EDI dispute working notes",
+                        evidence_type="Working notes",
+                        data_point="Governing service terms and a firm transfer date are not in the "
+                                   "pack.", confidence="Gap"),
+            EvidenceRow(finding="PP5", source="ERP and CRM customer exports",
+                        evidence_type="Structured data",
+                        data_point="340 active accounts in the ERP versus 318 in the CRM — a "
+                                   "22-account difference.", confidence="Verified"),
+        ],
+        risk_register=[
+            RiskItem(risk="The credit and commercial teams cannot agree the canonical credit limit "
+                          "for a contested account.",
+                     likelihood="Medium", impact="High",
+                     mitigation="Material gaps (e.g. the €600,000 Carrefour France gap) are held "
+                                "for the Credit Controller to adjudicate; nothing auto-resolves.",
+                     owner="Credit Controller"),
+            RiskItem(risk="The automated EDI exception rules do not cover an edge case, so it still "
+                          "reaches an agent.",
+                     likelihood="Medium", impact="Medium",
+                     mitigation="Unmatched and low-confidence exceptions route to an agent with the "
+                                "source order attached; coverage is reviewed as new types appear.",
+                     owner="Customer Service Lead"),
+            RiskItem(risk="Credit analysts do not trust the automated credit assessment and "
+                          "override it by default.",
+                     likelihood="Medium", impact="High",
+                     mitigation="Every hold and low-confidence case is shown with its reasoning and "
+                                "the limit used, so analysts can confirm rather than re-derive.",
+                     owner="Credit Controller"),
+            RiskItem(risk="A TSA connection's migration slips because the former parent's "
+                          "cooperation or service terms are unclear.",
+                     likelihood="High", impact="Medium",
+                     mitigation="Migrate one connection at a time on the published schedule, "
+                                "validating against live order flow before decommissioning.",
+                     owner="EDI integration lead"),
+            RiskItem(risk="ERP-only accounts are added to the CRM when some should instead be "
+                          "retired as inactive.",
+                     likelihood="Low", impact="Medium",
+                     mitigation="A data steward confirms each create-or-retire decision; ambiguous "
+                                "accounts are held for the account manager.",
+                     owner="Data steward"),
+        ],
+        traceability=[
+            TraceRow(pain_point="PP1", summary="ERP/CRM disagree on credit limits",
+                     severity="High", recommendation="R-01", opportunity="OPP1",
+                     expected_outcome="One agreed credit limit per account, with an approval trail.",
+                     horizon="H1"),
+            TraceRow(pain_point="PP2", summary="EDI channel undocumented and unowned",
+                     severity="High", recommendation="R-03", opportunity="OPP3",
+                     expected_outcome="A credit gate on the channel carrying most order value.",
+                     horizon="H2"),
+            TraceRow(pain_point="PP3", summary="EDI order failures concentrate here",
+                     severity="High", recommendation="R-02", opportunity="OPP2",
+                     expected_outcome="Routine EDI exceptions resolve without an agent.",
+                     horizon="H1"),
+            TraceRow(pain_point="PP4", summary="Six connections under the former parent",
+                     severity="Medium", recommendation="R-04", opportunity="OPP4",
+                     expected_outcome="All connections on the organisation's own platform.",
+                     horizon="H2"),
+            TraceRow(pain_point="PP5", summary="Customer masters hold different populations",
+                     severity="Medium", recommendation="R-05", opportunity="OPP5",
+                     expected_outcome="One agreed active-account population across both systems.",
+                     horizon="H1"),
         ],
         executive_summary=ExecutiveSummary(
             headline="Order-to-Cash runs on two customer systems that disagree on credit, and a "
@@ -577,9 +1170,17 @@ def fixture_o2c() -> SynthesisContent:
                      "release, so the volume that flows through EDI is no longer a blind spot.")
 
 
+def _table(t) -> DataTable:
+    return DataTable(title=t.get("title", ""), columns=list(t.get("columns", [])),
+                     rows=[list(r) for r in t.get("rows", [])], caption=t.get("caption", ""),
+                     note=t.get("note", ""), sources=[_sref(s) for s in t.get("sources", [])])
+
+
 def _from_payload(payload: dict) -> SynthesisContent:
-    """Map a live emit_synthesis payload onto the dataclasses. Defensive: tolerates missing
-    optional keys so a partial emit degrades rather than crashes."""
+    """Map a live emit_synthesis / fan-out payload onto the dataclasses. Defensive: tolerates missing
+    optional keys so a partial emit degrades rather than crashes. Maps the DEEP fields too (data
+    tables, process detail, per-PP detail tables, evidence/risk/traceability registers, baseline
+    stats) so the fan-out's merged payload reconstructs a reference-depth SynthesisContent."""
     cs = payload.get("current_state", {})
     current = CurrentState(
         domain_overview=cs.get("domain_overview", ""),
@@ -596,18 +1197,36 @@ def _from_payload(payload: dict) -> SynthesisContent:
         handoff_catalogue=[Handoff(from_step=h["from_step"], to_step=h["to_step"],
                                    mechanism=h.get("mechanism", ""))
                            for h in cs.get("handoff_catalogue", [])],
+        bounded_contexts=[BoundedContext(
+            name=b["name"], kind=b.get("kind", "core"), owner=b.get("owner", ""),
+            responsibilities=b.get("responsibilities", ""),
+            is_shared_kernel=bool(b.get("is_shared_kernel", False)),
+            relationships=[ContextRelationship(to=r["to"], kind=r.get("kind", ""),
+                                               label=r.get("label", ""))
+                           for r in b.get("relationships", []) if r.get("to")])
+            for b in cs.get("bounded_contexts", []) if b.get("name")],
         system_profiles=[SystemProfile(name=p["name"], role=p.get("role", ""),
                                        how_used=p.get("how_used", ""), owners=p.get("owners", ""),
                                        limitations=p.get("limitations", ""))
                          for p in cs.get("system_profiles", [])],
         format_taxonomy=[FormatPattern(label=f["label"], description=f.get("description", ""),
                                        examples=f.get("examples", ""))
-                         for f in cs.get("format_taxonomy", [])])
+                         for f in cs.get("format_taxonomy", [])],
+        baseline_stats=[KeyStat(value=str(k.get("value", "")), label=k.get("label", ""),
+                                sublabel=k.get("sublabel", "")) for k in cs.get("baseline_stats", [])],
+        data_tables=[_table(t) for t in cs.get("data_tables", [])],
+        process_detail=[ProcessDetail(title=p.get("title", ""), body=p.get("body", ""),
+                                      actor=p.get("actor", ""), system=p.get("system", ""),
+                                      sources=[_sref(s) for s in p.get("sources", [])])
+                        for p in cs.get("process_detail", [])])
     pain_points = [PainPoint(
         id=p["id"], title=p["title"], impact_rank=p.get("impact_rank", 1),
         from_finding=p.get("from_finding", ""), description=p.get("description", ""),
         root_cause=p.get("root_cause", ""), failure_pattern=p.get("failure_pattern", ""),
+        business_consequence=p.get("business_consequence", ""), category=p.get("category", ""),
+        severity=p.get("severity", ""),
         quantified=[_num(n) for n in p.get("quantified", [])],
+        detail_table=_table(p["detail_table"]) if p.get("detail_table") else None,
         sources=[_sref(s) for s in p.get("sources", [])]) for p in payload.get("pain_points", [])]
     opps = [_opp(o) for o in payload.get("opportunities", [])]
     tr = payload.get("transformation", {})
@@ -629,7 +1248,21 @@ def _from_payload(payload: dict) -> SynthesisContent:
                                       target=m.get("target", ""))
                            for m in payload.get("metrics_framework", [])],
         executive_summary=_exec_summary(payload.get("executive_summary", {})),
-        target_state=payload.get("target_state", ""))
+        target_state=payload.get("target_state", ""),
+        evidence_register=[EvidenceRow(finding=e.get("finding", ""), source=e.get("source", ""),
+                                       evidence_type=e.get("evidence_type", ""),
+                                       data_point=e.get("data_point", ""),
+                                       confidence=e.get("confidence", ""))
+                           for e in payload.get("evidence_register", [])],
+        risk_register=[RiskItem(risk=r.get("risk", ""), likelihood=r.get("likelihood", ""),
+                                impact=r.get("impact", ""), mitigation=r.get("mitigation", ""),
+                                owner=r.get("owner", "")) for r in payload.get("risk_register", [])],
+        traceability=[TraceRow(pain_point=t.get("pain_point", ""), summary=t.get("summary", ""),
+                               severity=t.get("severity", ""),
+                               recommendation=t.get("recommendation", ""),
+                               opportunity=t.get("opportunity", ""),
+                               expected_outcome=t.get("expected_outcome", ""),
+                               horizon=t.get("horizon", "")) for t in payload.get("traceability", [])])
 
 
 def _exec_summary(es: dict) -> ExecutiveSummary:

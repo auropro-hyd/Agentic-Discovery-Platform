@@ -1,0 +1,6 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+# synced from v1/out by `npm run sync:data` — regenerated, not source
+src/data/discovery-*.json

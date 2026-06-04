@@ -13,7 +13,9 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from discovery.llm import ToolTurn  # noqa: E402
-from discovery.models import MatrixQuadrant  # noqa: E402
+from discovery.models import (  # noqa: E402
+    BoundedContext, ContextRelationship, CurrentState, DataTable, MatrixQuadrant,
+)
 from discovery.reportsuite import build  # noqa: E402
 from _payloads import depth_doc_keys, depth_synthesis_payload  # noqa: E402
 
@@ -29,7 +31,9 @@ class FakeSynthLLM:
 
 def _raw():
     return {
-        "_tool_numbers": [267, 600000, 67, 5667, 8420, 1196, 12362493.74, 34, 2400000, 1800000],
+        "_tool_numbers": [267, 600000, 67, 5667, 8420, 1196, 12362493.74, 34, 2400000, 1800000,
+                          340, 318, 22, 14, 320, 111, 40, 1100000, 1200000, 1000000, 950000,
+                          850000, 800000, 750000, 1400000, 1550000, 1350000, 1150000],
         "findings": [
             {"id": "F1", "title": "Customer master conflict", "business_consequence": "Wrong limits.",
              "computed_values": [{"label": "a", "value": 267}, {"label": "b", "value": 600000}],
@@ -58,6 +62,69 @@ def test_build_synthesis_live_maps_depth_fields():
     # derived links still applied on the live path
     opp1 = next(o for o in content.opportunities if o.id == "OPP1")
     assert "OPP3" in opp1.prerequisite_for
+
+
+class _FanoutLLM:
+    """A fake that emits a grounded payload per report tool (drives the deep fan-out path)."""
+    _EMITS = {
+        "emit_exec": {"executive_summary": {"headline": "h", "situation": "s", "opportunity": "o"}},
+        "emit_current_state": {"current_state": {"domain_overview": "o", "process_summary": "s",
+            "process_flow": [{"seq": 1, "name": "A", "description": "d"},
+                             {"seq": 2, "name": "B", "description": "d"},
+                             {"seq": 3, "name": "C", "description": "d"}]}},
+        "emit_pain_points": {"pain_points": [{"id": "PP1", "title": "EDI fails", "impact_rank": 1,
+                                              "description": "d", "root_cause": "rc",
+                                              "severity": "high"}]},
+        "emit_recommendation": {"transformation": {"sequencing_rationale": "seq",
+                                                   "strategic_readiness": "sr"},
+                                "metrics_framework": [{"name": "m1", "definition": "d", "target": "t"},
+                                                      {"name": "m2", "definition": "d", "target": "t"},
+                                                      {"name": "m3", "definition": "d", "target": "t"}]},
+        "emit_roadmap": {"roadmap": [
+            {"horizon": "H1", "window": "0-6 months", "theme": "t", "items": [{"title": "i",
+                                                                              "rationale": "r"}]},
+            {"horizon": "H2", "window": "6-18 months", "theme": "t", "items": [{"title": "i",
+                                                                               "rationale": "r"}]},
+            {"horizon": "H3", "window": "18+ months", "theme": "t", "items": [{"title": "i",
+                                                                              "rationale": "r"}]}]},
+        "emit_opportunity": {"id": "OPP1", "title": "Fix", "pattern": "automation", "overview": "o",
+            "before_process": [{"seq": 1, "name": "b", "description": "d"},
+                               {"seq": 2, "name": "b2", "description": "d"}],
+            "after_process": [{"seq": 1, "name": "a", "description": "d"},
+                              {"seq": 2, "name": "a2", "description": "d"}],
+            "business_impact": {"narrative": "n"}},
+    }
+
+    def messages_with_tools(self, *, system, messages, tools, model=None, max_tokens=4096):
+        name = tools[0]["name"]
+        return ToolTurn(content=[{"type": "tool_use", "id": "e", "name": name,
+                                  "input": self._EMITS.get(name, {})}], stop_reason="tool_use")
+
+
+def test_build_synthesis_live_uses_fanout_when_reg_present():
+    """With reg + live + fanout=True, build_synthesis routes through the deep per-report fan-out and
+    attaches the fact-store, strategy, and planning assumptions."""
+    reg = {"csv_ids": [], "doc_ids": [], "manifest": {"strategy_profile": {
+        "direction_type": "consolidate", "horizon": "0-6 months"}}}
+    content = build.build_synthesis(_raw(), domain="o2c", live=True, llm=_FanoutLLM(),
+                                    doc_keys=[], reg=reg)
+    assert content.fact_store is not None                       # fact-store attached
+    assert content.strategy and content.strategy.direction_type == "consolidate"
+    assert content.strategy_profile.get("direction_type") == "consolidate"  # merged in
+    assert len(content.pain_points) == 1 and len(content.opportunities) == 1
+    assert len(content.roadmap) == 3 and len(content.metrics_framework) == 3
+
+
+def test_build_synthesis_live_falls_back_to_single_emit_without_reg():
+    """No reg → legacy single-emit path (back-compat), even with fanout left at its default True."""
+    llm = FakeSynthLLM(depth_synthesis_payload())
+    content = build.build_synthesis(_raw(), domain="o2c", live=True, llm=llm,
+                                    doc_keys=sorted(depth_doc_keys()))   # reg omitted, fanout default
+    assert content.fact_store is None and content.current_state.system_profiles
+    # and explicitly disabling fan-out takes the same legacy path
+    content2 = build.build_synthesis(_raw(), domain="o2c", live=True, llm=llm,
+                                     doc_keys=sorted(depth_doc_keys()), fanout=False, reg={"x": 1})
+    assert content2.fact_store is None
 
 
 def test_from_payload_tolerates_missing_optional_keys():
@@ -120,3 +187,64 @@ def test_derive_charts_empty_when_no_breakdown():
     # only one channel present -> not enough for a breakdown
     raw = {"findings": [{"computed_values": [{"label": "Unfulfilled EDI orders", "value": 5}]}]}
     assert build.derive_charts(raw) == []
+
+
+def test_derive_charts_from_data_tables():
+    cs = CurrentState(data_tables=[
+        # a clean categorical + numeric table -> a donut (<=5 cats); values copied verbatim
+        DataTable(title="Order channel mix", columns=["Channel", "Orders", "Value (EUR)"],
+                  rows=[["EDI", "5,667", "59,711,399"], ["Fax", "184", "1,771,828"]]),
+        # CRM vs ERP measures -> a bar (eur unit detected from the column name)
+        DataTable(title="Credit CRM vs ERP", columns=["Measure", "Value (EUR)"],
+                  rows=[["CRM total", "EUR 61,225,000"], ["ERP total", "EUR 58,975,000"],
+                        ["Delta", "EUR 30,675,000"]]),
+        # a date-led LOG must be REJECTED (no useful breakdown) — exercises the categorical guard
+        DataTable(title="Escalation log", columns=["Date", "Resolution (hrs)"],
+                  rows=[["2025-01-18", "6"], ["2025-01-25", "67"], ["2025-02-07", "54"]]),
+        # too few rows -> skipped
+        DataTable(title="One row", columns=["A", "N"], rows=[["x", "1"]]),
+        # categorical labels but NO numeric column -> skipped (num_col is None)
+        DataTable(title="All text", columns=["System", "Notes"],
+                  rows=[["SAP", "core"], ["CRM", "supporting"], ["EDI", "external"]]),
+        # numeric column found (col 1 has >=2 numeric cells), but the row loop drops a short row
+        # (105) and two empty-label rows (108) — leaving only ONE valid segment (<2) -> skipped (112).
+        DataTable(title="Ragged", columns=["Cat", "Count"],
+                  rows=[["A", "5"], ["nine"], ["", "9"], ["", "8"]]),
+        # a DUPLICATE title is skipped the second time (seen_titles guard)
+        DataTable(title="Order channel mix", columns=["Channel", "Orders"],
+                  rows=[["X", "1"], ["Y", "2"]]),
+    ])
+    charts = build.derive_charts({}, cs)
+    titles = [c["title"] for c in charts]
+    assert "Order channel mix" in titles and "Credit CRM vs ERP" in titles
+    assert "Escalation log" not in titles                       # date-led log rejected
+    assert "One row" not in titles and "All text" not in titles and "Ragged" not in titles
+    mix = next(c for c in charts if c["title"] == "Order channel mix")
+    assert mix["kind"] == "donut" and [s["value"] for s in mix["segments"]] == [5667.0, 184.0]
+    crm = next(c for c in charts if c["title"] == "Credit CRM vs ERP")
+    assert crm["unit"] == "eur" and crm["segments"][0]["value"] == 61225000.0   # sorted desc, verbatim
+
+
+def test_derive_charts_helpers():
+    assert build._num_cell("5,667") == 5667.0
+    assert build._num_cell("EUR 61,225,000") == 61225000.0
+    assert build._num_cell("67.3%") == 67.3
+    assert build._num_cell("n/a") is None and build._num_cell(None) is None
+    # categorical: a small repeated/fixed set is a category; dates / all-unique IDs are not
+    assert build._is_categorical("Channel", ["EDI", "Fax", "EDI"]) is True
+    assert build._is_categorical("Date", ["2025-01-01", "2025-02-01"]) is False   # date header
+    assert build._is_categorical("When", ["2025-01-01", "2025-02-01", "2025-03-01"]) is False  # date VALUES
+    assert build._is_categorical("Order ID", [f"ORD-{i}" for i in range(20)]) is False
+    assert build._is_categorical("Measure", []) is False
+    assert build._unit_from_col("Value (EUR)") == "eur" and build._unit_from_col("Share %") == "percent"
+    assert build._unit_from_col("Orders") == ""
+
+
+def test_bounded_context_to_dict_roundtrips():
+    bc = BoundedContext(name="Order Mgmt", kind="core", owner="CS", responsibilities="Receipt",
+                        is_shared_kernel=False,
+                        relationships=[ContextRelationship(to="Credit", kind="customer_supplier",
+                                                           label="U/D")])
+    d = bc.to_dict()
+    assert d["name"] == "Order Mgmt" and d["kind"] == "core" and d["is_shared_kernel"] is False
+    assert d["relationships"][0] == {"to": "Credit", "kind": "customer_supplier", "label": "U/D"}

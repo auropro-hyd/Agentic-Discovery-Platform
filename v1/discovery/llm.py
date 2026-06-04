@@ -41,6 +41,10 @@ class LLMClient:
             if offline is not None
             else os.environ.get("DISCOVERY_OFFLINE", "0") == "1"
         )
+        # DISCOVERY_NO_CACHE=1 forces a genuinely fresh run: skip the READ-cache so every call hits
+        # the provider (results are still WRITTEN, so a later replay is fast). Incompatible with
+        # offline — a fresh run by definition needs the network.
+        self.no_cache = os.environ.get("DISCOVERY_NO_CACHE", "0") == "1" and not self.offline
         self._client = None  # lazily created
 
     # ---- caching -----------------------------------------------------------
@@ -57,6 +61,8 @@ class LLMClient:
         return self.cache_dir / f"{key}.json"
 
     def _read_cache(self, key: str) -> str | None:
+        if self.no_cache:                  # forced-fresh run: never serve from the read-cache
+            return None
         p = self._cache_path(key)
         if p.exists():
             return json.loads(p.read_text())["response"]

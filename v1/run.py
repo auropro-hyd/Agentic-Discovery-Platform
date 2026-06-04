@@ -61,9 +61,16 @@ def main(argv=None) -> int:
                     help="skip the adversarial verification pass over findings")
     ap.add_argument("--refresh", action="store_true",
                     help="diff this run against the previous one for the domain (new/resolved/changed)")
+    ap.add_argument("--fresh", action="store_true",
+                    help="force a genuinely live run: bypass the LLM read-cache so every call hits "
+                         "the provider (slow, costs credits). Results are still cached for replay. "
+                         "Mutually exclusive with --golden.")
     args = ap.parse_args(argv)
     if args.provider:
         os.environ["DISCOVERY_PROVIDER"] = args.provider
+    if args.fresh and args.golden:
+        print("error: --fresh and --golden are mutually exclusive (fresh needs the network).")
+        return 2
 
     domain_dir = INPUTS / args.domain
     if not domain_dir.is_dir():
@@ -72,6 +79,9 @@ def main(argv=None) -> int:
     if args.golden:
         _activate_golden_cache(args.domain)
         os.environ["DISCOVERY_OFFLINE"] = "1"
+    if args.fresh:
+        os.environ["DISCOVERY_NO_CACHE"] = "1"
+        print("  (fresh run: bypassing the LLM cache — this will take minutes and spend credits)")
 
     print(f"Reading the {args.domain} landscape...")
     manifest = loader.load_manifest(domain_dir) or {}
@@ -130,10 +140,21 @@ def main(argv=None) -> int:
         client = ""
     else:
         client = detected
-    suppress_names = [detected] if (suppress and detected) else []
+    # Expand a multi-word detected name into the full phrase PLUS each significant token so a bare
+    # token ("Acme" from "Acme Manufacturing") can't leak in prose. Fixed at the SOURCE so BOTH the
+    # print render and the SPA sync (which read suppress_names) scrub every variant. Conservative:
+    # the full phrase always stays first; we only ADD tokens.
+    suppress_names = docnames.expand_suppress_names(detected) if (suppress and detected) else []
     docnames.set_noise_words(suppress_names)
     print(f"  client: {client or '(none — neutral)'}"
           + (f"  [suppressed on screen: {detected}]" if suppress_names else ""))
+    # Loud warning for the dangerous case the review surfaced: suppression was REQUESTED but the
+    # detector found no name to suppress (it needs >= 3 mentions in >= 2 docs). The org name may
+    # still appear once or twice in the LLM-written synthesis prose — so silence here would be a
+    # silent confidentiality leak. Flag it so the operator knows protection did NOT engage.
+    if suppress and not detected:
+        print("  ! WARNING: suppress_client is set but no client name was auto-detected to scrub. "
+              "Set an explicit manifest 'client' name, or verify the reports name no organisation.")
 
     # ---- build the 6-report suite content -----------------------------------------
     # LIVE BY DEFAULT for every domain — the report content is generated from this run's findings.
@@ -145,10 +166,12 @@ def main(argv=None) -> int:
     use_fixture = args.use_fixture and has_fixture
     if args.use_fixture and not has_fixture:
         print(f"  (no fixture exists for '{args.domain}'; generating live instead)")
+    reg["manifest"] = manifest          # the deep fan-out reads the StrategyProfile from here
     try:
         result.synthesis = build.build_synthesis(
             payload, domain=args.domain, live=not use_fixture, llm=llm,
-            doc_keys=reg["csv_ids"] + reg["doc_ids"], model=None, suppress_names=suppress_names)
+            doc_keys=reg["csv_ids"] + reg["doc_ids"], model=None, suppress_names=suppress_names,
+            reg=reg)
     except Exception as e:
         if has_fixture and not use_fixture:
             print(f"! live synthesis failed ({type(e).__name__}: {e}); "
@@ -169,6 +192,16 @@ def main(argv=None) -> int:
     internal = {**result.to_dict(), "internal_trace": result.raw_payload or {}}
     if refresh_diff is not None:
         internal["refresh_diff"] = refresh_diff
+    # Confidentiality hand-off for downstream client-facing consumers (e.g. the explorer SPA):
+    # the names that must NOT be shown on screen for this run, plus the neutral label to use
+    # instead. The print suite already scrubs these at render; this lets the SPA's sync step do the
+    # same so the suppressed name never even ships to a static host. (Internal trace keeps the
+    # real text — this block only declares what to scrub for the client-facing view.)
+    internal["_confidential"] = {
+        "suppress_requested": suppress,
+        "suppress_names": suppress_names,
+        "client_display": client or "the organisation",
+    }
     (OUT / f"discovery-{args.domain}.json").write_text(
         json.dumps(internal, indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8")
     print(f"\nDone. Open the suite: {index.relative_to(ROOT)}")

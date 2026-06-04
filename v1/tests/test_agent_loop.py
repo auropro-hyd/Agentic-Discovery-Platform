@@ -91,6 +91,40 @@ def test_loop_runs_and_grounds_honest_output():
     assert {f["id"] for f in out["findings"]} == {"F1", "F2", "F3"}
 
 
+def test_tool_use_paired_even_on_non_tool_use_stop_reason():
+    """Regression: a turn that ends with a tool_use but a non-'tool_use' stop_reason (e.g. the model
+    hit max_tokens mid-call) MUST still get a tool_result paired, or the next API request 400s on an
+    unpaired tool_use. The loop must record the result and continue, not nudge-and-desync."""
+    from discovery.llm import ToolTurn
+
+    class StopReasonLLM(ScriptedLLM):
+        def messages_with_tools(self, *, system, messages, tools, model=None, max_tokens=4096):
+            turn = super().messages_with_tools(system=system, messages=messages, tools=tools)
+            # first turn carries a real tool_use but reports a non-tool_use stop reason
+            if self.step == 1:
+                return ToolTurn(content=turn.content, stop_reason="max_tokens")
+            return turn
+
+    captured = {}
+
+    class Capture(StopReasonLLM):
+        def messages_with_tools(self, *, system, messages, tools, model=None, max_tokens=4096):
+            captured["messages"] = [m for m in messages]   # snapshot before this call
+            return super().messages_with_tools(system=system, messages=messages, tools=tools)
+
+    out = agent_loop.run_discovery(Capture(_honest_payload()), ["order-flow-analysis-export-2025"],
+                                   ["edi-integration-register-opella-europe"], "narrative")
+    assert {f["id"] for f in out["findings"]} == {"F1", "F2", "F3"}   # completed, no desync
+    # every assistant tool_use in the final transcript is immediately followed by a tool_result
+    msgs = captured["messages"]
+    for i, m in enumerate(msgs):
+        if m["role"] == "assistant" and any(
+                isinstance(b, dict) and b.get("type") == "tool_use" for b in m["content"]):
+            nxt = msgs[i + 1]
+            assert nxt["role"] == "user" and any(
+                isinstance(b, dict) and b.get("type") == "tool_result" for b in nxt["content"])
+
+
 def _transcript_with_real_tool_results():
     """Run the honest plan once to get a transcript whose tool_results hold the real numbers,
     so validate_and_ground can be tested directly against genuine tool output."""

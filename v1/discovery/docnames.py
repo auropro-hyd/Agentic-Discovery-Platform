@@ -63,6 +63,26 @@ def _titleise_token(tok: str) -> str:
     return tok[:1].upper() + tok[1:] if tok else tok
 
 
+# Generic, client-agnostic stopwords shared by detect_client() and the suppress-name expander.
+# These are common non-org capitalised words (process/finance/region/weekday/acronym filler) that
+# must never be treated as a distinguishing client token. NO client name is hardcoded here.
+_GENERIC_STOPWORDS: set[str] = {
+    "the", "order", "customer", "credit", "purchase", "supplier", "finance", "policy",
+    "europe", "european", "process", "system", "data", "report", "review", "notes",
+    "service", "management", "integration", "register", "guide", "analysis", "export",
+    "log", "sop", "raci", "edi", "crm", "erp", "sap", "monday", "tuesday", "wednesday",
+    "thursday", "friday", "q1", "q2", "q3", "q4", "north", "south", "east", "west",
+}
+
+# Pure region / legal-suffix words that qualify an org name but are NOT the distinguishing token
+# (e.g. "Acme Manufacturing" -> the token to also scrub is "Acme", never "Manufacturing").
+_GENERIC_ORG_QUALIFIERS: set[str] = {
+    "europe", "european", "group", "holdings", "industries", "manufacturing",
+    "pharmaceuticals", "healthcare", "company", "corporation",
+    "inc", "ltd", "limited", "llc", "co", "corp", "gmbh", "sa", "ag", "nv", "plc",
+    "north", "south", "east", "west", "global", "international",
+}
+
 # Tokens dropped from derived document names so a citation reads as the document TYPE rather than
 # trailing client/region qualifiers (e.g. "Credit Management Policy", not "...<Client> Europe").
 # NO client name is hardcoded — the engine is client-agnostic. The detected client name (if any)
@@ -82,6 +102,40 @@ def set_noise_words(words) -> None:
 
 def add_noise_words(words) -> None:
     _NOISE_WORDS.update(w.lower() for w in (words or []))
+
+
+def expand_suppress_names(name: str) -> list[str]:
+    """Expand a (possibly multi-word) suppressed client name into the full phrase PLUS each
+    significant token, so a bare token leaking in prose (e.g. "Acme" from "Acme Manufacturing")
+    is scrubbed too. Confidentiality-critical: NEVER drops the full phrase, only ADDS tokens.
+
+    A "significant token" is a word of length >= 3 that is neither a generic stopword nor a pure
+    region/legal-suffix qualifier (Europe, Group, Inc, Manufacturing, ...). The full phrase comes
+    first, then the tokens, de-duplicated case-insensitively while preserving order.
+
+    Examples:
+      "Acme Manufacturing" -> ["Acme Manufacturing", "Acme"]
+      "Opella"             -> ["Opella"]
+      "Opella Europe"      -> ["Opella Europe", "Opella"]
+    """
+    name = (name or "").strip()
+    if not name:
+        return []
+    out: list[str] = [name]
+    seen = {name.lower()}
+    tokens = name.split()
+    if len(tokens) > 1:                       # only expand multi-word phrases
+        for tok in tokens:
+            low = tok.lower()
+            if len(low) < 3:
+                continue
+            if low in _GENERIC_STOPWORDS or low in _GENERIC_ORG_QUALIFIERS:
+                continue
+            if low in seen:
+                continue
+            out.append(tok)
+            seen.add(low)
+    return out
 
 
 def _derive_friendly(doc_id: str) -> str:
@@ -136,12 +190,8 @@ def detect_client(texts: list[str], min_mentions: int = 3) -> str | None:
     suffix = r"(?:\s+(?:Inc|LLC|Ltd|Limited|GmbH|AG|S\.?A\.?|N\.?V\.?|PLC|Group|Holdings|" \
              r"Corporation|Corp|Company|Co|Manufacturing|Pharmaceuticals|Healthcare|Industries))?"
     pat = _re.compile(rf"\b([A-Z][a-zA-Z&]+(?:\s+[A-Z][a-zA-Z&]+){{0,2}}){suffix}\b")
-    # very common non-org capitalised words to ignore
-    stop = {"the", "order", "customer", "credit", "purchase", "supplier", "finance", "policy",
-            "europe", "european", "process", "system", "data", "report", "review", "notes",
-            "service", "management", "integration", "register", "guide", "analysis", "export",
-            "log", "sop", "raci", "edi", "crm", "erp", "sap", "monday", "tuesday", "wednesday",
-            "thursday", "friday", "q1", "q2", "q3", "q4", "north", "south", "east", "west"}
+    # very common non-org capitalised words to ignore (shared with the suppress-name expander)
+    stop = _GENERIC_STOPWORDS
 
     per_doc_seen = []
     counts = Counter()

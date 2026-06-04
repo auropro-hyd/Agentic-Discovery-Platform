@@ -1,11 +1,20 @@
-"""Render a SynthesisContent into the 6-report client suite (standalone HTML + index).
+"""Render a SynthesisContent into the formal discovery report suite.
+
+Each of the seven reports is a STANDALONE deliverable: its own branded cover, its own table of
+contents, and hierarchically numbered sections — matching the reference deliverables. There is no
+Document Control or Input-Documents section (dropped by request). The visual identity is formal
+navy/blue corporate (see assets.py).
 
 Reads ONLY SynthesisContent — tool names, locators and filenames are unreachable by type. Each
-report is leak-guarded before write; Report 01 additionally passes a factual-language lint.
+report is leak-guarded before write; Report 01 additionally passes a factual-language lint. Every
+number, label, node, and quote shown traces to a verified finding; components and infographics omit
+themselves when their grounded data is absent (never fabricated).
 """
 from __future__ import annotations
 
 import html
+import math
+import re
 from pathlib import Path
 
 from .. import docnames
@@ -24,10 +33,10 @@ REPORTS = [
     ("06-supporting-artefacts", "Supporting Artefacts"),
 ]
 _PATTERN_LABEL = {"hitl_workflow": "HITL Workflow", "automation": "Automation Pipeline",
-                  "modernisation": "Modernisation",
-                  "ai_agent": "AI Agent"}
+                  "modernisation": "Modernisation", "ai_agent": "AI Agent"}
 _QUAD = [("do_first", "Do First"), ("plan_for", "Plan For"),
          ("consider", "Consider"), ("deprioritise", "Deprioritise")]
+_HORIZON_CLASS = {"H1": "al-h1", "H2": "al-h2", "H3": "al-h3"}
 
 
 def render_suite(s: SynthesisContent, meta: dict, outdir: Path,
@@ -36,7 +45,6 @@ def render_suite(s: SynthesisContent, meta: dict, outdir: Path,
     (outdir / "assets").mkdir(exist_ok=True)
     (outdir / "assets" / "report.css").write_text(CSS, encoding="utf-8")
     (outdir / "assets" / "report.js").write_text(JS, encoding="utf-8")
-    # render each source document to a readable page so citations can click through (provenance)
     _render_source_pages(s, outdir, suppress_names)
     fns = {"00-executive-summary": r00, "01-current-state": r01, "02-pain-points": r02,
            "03-recommendation": r03, "04-opportunity-portfolio": r04, "05-roadmap": r05,
@@ -44,404 +52,852 @@ def render_suite(s: SynthesisContent, meta: dict, outdir: Path,
     for slug, title in REPORTS:
         body = _secnum_chips(_scrub_names(fns[slug](s, meta), suppress_names))
         text = _strip_tags(body)
-        # tool/jargon leaks still hard-fail; suppressed client names are scrubbed above, so the
-        # guard here is a backstop that should never trip on a name post-scrub.
         assert_no_leaks(text, suppress_names=suppress_names)
         if slug == "01-current-state":
             assert_factual(text)
-        (outdir / f"{slug}.html").write_text(_page(title, body, slug, meta), encoding="utf-8")
+        (outdir / f"{slug}.html").write_text(
+            _page(slug, title, body, meta), encoding="utf-8")
     # index.html IS the executive summary (the natural entry point to the suite)
     index = outdir / "index.html"
     index_body = _secnum_chips(_scrub_names(fns["00-executive-summary"](s, meta), suppress_names))
-    index.write_text(_page(REPORTS[0][1], index_body, "00-executive-summary", meta, is_index=True),
+    index.write_text(_page("00-executive-summary", REPORTS[0][1], index_body, meta),
                      encoding="utf-8")
     return index
 
 
-# ---- report bodies (return HTML fragments) --------------------------------
+# ---------------------------------------------------------------------------
+# section builder — each report appends numbered sections; the TOC is derived
+# from exactly the sections present, so it can never drift from the body.
+# ---------------------------------------------------------------------------
+class _Doc:
+    """Accumulates numbered sections for one report. h1(title) opens a section (1, 2, …); h2(title)
+    opens a subsection (1.1, 1.2, …). Both record a TOC entry. raw() appends arbitrary HTML to the
+    current section without numbering. The rendered body and the TOC come from the same source."""
+
+    def __init__(self, report_title: str, lede: str = ""):
+        self.report_title = report_title
+        self.lede = lede
+        self._parts: list[str] = []
+        self._toc: list[tuple[str, str, bool]] = []   # (number, title, is_sub)
+        self._sec = 0
+        self._sub = 0
+
+    def h1(self, title: str) -> "_Doc":
+        self._sec += 1
+        self._sub = 0
+        num = str(self._sec)
+        self._toc.append((num, title, False))
+        self._parts.append(f"<h2>{esc(num)}. {esc(title)}</h2>")
+        return self
+
+    def h2(self, title: str) -> "_Doc":
+        self._sub += 1
+        num = f"{self._sec}.{self._sub}"
+        self._toc.append((num, title, True))
+        self._parts.append(f"<h3>{esc(num)} &nbsp;{esc(title)}</h3>")
+        return self
+
+    def raw(self, html_str: str) -> "_Doc":
+        if html_str:
+            self._parts.append(html_str)
+        return self
+
+    def p(self, text: str) -> "_Doc":
+        if text:
+            self._parts.append(f"<p>{esc(text)}</p>")
+        return self
+
+    def body(self) -> str:
+        head = [f"<h1>{esc(self.report_title)}</h1>"]
+        if self.lede:
+            head.append(f"<p class='lede'>{esc(self.lede)}</p>")
+        return "\n".join(head + self._parts)
+
+    def toc_html(self) -> str:
+        if not self._toc:
+            return ""
+        rows = []
+        for num, title, is_sub in self._toc:
+            cls = "ti-sub" if is_sub else ""
+            rows.append(f"<a class='{cls}'><span class='ti-num'>{esc(num)}</span>"
+                        f"<span class='ti-title'>{esc(title)}</span>"
+                        f"<span class='ti-dots'></span></a>")
+        return f"<div class='report-toc'><h1>Contents</h1><div class='toc'>{''.join(rows)}</div></div>"
+
+
+# ---------------------------------------------------------------------------
+# report bodies — each returns (toc_html + numbered body) as one fragment.
+# The cover is added by _page(); the report-toc is print-only (CSS-hidden on screen).
+# ---------------------------------------------------------------------------
 def r00(s: SynthesisContent, meta) -> str:
-    """Executive Summary — the landing page that frames the whole assessment: a headline, the
-    at-a-glance KPI strip, the top opportunities, and what was read. Visual-first, low prose."""
     es = s.executive_summary
     dom = esc(meta.get("domain_label", "this process"))
     at_client = f" at {esc(meta['client'])}" if meta.get("client") else ""
     headline = es.headline or (f"How {dom} runs today{at_client}, the issues found in the data, and "
                                "the opportunities to address them.")
-    h = ["<h1>Executive Summary</h1>",
-         f"<p class='lede'>{esc(headline)}</p>",
-         kpi_tiles(s)]
-    # situation / opportunity, side by side, short
+    d = _Doc("Executive Summary", headline)
+    d.h1("At a glance").raw(stat_tiles(_exec_tiles(s)))
     if es.situation or es.opportunity:
-        h.append("<div class='two-col'>")
+        cells = []
         if es.situation:
-            h.append(f"<div class='panel'><h3>The situation</h3><p>{esc(es.situation)}</p></div>")
+            cells.append(f"<div class='panel'><h3>The situation</h3><p>{esc(es.situation)}</p></div>")
         if es.opportunity:
-            h.append(f"<div class='panel'><h3>The opportunity</h3><p>{esc(es.opportunity)}</p></div>")
-        h.append("</div>")
-    # top opportunities as compact cards (the "do first" ones, else the first few)
+            cells.append(f"<div class='panel'><h3>The opportunity</h3><p>{esc(es.opportunity)}</p>"
+                         "</div>")
+        d.h2("Situation & opportunity").raw("<div class='two-col'>" + "".join(cells) + "</div>")
     do_first = [o for o in s.opportunities if o.matrix_quadrant.value == "do_first"]
     top = do_first or s.opportunities[:3]
     if top:
-        h.append("<h2>Where to start</h2>")
-        h.append(value_feasibility_svg(s.opportunities))
-        h.append("<div class='opp-cards'>")
+        d.h1("Where to start")
+        d.raw(value_matrix_svg(s.opportunities))
+        cards = ["<div class='opp-cards'>"]
         for o in top:
             pat = _PATTERN_LABEL.get(o.pattern.value, "")
             impact = ""
             if o.business_impact and o.business_impact.quantified:
                 impact = " &nbsp; ".join(_metric(n) for n in o.business_impact.quantified[:2])
-            h.append("<a class='opp-card' href='04-opportunity-portfolio.html'>"
-                     f"<span class='pattern'>{esc(pat)}</span>"
-                     f"<h4>{esc(o.title)}</h4>"
-                     f"<p>{esc(_clip(o.overview, 150))}</p>"
-                     + (f"<p class='kfig'>{impact}</p>" if impact else "")
-                     + "</a>")
-        h.append("</div>")
-    # what we read
+            cards.append("<a class='opp-card' href='04-opportunity-portfolio.html'>"
+                         f"<span class='pattern'>{esc(pat)}</span>"
+                         f"<h4>{esc(o.title)}</h4><p>{esc(_clip(o.overview, 150))}</p>"
+                         + (f"<p class='kfig'>{impact}</p>" if impact else "") + "</a>")
+        cards.append("</div>")
+        d.raw("".join(cards))
     if s.source_index:
-        names = ", ".join(esc(d.business_name) for d in s.source_index[:8])
+        names = ", ".join(esc(x.business_name) for x in s.source_index[:8])
         more = f" and {len(s.source_index)-8} more" if len(s.source_index) > 8 else ""
-        h.append("<h2>What we read</h2>")
-        h.append(f"<p>{names}{more}. Every figure in this assessment is computed from these "
-                 "sources and traces back to them.</p>")
-    h.append("<p class='prov'>Read on: the "
-             "<a href='01-current-state.html'>Current State</a>, the "
-             "<a href='02-pain-points.html'>issues found</a>, and the recommended "
-             "<a href='04-opportunity-portfolio.html'>opportunities</a>.</p>")
-    return "\n".join(h)
+        d.h1("What we read")
+        d.p(f"{names}{more}. Every figure in this assessment is computed from these sources and "
+            "traces back to them.")
+        d.raw("<p class='prov'>Read on: the "
+              "<a href='01-current-state.html'>Current State</a>, the "
+              "<a href='02-pain-points.html'>issues found</a>, and the recommended "
+              "<a href='04-opportunity-portfolio.html'>opportunities</a>.</p>")
+    return d.toc_html() + d.body()
+
+
+def _tables_titled(tables, *needles):
+    """Return the grounded data tables whose title contains any of the given (lowercased) needles,
+    in declared order. Lets r01 place each table in the right numbered section without hardcoding."""
+    out = []
+    for t in tables or []:
+        low = (t.title or "").lower()
+        if any(n in low for n in needles):
+            out.append(t)
+    return out
 
 
 def r01(s: SynthesisContent, meta) -> str:
     cs = s.current_state
     dom = esc(meta.get("domain_label", "this process"))
     at_client = f" at {esc(meta['client'])}" if meta.get("client") else ""
-    h = [f"<h1>1. Current State Assessment</h1>",
-         f"<p class='lede'>How {dom} runs today{at_client}. A factual baseline of the process, the "
-         "systems that support it, and how information is structured — stated as fact, no judgements.</p>",
-         "<h2>1.1 Domain overview</h2>", f"<p>{esc(cs.domain_overview)}</p>",
-         f"<p>{esc(cs.process_summary)}</p>",
-         "<h2>1.2 Process flow</h2>",
-         "<p>The end-to-end flow, who performs each step and on which system:</p>",
-         process_flow_svg(cs.process_flow),
-         "<table><thead><tr><th>Step</th><th>Performed by</th><th>System</th>"
-         "<th>What happens</th></tr></thead><tbody>"]
+    d = _Doc("Current State Assessment",
+             f"How {dom} runs today{at_client}. A factual baseline of the process, the systems that "
+             "support it, and how information is structured — stated as fact, no judgements.")
+
+    # 1. Domain overview — context + grounded volume baseline + channel mix
+    d.h1("Domain overview")
+    d.h2("Context and scope").p(cs.domain_overview).p(cs.process_summary)
+    if cs.baseline_stats:
+        d.h2("Volume baseline")
+        d.raw(stat_tiles([(k.value, k.label + (f" — {k.sublabel}" if k.sublabel else ""), "blue")
+                          for k in cs.baseline_stats]))
+    for t in _tables_titled(cs.data_tables, "channel mix"):
+        d.raw(_data_table(t))
+
+    # 1b. Domain landscape — the DDD bounded-context map (omits itself if not emitted)
+    bc = bounded_context_svg(cs.bounded_contexts, meta.get("domain_label", ""))
+    if bc:
+        d.h2("Domain landscape")
+        d.p("The subdomains that make up this domain, how each is classified, who owns it, and how "
+            "they relate — the bounded-context view of the current state.")
+        d.raw(bc)
+
+    # 2. Process flow — diagram + step table
+    d.h1("Process flow")
+    d.p("The end-to-end flow, who performs each step and on which system:")
+    d.raw(process_flow_svg(cs.process_flow))
+    rows = ["<table><thead><tr><th>Step</th><th>Performed by</th><th>System</th>"
+            "<th>What happens</th></tr></thead><tbody>"]
     for st in cs.process_flow:
-        h.append(f"<tr><td>{st.seq}. {esc(st.name)}</td><td>{esc(st.actor)}</td>"
-                 f"<td>{esc(st.system)}</td><td>{esc(st.description)}</td></tr>")
-    h.append("</tbody></table>")
+        rows.append(f"<tr><td>{st.seq}. {esc(st.name)}</td><td>{esc(st.actor)}</td>"
+                    f"<td>{esc(st.system)}</td><td>{esc(st.description)}</td></tr>")
+    rows.append("</tbody></table>")
+    d.raw("".join(rows))
 
-    # 1.3 deep per-system narrative profiles (the depth the prior-engagement bar has)
-    if cs.system_profiles:
-        h.append("<h2>1.3 Systems &amp; sources</h2>")
-        h.append("<p>Each system that supports this process — what it is, how it is used, who owns "
-                 "it, and the constraints observed.</p>")
-        for p in cs.system_profiles:
-            h.append("<div class='card'>")
-            h.append(f"<h3>{esc(p.name)}</h3>")
-            if p.role:
-                h.append(f"<p>{esc(p.role)}</p>")
-            if p.how_used:
-                h.append(f"<p><strong>How it's used.</strong> {esc(p.how_used)}</p>")
-            if p.owners:
-                h.append(f"<p><strong>Ownership &amp; access.</strong> {esc(p.owners)}</p>")
-            if p.limitations:
-                h.append(f"<p><strong>Observed constraints.</strong> {esc(p.limitations)}</p>")
-            h.append("</div>")
+    # 3. Process inventory — per-step detail + the supporting reference tables
+    if cs.process_detail:
+        d.h1("Process inventory")
+        d.p("Each stage of the process in detail — how it runs today, who performs it, and on which "
+            "system.")
+        for pd in cs.process_detail:
+            who = " · ".join(x for x in [pd.actor, pd.system] if x)
+            d.raw(f"<div class='card'><h4>{esc(pd.title)}</h4>"
+                  + (f"<div class='who'>{esc(who)}</div>" if who else "")
+                  + f"<p>{esc(pd.body)}</p>"
+                  + (f"<p class='prov'>Source: {_cite_links(pd.sources)}</p>" if pd.sources else "")
+                  + "</div>")
+        for t in _tables_titled(cs.data_tables, "credit limit approval", "lead time",
+                                "collections escalation"):
+            d.raw(_data_table(t))
 
-    # 1.4 data / document format taxonomy
-    if cs.format_taxonomy:
-        h.append("<h2>1.4 Information format &amp; structure</h2>")
-        h.append("<p>The patterns the source information follows — this drives how it can be "
-                 "ingested and reasoned over.</p>")
-        h.append("<table><thead><tr><th>Pattern</th><th>Description</th><th>Where it appears</th>"
-                 "</tr></thead><tbody>")
-        for fp in cs.format_taxonomy:
-            h.append(f"<tr><td><strong>{esc(fp.label)}</strong></td><td>{esc(fp.description)}</td>"
-                     f"<td>{esc(fp.examples)}</td></tr>")
-        h.append("</tbody></table>")
-
+    # 4. Ownership map — RACI
+    d.h1("Ownership map")
     if cs.process_inventory:
-        h.append("<h2>1.5 Process inventory</h2><ul>")
-        for it in cs.process_inventory:
-            h.append(f"<li><strong>{esc(it.name)}</strong> — {esc(it.purpose)}</li>")
-        h.append("</ul>")
-    h.append("<h2>1.6 Ownership map</h2>"
-             "<table><thead><tr><th>Activity</th><th>Responsible</th><th>Accountable</th>"
-             "</tr></thead><tbody>")
+        d.h2("Process inventory summary")
+        d.raw("<ul>" + "".join(f"<li><strong>{esc(it.name)}</strong> — {esc(it.purpose)}</li>"
+                               for it in cs.process_inventory) + "</ul>")
+    d.h2("RACI matrix")
+    om = ["<table><thead><tr><th>Activity</th><th>Responsible</th><th>Accountable</th>"
+          "</tr></thead><tbody>"]
     for r in cs.ownership_map:
-        h.append(f"<tr><td>{esc(r.activity)}</td><td>{esc(r.responsible)}</td>"
-                 f"<td>{esc(r.accountable)}</td></tr>")
-    h.append("</tbody></table>")
-    h.append("<h2>1.7 System inventory</h2>"
-             "<table><thead><tr><th>System</th><th>Role</th><th>System of record for</th>"
-             "</tr></thead><tbody>")
+        om.append(f"<tr><td>{esc(r.activity)}</td><td>{esc(r.responsible)}</td>"
+                  f"<td>{esc(r.accountable)}</td></tr>")
+    om.append("</tbody></table>")
+    d.raw("".join(om))
+
+    # 5. System inventory — systems table + EDI connections + deep profiles + format taxonomy
+    d.h1("System inventory")
+    for t in _tables_titled(cs.data_tables, "systems in scope"):
+        d.h2("Systems in scope").raw(_data_table(t, show_title=False))
+    si = ["<table><thead><tr><th>System</th><th>Role</th><th>System of record for</th>"
+          "</tr></thead><tbody>"]
     for it in cs.system_inventory:
-        h.append(f"<tr><td>{esc(it.name)}</td><td>{esc(it.purpose)}</td>"
-                 f"<td>{esc(it.system_of_record_for)}</td></tr>")
-    h.append("</tbody></table>")
-    h.append("<h2>1.8 Handoff catalogue</h2><ul>")
-    for ho in cs.handoff_catalogue:
-        h.append(f"<li>{esc(ho.from_step)} → {esc(ho.to_step)} "
-                 f"<span class='prov'>({esc(ho.mechanism)})</span></li>")
-    h.append("</ul>")
-    return "\n".join(h)
+        si.append(f"<tr><td>{esc(it.name)}</td><td>{esc(it.purpose)}</td>"
+                  f"<td>{esc(it.system_of_record_for)}</td></tr>")
+    si.append("</tbody></table>")
+    d.raw("".join(si))
+    for t in _tables_titled(cs.data_tables, "edi connection"):
+        d.h2("EDI connection inventory").raw(_data_table(t, show_title=False))
+    if cs.system_profiles:
+        d.h2("System profiles")
+        d.p("Each system that supports this process — what it is, how it is used, who owns it, and "
+            "the constraints observed.")
+        for p in cs.system_profiles:
+            card = [f"<div class='card'><h4>{esc(p.name)}</h4>"]
+            if p.role:
+                card.append(f"<p>{esc(p.role)}</p>")
+            if p.how_used:
+                card.append(f"<p><strong>How it's used.</strong> {esc(p.how_used)}</p>")
+            if p.owners:
+                card.append(f"<p><strong>Ownership &amp; access.</strong> {esc(p.owners)}</p>")
+            if p.limitations:
+                card.append(f"<p><strong>Observed constraints.</strong> {esc(p.limitations)}</p>")
+            card.append("</div>")
+            d.raw("".join(card))
+    if cs.format_taxonomy:
+        d.h2("Information format & structure")
+        d.p("The patterns the source information follows — this drives how it can be ingested and "
+            "reasoned over.")
+        tx = ["<table><thead><tr><th>Pattern</th><th>Description</th><th>Where it appears</th>"
+              "</tr></thead><tbody>"]
+        for fp in cs.format_taxonomy:
+            tx.append(f"<tr><td><strong>{esc(fp.label)}</strong></td><td>{esc(fp.description)}</td>"
+                      f"<td>{esc(fp.examples)}</td></tr>")
+        tx.append("</tbody></table>")
+        d.raw("".join(tx))
+
+    # 6. Handoff map
+    d.h1("Handoff map")
+    d.p("How work crosses between steps and systems — each handoff is where information changes "
+        "hands or format.")
+    d.raw(context_map_svg(cs.process_flow, cs.handoff_catalogue))
+    d.raw("<ul>" + "".join(
+        f"<li>{esc(ho.from_step)} → {esc(ho.to_step)} "
+        f"<span class='prov'>({esc(ho.mechanism)})</span></li>" for ho in cs.handoff_catalogue)
+        + "</ul>")
+
+    # Appendix — account baseline
+    appendix = _tables_titled(cs.data_tables, "top trading accounts")
+    if appendix:
+        d.h1("Appendix — account baseline")
+        for t in appendix:
+            d.raw(_data_table(t))
+    return d.toc_html() + d.body()
 
 
 def r02(s: SynthesisContent, meta) -> str:
-    h = ["<h1>Pain Points &amp; Opportunities</h1>",
-         "<p class='lede'>The issues found in the discovery, ranked by business impact, "
-         "each mapped to a recommended opportunity.</p>",
-         impact_bars_svg(s.pain_points),
-         render_charts(s.charts, kinds={"bar"})]   # magnitude bars here; share donut on Report 06
-    for pp in sorted(s.pain_points, key=lambda p: p.impact_rank):
-        h.append("<div class='card'>")
-        h.append(f"<h3>{esc(pp.title)}</h3>")
-        h.append(f"<p>{esc(pp.description)}</p>")
-        if pp.quantified:
-            h.append("<p>" + " &nbsp; ".join(_metric(n) for n in pp.quantified) + "</p>")
-        h.append(f"<p><strong>Root cause:</strong> {esc(pp.root_cause)}</p>")
-        h.append(f"<p><strong>Pattern:</strong> {esc(pp.failure_pattern)}</p>")
-        if pp.opportunity_signal:
-            h.append(f"<p><strong>Addressed by:</strong> {esc(pp.opportunity_signal)} "
-                     f"(see the Opportunity Portfolio)</p>")
-        h.append(f"<p class='prov'>Where this comes from: {_cite_links(pp.sources)}</p>")
-        h.append("</div>")
+    d = _Doc("Pain Points & Opportunities",
+             "The issues found in the discovery, ranked by business impact, each mapped to a "
+             "recommended opportunity.")
+    d.h1("Issues at a glance")
+    d.raw(stat_tiles(_pp_tiles(s)))
+    d.raw(impact_bars_svg(s.pain_points))
+    d.raw(render_charts(s.charts, kinds={"bar"}))
+    d.h1("Root cause")
+    d.p("How the issues found trace back to shared structural causes:")
+    d.raw(root_cause_svg(s.pain_points, s.cross_process_patterns))
     if s.cross_process_patterns:
-        h.append("<h2>Cross-process patterns</h2>")
         for c in s.cross_process_patterns:
-            h.append(f"<p><strong>{esc(c.get('pattern',''))}.</strong> "
-                     f"{esc(c.get('description',''))}</p>")
-    return "\n".join(h)
+            d.raw(f"<p><strong>{esc(c.get('pattern',''))}.</strong> "
+                  f"{esc(c.get('description',''))}</p>")
+    d.h1("Pain points in detail")
+    for idx, pp in enumerate(sorted(s.pain_points, key=lambda p: p.impact_rank), start=1):
+        d.raw(_pain_point_card(pp, idx))
+    if s.evidence_register:
+        d.h1("Appendix — evidence register")
+        d.p("Every finding traced to the source it rests on, with the confidence tier.")
+        er = ["<table><thead><tr><th>Finding</th><th>Source</th><th>Evidence type</th>"
+              "<th>Key data point</th><th>Confidence</th></tr></thead><tbody>"]
+        for e in s.evidence_register:
+            conf = e.confidence.lower()
+            cls = ("b-low" if conf == "verified" else "b-med" if conf == "amber"
+                   else "b-high" if conf == "gap" else "b-pat")
+            er.append(f"<tr><td><strong>{esc(e.finding)}</strong></td><td>{esc(e.source)}</td>"
+                      f"<td>{esc(e.evidence_type)}</td><td>{esc(e.data_point)}</td>"
+                      f"<td><span class='badge {cls}'>{esc(e.confidence)}</span></td></tr>")
+        er.append("</tbody></table>")
+        d.raw("".join(er))
+    return d.toc_html() + d.body()
 
 
 def r03(s: SynthesisContent, meta) -> str:
     by_q = {q: [o for o in s.opportunities if o.matrix_quadrant.value == q] for q, _ in _QUAD}
-    h = ["<h1>Transformation Recommendation</h1>",
-         "<p class='lede'>Which opportunities to pursue, in what order, by value and "
-         "feasibility.</p>",
-         "<h2>Value vs. feasibility</h2>",
-         value_feasibility_svg(s.opportunities),
-         "<div class='matrix'>"]
+    titles = {o.id: o.title for o in s.opportunities}
+    d = _Doc("Transformation Recommendation",
+             "Which opportunities to pursue, in what order, by value and feasibility.")
+
+    d.h1("Transformation intent")
+    if s.target_state:
+        d.raw("<div class='panel target'><p>" + esc(s.target_state) + "</p></div>")
+    principles = _principles(s)
+    if principles:
+        d.h2("Guiding principles")
+        cards = ["<div class='principles'>"]
+        for i, (title, text) in enumerate(principles, start=1):
+            cards.append(f"<div class='prin-card'><div class='prin-num'>P{i}</div>"
+                         f"<div class='prin-title'>{esc(title)}</div>"
+                         f"<div class='prin-text'>{esc(text)}</div></div>")
+        cards.append("</div>")
+        d.raw("".join(cards))
+
+    d.h1("Value vs. feasibility")
+    d.raw(value_matrix_svg(s.opportunities))
+    mx = ["<div class='matrix'>"]
     for q, label in _QUAD:
         chips = "".join(f"<span class='chip'>{esc(o.title)}</span>" for o in by_q[q])
-        h.append(f"<div class='quad {q}'><h4>{label}</h4>{chips or '<span class=prov>—</span>'}</div>")
-    h.append("</div>")
-    h.append("<h2>Opportunity ratings</h2>"
-             "<table><thead><tr><th>Opportunity</th><th>Pattern</th><th>Value</th>"
-             "<th>Feasibility</th><th>Sequence</th></tr></thead><tbody>")
-    titles = {o.id: o.title for o in s.opportunities}
-    for o in s.opportunities:
-        if o.dependencies:
-            deps = ", ".join(titles.get(d, d) for d in o.dependencies)
-            seq = f"Requires {deps} first"
-        else:
-            seq = "Can start now"
-        h.append(f"<tr><td>{esc(o.title)}</td><td>{_PATTERN_LABEL.get(o.pattern.value,'')}</td>"
-                 f"<td>{esc(o.value_rating.title())}</td>"
-                 f"<td>{esc(o.feasibility_rating.title())}</td><td>{esc(seq)}</td></tr>")
-    h.append("</tbody></table>")
+        empty = "<span class='prov'>None in this quadrant</span>"
+        mx.append(f"<div class='quad {q}'><h4>{label}</h4>{chips or empty}</div>")
+    mx.append("</div>")
+    d.raw("".join(mx))
 
-    # Prioritization rationale across three readiness dimensions (the prior-engagement bar).
+    d.h1("Recommendations")
+    d.p("Each opportunity as a recommendation — what it addresses, the phased actions, and what "
+        "success looks like.")
+    for idx, o in enumerate(_seq_order(s.opportunities), start=1):
+        d.raw(_rec_card(o, idx, s, titles))
+
+    d.h1("Sequencing & readiness")
     rated = [o for o in s.opportunities
              if o.data_readiness or o.technical_complexity or o.operational_readiness]
     if rated:
-        h.append("<h2>Prioritization rationale</h2>")
-        h.append("<p>Each opportunity assessed across three readiness dimensions. The rating "
-                 "(high / medium / low) is followed by the reason, so the sequence is defensible "
-                 "rather than asserted.</p>")
-        h.append("<table class='rationale'><thead><tr><th>Opportunity</th>"
-                 "<th>Data readiness</th><th>Technical complexity</th>"
-                 "<th>Operational readiness</th></tr></thead><tbody>")
+        d.h2("Prioritization rationale")
+        d.p("Each opportunity assessed across three readiness dimensions. The rating "
+            "(high / medium / low) is followed by the reason, so the sequence is defensible rather "
+            "than asserted.")
+        rt = ["<table class='rationale'><thead><tr><th>Opportunity</th><th>Data readiness</th>"
+              "<th>Technical complexity</th><th>Operational readiness</th></tr></thead><tbody>"]
         for o in rated:
-            h.append(f"<tr><td><strong>{esc(o.title)}</strong></td>"
-                     f"<td>{_rating_cell(o.data_readiness)}</td>"
-                     f"<td>{_rating_cell(o.technical_complexity)}</td>"
-                     f"<td>{_rating_cell(o.operational_readiness)}</td></tr>")
-        h.append("</tbody></table>")
-
-    h.append(f"<h2>Sequencing rationale</h2><p>{esc(s.sequencing_rationale)}</p>")
+            rt.append(f"<tr><td><strong>{esc(o.title)}</strong></td>"
+                      f"<td>{_rating_cell(o.data_readiness)}</td>"
+                      f"<td>{_rating_cell(o.technical_complexity)}</td>"
+                      f"<td>{_rating_cell(o.operational_readiness)}</td></tr>")
+        rt.append("</tbody></table>")
+        d.raw("".join(rt))
+    d.h2("Implementation roadmap")
+    d.p("The recommendations sequenced across three horizons (now → later).")
+    d.raw(roadmap_timeline_svg(s.roadmap))
+    d.h2("Sequencing rationale").p(s.sequencing_rationale)
     if s.dependency_notes:
-        h.append(f"<p><strong>Dependencies:</strong> {esc(s.dependency_notes)}</p>")
-    h.append(f"<h2>Strategic readiness</h2><p>{esc(s.strategic_readiness)}</p>")
-    if s.target_state:
-        h.append("<h2>Where this should converge</h2>")
-        h.append("<div class='panel target'><p>" + esc(s.target_state) + "</p></div>")
-    return "\n".join(h)
+        d.raw(f"<p><strong>Dependencies:</strong> {esc(s.dependency_notes)}</p>")
+    d.raw(dependency_map_svg(s.opportunities))
+    d.h2("Strategic readiness").p(s.strategic_readiness)
+
+    if s.metrics_framework:
+        d.h1("Success metrics")
+        d.p("How to measure delivery once live — the baseline today and the directional target.")
+        mt = ["<table><thead><tr><th>Metric</th><th>What it measures</th><th>Target</th>"
+              "</tr></thead><tbody>"]
+        for m in s.metrics_framework:
+            mt.append(f"<tr><td><strong>{esc(m.name)}</strong></td><td>{esc(m.definition)}</td>"
+                      f"<td>{esc(m.target)}</td></tr>")
+        mt.append("</tbody></table>")
+        d.raw("".join(mt))
+
+    if s.risk_register:
+        d.h1("Risk register")
+        d.p("The delivery risks, how likely and how serious each is, and how it is mitigated.")
+        rk = ["<table><thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th>"
+              "<th>Owner</th></tr></thead><tbody>"]
+        for r in s.risk_register:
+            rk.append(f"<tr><td>{esc(r.risk)}</td><td>{_level_badge(r.likelihood)}</td>"
+                      f"<td>{_level_badge(r.impact)}</td><td>{esc(r.mitigation)}</td>"
+                      f"<td>{esc(r.owner)}</td></tr>")
+        rk.append("</tbody></table>")
+        d.raw("".join(rk))
+
+    if s.traceability:
+        d.h1("Appendix — traceability matrix")
+        d.p("Each pain point traced through to the recommendation, opportunity, expected outcome "
+            "and horizon that addresses it.")
+        tr = ["<table class='trace'><thead><tr><th>Pain point</th><th>Summary</th><th>Severity</th>"
+              "<th>Recommendation</th><th>Opportunity</th><th>Expected outcome</th><th>Horizon</th>"
+              "</tr></thead><tbody>"]
+        for t in s.traceability:
+            tr.append(f"<tr><td><strong>{esc(t.pain_point)}</strong></td><td>{esc(t.summary)}</td>"
+                      f"<td>{esc(t.severity)}</td><td>{esc(t.recommendation)}</td>"
+                      f"<td>{esc(t.opportunity)}</td><td>{esc(t.expected_outcome)}</td>"
+                      f"<td>{esc(t.horizon)}</td></tr>")
+        tr.append("</tbody></table>")
+        d.raw("".join(tr))
+    return d.toc_html() + d.body()
+
+
+def _level_badge(level: str) -> str:
+    """A High/Medium/Low level as a coloured badge (risk likelihood/impact)."""
+    lo = (level or "").strip().lower()
+    cls = "b-high" if lo == "high" else "b-med" if lo == "medium" else "b-low" if lo == "low" \
+        else "b-pat"
+    return f"<span class='badge {cls}'>{esc(level)}</span>" if level else "—"
 
 
 def r04(s: SynthesisContent, meta) -> str:
-    h = ["<h1>AI Opportunity Portfolio</h1>",
-         "<p class='lede'>The recommended interventions in full — what the problem is, how the "
-         "process changes, and what it delivers.</p>"]
-    # Summary table first (the use-case anatomy: pattern / who / sources / behaviour), then the
-    # deep write-ups follow. Mirrors the prior-engagement use-case summary table.
+    d = _Doc("AI Opportunity Portfolio",
+             "The recommended interventions in full — what the problem is, how the process changes, "
+             "and what it delivers.")
     if s.opportunities:
-        h.append("<h2>At a glance</h2>")
-        h.append("<table class='usecase'><thead><tr><th>Opportunity</th><th>Pattern</th>"
-                 "<th>Who it serves</th><th>Knowledge sources</th><th>Expected behaviour</th>"
-                 "</tr></thead><tbody>")
+        d.h1("Portfolio at a glance")
+        ug = ["<table class='usecase'><thead><tr><th>Opportunity</th><th>Pattern</th>"
+              "<th>Who it serves</th><th>Knowledge sources</th><th>Expected behaviour</th>"
+              "</tr></thead><tbody>"]
         for o in s.opportunities:
             who = ", ".join(esc(p) for p in o.personas) or "—"
             srcs = ", ".join(esc(x) for x in o.knowledge_sources) or "—"
             beh = esc(_clip(o.expected_behaviour, 110)) if o.expected_behaviour else "—"
-            h.append(f"<tr><td><strong>{esc(o.title)}</strong></td>"
-                     f"<td>{_PATTERN_LABEL.get(o.pattern.value,'')}</td>"
-                     f"<td>{who}</td><td>{srcs}</td><td>{beh}</td></tr>")
-        h.append("</tbody></table>")
-        h.append("<h2>In detail</h2>")
+            ug.append(f"<tr><td><strong>{esc(o.title)}</strong></td>"
+                      f"<td>{_PATTERN_LABEL.get(o.pattern.value,'')}</td>"
+                      f"<td>{who}</td><td>{srcs}</td><td>{beh}</td></tr>")
+        ug.append("</tbody></table>")
+        d.raw("".join(ug))
+    d.h1("Opportunities in detail")
+    opp_titles = {x.id: x.title for x in s.opportunities}
     for o in s.opportunities:
-        h.append("<div class='card'>")
-        h.append(f"<h3>{esc(o.title)}<span class='pattern'>{_PATTERN_LABEL.get(o.pattern.value,'')}"
-                 f"</span></h3>")
-        h.append(f"<p>{esc(o.overview)}</p>")
-        h.append("<div class='ba-grid'>")
-        h.append("<div class='col before'><div class='ba-tag'>Today</div>"
-                 + _steps(o.before_process) + "</div>")
-        h.append("<div class='ba-arrow' aria-hidden='true'>"
-                 "<svg viewBox='0 0 28 28'><path d='M4 14h16M15 8l6 6-6 6' fill='none' "
-                 "stroke='var(--accent)' stroke-width='2.4' stroke-linecap='round' "
-                 "stroke-linejoin='round'/></svg></div>")
-        h.append("<div class='col after'><div class='ba-tag after'>With the change</div>"
-                 + _steps(o.after_process) + "</div>")
-        h.append("</div>")
-        bi = o.business_impact
-        h.append("<p><strong>Business impact.</strong> " + esc(bi.narrative))
-        if bi.quantified:
-            h.append(" " + " &nbsp; ".join(_metric(n) for n in bi.quantified))
-        h.append("</p>")
-        if bi.derivation:
-            h.append(f"<p class='prov'>How we get there: {esc(bi.derivation)}</p>")
-        h.append(f"<p><strong>How it's delivered.</strong> {esc(o.implementation_approach)}</p>")
-        # Operating model: who uses it, what it does, and when it hands back to a human.
-        if o.personas or o.expected_behaviour or o.escalation:
-            h.append("<div class='opmodel'>")
-            if o.personas:
-                h.append("<p><strong>Who uses it.</strong> " +
-                         ", ".join(esc(x) for x in o.personas) + "</p>")
-            if o.expected_behaviour:
-                h.append(f"<p><strong>Expected behaviour.</strong> {esc(o.expected_behaviour)}</p>")
-            if o.escalation:
-                h.append(f"<p><strong>Escalation &amp; human fallback.</strong> "
-                         f"{esc(o.escalation)}</p>")
-            if o.knowledge_sources or o.document_formats:
-                bits = []
-                if o.knowledge_sources:
-                    bits.append("<strong>Sources.</strong> " +
-                                ", ".join(esc(x) for x in o.knowledge_sources))
-                if o.document_formats:
-                    bits.append("<strong>Formats.</strong> " +
-                                ", ".join(esc(x) for x in o.document_formats))
-                h.append("<p>" + " &nbsp; ".join(bits) + "</p>")
-            h.append("</div>")
-        if o.required_integrations:
-            h.append("<p><strong>Connects:</strong> " +
-                     ", ".join(esc(x) for x in o.required_integrations) + "</p>")
-        if o.success_metrics:
-            h.append("<p><strong>Success looks like:</strong></p><ul>" +
-                     "".join(f"<li>{esc(x)}</li>" for x in o.success_metrics) + "</ul>")
-        opp_titles = {x.id: x.title for x in s.opportunities}
-        if o.dependencies:
-            dep = "Requires " + ", ".join(opp_titles.get(d, d) for d in o.dependencies) + " first."
-        else:
-            dep = "Independent — can start immediately."
-        if o.prerequisite_for:
-            after = ", ".join(opp_titles.get(d, d) for d in o.prerequisite_for)
-            dep += f" Prerequisite for {after}."
-        h.append(f"<p><strong>Dependencies:</strong> {esc(dep)}</p>")
-        if o.risks:
-            h.append("<p><strong>Risks:</strong></p><ul>" +
-                     "".join(f"<li>{esc(x)}</li>" for x in o.risks) + "</ul>")
-        h.append(f"<p class='prov'>Where this comes from: {_cite_links(o.sources)}</p>")
-        h.append("</div>")
-    return "\n".join(h)
+        d.raw(_opportunity_detail(o, s, opp_titles))
+    return d.toc_html() + d.body()
 
 
 def r05(s: SynthesisContent, meta) -> str:
-    posture = s.strategy_profile.get("posture", "").replace("_", " + ")
-    h = ["<h1>Transformation Roadmap</h1>",
-         f"<p class='lede'>Sequenced across three horizons, aimed at a "
-         f"<strong>{esc(posture)}</strong> direction.</p>",
-         roadmap_timeline_svg(s.roadmap),
-         "<h2>Horizon detail</h2>"]
+    posture = s.strategy_profile.get("posture", "").replace("_", " ").strip()
+    # a SHORT posture reads as a direction phrase in the standfirst; a long one (a full sentence)
+    # would garble the sentence, so it becomes its own framing line under a clean lede.
+    if posture and len(posture.split()) <= 5:
+        lede = f"Sequenced across three horizons, aimed at a {posture} direction."
+    else:
+        lede = "The recommended opportunities, sequenced across three horizons."
+    d = _Doc("Transformation Roadmap", lede)
+    if posture and len(posture.split()) > 5:
+        d.raw(f"<p><strong>Strategic direction.</strong> {esc(posture[:1].upper() + posture[1:])}</p>")
+    d.h1("Implementation roadmap")
+    d.raw(roadmap_timeline_svg(s.roadmap))
+    d.h1("Horizon detail")
     for hz in s.roadmap:
-        h.append(f"<div class='horizon'><h3>{esc(hz.horizon)} — {esc(hz.theme)} "
-                 f"<span class='win'>({esc(hz.window)})</span></h3><ul>")
+        items = []
         for it in hz.items:
             tag = " <span class='chip'>opportunity</span>" if it.opportunity_id else ""
-            h.append(f"<li><strong>{esc(it.title)}</strong>{tag} — {esc(it.rationale)}</li>")
-        h.append("</ul></div>")
-    return "\n".join(h)
+            items.append(f"<li><strong>{esc(it.title)}</strong>{tag} — {esc(it.rationale)}</li>")
+        d.raw(f"<div class='horizon'><h4>{esc(hz.horizon)} — {esc(hz.theme)} "
+              f"<span class='win'>({esc(hz.window)})</span></h4><ul>" + "".join(items) + "</ul></div>")
+    depmap = dependency_map_svg(s.opportunities)
+    if depmap:                          # omit the whole section when there are no enabling edges
+        d.h1("How the work connects")
+        d.p("The enabling relationships between the opportunities — what unlocks what.")
+        d.raw(depmap)
+    panel = _planning_panel(s.planning_assumptions)
+    if panel:
+        d.h1("Planning assumptions")
+        d.p("The forward-looking elements of this roadmap — dates, owners, service levels, targets, "
+            "cadence and sequence — are planning assumptions, not measured findings. They are shown "
+            "here explicitly so they can be confirmed before delivery.")
+        d.raw(panel)
+    return d.toc_html() + d.body()
+
+
+_PLANNING_LABEL = {"date": "Timing", "owner": "Ownership", "sla": "Service level",
+                   "threshold": "Target", "cadence": "Cadence", "cost": "Cost",
+                   "sequence": "Sequencing"}
+
+
+def _planning_panel(assumptions) -> str:
+    """Render the labelled planning-assumption channel: a table of forward-looking statements with
+    their kind and the grounded basis each rests on, clearly marked as assumptions (not facts).
+    Empty → ''."""
+    rows = []
+    for pa in assumptions or []:
+        kind = _PLANNING_LABEL.get(getattr(pa, "kind", ""), "Planning")
+        basis = f"<span class='prov'>{esc(pa.basis)}</span>" if getattr(pa, "basis", "") else "—"
+        rows.append(f"<tr><td><span class='badge b-plan'>{esc(kind)}</span></td>"
+                    f"<td>{esc(pa.statement)}</td><td>{basis}</td></tr>")
+    if not rows:
+        return ""
+    return ("<div class='note-box'><div class='nb-title'>Planning assumption — confirm before "
+            "delivery</div><div class='nb-text'>These forward-looking items are recommendations, "
+            "not measured facts.</div></div>"
+            "<table><thead><tr><th>Type</th><th>Assumption</th><th>Basis</th></tr></thead><tbody>"
+            + "".join(rows) + "</tbody></table>")
 
 
 def r06(s: SynthesisContent, meta) -> str:
-    h = ["<h1>Supporting Artefacts</h1>",
-         "<p class='lede'>Reference material behind this assessment.</p>",
-         "<h2>Source document index</h2>",
-         "<table><thead><tr><th>Document</th><th>Type</th><th>What it is</th>"
-         "<th>Findings it supported</th></tr></thead><tbody>"]
-    for d in s.source_index:
-        fnd = ", ".join(d.supported_findings) if d.supported_findings else "—"
-        name = f"<a href='{_src_href(d.doc_id)}'>{esc(d.business_name)}</a>"
-        h.append(f"<tr><td>{name}</td><td>{esc(d.doc_type)}</td>"
-                 f"<td>{esc(d.what_we_read)}</td><td>{esc(fnd)}</td></tr>")
-    h.append("</tbody></table>")
+    d = _Doc("Supporting Artefacts", "Reference material behind this assessment.")
+    d.h1("Source provenance")
+    d.p("Every figure in this assessment is computed from the sources below and traces back to "
+        "them.")
+    si = ["<table><thead><tr><th>Source</th><th>Type</th><th>What it is</th>"
+          "<th>Findings it supported</th></tr></thead><tbody>"]
+    for doc in s.source_index:
+        fnd = ", ".join(doc.supported_findings) if doc.supported_findings else "—"
+        name = f"<a href='{_src_href(doc.doc_id)}'>{esc(doc.business_name)}</a>"
+        si.append(f"<tr><td>{name}</td><td>{esc(doc.doc_type)}</td>"
+                  f"<td>{esc(doc.what_we_read)}</td><td>{esc(fnd)}</td></tr>")
+    si.append("</tbody></table>")
+    d.raw("".join(si))
     if s.metrics_framework:
-        h.append("<h2>Success metrics framework</h2>")
-        h.append("<p>How the impact of the recommended interventions should be measured once live — "
-                 "the dimension, what it means, and the target to hold delivery to.</p>")
-        h.append("<table><thead><tr><th>Metric</th><th>Definition</th><th>Target</th>"
-                 "</tr></thead><tbody>")
+        d.h1("Success metrics framework")
+        d.p("How the impact of the recommended interventions should be measured once live — the "
+            "dimension, what it means, and the target to hold delivery to.")
+        mt = ["<table><thead><tr><th>Metric</th><th>Definition</th><th>Target</th>"
+              "</tr></thead><tbody>"]
         for m in s.metrics_framework:
-            h.append(f"<tr><td><strong>{esc(m.name)}</strong></td><td>{esc(m.definition)}</td>"
-                     f"<td>{esc(m.target)}</td></tr>")
-        h.append("</tbody></table>")
+            mt.append(f"<tr><td><strong>{esc(m.name)}</strong></td><td>{esc(m.definition)}</td>"
+                      f"<td>{esc(m.target)}</td></tr>")
+        mt.append("</tbody></table>")
+        d.raw("".join(mt))
     donut = render_charts(s.charts, kinds={"donut"})
     if donut:
-        h.append("<h2>Where the failures concentrate</h2>")
-        h.append(donut)
-    h.append("<h2>System &amp; data-flow map</h2>")
-    h.append("<p class='prov'>The full step-by-step process flow is in the Current State "
-             "Assessment; this is the systems view of the same domain.</p>")
-    h.append(data_flow_svg(s.current_state.process_flow))
-    h.append("<h2>Companion material</h2><ul>"
-             "<li>Ownership and handoff maps</li>"
-             "<li>Exception and workaround register</li></ul>")
-    h.append("<p class='badge-note'>A full technical trace of every figure in this assessment is "
-             "available to your data team on request.</p>")
-    return "\n".join(h)
+        d.h1("Where the failures concentrate")
+        d.raw(donut)
+    d.h1("System & data-flow map")
+    d.p("The systems view of the same domain — which business systems the process touches and how "
+        "data moves between them.")
+    d.raw(data_flow_svg(s.current_state.process_flow))
+    d.raw("<p class='badge-note'>A full technical trace of every figure in this assessment is "
+          "available to your data team on request.</p>")
+    return d.toc_html() + d.body()
 
 
-# ---- diagrams (self-contained SVG, no external deps) ----------------------
+# ---------------------------------------------------------------------------
+# grounded component renderers (HTML)
+# ---------------------------------------------------------------------------
+def _severity(rank: int, explicit: str = "") -> tuple[str, str]:
+    """Severity badge for a pain point. Uses an explicit grounded severity when set
+    (high|medium|lower), else falls back to the impact rank. Red/amber for high/medium; neutral blue
+    for lower (green would read as 'good' and clash in a pain-point context)."""
+    level = (explicit or "").strip().lower()
+    if not level:
+        level = "high" if rank <= 1 else "medium" if rank == 2 else "lower"
+    if level == "high":
+        return "b-high", "High Severity"
+    if level == "medium":
+        return "b-med", "Medium Severity"
+    return "b-pat", "Lower Severity"
+
+
+def _is_high(pp) -> bool:
+    lvl = (pp.severity or "").strip().lower()
+    return lvl == "high" if lvl else pp.impact_rank <= 1
+
+
+def _pain_point_card(pp, idx: int) -> str:
+    sev_cls, sev_lbl = _severity(pp.impact_rank, pp.severity)
+    badges = [f"<span class='badge {sev_cls}'>{sev_lbl}</span>"]
+    cat = pp.category or pp.failure_pattern
+    if cat:
+        badges.append(f"<span class='badge b-cat'>{esc(_clip(cat, 28))}</span>")
+    h = ["<div class='card'>",
+         "<div class='pp-hdr'>",
+         f"<div class='pp-id'>PP<br>{idx:02d}</div>",
+         f"<div><div class='pp-name'>{esc(pp.title)}</div>"
+         f"<div class='pp-badges'>{''.join(badges)}</div></div>",
+         "</div>",
+         f"<p>{esc(pp.description)}</p>"]
+    mini = _mini_stats(pp.quantified)
+    if mini:
+        h.append(mini)
+    if pp.detail_table:
+        h.append(_data_table(pp.detail_table))
+    h.append(f"<p><strong>Root cause:</strong> {esc(pp.root_cause)}</p>")
+    quote = _ev_quote(pp.sources)
+    if quote:
+        h.append(quote)
+    if pp.business_consequence:
+        hi = _is_high(pp)
+        sev_box = "high-box" if hi else "med-box"
+        title_cls = "hb-title" if hi else "mb-title"
+        text_cls = "hb-text" if hi else "mb-text"
+        h.append(f"<div class='{sev_box}'><div class='{title_cls}'>Business impact</div>"
+                 f"<div class='{text_cls}'>{esc(pp.business_consequence)}</div></div>")
+    if pp.opportunity_signal:
+        h.append("<div class='note-box'><div class='nb-title'>Addressed by</div>"
+                 f"<div class='nb-text'>{esc(pp.opportunity_signal)} — see the Opportunity "
+                 "Portfolio.</div></div>")
+    h.append(f"<p class='prov'>Where this comes from: {_cite_links(pp.sources)}</p>")
+    h.append("</div>")
+    return "".join(h)
+
+
+def _mini_stats(quantified) -> str:
+    """A row of grounded mini-stats from a pain point's NumberRefs. Empty → ''."""
+    cells = []
+    for n in (quantified or [])[:4]:
+        if n.unit == "eur":
+            val, cls = _fmt_money(n.value), "red"
+        elif n.unit == "percent":
+            val, cls = f"{n.value:g}%", "amber"
+        else:
+            val = f"{int(n.value):,}" if float(n.value) == int(n.value) else f"{n.value:g}"
+            cls = "blue"
+        label = _clip((n.label or n.text or "").strip(), 34) or "figure"
+        cells.append(f"<div class='mini'><div class='mval {cls}'>{esc(val)}</div>"
+                     f"<div class='mlbl'>{esc(label)}</div></div>")
+    return f"<div class='mini-row'>{''.join(cells)}</div>" if cells else ""
+
+
+def _ev_quote(sources) -> str:
+    """An attributed evidence quote — ONLY when a verified source quote exists. Attributed to the
+    friendly document name (never a fabricated person/date). Empty → ''."""
+    for r in sources or []:
+        q = (getattr(r, "quote", "") or "").strip()
+        if q:
+            return ("<div class='ev-quote'>"
+                    f"<div class='eq-text'>&ldquo;{esc(_clip(q, 240))}&rdquo;</div>"
+                    f"<div class='eq-attr'>— {esc(docnames.friendly(r.doc_id))}</div></div>")
+    return ""
+
+
+def _seq_order(opportunities):
+    """Stable order honouring dependencies: an opportunity never precedes one it depends on. Keeps
+    declared order otherwise (deterministic)."""
+    opps = list(opportunities)
+    by_id = {o.id: o for o in opps}
+    placed, order = set(), []
+
+    def visit(o):
+        if o.id in placed:
+            return
+        for d in o.dependencies:
+            if d in by_id and d not in placed:
+                visit(by_id[d])
+        placed.add(o.id)
+        order.append(o)
+    for o in opps:
+        visit(o)
+    return order
+
+
+def _rec_card(o, idx: int, s: SynthesisContent, titles: dict) -> str:
+    pat = _PATTERN_LABEL.get(o.pattern.value, "")
+    badges = []
+    if o.value_rating:
+        prio = ("b-crit" if o.value_rating == "high" else
+                "b-med" if o.value_rating == "medium" else "b-low")
+        lbl = {"high": "Critical Priority", "medium": "High Priority"}.get(
+            o.value_rating, "Medium Priority")
+        badges.append(f"<span class='badge {prio}'>{lbl}</span>")
+    hz = _opp_horizon(o.id, s.roadmap)
+    if hz:
+        badges.append(f"<span class='badge {_HORIZON_CLASS.get(hz,'b-h1')}'>{esc(hz)}</span>")
+    if o.pattern.value == "ai_agent":
+        badges.append("<span class='badge b-ai'>AI Opportunity</span>")
+    if pat:
+        badges.append(f"<span class='badge b-pat'>{esc(pat)}</span>")
+    pp = OPP_TO_PP_LABEL(o)
+    trace = []
+    if pp:
+        trace.append(f"Addresses {esc(pp)}")
+    trace.append(f"Delivers {esc(o.id)}")
+    badges.append(f"<span class='trace'>{' &nbsp;|&nbsp; '.join(trace)}</span>")
+
+    h = ["<div class='rec-card'><div class='rec-hdr'>",
+         f"<div class='rec-id'>R<br>{idx:02d}</div>",
+         f"<div><div class='rec-name'>{esc(o.title)}</div>"
+         f"<div class='rec-badges'>{''.join(badges)}</div></div></div>",
+         "<div class='rec-body'>",
+         f"<p>{esc(o.overview)}</p>"]
+    # phased actions: derive from before→after milestones placed on the opportunity's horizon
+    actions = _rec_actions(o, hz)
+    if actions:
+        h.append("<h4>Phased actions</h4><ul class='action-list'>")
+        for hzlbl, text in actions:
+            cls = _HORIZON_CLASS.get(hzlbl, "al-h1")
+            h.append(f"<li><span class='al-horizon {cls}'>{esc(hzlbl)}</span>"
+                     f"<span>{esc(text)}</span></li>")
+        h.append("</ul>")
+    if o.success_metrics:
+        h.append("<h4>Success criteria</h4><div class='kpi-row'>"
+                 + "".join(f"<span class='kpi-pill'>{esc(m)}</span>" for m in o.success_metrics)
+                 + "</div>")
+    h.append("</div></div>")
+    # dependency relationship as a strategy box (grounded in declared dependencies)
+    rel = []
+    if o.dependencies:
+        rel.append("Requires " + ", ".join(str(titles.get(d, d)) for d in o.dependencies)
+                   + " first.")
+    if o.prerequisite_for:
+        rel.append("Prerequisite for "
+                   + ", ".join(str(titles.get(d, d)) for d in o.prerequisite_for) + ".")
+    if rel:
+        h.append("<div class='strat-box'><div class='sb-title'>Dependency</div>"
+                 f"<div class='sb-text'>{esc(' '.join(rel))}</div></div>")
+    return "".join(h)
+
+
+def _rec_actions(o, hz: str) -> list[tuple[str, str]]:
+    """Phased actions for a recommendation, grounded in the after-process steps (what the change
+    actually does), each tagged to the opportunity's horizon. Falls back to the implementation
+    approach as a single action if there are no after-steps."""
+    out = []
+    label = hz or "H1"
+    for st in (o.after_process or [])[:4]:
+        text = st.description or st.name
+        if text:
+            out.append((label, _clip(text, 220)))
+    if not out and o.implementation_approach:
+        out.append((label, _clip(o.implementation_approach, 220)))
+    return out
+
+
+def _opportunity_detail(o, s: SynthesisContent, opp_titles: dict) -> str:
+    h = ["<div class='card'>",
+         f"<h3>{esc(o.title)}<span class='pattern' style='margin-left:.5rem'>"
+         f"{_PATTERN_LABEL.get(o.pattern.value,'')}</span></h3>",
+         f"<p>{esc(o.overview)}</p>",
+         "<div class='ba-grid'>",
+         "<div class='col before'><div class='ba-tag'>Today</div>"
+         + _steps(o.before_process) + "</div>",
+         "<div class='ba-arrow' aria-hidden='true'><svg viewBox='0 0 28 28'>"
+         "<path d='M4 14h16M15 8l6 6-6 6' fill='none' stroke='var(--blue)' stroke-width='2.4' "
+         "stroke-linecap='round' stroke-linejoin='round'/></svg></div>",
+         "<div class='col after'><div class='ba-tag after'>With the change</div>"
+         + _steps(o.after_process) + "</div>",
+         "</div>"]
+    bi = o.business_impact
+    impact = "<p><strong>Business impact.</strong> " + esc(bi.narrative)
+    if bi.quantified:
+        impact += " " + " &nbsp; ".join(_metric(n) for n in bi.quantified)
+    impact += "</p>"
+    h.append(impact)
+    if bi.derivation:
+        h.append(f"<p class='prov'>How we get there: {esc(bi.derivation)}</p>")
+    h.append(f"<p><strong>How it's delivered.</strong> {esc(o.implementation_approach)}</p>")
+    if o.personas or o.expected_behaviour or o.escalation:
+        om = ["<div class='opmodel'>"]
+        if o.personas:
+            om.append("<p><strong>Who uses it.</strong> " + ", ".join(esc(x) for x in o.personas)
+                      + "</p>")
+        if o.expected_behaviour:
+            om.append(f"<p><strong>Expected behaviour.</strong> {esc(o.expected_behaviour)}</p>")
+        if o.escalation:
+            om.append(f"<p><strong>Escalation &amp; human fallback.</strong> {esc(o.escalation)}</p>")
+        if o.knowledge_sources or o.document_formats:
+            bits = []
+            if o.knowledge_sources:
+                bits.append("<strong>Sources.</strong> "
+                            + ", ".join(esc(x) for x in o.knowledge_sources))
+            if o.document_formats:
+                bits.append("<strong>Formats.</strong> "
+                            + ", ".join(esc(x) for x in o.document_formats))
+            om.append("<p>" + " &nbsp; ".join(bits) + "</p>")
+        om.append("</div>")
+        h.append("".join(om))
+    if o.required_integrations:
+        h.append("<p><strong>Connects:</strong> "
+                 + ", ".join(esc(x) for x in o.required_integrations) + "</p>")
+    if o.success_metrics:
+        h.append("<p><strong>Success looks like:</strong></p><ul>"
+                 + "".join(f"<li>{esc(x)}</li>" for x in o.success_metrics) + "</ul>")
+    if o.dependencies:
+        dep = "Requires " + ", ".join(str(opp_titles.get(d, d)) for d in o.dependencies) + " first."
+    else:
+        dep = "Independent — can start immediately."
+    if o.prerequisite_for:
+        dep += (" Prerequisite for "
+                + ", ".join(str(opp_titles.get(d, d)) for d in o.prerequisite_for) + ".")
+    h.append(f"<p><strong>Dependencies:</strong> {esc(dep)}</p>")
+    if o.risks:
+        h.append("<p><strong>Risks:</strong></p><ul>"
+                 + "".join(f"<li>{esc(x)}</li>" for x in o.risks) + "</ul>")
+    h.append(f"<p class='prov'>Where this comes from: {_cite_links(o.sources)}</p>")
+    h.append("</div>")
+    return "".join(h)
+
+
+def OPP_TO_PP_LABEL(o) -> str:
+    """The pain point an opportunity addresses, as a label (derived field set by build)."""
+    return getattr(o, "addresses_pain_point", "") or ""
+
+
+def _opp_horizon(opp_id: str, roadmap) -> str:
+    """Which horizon an opportunity is scheduled in (from the roadmap placement). '' if unplaced."""
+    for hz in roadmap or []:
+        for it in hz.items:
+            if it.opportunity_id == opp_id:
+                return hz.horizon
+    return ""
+
+
+def _principles(s: SynthesisContent) -> list[tuple[str, str]]:
+    """Guiding principles, DERIVED in code from grounded synthesis text (no invented principles).
+    Built from the strategy posture + the sequencing/strategic-readiness narratives, split into
+    short titled cards. Returns [] when there is nothing grounded to show."""
+    out = []
+    posture = (s.strategy_profile.get("posture") or "").replace("_", " ").strip()
+    if posture:
+        out.append(("Strategic direction", posture[:1].upper() + posture[1:]))
+    for title, text in (("Sequencing", s.sequencing_rationale),
+                        ("Readiness", s.strategic_readiness)):
+        text = (text or "").strip()
+        if text:
+            out.append((title, _clip(_first_sentence(text), 180)))
+    return out[:4]
+
+
+def _first_sentence(text: str) -> str:
+    m = re.search(r"^(.*?[.!?])(\s|$)", text)
+    return m.group(1) if m else text
+
+
+# ---------------------------------------------------------------------------
+# infographics — pure inline SVG, offline-safe, grounded inputs only
+# ---------------------------------------------------------------------------
 _SVG_DEFS = (
     "<defs>"
     "<marker id='arr' markerWidth='10' markerHeight='10' refX='8' refY='3.2' orient='auto'>"
-    "<path d='M0,0 L8,3.2 L0,6.4 Z' fill='#0f7c8c'/></marker>"
-    "<linearGradient id='hdr' x1='0' y1='0' x2='0' y2='1'>"
-    "<stop offset='0' stop-color='#2a93a3'/><stop offset='1' stop-color='#0f7c8c'/></linearGradient>"
+    "<path d='M0,0 L8,3.2 L0,6.4 Z' fill='#2563eb'/></marker>"
+    "<marker id='arrg' markerWidth='10' markerHeight='10' refX='8' refY='3.2' orient='auto'>"
+    "<path d='M0,0 L8,3.2 L0,6.4 Z' fill='#9aa7b6'/></marker>"
     "<filter id='sh' x='-20%' y='-20%' width='140%' height='150%'>"
-    "<feDropShadow dx='0' dy='1.5' stdDeviation='2.5' flood-color='#1a2230' flood-opacity='0.12'/>"
+    "<feDropShadow dx='0' dy='1.2' stdDeviation='2' flood-color='#1a2f50' flood-opacity='0.12'/>"
     "</filter></defs>"
 )
+# categorical palette in the navy/blue family
+_SERIES = ["#1a2f50", "#2563eb", "#3665a8", "#60a5fa", "#a9c7f0"]
+
+
+def _fig(cap: str, svg: str, foot: str = "") -> str:
+    foot_html = f"<div class='fig-foot'>{esc(foot)}</div>" if foot else ""
+    return f"<div class='fig'><div class='fig-cap'>{esc(cap)}</div>{svg}{foot_html}</div>"
 
 
 def process_flow_svg(steps) -> str:
-    """The hero process-flow visual for Report 01: a wrapping chain of polished node cards with a
-    coloured header band (step number + name), actor and system on separate lines, soft shadow, and
-    blue connecting arrows. Pure inline SVG (offline-safe). Generated from this run's steps."""
+    """Report 01 hero: a wrapping chain of node cards (step number + name header band, actor +
+    system lines), navy header, blue connecting arrows. Grounded from this run's steps. Empty → ''."""
     if not steps:
-        return "<p class='prov'>No process flow available.</p>"
-    WRAP = 3
-    NW, NH = 234, 104
-    GAP_X, GAP_Y = 58, 52
-    PAD = 16
-    HDR = 30                       # coloured header band height
+        return ""
+    WRAP, NW, NH, GAP_X, GAP_Y, PAD, HDR = 3, 234, 104, 58, 52, 16, 30
     rows = [steps[i:i + WRAP] for i in range(0, len(steps), WRAP)]
     cols = min(WRAP, len(steps))
     width = PAD * 2 + cols * NW + (cols - 1) * GAP_X
     height = PAD * 2 + len(rows) * NH + (len(rows) - 1) * GAP_Y
-    out = [f"<svg class='flow' viewBox='0 0 {width} {height}' width='100%' "
-           f"role='img' aria-label='Process flow diagram' xmlns='http://www.w3.org/2000/svg'>",
-           _SVG_DEFS]
+    out = [f"<svg class='chart' viewBox='0 0 {width} {height}' width='100%' role='img' "
+           f"aria-label='Process flow diagram' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
 
     def node_xy(idx):
         r, c = idx // WRAP, idx % WRAP
@@ -451,144 +907,359 @@ def process_flow_svg(steps) -> str:
         x1, y1 = node_xy(i)
         x2, y2 = node_xy(i + 1)
         if (i // WRAP) == ((i + 1) // WRAP):
-            out.append(f"<line x1='{x1 + NW}' y1='{y1 + NH/2}' x2='{x2 - 3}' y2='{y2 + NH/2}' "
-                       f"stroke='#0f7c8c' stroke-width='2.2' marker-end='url(#arr)'/>")
+            out.append(f"<line x1='{x1+NW}' y1='{y1+NH/2}' x2='{x2-3}' y2='{y2+NH/2}' "
+                       f"stroke='#2563eb' stroke-width='2.2' marker-end='url(#arr)'/>")
         else:
             sx, sy = x1 + NW / 2, y1 + NH
             ex, ey = x2 + NW / 2, y2 - 3
             midy = sy + GAP_Y / 2
             out.append(f"<path d='M{sx},{sy} L{sx},{midy} L{ex},{midy} L{ex},{ey}' fill='none' "
-                       f"stroke='#0f7c8c' stroke-width='2.2' marker-end='url(#arr)'/>")
-
+                       f"stroke='#2563eb' stroke-width='2.2' marker-end='url(#arr)'/>")
     for i, st in enumerate(steps):
         x, y = node_xy(i)
-        actor = getattr(st, "actor", "")
-        system = getattr(st, "system", "")
-        out.append(f"<g filter='url(#sh)'>")
-        out.append(f"<rect x='{x}' y='{y}' width='{NW}' height='{NH}' rx='12' fill='#fff' "
-                   f"stroke='#dbe3ee' stroke-width='1'/>")
-        # header band (rounded top only, via path)
-        out.append(f"<path d='M{x},{y+12} a12,12 0 0 1 12,-12 h{NW-24} a12,12 0 0 1 12,12 "
-                   f"v{HDR-12} h-{NW} z' fill='url(#hdr)'/>")
+        actor, system = getattr(st, "actor", ""), getattr(st, "system", "")
+        out.append("<g filter='url(#sh)'>")
+        out.append(f"<rect x='{x}' y='{y}' width='{NW}' height='{NH}' rx='10' fill='#fff' "
+                   f"stroke='#d1d5db' stroke-width='1'/>")
+        out.append(f"<path d='M{x},{y+10} a10,10 0 0 1 10,-10 h{NW-20} a10,10 0 0 1 10,10 "
+                   f"v{HDR-10} h-{NW} z' fill='#1a2f50'/>")
         out.append(f"<text x='{x+13}' y='{y+20}' font-size='13' font-weight='700' fill='#fff'>"
-                   f"{st.seq}. {esc(_clip(st.name, 26))}</text>")
+                   f"{st.seq}. {esc(_clipw(st.name, 30))}</text>")
         if actor:
-            out.append(f"<text x='{x+13}' y='{y+HDR+22}' font-size='11.5' fill='#1a2230'>"
-                       f"<tspan font-weight='600'>Who </tspan>{esc(_clip(actor, 26))}</text>")
+            out.append(f"<text x='{x+13}' y='{y+HDR+22}' font-size='11.5' fill='#111827'>"
+                       f"<tspan font-weight='700'>Who </tspan>{esc(_clipw(actor, 26))}</text>")
         if system:
-            out.append(f"<text x='{x+13}' y='{y+HDR+44}' font-size='11.5' fill='#5b6776'>"
-                       f"<tspan font-weight='600' fill='#1a2230'>System </tspan>"
-                       f"{esc(_clip(system, 24))}</text>")
+            out.append(f"<text x='{x+13}' y='{y+HDR+44}' font-size='11.5' fill='#6b7280'>"
+                       f"<tspan font-weight='700' fill='#111827'>System </tspan>"
+                       f"{esc(_clipw(system, 24))}</text>")
         out.append("</g>")
     out.append("</svg>")
-    return ("<div class='flow-wrap'><div class='flow-cap'>How work moves, end to end</div>"
-            + "".join(out) + "</div>")
+    return _fig("How work moves, end to end", "".join(out))
 
 
-def data_flow_svg(steps) -> str:
-    """A DIFFERENT artefact for Supporting Artefacts (not a copy of the process flow): a system /
-    data-flow map showing which business systems the process touches and the handoffs between them.
-    Derived from the distinct systems named across the process steps."""
-    # distinct systems in order of first appearance
-    systems, seen = [], set()
-    for st in steps:
-        sysname = (getattr(st, "system", "") or "").strip()
-        for part in [p.strip() for p in sysname.replace(" / ", "/").split("/") if p.strip()]:
-            if part.lower() not in seen:
-                seen.add(part.lower())
-                systems.append(part)
-    if len(systems) < 2:
-        return "<p class='prov'>System map not available (too few named systems).</p>"
-    NW, NH, GAP_X, PAD = 196, 58, 64, 16
-    cols = min(4, len(systems))
-    rows = [systems[i:i + 4] for i in range(0, len(systems), 4)]
+def context_map_svg(steps, handoffs) -> str:
+    """A context/handoff map: the process steps as boxes, with the grounded handoffs drawn as
+    labelled arrows between them. Boxes = real steps; arrows = real handoffs (by mechanism). Pure
+    SVG. Empty (no steps or no handoffs) → ''."""
+    steps = list(steps or [])
+    handoffs = list(handoffs or [])
+    if len(steps) < 2 or not handoffs:
+        return ""
+    # lay steps out in a horizontal lane, wrapping; map step name -> index for handoff lookup
+    WRAP = 4
+    NW, NH, GAP_X, GAP_Y, PAD = 168, 56, 40, 60, 16
+    cols = min(WRAP, len(steps))
+    rows = [steps[i:i + WRAP] for i in range(0, len(steps), WRAP)]
     width = PAD * 2 + cols * NW + (cols - 1) * GAP_X
-    height = PAD * 2 + len(rows) * NH + (len(rows) - 1) * 44
-    out = [f"<svg class='flow' viewBox='0 0 {width} {height}' width='100%' role='img' "
-           f"aria-label='System and data-flow map' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
+    height = PAD * 2 + len(rows) * NH + (len(rows) - 1) * GAP_Y
+    name_idx = {(st.name or "").strip().lower(): i for i, st in enumerate(steps)}
 
-    def sxy(idx):
-        r, c = idx // 4, idx % 4
-        return PAD + c * (NW + GAP_X), PAD + r * (NH + 44)
+    def cxy(idx):
+        r, c = idx // WRAP, idx % WRAP
+        return PAD + c * (NW + GAP_X), PAD + r * (NH + GAP_Y)
 
-    for i in range(len(systems) - 1):
-        x1, y1 = sxy(i)
-        x2, y2 = sxy(i + 1)
-        if (i // 4) == ((i + 1) // 4):
-            out.append(f"<line x1='{x1+NW}' y1='{y1+NH/2}' x2='{x2-3}' y2='{y2+NH/2}' "
-                       f"stroke='#8aa6d6' stroke-width='2' stroke-dasharray='5 4' "
+    out = [f"<svg class='chart' viewBox='0 0 {width} {height}' width='100%' role='img' "
+           f"aria-label='Handoff map' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
+    # arrows for handoffs whose endpoints we can resolve to steps
+    for ho in handoffs:
+        a = name_idx.get((ho.from_step or "").strip().lower())
+        b = name_idx.get((ho.to_step or "").strip().lower())
+        if a is None or b is None or a == b:
+            continue
+        x1, y1 = cxy(a)
+        x2, y2 = cxy(b)
+        sx, sy = x1 + NW, y1 + NH / 2
+        ex, ey = x2, y2 + NH / 2
+        if y1 == y2 and b == a + 1:
+            out.append(f"<line x1='{sx}' y1='{sy}' x2='{ex-3}' y2='{ey}' stroke='#3665a8' "
+                       f"stroke-width='1.8' marker-end='url(#arr)'/>")
+        else:
+            my = min(y1, y2) - GAP_Y / 2 + 6
+            cx1, cx2 = x1 + NW / 2, x2 + NW / 2
+            out.append(f"<path d='M{cx1},{y1} C{cx1},{my} {cx2},{my} {cx2},{y2}' fill='none' "
+                       f"stroke='#3665a8' stroke-width='1.6' stroke-dasharray='5 4' "
                        f"marker-end='url(#arr)'/>")
-    for i, name in enumerate(systems):
-        x, y = sxy(i)
-        out.append(f"<g filter='url(#sh)'><rect x='{x}' y='{y}' width='{NW}' height='{NH}' rx='10' "
-                   f"fill='#e6f1f3' stroke='#0f7c8c' stroke-width='1.2'/>"
-                   f"<text x='{x+NW/2}' y='{y+NH/2+5}' text-anchor='middle' font-size='13' "
-                   f"font-weight='600' fill='#0b5e6b'>{esc(_clip(name, 22))}</text></g>")
+    for i, st in enumerate(steps):
+        x, y = cxy(i)
+        out.append(f"<g filter='url(#sh)'><rect x='{x}' y='{y}' width='{NW}' height='{NH}' rx='8' "
+                   f"fill='#eff6ff' stroke='#2563eb' stroke-width='1.2'/>"
+                   f"<text x='{x+NW/2}' y='{y+NH/2-2}' text-anchor='middle' font-size='12' "
+                   f"font-weight='700' fill='#1a2f50'>{esc(_clipw(st.name, 20))}</text>"
+                   f"<text x='{x+NW/2}' y='{y+NH/2+15}' text-anchor='middle' font-size='10' "
+                   f"fill='#6b7280'>{esc(_clipw(getattr(st,'system','') or '', 22))}</text></g>")
     out.append("</svg>")
-    return ("<div class='flow-wrap'><div class='flow-cap'>Systems the process touches, and how "
-            "data moves between them</div>" + "".join(out) + "</div>")
+    return _fig("Where work crosses between steps and systems", "".join(out),
+                "Boxes are process steps; arrows are the handoffs recorded between them.")
 
 
-def _clip(t: str, n: int) -> str:
-    t = str(t)
-    return t if len(t) <= n else t[: n - 1] + "…"
+_BC_STYLE = {  # kind -> (fill, stroke, title-fill, sub-fill, tag-fill, tag-label)
+    "core": ("#eef3fb", "#2563eb", "#1a2f50", "#3665a8", "#1a2f50", "CORE"),
+    "supporting": ("#ecfdf5", "#059669", "#065f46", "#047857", "#059669", "SUPPORTING"),
+    "generic": ("#f3f4f6", "#9ca3af", "#374151", "#6b7280", "#6b7280", "GENERIC"),
+    "external": ("#fffbeb", "#d97706", "#92400e", "#b45309", "#d97706", "EXTERNAL"),
+}
+_REL_ABBR = {  # DDD relationship -> short edge label
+    "customer_supplier": "C/S", "conformist": "CF", "anti_corruption_layer": "ACL",
+    "open_host_service": "OHS", "shared_kernel": "SK", "partnership": "P",
+}
 
 
-# ---- data-viz helpers (pure inline SVG, offline-safe, grounded inputs only) -------------------
-# A restrained categorical palette for multi-series visuals — all in the calm blue/slate family,
-# no traffic-light status colours (those are reserved for the H/M/L readiness badges).
-_SERIES = ["#0f7c8c", "#2a93a3", "#5fb0bc", "#9fccd3", "#cfe6ea"]
+def bounded_context_svg(contexts, domain_label: str = "") -> str:
+    """The Domain-Driven-Design bounded-context map: each subdomain as a box, coloured by kind
+    (core / supporting / generic / external), placed inside the domain boundary, with the shared
+    kernel as a band beneath and DDD relationships drawn as labelled connectors. Mirrors the
+    reference reports' signature diagram. Grounded: boxes/owners/relationships are exactly what the
+    synthesis emitted. Empty (no contexts) → ''."""
+    contexts = [c for c in (contexts or []) if getattr(c, "name", "")]
+    if len(contexts) < 2:
+        return ""
+    kernel = next((c for c in contexts if getattr(c, "is_shared_kernel", False)), None)
+    cells = [c for c in contexts if c is not kernel]
+
+    NW, NH, GAP_X, GAP_Y, PAD, TOP = 188, 70, 30, 30, 22, 34
+    COLS = 3
+    rows = (len(cells) + COLS - 1) // COLS
+    cols = min(COLS, len(cells)) or 1
+    width = PAD * 2 + cols * NW + (cols - 1) * GAP_X
+    body_h = rows * NH + (rows - 1) * GAP_Y
+    kernel_h = 40 if kernel else 0
+    height = TOP + PAD + body_h + (kernel_h + 14 if kernel else 0) + PAD
+
+    pos: dict[str, tuple[float, float]] = {}
+
+    def cxy(i):
+        r, c = i // COLS, i % COLS
+        return PAD + c * (NW + GAP_X), TOP + PAD + r * (NH + GAP_Y)
+
+    out = [f"<svg class='chart' viewBox='0 0 {width} {height}' width='100%' role='img' "
+           f"aria-label='Bounded context map' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
+    # domain boundary frame + label
+    out.append(f"<rect x='3' y='3' width='{width-6}' height='{height-6}' rx='12' fill='none' "
+               f"stroke='#cbd5e1' stroke-width='1.3' stroke-dasharray='5 4'/>")
+    label = (domain_label or "Domain").upper() + " — DOMAIN BOUNDARY"
+    out.append(f"<text x='{width/2}' y='22' text-anchor='middle' font-size='9' font-weight='700' "
+               f"fill='#3665a8' letter-spacing='1.1'>{esc(label)}</text>")
+
+    # relationship edges first (so boxes sit on top); resolve names case-insensitively
+    for i, c in enumerate(cells):
+        pos[(c.name or "").strip().lower()] = cxy(i)
+    for c in cells:
+        a = pos.get((c.name or "").strip().lower())
+        for rel in getattr(c, "relationships", []) or []:
+            b = pos.get((getattr(rel, "to", "") or "").strip().lower())
+            if not a or not b or a == b:
+                continue
+            x1, y1 = a[0] + NW / 2, a[1] + NH / 2
+            x2, y2 = b[0] + NW / 2, b[1] + NH / 2
+            out.append(f"<line x1='{x1}' y1='{y1}' x2='{x2}' y2='{y2}' stroke='#94a3b8' "
+                       f"stroke-width='1.2' marker-end='url(#arr)'/>")
+            tag = _REL_ABBR.get((getattr(rel, "kind", "") or "").lower(), "")
+            if tag:
+                out.append(f"<text x='{(x1+x2)/2}' y='{(y1+y2)/2-3}' text-anchor='middle' "
+                           f"font-size='7.5' font-weight='700' fill='#475569'>{esc(tag)}</text>")
+
+    # context boxes
+    for i, c in enumerate(cells):
+        x, y = cxy(i)
+        fill, stroke, tf, sf, tagf, taglbl = _BC_STYLE.get(
+            (c.kind or "core").lower(), _BC_STYLE["core"])
+        out.append(f"<g filter='url(#sh)'><rect x='{x}' y='{y}' width='{NW}' height='{NH}' rx='9' "
+                   f"fill='{fill}' stroke='{stroke}' stroke-width='1.3'/>"
+                   f"<text x='{x+NW/2}' y='{y+22}' text-anchor='middle' font-size='11' "
+                   f"font-weight='800' fill='{tf}'>{esc(_clipw(c.name, 26))}</text>")
+        if c.owner:
+            out.append(f"<text x='{x+NW/2}' y='{y+37}' text-anchor='middle' font-size='8' "
+                       f"fill='{sf}'>{esc(_clipw(c.owner, 32))}</text>")
+        if c.responsibilities:
+            out.append(f"<text x='{x+NW/2}' y='{y+50}' text-anchor='middle' font-size='8' "
+                       f"fill='{sf}'>{esc(_clipw(c.responsibilities, 34))}</text>")
+        # the kind tag chip, bottom-left
+        out.append(f"<rect x='{x+8}' y='{y+NH-15}' width='{8.5*len(taglbl)+8}' height='12' rx='3' "
+                   f"fill='{tagf}'/><text x='{x+8+(8.5*len(taglbl)+8)/2}' y='{y+NH-6}' "
+                   f"text-anchor='middle' font-size='7' font-weight='700' fill='#fff'>{taglbl}</text></g>")
+
+    # shared-kernel band
+    if kernel:
+        ky = TOP + PAD + body_h + 14
+        out.append(f"<rect x='{PAD}' y='{ky}' width='{width-2*PAD}' height='{kernel_h}' rx='8' "
+                   f"fill='#fffbeb' stroke='#d97706' stroke-width='1.3'/>"
+                   f"<text x='{width/2}' y='{ky+17}' text-anchor='middle' font-size='9.5' "
+                   f"font-weight='800' fill='#92400e'>{esc(_clipw(kernel.name, 60))} — Shared Kernel</text>")
+        if kernel.responsibilities:
+            out.append(f"<text x='{width/2}' y='{ky+31}' text-anchor='middle' font-size='8' "
+                       f"fill='#b45309'>{esc(_clipw(kernel.responsibilities, 90))}</text>")
+    out.append("</svg>")
+    foot = ("Subdomains classified core / supporting / generic / external; connectors show DDD "
+            "relationships (C/S customer-supplier, CF conformist, ACL anti-corruption layer, "
+            "OHS open-host service).")
+    return _fig("Domain landscape — bounded context map", "".join(out), foot)
 
 
-def _fmt_compact(v: float) -> str:
-    """Human-readable money/number: 30675000 -> '€30.7M', 1196 -> '1,196'."""
-    try:
-        f = float(v)
-    except (TypeError, ValueError):
-        return str(v)
-    a = abs(f)
-    if a >= 1_000_000:
-        return f"€{f/1_000_000:.1f}M".replace(".0M", "M")
-    if a >= 1_000 and f == int(f):
-        return f"{int(f):,}"
-    return f"{f:g}"
+def root_cause_svg(pain_points, patterns) -> str:
+    """A root-cause map: shared structural cause(s) on the left → the pain points they drive on the
+    right, with arrows. Causes come from cross_process_patterns (grounded); if none are given, the
+    pain points' own failure patterns are used as the cause nodes. Empty → ''."""
+    pps = sorted(pain_points or [], key=lambda p: p.impact_rank)
+    if not pps:
+        return ""
+    causes = [(c.get("pattern", "") or "").strip() for c in (patterns or [])]
+    causes = [c for c in causes if c][:3]
+    if not causes:
+        # fall back to the distinct failure patterns across pain points
+        seen = []
+        for p in pps:
+            fp = (p.failure_pattern or "").strip()
+            if fp and fp.lower() not in [x.lower() for x in seen]:
+                seen.append(fp)
+        causes = seen[:3]
+    if not causes:
+        return ""
+    LW, RW, NH, PAD, GAP = 188, 224, 50, 18, 16
+    midgap = 96
+    n_left, n_right = len(causes), len(pps)
+    leftH = n_left * NH + (n_left - 1) * GAP
+    rightH = n_right * NH + (n_right - 1) * GAP
+    height = PAD * 2 + max(leftH, rightH)
+    width = PAD * 2 + LW + midgap + RW
+    lx = PAD
+    rx = PAD + LW + midgap
+
+    def ly(i):
+        off = (height - leftH) / 2
+        return off + i * (NH + GAP)
+
+    def ry(i):
+        off = (height - rightH) / 2
+        return off + i * (NH + GAP)
+
+    out = [f"<svg class='chart' viewBox='0 0 {width} {height}' width='100%' role='img' "
+           f"aria-label='Root cause map' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
+    # edges: each pain point linked to its matching cause (by failure pattern), else to all causes
+    for j, p in enumerate(pps):
+        fp = (p.failure_pattern or "").strip().lower()
+        match = [i for i, c in enumerate(causes) if c.lower() == fp]
+        targets = match or list(range(len(causes)))
+        for i in targets:
+            y1 = ly(i) + NH / 2
+            y2 = ry(j) + NH / 2
+            out.append(f"<path d='M{lx+LW},{y1} C{lx+LW+midgap/2},{y1} {rx-midgap/2},{y2} "
+                       f"{rx},{y2}' fill='none' stroke='#9aa7b6' stroke-width='1.4' "
+                       f"marker-end='url(#arrg)'/>")
+    for i, c in enumerate(causes):
+        y = ly(i)
+        out.append(f"<g filter='url(#sh)'><rect x='{lx}' y='{y}' width='{LW}' height='{NH}' rx='8' "
+                   f"fill='#1a2f50'/><text x='{lx+LW/2}' y='{y+NH/2+4}' text-anchor='middle' "
+                   f"font-size='11.5' font-weight='700' fill='#fff'>{esc(_clipw(c, 26))}</text></g>")
+    for j, p in enumerate(pps):
+        y = ry(j)
+        sev_fill = "#fef2f2" if p.impact_rank <= 1 else "#fffbeb" if p.impact_rank == 2 else "#f9fafb"
+        sev_bd = "#fca5a5" if p.impact_rank <= 1 else "#fcd34d" if p.impact_rank == 2 else "#d1d5db"
+        out.append(f"<g filter='url(#sh)'><rect x='{rx}' y='{y}' width='{RW}' height='{NH}' rx='8' "
+                   f"fill='{sev_fill}' stroke='{sev_bd}' stroke-width='1.2'/>"
+                   f"<text x='{rx+12}' y='{y+22}' font-size='11.5' font-weight='700' fill='#1a2f50'>"
+                   f"{esc(p.id)}  {esc(_clipw(p.title, 24))}</text>"
+                   f"<text x='{rx+12}' y='{y+40}' font-size='10' fill='#6b7280'>"
+                   f"{esc(_clip(p.failure_pattern or '', 32))}</text></g>")
+    out.append("</svg>")
+    return _fig("How the issues trace back to shared causes", "".join(out),
+                "Left: structural causes. Right: the pain points each one drives.")
+
+
+def value_matrix_svg(opportunities) -> str:
+    """Value (y) vs feasibility (x) bubble plot using value_score/feasibility_score (1–5, grounded).
+    Quadrant guides + soft 'do first' shade; deterministic collision spread; bubbles labelled with
+    opportunity id. Empty (no scored opportunities) → ''."""
+    opps = [o for o in opportunities if o.value_score and o.feasibility_score]
+    if not opps:
+        return ""
+    W, H, PAD = 520, 420, 56
+    plotW, plotH = W - PAD * 2, H - PAD * 2
+
+    def px(score):
+        return PAD + (score - 1) / 4 * plotW
+
+    def py(score):
+        return PAD + plotH - (score - 1) / 4 * plotH
+    out = [f"<svg class='chart' viewBox='0 0 {W} {H}' width='100%' role='img' "
+           f"aria-label='Value versus feasibility' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
+    midx, midy = px(3), py(3)
+    out.append(f"<rect x='{midx}' y='{PAD}' width='{PAD+plotW-midx}' height='{midy-PAD}' "
+               f"fill='#eff6ff'/>")
+    out.append(f"<line x1='{midx}' y1='{PAD}' x2='{midx}' y2='{PAD+plotH}' stroke='#e3e8ee'/>")
+    out.append(f"<line x1='{PAD}' y1='{midy}' x2='{PAD+plotW}' y2='{midy}' stroke='#e3e8ee'/>")
+    out.append(f"<text x='{PAD+plotW/2}' y='{H-14}' text-anchor='middle' font-size='12' "
+               f"fill='#6b7280' font-weight='700'>Feasibility →</text>")
+    out.append(f"<text x='16' y='{PAD+plotH/2}' text-anchor='middle' font-size='12' fill='#6b7280' "
+               f"font-weight='700' transform='rotate(-90 16 {PAD+plotH/2})'>Value →</text>")
+    for qx, qy, anchor, label in [
+            (PAD + plotW - 6, PAD + 16, "end", "Do first"),
+            (PAD + 6, PAD + 16, "start", "Plan for"),
+            (PAD + plotW - 6, PAD + plotH - 8, "end", "Quick wins"),
+            (PAD + 6, PAD + plotH - 8, "start", "Reconsider")]:
+        out.append(f"<text x='{qx}' y='{qy}' text-anchor='{anchor}' font-size='10' "
+                   f"fill='#9aa7b6' font-weight='700'>{label}</text>")
+    # spread bubbles that share a coordinate around a small ring so neither circles nor labels
+    # overprint (a 6-opportunity cluster used to collapse into illegible "OPP?PP4" overlaps).
+    R = 15                                  # bubble radius
+    groups: dict[tuple, list] = {}
+    for o in opps:
+        groups.setdefault((o.feasibility_score, o.value_score), []).append(o)
+    for (fscore, vscore), members in groups.items():
+        n = len(members)
+        bx, by = px(fscore), py(vscore)
+        # ring radius grows with crowding so n circles of radius R never touch
+        ring = 0 if n == 1 else max(R + 6, int(R * n / math.pi) + 4)
+        for j, o in enumerate(members):
+            if n == 1:
+                cx, cy = bx, by
+            else:
+                ang = -math.pi / 2 + 2 * math.pi * j / n
+                cx, cy = bx + ring * math.cos(ang), by + ring * math.sin(ang)
+            out.append(f"<circle cx='{cx:.1f}' cy='{cy:.1f}' r='{R}' fill='#2563eb' "
+                       f"fill-opacity='0.16' stroke='#2563eb'/>")
+            out.append(f"<text x='{cx:.1f}' y='{cy+4:.1f}' text-anchor='middle' font-size='10' "
+                       f"font-weight='700' fill='#1d4ed8'>{esc(o.id)}</text>")
+    out.append("</svg>")
+    return _fig("Where each opportunity sits on value versus feasibility", "".join(out))
 
 
 def impact_bars_svg(pain_points) -> str:
-    """Horizontal bars ranking pain points by impact_rank (1 = most material). Bar length encodes
-    rank position (not a fabricated metric); the label carries the title. Calm, single-accent."""
-    pts = sorted(pain_points, key=lambda p: p.impact_rank)
+    """Horizontal bars ranking pain points by impact_rank (1 = most material). The PP id + title sit
+    in a LEFT label column (always fully readable); the bar to the right is a clean rank indicator
+    (length encodes rank position, not a fabricated metric) with the rank number at its end.
+    Empty → ''."""
+    pts = sorted(pain_points or [], key=lambda p: p.impact_rank)
     if not pts:
         return ""
     rows = len(pts)
-    BARH, GAP, PAD, LBLW = 30, 14, 12, 8
-    W, innerW = 760, 520
+    BARH, GAP, PAD, LBLW = 30, 16, 12, 360
+    W = 780
+    innerW = W - PAD * 2 - LBLW - 40
     H = PAD * 2 + rows * BARH + (rows - 1) * GAP
     out = [f"<svg class='chart' viewBox='0 0 {W} {H}' width='100%' role='img' "
            f"aria-label='Pain points ranked by impact' xmlns='http://www.w3.org/2000/svg'>",
            _SVG_DEFS]
     for i, p in enumerate(pts):
         y = PAD + i * (BARH + GAP)
-        # length: most-material (rank 1) longest, descending by rank
         frac = (rows - i) / rows
-        w = int(innerW * frac)
-        x0 = 150
-        out.append(f"<rect x='{x0}' y='{y}' width='{w}' height='{BARH}' rx='5' "
-                   f"fill='url(#hdr)' filter='url(#sh)'/>")
-        out.append(f"<text x='{x0-10}' y='{y+BARH/2+4}' text-anchor='end' font-size='12.5' "
-                   f"font-weight='700' fill='#1a2230'>{esc(p.id)}</text>")
-        out.append(f"<text x='{x0+12}' y='{y+BARH/2+4}' font-size='12' fill='#fff' "
-                   f"font-weight='600'>{esc(_clip(p.title, 64))}</text>")
+        w = max(2, int(innerW * frac))
+        out.append(f"<text x='{PAD}' y='{y+BARH/2+1}' font-size='11' font-weight='700' "
+                   f"fill='#2563eb'>{esc(p.id)}</text>")
+        out.append(f"<text x='{PAD+34}' y='{y+BARH/2+1}' font-size='11.5' fill='#1a2f50'>"
+                   f"{esc(_clipw(p.title, 50))}</text>")
+        out.append(f"<rect x='{PAD+LBLW}' y='{y}' width='{w}' height='{BARH}' rx='5' fill='#1a2f50' "
+                   f"filter='url(#sh)'/>")
+        out.append(f"<text x='{PAD+LBLW+w-12}' y='{y+BARH/2+4}' text-anchor='end' font-size='11.5' "
+                   f"font-weight='700' fill='#fff'>#{i+1}</text>")
     out.append("</svg>")
-    return ("<div class='chart-wrap'><div class='chart-cap'>Issues ranked by business impact "
-            "(most material first)</div>" + "".join(out) + "</div>")
+    return _fig("Issues ranked by business impact (most material first)", "".join(out))
 
 
 def roadmap_timeline_svg(roadmap) -> str:
-    """A horizon timeline: one column per horizon (H1/H2/H3), a coloured header band with the
-    theme + window, and the horizon's items as stacked cards beneath. A time arrow runs across the
-    top (left = now). Opportunity-backed items carry a teal dot. Positions encode horizon order and
-    item order only — no quantitative claim. Returns '' when the roadmap is empty."""
+    """A horizon timeline: one column per horizon (H1/H2/H3) with a navy/blue header band (theme +
+    window) and the horizon's items as stacked cards. A time arrow runs across the top (now →
+    later); opportunity-backed items carry a dot. Positions encode horizon + item order only.
+    Empty → ''."""
     horizons = list(roadmap or [])
     if not horizons:
         return ""
@@ -599,109 +1270,170 @@ def roadmap_timeline_svg(roadmap) -> str:
     bodyH = max_items * ITEMH + max(0, max_items - 1) * ITEMGAP
     W = PAD * 2 + cols * COLW + (cols - 1) * GAP
     H = PAD * 2 + TOPBAR + HDR + bodyH + 10
-    out = [f"<svg class='chart timeline' viewBox='0 0 {W} {H}' width='100%' role='img' "
+    out = [f"<svg class='chart' viewBox='0 0 {W} {H}' width='100%' role='img' "
            f"aria-label='Transformation roadmap timeline' xmlns='http://www.w3.org/2000/svg'>",
            _SVG_DEFS]
-    # time arrow across the top
     ay = PAD + TOPBAR / 2
-    out.append(f"<line x1='{PAD}' y1='{ay}' x2='{W-PAD-6}' y2='{ay}' stroke='#0f7c8c' "
+    out.append(f"<line x1='{PAD}' y1='{ay}' x2='{W-PAD-6}' y2='{ay}' stroke='#2563eb' "
                f"stroke-width='1.6' marker-end='url(#arr)'/>")
     out.append(f"<text x='{PAD+2}' y='{ay-8}' font-size='10' fill='#9aa7b6' "
-               f"font-weight='600'>NOW</text>")
+               f"font-weight='700'>NOW</text>")
     out.append(f"<text x='{W-PAD-10}' y='{ay-8}' font-size='10' fill='#9aa7b6' text-anchor='end' "
-               f"font-weight='600'>LATER</text>")
-    shades = ["var(--accent)", "#2a93a3", "#5fb0bc"]
+               f"font-weight='700'>LATER</text>")
+    shades = ["#1a2f50", "#2563eb", "#3665a8"]
     for ci, hz in enumerate(horizons):
         x = PAD + ci * (COLW + GAP)
         y = PAD + TOPBAR
         band = shades[ci % len(shades)]
-        # header band
         out.append(f"<path d='M{x},{y+10} a10,10 0 0 1 10,-10 h{COLW-20} a10,10 0 0 1 10,10 "
                    f"v{HDR-10} h-{COLW} z' fill='{band}'/>")
         out.append(f"<text x='{x+14}' y='{y+22}' font-size='12.5' font-weight='700' fill='#fff'>"
-                   f"{esc(hz.horizon)} · {esc(_clip(hz.theme, 26))}</text>")
-        out.append(f"<text x='{x+14}' y='{y+40}' font-size='10.5' fill='#e6f1f3'>"
+                   f"{esc(hz.horizon)} · {esc(_clipw(hz.theme, 26))}</text>")
+        out.append(f"<text x='{x+14}' y='{y+40}' font-size='10.5' fill='#cfe0fb'>"
                    f"{esc(hz.window)}</text>")
-        # item cards
         iy = y + HDR + 12
         for it in hz.items:
-            out.append(f"<rect x='{x}' y='{iy}' width='{COLW}' height='{ITEMH}' rx='8' "
-                       f"fill='#fff' stroke='var(--line)'/>")
+            out.append(f"<rect x='{x}' y='{iy}' width='{COLW}' height='{ITEMH}' rx='8' fill='#fff' "
+                       f"stroke='#d1d5db'/>")
             if it.opportunity_id:
                 out.append(f"<circle cx='{x+14}' cy='{iy+ITEMH/2}' r='4' fill='{band}'/>")
             tx = x + (26 if it.opportunity_id else 14)
             out.append(f"<text x='{tx}' y='{iy+ITEMH/2-3}' font-size='11.5' font-weight='700' "
-                       f"fill='#1a2230'>{esc(_clip(it.title, 30))}</text>")
-            out.append(f"<text x='{tx}' y='{iy+ITEMH/2+13}' font-size='10' fill='#5b6776'>"
-                       f"{esc(_clip(it.rationale, 36))}</text>")
+                       f"fill='#1a2f50'>{esc(_clipw(it.title, 30))}</text>")
+            out.append(f"<text x='{tx}' y='{iy+ITEMH/2+13}' font-size='10' fill='#6b7280'>"
+                       f"{esc(_clipw(it.rationale, 36))}</text>")
             iy += ITEMH + ITEMGAP
     out.append("</svg>")
-    return ("<div class='chart-wrap'><div class='chart-cap'>The plan across three horizons "
-            "(now → later)</div>" + "".join(out) + "</div>")
+    return _fig("The plan across three horizons (now → later)", "".join(out))
 
 
-def value_feasibility_svg(opportunities) -> str:
-    """A value (y) vs feasibility (x) bubble plot. Positions use value_score/feasibility_score
-    (1-5, set by synthesis); bubbles are labelled with the opportunity id. Quadrant guides shown."""
-    opps = [o for o in opportunities if o.value_score and o.feasibility_score]
-    if not opps:
+def dependency_map_svg(opportunities) -> str:
+    """A dependency map: opportunity nodes with directed 'enables' edges (from declared
+    dependencies) flowing into an outcome node. Pure SVG. Empty (no edges) → ''."""
+    opps = list(opportunities or [])
+    edges = [(d, o.id) for o in opps for d in o.dependencies if d in {x.id for x in opps}]
+    if not edges:
         return ""
-    W, H, PAD = 520, 420, 56
-    plotW, plotH = W - PAD * 2, H - PAD * 2
-    def px(score):                                # feasibility 1..5 -> x
-        return PAD + (score - 1) / 4 * plotW
-    def py(score):                                # value 1..5 -> y (inverted)
-        return PAD + plotH - (score - 1) / 4 * plotH
-    out = [f"<svg class='chart' viewBox='0 0 {W} {H}' width='100%' role='img' "
-           f"aria-label='Value versus feasibility' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
-    # shade the top-right "do first" quadrant softly so the map reads as intentional
-    midx, midy = px(3), py(3)
-    out.append(f"<rect x='{midx}' y='{PAD}' width='{PAD+plotW-midx}' height='{midy-PAD}' "
-               f"fill='var(--accent-soft)'/>")
-    # quadrant guide lines at the midpoint
-    out.append(f"<line x1='{midx}' y1='{PAD}' x2='{midx}' y2='{PAD+plotH}' stroke='#e3e8ee'/>")
-    out.append(f"<line x1='{PAD}' y1='{midy}' x2='{PAD+plotW}' y2='{midy}' stroke='#e3e8ee'/>")
-    # axes labels
-    out.append(f"<text x='{PAD+plotW/2}' y='{H-14}' text-anchor='middle' font-size='12' "
-               f"fill='#5b6776' font-weight='600'>Feasibility →</text>")
-    out.append(f"<text x='16' y='{PAD+plotH/2}' text-anchor='middle' font-size='12' fill='#5b6776' "
-               f"font-weight='600' transform='rotate(-90 16 {PAD+plotH/2})'>Value →</text>")
-    # quadrant captions in all four corners so empty space reads as the map, not missing data
-    for qx, qy, anchor, label in [
-            (PAD + plotW - 6, PAD + 16, "end", "Do first"),
-            (PAD + 6, PAD + 16, "start", "Plan for"),
-            (PAD + plotW - 6, PAD + plotH - 8, "end", "Quick wins"),
-            (PAD + 6, PAD + plotH - 8, "start", "Reconsider")]:
-        out.append(f"<text x='{qx}' y='{qy}' text-anchor='{anchor}' font-size='10' "
-                   f"fill='#9aa7b6' font-weight='600'>{label}</text>")
-    # spread bubbles that land on the same coordinate so labels never collide (deterministic)
-    placed: dict[tuple, int] = {}
+    # rank nodes by dependency depth so prerequisites sit left of dependents
+    by_id = {o.id: o for o in opps}
+    depth: dict[str, int] = {}
+
+    def dep_depth(oid, guard):
+        if oid in depth:
+            return depth[oid]
+        if oid in guard:
+            return 0
+        ds = [d for d in by_id[oid].dependencies if d in by_id]
+        depth[oid] = (1 + max((dep_depth(d, guard | {oid}) for d in ds), default=-1)) if ds else 0
+        return depth[oid]
     for o in opps:
-        key = (o.feasibility_score, o.value_score)
-        k = placed.get(key, 0)
-        placed[key] = k + 1
-        ox = (k % 3 - 1) * 22 if k else 0           # fan out: 0, then -22/0/+22, ...
-        oy = (k // 3) * 22 if k else 0
-        cx, cy = px(o.feasibility_score) + ox, py(o.value_score) + oy
-        out.append(f"<circle cx='{cx}' cy='{cy}' r='17' fill='var(--accent)' fill-opacity='0.16' "
-                   f"stroke='var(--accent)'/>")
-        out.append(f"<text x='{cx}' y='{cy+4}' text-anchor='middle' font-size='11' "
-                   f"font-weight='700' fill='#0b5e6b'>{esc(o.id)}</text>")
+        dep_depth(o.id, set())
+    max_d = max(depth.values(), default=0)
+    cols: dict[int, list] = {}
+    for o in opps:
+        cols.setdefault(depth[o.id], []).append(o)
+    NW, NH, COLGAP, ROWGAP, PAD = 168, 48, 70, 18, 18
+    n_cols = max_d + 2                                   # + outcome column
+    rowmax = max((len(v) for v in cols.values()), default=1)
+    width = PAD * 2 + n_cols * NW + (n_cols - 1) * COLGAP
+    height = PAD * 2 + rowmax * NH + (rowmax - 1) * ROWGAP
+    pos: dict[str, tuple] = {}
+
+    def colx(c):
+        return PAD + c * (NW + COLGAP)
+    out = [f"<svg class='chart' viewBox='0 0 {width} {height}' width='100%' role='img' "
+           f"aria-label='Opportunity dependency map' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
+    for c in range(max_d + 1):
+        group = cols.get(c, [])
+        colH = len(group) * NH + max(0, len(group) - 1) * ROWGAP
+        y0 = (height - colH) / 2
+        for r, o in enumerate(group):
+            y = y0 + r * (NH + ROWGAP)
+            pos[o.id] = (colx(c), y)
+    # outcome node centred in the last column
+    ox = colx(n_cols - 1)
+    oy = (height - NH) / 2
+    # every opportunity is placed above (cols covers depths 0..max_d), so pos has all ids.
+    for src, dst in edges:
+        x1, y1 = pos[src]
+        x2, y2 = pos[dst]
+        out.append(f"<path d='M{x1+NW},{y1+NH/2} C{x1+NW+COLGAP/2},{y1+NH/2} "
+                   f"{x2-COLGAP/2},{y2+NH/2} {x2},{y2+NH/2}' fill='none' stroke='#2563eb' "
+                   f"stroke-width='1.6' marker-end='url(#arr)'/>")
+    # leaf nodes (no dependents) flow into the outcome
+    has_dependent = {src for src, _ in edges}
+    for o in opps:
+        if o.id not in has_dependent:
+            x1, y1 = pos[o.id]
+            out.append(f"<path d='M{x1+NW},{y1+NH/2} C{x1+NW+COLGAP/2},{y1+NH/2} "
+                       f"{ox-COLGAP/2},{oy+NH/2} {ox},{oy+NH/2}' fill='none' stroke='#9aa7b6' "
+                       f"stroke-width='1.4' stroke-dasharray='5 4' marker-end='url(#arrg)'/>")
+    for o in opps:
+        x, y = pos[o.id]
+        out.append(f"<g filter='url(#sh)'><rect x='{x}' y='{y}' width='{NW}' height='{NH}' rx='8' "
+                   f"fill='#eff6ff' stroke='#2563eb' stroke-width='1.2'/>"
+                   f"<text x='{x+NW/2}' y='{y+NH/2-2}' text-anchor='middle' font-size='11' "
+                   f"font-weight='700' fill='#1a2f50'>{esc(o.id)}</text>"
+                   f"<text x='{x+NW/2}' y='{y+NH/2+14}' text-anchor='middle' font-size='9.5' "
+                   f"fill='#6b7280'>{esc(_clipw(o.title, 22))}</text></g>")
+    out.append(f"<g filter='url(#sh)'><rect x='{ox}' y='{oy}' width='{NW}' height='{NH}' rx='8' "
+               f"fill='#1a2f50'/><text x='{ox+NW/2}' y='{oy+NH/2+4}' text-anchor='middle' "
+               f"font-size='11' font-weight='700' fill='#fff'>Target state</text></g>")
     out.append("</svg>")
-    return ("<div class='chart-wrap'><div class='chart-cap'>Where each opportunity sits on value "
-            "versus feasibility</div>" + "".join(out) + "</div>")
+    return _fig("How the opportunities enable one another", "".join(out),
+                "Arrows show enabling relationships; all paths lead to the target state.")
+
+
+def data_flow_svg(steps) -> str:
+    """Supporting-artefacts systems view: the distinct business systems the process touches, with
+    dashed connecting arrows. Derived from systems named across the steps. <2 systems → ''."""
+    systems, seen = [], set()
+    for st in steps or []:
+        sysname = (getattr(st, "system", "") or "").strip()
+        # split ONLY on a spaced separator (" / ", " & ", ", ") between distinct systems — never on a
+        # bare "/" inside a single name like "SAP S/4HANA".
+        for part in [p.strip() for p in re.split(r"\s+/\s+|\s+&\s+|,\s+", sysname) if p.strip()]:
+            if part.lower() not in seen:
+                seen.add(part.lower())
+                systems.append(part)
+    if len(systems) < 2:
+        return ""
+    NW, NH, GAP_X, PAD = 196, 58, 64, 16
+    cols = min(4, len(systems))
+    rows = [systems[i:i + 4] for i in range(0, len(systems), 4)]
+    width = PAD * 2 + cols * NW + (cols - 1) * GAP_X
+    height = PAD * 2 + len(rows) * NH + (len(rows) - 1) * 44
+    out = [f"<svg class='chart' viewBox='0 0 {width} {height}' width='100%' role='img' "
+           f"aria-label='System and data-flow map' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
+
+    def sxy(idx):
+        r, c = idx // 4, idx % 4
+        return PAD + c * (NW + GAP_X), PAD + r * (NH + 44)
+    for i in range(len(systems) - 1):
+        x1, y1 = sxy(i)
+        x2, y2 = sxy(i + 1)
+        if (i // 4) == ((i + 1) // 4):
+            out.append(f"<line x1='{x1+NW}' y1='{y1+NH/2}' x2='{x2-3}' y2='{y2+NH/2}' "
+                       f"stroke='#3665a8' stroke-width='2' stroke-dasharray='5 4' "
+                       f"marker-end='url(#arr)'/>")
+    for i, name in enumerate(systems):
+        x, y = sxy(i)
+        out.append(f"<g filter='url(#sh)'><rect x='{x}' y='{y}' width='{NW}' height='{NH}' rx='9' "
+                   f"fill='#eff6ff' stroke='#2563eb' stroke-width='1.2'/>"
+                   f"<text x='{x+NW/2}' y='{y+NH/2+5}' text-anchor='middle' font-size='13' "
+                   f"font-weight='700' fill='#1a2f50'>{esc(_clipw(name, 22))}</text></g>")
+    out.append("</svg>")
+    return _fig("Systems the process touches, and how data moves between them", "".join(out))
 
 
 def donut_svg(segments, caption: str) -> str:
-    """A donut from (label, value) pairs — e.g. order value by channel. Values must be grounded
-    (the caller passes only figures already in the findings). Returns '' if nothing to show."""
+    """A donut from (label, value) pairs (grounded). Returns '' if nothing to show."""
     segs = [(l, float(v)) for l, v in segments if _to_number_safe(v) and float(v) > 0]
     total = sum(v for _, v in segs)
     if not segs or total <= 0:
         return ""
-    import math
     cx, cy, r, rin = 90, 90, 78, 46
-    out = [f"<svg class='chart donut' viewBox='0 0 360 184' width='100%' role='img' "
+    out = [f"<svg class='chart donut' viewBox='0 0 380 184' width='100%' role='img' "
            f"aria-label='{esc(caption)}' xmlns='http://www.w3.org/2000/svg'>"]
     a0 = -math.pi / 2
     legend = []
@@ -718,33 +1450,19 @@ def donut_svg(segments, caption: str) -> str:
                    f"L{xi0:.1f},{yi0:.1f} A{rin},{rin} 0 {large} 0 {xi1:.1f},{yi1:.1f} Z' "
                    f"fill='{col}'/>")
         ly = 34 + i * 26
-        legend.append(f"<rect x='196' y='{ly-10}' width='12' height='12' rx='2' fill='{col}'/>"
-                      f"<text x='214' y='{ly}' font-size='12' fill='#1a2230'>"
-                      f"{esc(_nice_label(_clip(label, 22)))} · {esc(_fmt_compact(v))} "
+        legend.append(f"<rect x='208' y='{ly-10}' width='12' height='12' rx='2' fill='{col}'/>"
+                      f"<text x='226' y='{ly}' font-size='12' fill='#111827'>"
+                      f"{esc(_nice_label(_clip(label, 20)))} · {esc(_fmt_compact(v))} "
                       f"({frac*100:.0f}%)</text>")
         a0 = a1
     out += legend
     out.append("</svg>")
-    return ("<div class='chart-wrap'><div class='chart-cap'>" + esc(caption) + "</div>"
-            + "".join(out) + "</div>")
-
-
-def _to_number_safe(v):
-    try:
-        float(v); return True
-    except (TypeError, ValueError):
-        return False
-
-
-def _nice_label(s: str) -> str:
-    """Tidy a derived series label: uppercase known acronyms, else title-case."""
-    s = str(s).strip()
-    return "EDI" if s.lower() == "edi" else s
+    return _fig(caption, "".join(out))
 
 
 def value_bar_svg(segments, caption: str, unit: str = "") -> str:
     """A horizontal bar chart from (label, value) pairs — bar length proportional to value, the
-    real figure labelled on each. For grounded breakdowns (e.g. unfulfilled orders by channel)."""
+    real figure labelled on each. Grounded breakdowns only. Empty → ''."""
     segs = [(_nice_label(l), float(v)) for l, v in segments if _to_number_safe(v) and float(v) > 0]
     if not segs:
         return ""
@@ -758,28 +1476,23 @@ def value_bar_svg(segments, caption: str, unit: str = "") -> str:
     for i, (label, v) in enumerate(segs):
         y = PAD + i * (BARH + GAP)
         w = max(2, int(innerW * (v / mx)))
-        out.append(f"<text x='{PAD}' y='{y+BARH/2+4}' font-size='12.5' font-weight='600' "
-                   f"fill='#1a2230'>{esc(_clip(label, 18))}</text>")
-        out.append(f"<rect x='{PAD+LBLW}' y='{y}' width='{w}' height='{BARH}' rx='5' "
-                   f"fill='url(#hdr)' filter='url(#sh)'/>")
+        out.append(f"<text x='{PAD}' y='{y+BARH/2+4}' font-size='12.5' font-weight='700' "
+                   f"fill='#1a2f50'>{esc(_clip(label, 18))}</text>")
+        out.append(f"<rect x='{PAD+LBLW}' y='{y}' width='{w}' height='{BARH}' rx='5' fill='#2563eb' "
+                   f"filter='url(#sh)'/>")
         val = _fmt_compact(v) if unit == "eur" else (f"{int(v):,}" if v == int(v) else f"{v:g}")
         out.append(f"<text x='{PAD+LBLW+w+10}' y='{y+BARH/2+4}' font-size='12' font-weight='700' "
-                   f"fill='#0b5e6b'>{esc(val)}</text>")
+                   f"fill='#1d4ed8'>{esc(val)}</text>")
     out.append("</svg>")
-    return ("<div class='chart-wrap'><div class='chart-cap'>" + esc(caption) + "</div>"
-            + "".join(out) + "</div>")
+    return _fig(caption, "".join(out))
 
 
 def render_charts(charts, kinds=None) -> str:
-    """Render the code-owned grounded chart series (donut for shares, bar for counts/values).
-    `kinds` optionally restricts to certain chart kinds (e.g. only 'bar' on one report, 'donut'
-    on another) so the same grounded series can show as magnitude in one place and share in
-    another without duplicating on a single page."""
     out = []
     for c in charts or []:
         if kinds is not None and c.get("kind") not in kinds:
             continue
-        segs = [(s.get("label", ""), s.get("value")) for s in c.get("segments", [])]
+        segs = [(seg.get("label", ""), seg.get("value")) for seg in c.get("segments", [])]
         title = c.get("title", "")
         if c.get("kind") == "donut":
             out.append(donut_svg(segs, title))
@@ -788,111 +1501,209 @@ def render_charts(charts, kinds=None) -> str:
     return "\n".join(x for x in out if x)
 
 
-def kpi_tiles(s: SynthesisContent) -> str:
-    """The 'at a glance' strip on the executive summary. Every figure is DERIVED in code from the
-    grounded content (counts + the largest quantified pain-point numbers) — never model-set, so it
-    cannot carry a fabricated number. Picks the most material money/percent figures to surface."""
-    tiles = [(str(len(s.pain_points)), "issues identified"),
-             (str(len(s.opportunities)), "opportunities mapped"),
-             (str(len(s.source_index)), "sources analysed")]
-    # surface up to two headline grounded figures from the ranked pain points: the LARGEST money
-    # figure (most material) and the first percentage — both already grounded, never model-set.
+# ---------------------------------------------------------------------------
+# stat tiles (exec summary + pain-points overview)
+# ---------------------------------------------------------------------------
+def stat_tiles(tiles) -> str:
+    if not tiles:
+        return ""
+    cells = "".join(f"<div class='stat-box'>{_stat_icon(l)}<div class='sv {c}'>{esc(v)}</div>"
+                    f"<div class='sl'>{esc(l)}</div></div>" for v, l, c in tiles[:4])
+    return f"<div class='stat-row'>{cells}</div>"
+
+
+def _data_table(t, show_title: bool = True) -> str:
+    """Render a grounded factual DataTable: a titled table with a navy header, optional caption above
+    and footnote below, and a source line. `show_title=False` omits the table's own heading when a
+    section heading already names it (avoids a duplicate title). Empty rows → ''."""
+    if not t or not getattr(t, "rows", None):
+        return ""
+    head = "".join(f"<th>{esc(c)}</th>" for c in t.columns)
+    body = "".join("<tr>" + "".join(f"<td>{esc(c)}</td>" for c in row) + "</tr>" for row in t.rows)
+    title = f"<h4>{esc(t.title)}</h4>" if show_title else ""
+    cap = f"<div class='dt-cap'>{esc(t.caption)}</div>" if t.caption else ""
+    note = f"<p class='prov'>{esc(t.note)}</p>" if t.note else ""
+    src = (f"<p class='prov'>Source: {_cite_links(t.sources)}</p>"
+           if getattr(t, "sources", None) else "")
+    return (f"<div class='dt'>{title}{cap}"
+            f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>{note}{src}</div>")
+
+
+def _exec_tiles(s: SynthesisContent):
+    """Derived-in-code grounded tiles for the executive summary (counts + headline figures)."""
+    tiles = [(str(len(s.pain_points)), "issues identified", "blue"),
+             (str(len(s.opportunities)), "opportunities mapped", "blue"),
+             (str(len(s.source_index)), "sources analysed", "blue")]
     money, pct = [], []
     for p in sorted(s.pain_points, key=lambda x: x.impact_rank):
         for n in p.quantified:
             label = (n.label or "").strip() or p.title
             if n.unit == "eur":
-                money.append((float(n.value), _fmt_compact(n.value), _clip(label, 34)))
+                money.append((float(n.value), _fmt_money(n.value), _clip(label, 30)))
             elif n.unit == "percent":
-                pct.append((f"{n.value:g}%", _clip(label, 34)))
+                pct.append((f"{n.value:g}%", _clip(label, 30)))
     headline = []
     if money:
-        _, v, l = max(money, key=lambda m: m[0])      # the biggest € figure leads
-        headline.append((v, l))
+        _, v, l = max(money, key=lambda m: m[0])
+        headline.append((v, l, "red"))
     if pct:
-        headline.append(pct[0])
-    tiles = headline + tiles
-    cells = "".join(f"<div class='kpi'>{_kpi_icon(l)}<div class='kpi-v'>{esc(v)}</div>"
-                    f"<div class='kpi-l'>{esc(l)}</div></div>" for v, l in tiles[:5])
-    return f"<div class='kpis'>{cells}</div>"
+        headline.append((pct[0][0], pct[0][1], "amber"))
+    return (headline + tiles)[:4]
 
 
-# small line-glyphs (inline SVG, offline-safe) chosen by what the tile measures
-_KPI_GLYPHS = {
-    "value": "<circle cx='8' cy='8' r='6'/><path d='M8 5v6M6 7h3a1.3 1.3 0 010 2.6H6'/>",  # currency
-    "share": "<circle cx='8' cy='8' r='6'/><path d='M8 2.2A5.8 5.8 0 0113.8 8H8z'/>",       # pie/percent
-    "issue": "<path d='M8 2l6 11H2z'/><path d='M8 7v3M8 11.5v.2'/>",                          # alert triangle
-    "opportunity": "<path d='M5 9a3 3 0 116 0c0 1.5-1.2 2-1.2 3.2H6.2C6.2 11 5 10.5 5 9z'/>"  # lightbulb
+def _pp_tiles(s: SynthesisContent):
+    """Severity-coloured tiles for the pain-points overview (counts by severity + opp count). Counts
+    by the explicit grounded severity where set, else the impact rank."""
+    def level(p):
+        lvl = (p.severity or "").strip().lower()
+        return lvl if lvl else ("high" if p.impact_rank <= 1 else
+                                "medium" if p.impact_rank == 2 else "lower")
+    levels = [level(p) for p in s.pain_points]
+    high = sum(1 for x in levels if x == "high")
+    med = sum(1 for x in levels if x == "medium")
+    return [(str(len(s.pain_points)), "pain points", "blue"),
+            (str(high), "high severity", "red"),
+            (str(med), "medium severity", "amber"),
+            (str(len(s.opportunities)), "opportunities", "green")]
+
+
+_STAT_GLYPHS = {
+    "value": "<circle cx='8' cy='8' r='6'/><path d='M8 5v6M6 7h3a1.3 1.3 0 010 2.6H6'/>",
+    "share": "<circle cx='8' cy='8' r='6'/><path d='M8 2.2A5.8 5.8 0 0113.8 8H8z'/>",
+    "issue": "<path d='M8 2l6 11H2z'/><path d='M8 7v3M8 11.5v.2'/>",
+    "opportunity": "<path d='M5 9a3 3 0 116 0c0 1.5-1.2 2-1.2 3.2H6.2C6.2 11 5 10.5 5 9z'/>"
                    "<path d='M6.4 14h3.2'/>",
-    "source": "<path d='M3.5 3.2h6l3 3v6.6h-9z'/><path d='M9.5 3.2v3h3'/>",                    # document
+    "source": "<path d='M3.5 3.2h6l3 3v6.6h-9z'/><path d='M9.5 3.2v3h3'/>",
 }
 
 
-def _kpi_icon(label: str) -> str:
+def _stat_icon(label: str) -> str:
     lo = label.lower()
     key = ("value" if "value" in lo or "€" in label or "divergence" in lo or "gap" in lo
-           else "share" if "%" in label or "share" in lo or "percent" in lo
-           else "issue" if "issue" in lo
+           else "share" if "%" in label or "share" in lo or "percent" in lo or "severity" in lo
+           else "issue" if "issue" in lo or "pain" in lo
            else "opportunity" if "opportun" in lo
            else "source" if "source" in lo
            else "value")
-    return (f"<span class='kpi-ico'><svg viewBox='0 0 16 16' fill='none' "
-            f"stroke-linecap='round' stroke-linejoin='round'>{_KPI_GLYPHS[key]}</svg></span>")
+    return (f"<span class='stat-ico'><svg viewBox='0 0 16 16' fill='none' "
+            f"stroke-linecap='round' stroke-linejoin='round'>{_STAT_GLYPHS[key]}</svg></span>")
 
 
-def _secnum_chips(body: str) -> str:
-    """Wrap a leading section number (e.g. '1.3' or '2') in any <h2> with a teal .secnum chip, so
-    numbered headings get a designed number tile. Headings with no leading number are untouched.
-    Operates on the rendered HTML fragment (post-scrub) so call sites stay simple."""
-    import re
-
-    def repl(m):
-        num, rest = m.group(1), m.group(2)
-        return f"<h2><span class='secnum'>{num}</span>{rest}</h2>"
-    # <h2>1.3 Title</h2>  or  <h2>1. Title</h2>  -> chip + title
-    return re.sub(r"<h2>(\d+(?:\.\d+)?)\.?\s+(.*?)</h2>", repl, body)
+# ---------------------------------------------------------------------------
+# text + post-processing helpers
+# ---------------------------------------------------------------------------
+def _clip(t: str, n: int) -> str:
+    t = str(t)
+    return t if len(t) <= n else t[: n - 1] + "…"
 
 
-def _scrub_names(body: str, suppress_names) -> str:
-    """Replace any suppressed organisation name in rendered report text with a neutral phrase.
-    Belt-and-braces with the synthesis-prompt instruction: if the live agent still wrote the name,
-    it's removed here rather than hard-failing the render. Whole-word, case-insensitive."""
-    import re
-    for name in (suppress_names or []):
-        if not name:
-            continue
-        body = re.sub(rf"\b{re.escape(name)}\b", "the organisation", body, flags=re.I)
-    return body
+def _clipw(t: str, n: int) -> str:
+    """Word-boundary clip for diagram labels: trims to the last whole word that fits within n chars
+    (rather than cutting mid-word), then appends an ellipsis. Falls back to a hard clip if even the
+    first word overflows."""
+    t = str(t)
+    if len(t) <= n:
+        return t
+    cut = t[: n - 1]
+    sp = cut.rfind(" ")
+    return (cut[:sp] if sp > n // 2 else cut) + "…"
 
 
-# ---- helpers --------------------------------------------------------------
+def _to_number_safe(v):
+    try:
+        float(v)
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
+def _nice_label(s: str) -> str:
+    s = str(s).strip()
+    return "EDI" if s.lower() == "edi" else s
+
+
+def _fmt_compact(v: float) -> str:
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return str(v)
+    a = abs(f)
+    if a >= 1_000_000:
+        return f"€{f/1_000_000:.1f}M".replace(".0M", "M")
+    if a >= 1_000 and f == int(f):
+        return f"{int(f):,}"
+    return f"{f:g}"
+
+
+def _fmt_money(v: float) -> str:
+    """A monetary figure with a currency mark at any magnitude: 600000 → '€600K', 30675000 →
+    '€30.7M', 950 → '€950'."""
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return str(v)
+    a = abs(f)
+    if a >= 1_000_000:
+        return f"€{f/1_000_000:.1f}M".replace(".0M", "M")
+    if a >= 1_000:
+        return f"€{int(f/1_000)}K" if f % 1_000 == 0 else f"€{f/1_000:.1f}K"
+    return f"€{f:g}"
+
+
 def _steps(steps) -> str:
     out = []
     for st in steps:
         who = " · ".join(x for x in [st.actor, st.system] if x)
         fp = "".join(f"<span class='failpoint'>{esc(p)}</span>" for p in st.failure_points)
+        # omit the description div when empty (a model occasionally emits a step with only a name —
+        # don't leave a hollow gap under it)
+        desc = f"<div>{esc(_deshout(st.description))}</div>" if st.description else ""
+        whod = f"<div class='who'>{esc(who)}</div>" if who else ""
         out.append(f"<div class='step'><strong>{st.seq}. {esc(st.name)}</strong>"
-                   f"<div class='who'>{esc(who)}</div><div>{esc(st.description)}</div>{fp}</div>")
+                   f"{whod}{desc}{fp}</div>")
     return "\n".join(out)
 
 
 def _metric(n) -> str:
-    """Render a NumberRef as a chip. If the model's text/label already carries a digit, show it as
-    is; otherwise prepend the formatted grounded value so the figure is always visible (the model
-    sometimes writes 'aggregate divergence addressed' and expects the number rendered separately)."""
-    import re as _re
     text = (n.text or n.label or "").strip()
-    if not _re.search(r"\d", text):
-        figure = _fmt_compact(n.value) if n.unit == "eur" else (
+    if not re.search(r"\d", text):
+        figure = _fmt_money(n.value) if n.unit == "eur" else (
             f"{n.value:g}%" if n.unit == "percent" else
             (f"{int(n.value):,}" if float(n.value) == int(n.value) else f"{n.value:g}"))
         text = f"{figure} — {text}" if text else figure
     return f"<span class='metric'>{esc(text)}</span>"
 
 
+_ACRONYM = re.compile(r"\b(ERP|EDI|CRM|SAP|RACI|SOP|O2C|P2P|AR|AP|KPI|TSA|SLA|PO|MOQ|FTE|"
+                      r"S/4HANA|NET\d+)\b", re.I)
+
+
+# a raw SHOUTY_SNAKE enum value (a CSV status the model copied verbatim, e.g. NOT_FULFILLED,
+# ON_HOLD). Two+ underscore-joined all-caps segments — narrow enough to never touch a real acronym.
+_SNAKE_ENUM = re.compile(r"\b[A-Z][A-Z0-9]+(?:_[A-Z0-9]+)+\b")
+
+
+def _humanize_enums(text: str) -> str:
+    """Turn a raw CSV enum value the model copied into prose (NOT_FULFILLED, ON_HOLD) into plain
+    words ('not fulfilled'). Cosmetic only — changes casing/underscores, never numbers or meaning;
+    leaves genuine acronyms (single tokens like EDI/SAP) untouched."""
+    return _SNAKE_ENUM.sub(lambda m: m.group(0).replace("_", " ").lower(), text)
+
+
+def _deshout(text: str) -> str:
+    """Down-case a SHOUTING (all-caps) reason for readability while preserving acronyms. A
+    cosmetic display fix for a model that occasionally writes a cell in CAPS — it changes only
+    casing, never words or numbers. Leaves normally-cased text untouched. Also humanises any raw
+    SHOUTY_SNAKE enum value embedded in otherwise-normal prose."""
+    text = _humanize_enums(text)
+    letters = [c for c in text if c.isalpha()]
+    if not letters or sum(c.isupper() for c in letters) / len(letters) < 0.7:
+        return text                              # not shouting → leave as authored
+    out = _ACRONYM.sub(lambda m: m.group(0).upper(), text.lower())
+    return out[:1].upper() + out[1:]             # sentence-case the start
+
+
 def _rating_cell(raw: str) -> str:
-    """Render a readiness rating of the form 'high — reason' as a coloured H/M/L badge followed by
-    the reason. Tolerant of an em-dash, hyphen, or colon separator, or a bare rating."""
     if not raw:
         return "—"
     rating, _, reason = raw.partition("—")
@@ -903,8 +1714,27 @@ def _rating_cell(raw: str) -> str:
     level = rating.strip().lower()
     cls = level if level in ("high", "medium", "low") else "na"
     badge = f"<span class='rate rate-{cls}'>{esc(rating.strip().title() or '—')}</span>"
-    reason = reason.strip()
+    reason = _deshout(reason.strip())
     return f"{badge} {esc(reason)}" if reason else badge
+
+
+def _secnum_chips(body: str) -> str:
+    """Wrap the leading section number in a numbered heading with a designed chip. Section headings
+    are <h2>'N. Title'</h2> (from _Doc.h1) and subsection headings are <h3>'N.M Title'</h3> (from
+    _Doc.h2). Headings without a leading number (the report <h1>, opportunity/system card <h4>) are
+    untouched."""
+    def repl(m):
+        tag, num, rest = m.group(1), m.group(2), m.group(3)
+        return f"<{tag}><span class='secnum'>{num}</span>{rest}</{tag}>"
+    return re.sub(r"<(h2|h3)>(\d+(?:\.\d+)?)\.?\s*(?:&nbsp;)?\s*(.*?)</\1>", repl, body)
+
+
+def _scrub_names(body: str, suppress_names) -> str:
+    for name in (suppress_names or []):
+        if not name:
+            continue
+        body = re.sub(rf"\b{re.escape(name)}\b", "the organisation", body, flags=re.I)
+    return body
 
 
 def _cite(refs) -> str:
@@ -917,7 +1747,6 @@ def _src_href(doc_id: str) -> str:
 
 
 def _cite_links(refs) -> str:
-    """Like _cite but each source is a clickable link to its rendered source page (provenance)."""
     from .. import docnames as dn
     seen, out = set(), []
     for r in refs:
@@ -934,26 +1763,23 @@ def _cite_links(refs) -> str:
 
 
 def _render_source_pages(s: SynthesisContent, outdir: Path, suppress_names) -> None:
-    """Write a readable page per source document so citations can click through. CSV sources show
-    a row-count + preview; narrative docs show their frozen text. Suppressed names are scrubbed."""
     from .. import docnames as dn, tools
     sdir = outdir / "sources"
     sdir.mkdir(exist_ok=True)
     for d in s.source_index:
         sid = dn.stem(d.doc_id)
-        disp = _scrub_names(dn.friendly(sid), suppress_names)  # respect current noise words + scrub
+        disp = _scrub_names(dn.friendly(sid), suppress_names)
         body = [f"<h1>{esc(disp)}</h1>",
                 f"<p class='lede'>{esc(d.doc_type)} — referenced by findings: "
                 f"{esc(', '.join(d.supported_findings) or '—')}</p>",
                 "<p><a href='../06-supporting-artefacts.html'>&larr; back to the source index</a></p>"]
         text = tools.DOC_TEXT.get(sid)
-        if text is None:  # a CSV source — show a compact preview
+        if text is None:
             path = tools.FILE_REGISTRY.get(sid)
             if path:
                 import csv as _csv
                 with path.open(encoding="utf-8-sig", newline="") as fh:
-                    rdr = _csv.reader(fh)
-                    rows = list(rdr)
+                    rows = list(_csv.reader(fh))
                 head = rows[0] if rows else []
                 body.append(f"<p class='prov'>{len(rows)-1} rows · columns: {esc(', '.join(head))}</p>")
                 prev = rows[1:21]
@@ -977,81 +1803,85 @@ def _src_page(title: str, body: str) -> str:
 
 
 def esc(x) -> str:
-    return html.escape(str(x or ""))
+    # Humanise any raw SHOUTY_SNAKE enum value (a CSV status the model copied verbatim, e.g.
+    # NOT_FULFILLED) before escaping — these are never legitimate prose and read as raw-data leakage
+    # in a board report. Cosmetic only: it rewrites X_Y all-caps tokens, never numbers or meaning,
+    # and esc() is used solely for visible text (never for href/src/id/class attributes).
+    return html.escape(_humanize_enums(str(x or "")))
 
 
 def _strip_tags(htmlfrag: str) -> str:
-    import re
     return re.sub(r"<[^>]+>", " ", htmlfrag)
 
 
-# The AuroPro brand mark — inline SVG (offline-safe), the cyan/teal twin-triangle device.
+# The AuroPro brand mark — inline SVG (offline-safe), navy/blue twin-triangle device.
 _LOGO = ("<svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'>"
-         "<path d='M16 3 L27 26 H19 L16 18 L13 26 H5 Z' fill='#0f7c8c'/>"
-         "<path d='M16 3 L21 13 L16 13 Z' fill='#22c3d6'/></svg>")
+         "<path d='M16 3 L27 26 H19 L16 18 L13 26 H5 Z' fill='#1a2f50'/>"
+         "<path d='M16 3 L21 13 L16 13 Z' fill='#2563eb'/></svg>")
 
 
-def _toc(meta: dict) -> str:
-    """A table of contents over the report sections (print-quality navigation)."""
-    rows = []
-    for i, (slug, label) in enumerate(REPORTS):
-        num = slug.split("-")[0]
-        rows.append(f"<a href='{slug}.html'><span class='toc-num'>{num}</span>"
-                    f"<span class='toc-t'>{esc(label)}</span></a>")
-    return "<div class='toc'>" + "".join(rows) + "</div>"
-
-
-def _cover(meta: dict) -> str:
-    """The branded cover page (print only). Domain + AuroPro brand; the client name appears only
-    when it is known AND not suppressed (meta['client'] is already blanked when suppressed)."""
+# ---------------------------------------------------------------------------
+# per-report cover + standalone page assembly
+# ---------------------------------------------------------------------------
+def _cover(slug: str, title: str, meta: dict) -> str:
+    """A branded per-report cover (print-only). Report tag, title, domain/client subtitle, and a
+    meta grid. The report number is the slug's own prefix (00 = Executive Summary, 01–06 = the
+    content reports), so it never drifts. Names route through scrub via meta (client blanked when
+    suppressed)."""
     client = (meta.get("client") or "").strip()
     domain = esc(meta.get("domain_label", "Discovery"))
-    title = f"{domain} Discovery Report"
+    num = slug.split("-")[0]
+    is_exec = num == "00"
+    tag = "Executive Summary" if is_exec else f"Report {num} of 06"
     sub = esc(client) if client else "Autonomous Discovery Assessment"
-    return (f"<section class='cover'><div class='ctitle'>{esc(title)}</div>"
-            f"<div class='csub'>{sub}</div>"
-            f"<div class='cbrand'>{_LOGO}<span>AuroPro · Autonomous Discovery Platform</span></div>"
+    meta_rows = [("Report reference", "Executive Summary" if is_exec else f"Report {num} of 06"),
+                 ("Domain", meta.get("domain_label", "Discovery")),
+                 ("Prepared by", "AuroPro · Autonomous Discovery Platform"),
+                 ("Classification", "Confidential")]
+    if client:
+        meta_rows.insert(1, ("Client", client))
+    grid = "".join(f"<div class='cml'>{esc(k)}</div><div class='cmv'>{esc(v)}</div>"
+                   for k, v in meta_rows)
+    return (f"<section class='cover'>"
+            f"<div class='cv-top'></div>"
+            f"<div class='cv-brand'><span class='brandmark'>{_LOGO}AuroPro</span>"
+            f"<span class='cv-sub'>Autonomous Discovery Platform</span></div>"
+            f"<div class='cv-accent'></div>"
+            f"<div class='cv-body'>"
+            f"<span class='cv-tag'>{esc(tag)}</span>"
+            f"<div class='cv-title'>{esc(title)}</div>"
+            f"<div class='cv-domain'>{domain} · {sub}</div>"
+            f"<div class='cv-meta'>{grid}</div>"
+            f"</div>"
+            f"<div class='cv-bottom'><span class='cv-bot-txt'>{domain} Discovery</span>"
+            f"<span class='cv-bot-badge'>Confidential</span></div>"
             f"</section>")
 
 
-def _page(title: str, body: str, active: str, meta: dict, is_index=False) -> str:
+def _page(slug: str, title: str, body: str, meta: dict) -> str:
+    """A standalone report document — like the reference: a slim top nav-bar to move between the
+    seven reports (screen only), then the report's OWN cover, its OWN table of contents, and its
+    numbered sections, as one centred scrolling document. Cover/TOC are visible on screen AND in
+    print (where each report paginates from its own cover)."""
     nav = []
-    for slug, label in REPORTS:
-        num = slug.split("-")[0]
-        cls = " active" if slug == active else ""
-        nav.append(f"<a class='{cls.strip()}' href='{slug}.html'>"
+    for s_slug, label in REPORTS:
+        num = s_slug.split("-")[0]
+        cls = " active" if s_slug == slug else ""
+        nav.append(f"<a class='{cls.strip()}' href='{s_slug}.html'>"
                    f"<span class='num'>{num}</span>{esc(label)}</a>")
     client = (meta.get("client") or "").strip()
     domain = esc(meta.get("domain_label", "Discovery"))
-    # title: "<report> — <client>" only when we have a client name; else just the report
     page_title = f"{esc(title)} — {esc(client)}" if client else esc(title)
-    # sidebar heading: the client name if known, otherwise the engagement (domain) — never a placeholder
-    heading = esc(client) if client else f"{domain} Discovery"
-    sub = f"{domain} Discovery" if client else "Discovery assessment"
-    # running header/footer: in the DOM always, shown only in print (via CSS). The header carries
-    # the brand mark + engagement; the footer a confidentiality note. Page numbers come from @page.
-    hdr_label = f"{domain} Discovery Report" + (f" · {esc(client)}" if client else "")
-    rep_header = ""   # omitted in print (a fixed top band collides with headings)
-    rep_footer = (f"<div class='rep-footer'><span class='brandmark'>{_LOGO}{hdr_label}</span>"
-                  f"<span>Confidential</span></div>")
-    # the index page leads with the branded cover + a table of contents (print only — on screen the
-    # index shows the executive summary directly; the cover/TOC are for the PDF deliverable)
-    cover = (_cover(meta)
-             + f"<main class='content cover-toc'><h1>Contents</h1>{_toc(meta)}</main>"
-             if is_index else "")
+    cover = _cover(slug, title, meta)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{page_title}</title>
 <link rel="stylesheet" href="assets/report.css"></head><body>
-{rep_header}{rep_footer}
-{cover}
-<div class="layout">
-<nav class="sidebar">
-  <span class="brandmark" style="color:#fff;margin-bottom:1rem">{_LOGO}AuroPro</span>
-  <h1>{heading}</h1>
-  <div class="sub">{sub}</div>
-  {''.join(nav)}
+<nav class="topnav">
+  <span class="brandmark">{_LOGO}AuroPro</span>
+  <span class="tn-links">{''.join(nav)}</span>
 </nav>
+{cover}
 <main class="content">
 {body}
-</main></div></body></html>"""
+</main></body></html>"""

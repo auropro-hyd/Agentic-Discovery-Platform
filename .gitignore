@@ -33,3 +33,8 @@ v1/htmlcov/
 .specify/
 specs/
 CLAUDE.md
+
+# ── framework spike (LangGraph evaluation; NOT product code) ──────
+# Recorded the plain-code-vs-LangGraph decision in specs/003; the spike files exercised the
+# comparison and are kept local only — they are not part of the shipped engine.
+v1/spike/

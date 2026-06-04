@@ -1,0 +1,78 @@
+/* Design tokens — lifted VERBATIM from the print suite (v1/out/o2c/assets/report.css :root)
+ * so the explorer SPA and the printed/PDF deliverable share one visual identity.
+ * scripts/check-tokens.mjs warns if the brand colours drift. Offline-safe: system font, no CDN.
+ *
+ * Colour discipline (inherited from the print suite): navy/blue is the brand; the RED/AMBER/GREEN
+ * status colours are used ONLY to signal severity / priority / readiness — never for decoration. */
+:root {
+  --navy: #1a2f50;
+  --blue: #2563eb;
+  --blue-mid: #3665a8;
+  --blue-deep: #1d4ed8;
+  --ink: #111827;
+  --muted: #6b7280;
+  --line: #d1d5db;
+  --line-soft: #eaecf0;
+  --bg: #f3f5f8;
+  --bg-light: #f9fafb;
+  --bg-alt: #f2f4f7;
+  --panel: #ffffff;
+  --note-bg: #eff6ff;
+
+  /* status (signalling only) */
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --red-bd: #fca5a5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --amber-bd: #fcd34d;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --green-bd: #6ee7b7;
+  --purple: #6d28d9;
+  --purple-bg: #f3f0ff;
+
+  /* chart series ramp — navy/blue family (NOT status) */
+  --c1: #1a2f50;
+  --c2: #2563eb;
+  --c3: #3665a8;
+  --c4: #60a5fa;
+  --c5: #a9c7f0;
+
+  /* system sans stack (offline-safe) — matches the reference */
+  --sans: "Helvetica Neue", Arial, "Liberation Sans", "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  /* a refined DISPLAY stack for headings — a high-contrast transitional serif (offline-safe,
+   * ships on macOS/Windows/Linux), giving the suite an editorial, board-report character that the
+   * sans body lacks. Falls back gracefully where a serif isn't present. */
+  --display: "Georgia", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Hoefler Text", serif;
+
+  /* type scale (1.2 minor-third) — consistent vertical rhythm across every page */
+  --t-eyebrow: 0.72rem;
+  --t-sm: 0.84rem;
+  --t-base: 0.94rem;
+  --t-h3: 1.05rem;
+  --t-h2: 1.32rem;
+  --t-h1: 2.05rem;
+  --t-hero: 2.6rem;
+
+  --s1: 0.5rem;
+  --s2: 1rem;
+  --s3: 1.5rem;
+  --s4: 2rem;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  /* layered elevation — soft, tight ambient + a longer diffuse shadow for real depth */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 2px 6px rgba(16, 24, 40, 0.07);
+  --shadow-lg: 0 4px 10px rgba(16, 24, 40, 0.08), 0 18px 36px rgba(26, 47, 80, 0.13);
+  --shadow-navy: 0 14px 34px rgba(26, 47, 80, 0.28);
+  --ring: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sidebar-w: 264px;
+  --topbar-h: 60px;
+  /* page atmosphere — a barely-there cool wash + hairline grid, never flat white */
+  --page-grad: radial-gradient(1200px 600px at 82% -8%, rgba(37, 99, 235, 0.05), transparent 60%),
+    linear-gradient(180deg, #f5f7fb 0%, var(--bg) 38%);
+}

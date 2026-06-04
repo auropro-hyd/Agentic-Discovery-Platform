@@ -1,4 +1,9 @@
 {
+  "_confidential": {
+    "client_display": "Acme Manufacturing",
+    "suppress_names": [],
+    "suppress_requested": false
+  },
   "documents": [
     {
       "category": "unknown",
@@ -21,85 +26,95 @@
   "entities": [],
   "findings": [
     {
-      "business_consequence": "EUR 557,000 of high-value commitments were released without the mandated second Finance approval, defeating the dual-control designed to prevent unauthorized large spend and exposing the company to fraud, over-commitment, and audit-failure risk.",
+      "business_consequence": "EUR 557,000 of high-value spend bypassed the Finance second-approval control, exposing the company to unauthorized commitment, fraud and budget-override risk on precisely the orders the policy singled out as needing extra scrutiny.",
       "candidates": [],
       "chosen_candidate_id": null,
-      "confidence": "verified",
-      "description": "Policy §2 requires that any purchase order above EUR 50,000 carry approval from the Category Manager AND a second approval from Finance before release. The export contains 7 POs flagged 'single_approval_only', and the cross-tab of approval_status by amount shows every one of them is above EUR 50,000 (54,000; 61,000; 67,000; 72,000; 88,000; 95,000; 120,000). These are exactly the orders the dual-approval control exists to catch, yet all 7 were released on a single approval. Combined they total EUR 557,000 of spend that bypassed the documented second-approval control.\n\nWhat the data shows:\n- POs flagged single_approval_only (count): 7\n- Total EUR value of single_approval_only POs: 557,000\n- Pct of total PO value bypassing second approval: 12\n- Largest single PO in dataset (EUR, max amount): 150,000\n- Policy threshold and dual-approval rule: 50,000 (“2. Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second” — Procurement Policy)\n- Second approver named: Finance (“approval from Finance before it is released to the supplier.” — Procurement Policy)",
+      "confidence": "amber",
+      "description": "Policy §2 requires every purchase order above EUR 50,000 to carry approval from the Category Manager AND a second approval from Finance before release. The export shows 7 POs flagged 'single_approval_only', and the cross-tab proves every one of them sits above the EUR 50,000 threshold (amounts 54000, 61000, 67000, 72000, 88000, 95000, 120000) — a 100% failure of the dual-control on the exact population the control was written for. These 7 POs carry EUR 557,000 of spend, 12% of total PO value.\n\nWhat the data shows:\n- POs flagged single_approval_only: 7\n- Value of single_approval_only POs (EUR): 557,000\n- Pct of total PO value from single-approval POs: 12\n- Approval threshold (EUR): 50,000 (“2. Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second” — Procurement Policy)\n\n_Flagged for review: Policy §2 requires every purchase order above EUR 50,000 to carry approval from the Category Manager AND a second approval before release. The export flags 7 POs as 'single_approval_only', representing EUR 557,000 of spend (12% of total PO value), which appear to lack the required second approval. The exact identity of the second approver (e.g. Finance) and confirmation that all 7 flagged POs exce_",
       "id": "F1",
       "resolution_note": "",
       "resolved": false,
       "severity": "high",
       "sources": [
         {
-          "doc_id": "purchase-order-export",
-          "locator": "group_by approval_status x amount_eur",
-          "quote": "single_approval_only POs at amounts 54000, 61000, 67000, 72000, 88000, 95000, 120000 — all >50000"
+          "doc_id": "procurement-policy",
+          "locator": "line 4",
+          "quote": "2. Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second"
         },
         {
           "doc_id": "procurement-policy",
-          "locator": "line 4-5",
-          "quote": "Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second approval from Finance before it is released to the supplier."
+          "locator": "line 5",
+          "quote": "approval from Finance before it is released to the supplier."
+        },
+        {
+          "doc_id": "purchase-order-export",
+          "locator": "group_by approval_status x amount_eur",
+          "quote": "All 7 single_approval_only rows have amount_eur in {54000,61000,67000,72000,88000,95000,120000}, every value above the 50000 threshold"
         }
       ],
-      "title": "Seven high-value POs (all >EUR 50,000) released with only single approval, breaching Policy §2's mandatory second Finance approval"
+      "title": "High-value POs above EUR 50,000 released on a single approval, breaching the two-step approval control"
     },
     {
-      "business_consequence": "EUR 216,000 was committed outside the controlled procurement process entirely — violating an absolute 'no maverick spend' rule — with the additional failure of no second approval, meaning there was no preventive control at all on these orders.",
+      "business_consequence": "EUR 216,000 was committed to suppliers outside the controlled process, breaching an absolute prohibition. This removes pre-commitment scrutiny and price/budget control, and points to specific buyers (buyer_a, buyer_d) needing remediation.",
       "candidates": [],
       "chosen_candidate_id": null,
       "confidence": "amber",
-      "description": "Policy §1 requires a PO be raised before goods are ordered and Policy §4 states maverick spend is 'not permitted under any circumstances'. The export has 3 rows with po_before_order = 'no', totalling EUR 216,000. The two-way breakdown shows all 3 of these maverick rows are ALSO flagged 'single_approval_only', so they compound two distinct control breaches: ordering without a PO and releasing without the required second approval. These are the highest-risk records in the dataset.\n\nWhat the data shows:\n- Maverick POs (po_before_order = no) count: 3\n- Total EUR value of maverick POs: 216,000\n- Maverick POs that are also single_approval_only (count): 3\n- Pct of total PO value from maverick spend: 4.7\n- PO-before-order rule: 1 (“1. All purchase orders must be raised in the procurement system before goods are ordered.” — Procurement Policy)\n- Maverick spend prohibition: 4 (“4. Maverick spend — ordering without a purchase order — is not permitted under any circumstances.” — Procurement Policy)\n\n_Flagged for review: Correct the section references (§1 = PO-before-order, §4 = maverick prohibition) and soften the consequence: 'Three POs totalling EUR 216,000 (4.7% of total PO value) were flagged po_before_order = no, breaching Policy §4's prohibition on maverick spend and §1's requirement to raise a PO before ordering. All three are also flagged single_approval_only, so each combines two distinct control failure_",
+      "description": "Policy §1 requires all POs to be raised in the procurement system before goods are ordered, and §4 states maverick spend (ordering without a PO) is 'not permitted under any circumstances'. The export's po_before_order flag shows 3 POs marked 'no' — goods ordered ahead of the PO — totalling EUR 216,000, 4.7% of value. The breaches are concentrated in two buyers: buyer_a (2 POs) and buyer_d (1 PO).\n\nWhat the data shows:\n- POs ordered without a prior PO (po_before_order=no): 3\n- Value of maverick-spend POs (EUR): 216,000\n- Pct of total PO value that is maverick spend: 4.7\n- Maverick POs raised by buyer_a: 2\n\n_Flagged for review: Drop the verbatim policy quotes and the absolute-prohibition framing unless the policy text is cited. Reword to: 'The export's po_before_order flag shows 3 POs marked \"no\" (goods apparently ordered ahead of the PO), totalling EUR 216,000 (4.7% of value); 2 were raised by buyer_a and the remaining 1 by another buyer. This pattern is consistent with maverick spend and warrants review against the pro_",
       "id": "F2",
       "resolution_note": "",
       "resolved": false,
       "severity": "high",
       "sources": [
         {
-          "doc_id": "purchase-order-export",
-          "locator": "group_by po_before_order x approval_status",
-          "quote": "po_before_order=no & single_approval_only: count 3, sum 216000"
+          "doc_id": "procurement-policy",
+          "locator": "line 3",
+          "quote": "1. All purchase orders must be raised in the procurement system before goods are ordered."
         },
         {
           "doc_id": "procurement-policy",
-          "locator": "line 3 & 8",
-          "quote": "All purchase orders must be raised in the procurement system before goods are ordered. ... Maverick spend — ordering without a purchase order — is not permitted under any circumstances."
+          "locator": "line 8",
+          "quote": "4. Maverick spend — ordering without a purchase order — is not permitted under any circumstances."
+        },
+        {
+          "doc_id": "purchase-order-export",
+          "locator": "group_by po_before_order x raised_by",
+          "quote": "po_before_order=no: buyer_a count 2, buyer_d count 1; summed amount_eur 216000"
         }
       ],
-      "title": "Three maverick-spend POs (EUR 216,000) ordered with no PO-before-order, breaching the absolute Policy §4 prohibition — and all three also lack second approval"
+      "title": "Maverick spend: goods ordered before a PO existed, despite an absolute policy ban"
     },
     {
-      "business_consequence": "Because no document assigns an owner or detective/remediation control to the exception states the system already records, the EUR 557,000 single-approval and EUR 216,000 maverick breaches can persist undetected and unactioned.",
+      "business_consequence": "The three-way match cannot be demonstrated for any of the 233 POs / EUR 4.63M of spend from this export, so payment-release integrity is unverifiable — an audit and overpayment risk across the entire PO population.",
       "candidates": [],
       "chosen_candidate_id": null,
       "confidence": "amber",
-      "description": "The PO export tracks two exception states the system actually records — approval_status = 'single_approval_only' (7 rows) and po_before_order = 'no' (3 rows). The procurement policy mandates a second approval over EUR 50,000 but a find_mentions search shows the term 'second approval' appears 0 times as a discrete concept and the policy text never defines who reviews, escalates, or remediates a single-approval or maverick exception. The system captures these breaches as data states, yet no document assigns an owner or detective control to them — a process-vs-reality governance gap that lets the EUR 557,000 single-approval and EUR 216,000 maverick exposures persist unactioned.\n\nWhat the data shows:\n- Distinct approval_status values in export: 2\n- single_approval_only rows: 7\n- po_before_order = no rows: 3\n- 'second approval' term occurrences in policy: 0 (“before goods are ordered” — Procurement Policy)\n- Policy describes the to-be approval only via line 1: 1 (“1. All purchase orders must be raised in the procurement system before goods are ordered.” — Procurement Policy)\n\n_Flagged for review: Restrict the finding to what the cited evidence shows: the export records 2 distinct approval_status values including 7 'single_approval_only' rows and 3 'po_before_order = no' rows, and the only policy text available (line 1) addresses raising POs before ordering, not exception handling, ownership, escalation, or remediation. Remove the unsupported 'mandates a second approval over EUR 50,000' cla_",
+      "description": "Policy §3 mandates that POs are matched against the goods receipt and the supplier invoice (three-way match) before payment is released. The purchase-order-export, which spans all 233 POs and EUR 4,625,800 of spend, contains no goods-receipt or invoice fields whatsoever (columns are limited to po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order). The control the policy describes as a payment gate is therefore not observable or auditable in the system of record provided — a documentation-vs-data gap.\n\nWhat the data shows:\n- Total PO value lacking match evidence (EUR): 4,625,800\n\n_Flagged for review: Either attach the Policy §3 quote that states the three-way-match/payment-gate requirement, or reword to avoid asserting policy content: e.g. 'The purchase-order export (233 POs, EUR 4,625,800) contains only po_id, supplier, category, amount_eur, raised_by, approval_status and po_before_order — no goods-receipt or invoice fields. As a result, any three-way-match control would not be observable or _",
       "id": "F3",
       "resolution_note": "",
       "resolved": false,
       "severity": "amber",
       "sources": [
         {
-          "doc_id": "purchase-order-export",
-          "locator": "describe approval_status / po_before_order",
-          "quote": "approval_status distinct: approved (226), single_approval_only (7); po_before_order distinct: yes (230), no (3)"
+          "doc_id": "procurement-policy",
+          "locator": "line 6",
+          "quote": "3. Purchase orders are matched against the goods receipt and the supplier invoice (three-way match)"
         },
         {
-          "doc_id": "procurement-policy",
-          "locator": "find_mentions term 'second approval' count=0",
-          "quote": "second approval: count 0, no matching lines — policy never names an exception/remediation owner"
+          "doc_id": "purchase-order-export",
+          "locator": "describe schema",
+          "quote": "Columns: po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order — no goods_receipt or invoice column present"
         }
       ],
-      "title": "Policy is silent on exception handling: it names a 'second approval' control but the term appears zero times, leaving the system's recorded breach states ungoverned"
+      "title": "Three-way match control is documented but cannot be evidenced from the PO system export"
     }
   ],
   "internal_trace": {
     "_tool_numbers": [
       0.0,
       0.4,
+      0.9,
       1.0,
       1.3,
-      1.7,
       2.0,
       3.0,
       4.0,
@@ -108,7 +123,6 @@
       6.0,
       6.9,
       7.0,
-      7.4,
       8.0,
       8.6,
       9.4,
@@ -120,8 +134,12 @@
       12.0,
       12.9,
       13.0,
+      13.7,
       14.0,
+      14.6,
       15.0,
+      15.5,
+      15.9,
       16.0,
       19.0,
       20.0,
@@ -135,6 +153,7 @@
       32.0,
       33.0,
       34.0,
+      36.0,
       37.0,
       38.0,
       40.0,
@@ -148,9 +167,7 @@
       226.0,
       230.0,
       233.0,
-      150000.0,
       216000.0,
-      341000.0,
       557000.0,
       4068800.0,
       4409800.0,
@@ -158,183 +175,144 @@
     ],
     "findings": [
       {
-        "business_consequence": "EUR 557,000 of high-value commitments were released without the mandated second Finance approval, defeating the dual-control designed to prevent unauthorized large spend and exposing the company to fraud, over-commitment, and audit-failure risk.",
+        "business_consequence": "EUR 557,000 of high-value spend bypassed the Finance second-approval control, exposing the company to unauthorized commitment, fraud and budget-override risk on precisely the orders the policy singled out as needing extra scrutiny.",
         "computed_values": [
           {
             "from_tool": "group_by",
-            "label": "POs flagged single_approval_only (count)",
+            "label": "POs flagged single_approval_only",
             "value": 7
           },
           {
             "from_tool": "group_by",
-            "label": "Total EUR value of single_approval_only POs",
-            "value": 557000.0
+            "label": "Value of single_approval_only POs (EUR)",
+            "value": 557000
           },
           {
             "from_tool": "group_by",
-            "label": "Pct of total PO value bypassing second approval",
-            "value": 12.0
-          },
-          {
-            "from_tool": "aggregate",
-            "label": "Largest single PO in dataset (EUR, max amount)",
-            "value": 150000.0
+            "label": "Pct of total PO value from single-approval POs",
+            "value": 12
           }
         ],
         "confidence": "verified",
-        "description": "Policy §2 requires that any purchase order above EUR 50,000 carry approval from the Category Manager AND a second approval from Finance before release. The export contains 7 POs flagged 'single_approval_only', and the cross-tab of approval_status by amount shows every one of them is above EUR 50,000 (54,000; 61,000; 67,000; 72,000; 88,000; 95,000; 120,000). These are exactly the orders the dual-approval control exists to catch, yet all 7 were released on a single approval. Combined they total EUR 557,000 of spend that bypassed the documented second-approval control.",
+        "description": "Policy §2 requires every purchase order above EUR 50,000 to carry approval from the Category Manager AND a second approval from Finance before release. The export shows 7 POs flagged 'single_approval_only', and the cross-tab proves every one of them sits above the EUR 50,000 threshold (amounts 54000, 61000, 67000, 72000, 88000, 95000, 120000) — a 100% failure of the dual-control on the exact population the control was written for. These 7 POs carry EUR 557,000 of spend, 12% of total PO value.",
         "id": "F1",
         "impact_score": 90,
         "narrative_values": [
           {
             "doc_id": "procurement-policy",
-            "label": "Policy threshold and dual-approval rule",
+            "label": "Approval threshold (EUR)",
             "quote": "2. Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second",
-            "value": 50000
-          },
-          {
-            "doc_id": "procurement-policy",
-            "label": "Second approver named",
-            "quote": "approval from Finance before it is released to the supplier.",
-            "value": "Finance"
+            "value": "50,000"
           }
         ],
         "severity": "high",
         "sources": [
+          {
+            "doc_id": "procurement-policy",
+            "locator": "line 4",
+            "quote": "2. Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second"
+          },
+          {
+            "doc_id": "procurement-policy",
+            "locator": "line 5",
+            "quote": "approval from Finance before it is released to the supplier."
+          },
           {
             "doc_id": "purchase-order-export",
             "locator": "group_by approval_status x amount_eur",
-            "quote": "single_approval_only POs at amounts 54000, 61000, 67000, 72000, 88000, 95000, 120000 — all >50000"
-          },
-          {
-            "doc_id": "procurement-policy",
-            "locator": "line 4-5",
-            "quote": "Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second approval from Finance before it is released to the supplier."
+            "quote": "All 7 single_approval_only rows have amount_eur in {54000,61000,67000,72000,88000,95000,120000}, every value above the 50000 threshold"
           }
         ],
-        "title": "Seven high-value POs (all >EUR 50,000) released with only single approval, breaching Policy §2's mandatory second Finance approval",
+        "title": "High-value POs above EUR 50,000 released on a single approval, breaching the two-step approval control",
         "verification": {
-          "reason": "The policy quotes confirm the >EUR 50,000 threshold and the dual Category Manager + Finance approval requirement. The computed evidence confirms 7 POs flagged single_approval_only totaling EUR 557,000, and the listed amounts (54,000-120,000) are all above the threshold. The conclusion that these breach the documented control follows directly from the cited evidence. The business consequences (frau",
-          "suggested_fix": "",
-          "supported": true
-        }
-      },
-      {
-        "business_consequence": "EUR 216,000 was committed outside the controlled procurement process entirely — violating an absolute 'no maverick spend' rule — with the additional failure of no second approval, meaning there was no preventive control at all on these orders.",
-        "computed_values": [
-          {
-            "from_tool": "group_by",
-            "label": "Maverick POs (po_before_order = no) count",
-            "value": 3
-          },
-          {
-            "from_tool": "group_by",
-            "label": "Total EUR value of maverick POs",
-            "value": 216000.0
-          },
-          {
-            "from_tool": "group_by",
-            "label": "Maverick POs that are also single_approval_only (count)",
-            "value": 3
-          },
-          {
-            "from_tool": "group_by",
-            "label": "Pct of total PO value from maverick spend",
-            "value": 4.7
-          }
-        ],
-        "confidence": "verified",
-        "description": "Policy §1 requires a PO be raised before goods are ordered and Policy §4 states maverick spend is 'not permitted under any circumstances'. The export has 3 rows with po_before_order = 'no', totalling EUR 216,000. The two-way breakdown shows all 3 of these maverick rows are ALSO flagged 'single_approval_only', so they compound two distinct control breaches: ordering without a PO and releasing without the required second approval. These are the highest-risk records in the dataset.",
-        "id": "F2",
-        "impact_score": 78,
-        "narrative_values": [
-          {
-            "doc_id": "procurement-policy",
-            "label": "PO-before-order rule",
-            "quote": "1. All purchase orders must be raised in the procurement system before goods are ordered.",
-            "value": 1
-          },
-          {
-            "doc_id": "procurement-policy",
-            "label": "Maverick spend prohibition",
-            "quote": "4. Maverick spend — ordering without a purchase order — is not permitted under any circumstances.",
-            "value": 4
-          }
-        ],
-        "severity": "high",
-        "sources": [
-          {
-            "doc_id": "purchase-order-export",
-            "locator": "group_by po_before_order x approval_status",
-            "quote": "po_before_order=no & single_approval_only: count 3, sum 216000"
-          },
-          {
-            "doc_id": "procurement-policy",
-            "locator": "line 3 & 8",
-            "quote": "All purchase orders must be raised in the procurement system before goods are ordered. ... Maverick spend — ordering without a purchase order — is not permitted under any circumstances."
-          }
-        ],
-        "title": "Three maverick-spend POs (EUR 216,000) ordered with no PO-before-order, breaching the absolute Policy §4 prohibition — and all three also lack second approval",
-        "verification": {
-          "reason": "The computed evidence confirms the count (3), total (EUR 216,000), and that all 3 maverick rows are also single_approval_only, and the quotes support both the PO-before-order rule (§1) and the maverick prohibition (§4). However, the finding internally misattributes the policy sections: the title and claim say the PO-before-order requirement is '§4' and then '§1', and that §4 is the maverick prohib",
-          "suggested_fix": "Correct the section references (§1 = PO-before-order, §4 = maverick prohibition) and soften the consequence: 'Three POs totalling EUR 216,000 (4.7% of total PO value) were flagged po_before_order = no, breaching Policy §4's prohibition on maverick spend and §1's requirement to raise a PO before ordering. All three are also flagged single_approval_only, so each combines two distinct control failure",
+          "reason": "The document quote is truncated mid-sentence ('...AND a second') and does not actually confirm that the second approval must come from Finance — the finding asserts 'a second approval from Finance' but the evidence does not show that. Additionally, the cited computed evidence only provides the count (7), total value (557000), and percentage (12); it does not include the per-PO amounts (54000, 6100",
+          "suggested_fix": "Policy §2 requires every purchase order above EUR 50,000 to carry approval from the Category Manager AND a second approval before release. The export flags 7 POs as 'single_approval_only', representing EUR 557,000 of spend (12% of total PO value), which appear to lack the required second approval. The exact identity of the second approver (e.g. Finance) and confirmation that all 7 flagged POs exce",
           "supported": false
         }
       },
       {
-        "business_consequence": "Because no document assigns an owner or detective/remediation control to the exception states the system already records, the EUR 557,000 single-approval and EUR 216,000 maverick breaches can persist undetected and unactioned.",
+        "business_consequence": "EUR 216,000 was committed to suppliers outside the controlled process, breaching an absolute prohibition. This removes pre-commitment scrutiny and price/budget control, and points to specific buyers (buyer_a, buyer_d) needing remediation.",
         "computed_values": [
           {
-            "from_tool": "describe",
-            "label": "Distinct approval_status values in export",
-            "value": 2
-          },
-          {
             "from_tool": "group_by",
-            "label": "single_approval_only rows",
-            "value": 7
-          },
-          {
-            "from_tool": "group_by",
-            "label": "po_before_order = no rows",
+            "label": "POs ordered without a prior PO (po_before_order=no)",
             "value": 3
+          },
+          {
+            "from_tool": "group_by",
+            "label": "Value of maverick-spend POs (EUR)",
+            "value": 216000
+          },
+          {
+            "from_tool": "group_by",
+            "label": "Pct of total PO value that is maverick spend",
+            "value": 4.7
+          },
+          {
+            "from_tool": "group_by",
+            "label": "Maverick POs raised by buyer_a",
+            "value": 2
           }
         ],
         "confidence": "verified",
-        "description": "The PO export tracks two exception states the system actually records — approval_status = 'single_approval_only' (7 rows) and po_before_order = 'no' (3 rows). The procurement policy mandates a second approval over EUR 50,000 but a find_mentions search shows the term 'second approval' appears 0 times as a discrete concept and the policy text never defines who reviews, escalates, or remediates a single-approval or maverick exception. The system captures these breaches as data states, yet no document assigns an owner or detective control to them — a process-vs-reality governance gap that lets the EUR 557,000 single-approval and EUR 216,000 maverick exposures persist unactioned.",
-        "id": "F3",
-        "impact_score": 55,
-        "narrative_values": [
+        "description": "Policy §1 requires all POs to be raised in the procurement system before goods are ordered, and §4 states maverick spend (ordering without a PO) is 'not permitted under any circumstances'. The export's po_before_order flag shows 3 POs marked 'no' — goods ordered ahead of the PO — totalling EUR 216,000, 4.7% of value. The breaches are concentrated in two buyers: buyer_a (2 POs) and buyer_d (1 PO).",
+        "id": "F2",
+        "impact_score": 70,
+        "severity": "high",
+        "sources": [
           {
             "doc_id": "procurement-policy",
-            "label": "'second approval' term occurrences in policy",
-            "quote": "before goods are ordered",
-            "value": 0
+            "locator": "line 3",
+            "quote": "1. All purchase orders must be raised in the procurement system before goods are ordered."
           },
           {
             "doc_id": "procurement-policy",
-            "label": "Policy describes the to-be approval only via line 1",
-            "quote": "1. All purchase orders must be raised in the procurement system before goods are ordered.",
-            "value": 1
+            "locator": "line 8",
+            "quote": "4. Maverick spend — ordering without a purchase order — is not permitted under any circumstances."
+          },
+          {
+            "doc_id": "purchase-order-export",
+            "locator": "group_by po_before_order x raised_by",
+            "quote": "po_before_order=no: buyer_a count 2, buyer_d count 1; summed amount_eur 216000"
           }
         ],
+        "title": "Maverick spend: goods ordered before a PO existed, despite an absolute policy ban",
+        "verification": {
+          "reason": "The numeric evidence supports the counts (3 POs, EUR 216,000, 4.7%, buyer_a=2), but the finding quotes specific policy text (§1 'before goods are ordered', §4 'not permitted under any circumstances') while DOCUMENT EVIDENCE is empty. There is no cited quote backing the existence or wording of the policy, so the central claim of an 'absolute policy ban' is unverified. Also buyer_d=1 is asserted but",
+          "suggested_fix": "Drop the verbatim policy quotes and the absolute-prohibition framing unless the policy text is cited. Reword to: 'The export's po_before_order flag shows 3 POs marked \"no\" (goods apparently ordered ahead of the PO), totalling EUR 216,000 (4.7% of value); 2 were raised by buyer_a and the remaining 1 by another buyer. This pattern is consistent with maverick spend and warrants review against the pro",
+          "supported": false
+        }
+      },
+      {
+        "business_consequence": "The three-way match cannot be demonstrated for any of the 233 POs / EUR 4.63M of spend from this export, so payment-release integrity is unverifiable — an audit and overpayment risk across the entire PO population.",
+        "computed_values": [
+          {
+            "from_tool": "group_by",
+            "label": "Total PO value lacking match evidence (EUR)",
+            "value": 4625800
+          }
+        ],
+        "confidence": "amber",
+        "description": "Policy §3 mandates that POs are matched against the goods receipt and the supplier invoice (three-way match) before payment is released. The purchase-order-export, which spans all 233 POs and EUR 4,625,800 of spend, contains no goods-receipt or invoice fields whatsoever (columns are limited to po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order). The control the policy describes as a payment gate is therefore not observable or auditable in the system of record provided — a documentation-vs-data gap.",
+        "id": "F3",
+        "impact_score": 45,
         "severity": "amber",
         "sources": [
           {
-            "doc_id": "purchase-order-export",
-            "locator": "describe approval_status / po_before_order",
-            "quote": "approval_status distinct: approved (226), single_approval_only (7); po_before_order distinct: yes (230), no (3)"
+            "doc_id": "procurement-policy",
+            "locator": "line 6",
+            "quote": "3. Purchase orders are matched against the goods receipt and the supplier invoice (three-way match)"
           },
           {
-            "doc_id": "procurement-policy",
-            "locator": "find_mentions term 'second approval' count=0",
-            "quote": "second approval: count 0, no matching lines — policy never names an exception/remediation owner"
+            "doc_id": "purchase-order-export",
+            "locator": "describe schema",
+            "quote": "Columns: po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order — no goods_receipt or invoice column present"
           }
         ],
-        "title": "Policy is silent on exception handling: it names a 'second approval' control but the term appears zero times, leaving the system's recorded breach states ungoverned",
+        "title": "Three-way match control is documented but cannot be evidenced from the PO system export",
         "verification": {
-          "reason": "The computed evidence supports the row counts (7 single_approval_only, 3 po_before_order=no) and that there are 2 distinct approval_status values. However, the document evidence does NOT contain the policy text stating a 'second approval over EUR 50,000' is mandated — the only quote provided is line 1 about raising POs before ordering. Without the quote establishing the EUR 50,000 second-approval ",
-          "suggested_fix": "Restrict the finding to what the cited evidence shows: the export records 2 distinct approval_status values including 7 'single_approval_only' rows and 3 'po_before_order = no' rows, and the only policy text available (line 1) addresses raising POs before ordering, not exception handling, ownership, escalation, or remediation. Remove the unsupported 'mandates a second approval over EUR 50,000' cla",
+          "reason": "The computed figure (4,625,800) and the column list support that the export lacks goods-receipt/invoice fields, but the claim relies on quoting Policy §3 ('mandates... three-way match before payment') and there is NO document evidence provided. Without the policy text, the finding's central framing — a documentation-vs-data gap against a specific policy requirement — cannot be verified. The conclu",
+          "suggested_fix": "Either attach the Policy §3 quote that states the three-way-match/payment-gate requirement, or reword to avoid asserting policy content: e.g. 'The purchase-order export (233 POs, EUR 4,625,800) contains only po_id, supplier, category, amount_eur, raised_by, approval_status and po_before_order — no goods-receipt or invoice fields. As a result, any three-way-match control would not be observable or ",
           "supported": false
         }
       }
@@ -344,115 +322,438 @@
   "recommendations": [],
   "synthesis": {
     "charts": [],
-    "cross_process_patterns": [],
+    "cross_process_patterns": [
+      {
+        "description": "All three pain points share a common shape: the procurement policy specifies a control (three-way match, dual approval above EUR 50,000, no ordering without a PO), but the operational data either lacks the fields to evidence it or shows it being bypassed. The gap is between written policy and system enforcement.",
+        "pattern": "Controls defined in policy are not enforced or evidenced in the system"
+      },
+      {
+        "description": "Off-policy behaviour is not evenly spread. buyer_a alone accounts for two of the three maverick-spend cases, suggesting that targeted buyer coaching and controls could address a disproportionate share of the issue.",
+        "pattern": "Buyer-level concentration of off-policy activity"
+      },
+      {
+        "description": "Single-approval breaches occur exclusively on orders above EUR 50,000, meaning the missing control coincides with the largest financial exposures rather than low-value transactions.",
+        "pattern": "Risk concentrates at the high-value end"
+      }
+    ],
     "current_state": {
-      "domain_overview": "This domain covers how the company commits to spend with suppliers — from the point a purchase order is raised, through approval, to the point an order is placed. The process is steered by a written procurement policy and recorded in a structured commitments export. The policy sets two headline controls: a mandatory second Finance approval on large purchase orders, and a requirement that a purchase order exists before any order is placed.",
-      "format_taxonomy": [
+      "baseline_stats": [
         {
-          "description": "A structured export of purchase commitments carrying value, approval status, and order sequence for each order, with two distinct approval states in use.",
-          "examples": "Your recorded purchase commitments",
-          "label": "Type 1 — Structured transactional record"
+          "label": "POs flagged single-approval only",
+          "sublabel": "all above EUR 50,000 threshold",
+          "value": "7"
         },
         {
-          "description": "A written rulebook stating the control requirements that approvals and ordering should follow.",
-          "examples": "Your procurement policy",
-          "label": "Type 2 — Governing policy document"
+          "label": "Value of single-approval POs",
+          "sublabel": "12% of total PO value",
+          "value": "EUR 557,000"
+        },
+        {
+          "label": "POs raised without a prior PO",
+          "sublabel": "po_before_order=no",
+          "value": "3"
+        },
+        {
+          "label": "Value of maverick-spend POs",
+          "sublabel": "4.7% of total PO value",
+          "value": "EUR 216,000"
+        },
+        {
+          "label": "PO value without match evidence",
+          "sublabel": "no goods receipt / invoice column in export",
+          "value": "EUR 4,625,800"
+        }
+      ],
+      "bounded_contexts": [],
+      "data_tables": [
+        {
+          "caption": "",
+          "columns": [
+            "#",
+            "Requirement"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "1",
+              "All purchase orders must be raised in the procurement system before goods are ordered."
+            ],
+            [
+              "2",
+              "Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second approval from Finance before it is released to the supplier."
+            ],
+            [
+              "3",
+              "Purchase orders are matched against the goods receipt and the supplier invoice (three-way match)."
+            ],
+            [
+              "4",
+              "Maverick spend — ordering without a purchase order — is not permitted under any circumstances."
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "procurement-policy",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Procurement control requirements (policy)"
+        },
+        {
+          "caption": "",
+          "columns": [
+            "Finding"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "All 7 single_approval_only rows have amount_eur in {54000,61000,67000,72000,88000,95000,120000}, every value above the 50000 threshold"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Single-approval-only POs"
+        },
+        {
+          "caption": "",
+          "columns": [
+            "Finding"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "po_before_order=no: buyer_a count 2, buyer_d count 1; summed amount_eur 216000"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "POs ordered without a prior PO (po_before_order=no)"
+        },
+        {
+          "caption": "",
+          "columns": [
+            "po_id",
+            "supplier",
+            "category",
+            "amount_eur",
+            "raised_by",
+            "approval_status",
+            "po_before_order"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "PO-1007",
+              "PackRight",
+              "Packaging",
+              "45000",
+              "buyer_e",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1203",
+              "CargoLink",
+              "Logistics",
+              "18500",
+              "buyer_h",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1054",
+              "PrecisionParts",
+              "Components",
+              "45000",
+              "buyer_h",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1003",
+              "ITPartner",
+              "Services",
+              "2800",
+              "buyer_b",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1050",
+              "FreightOne",
+              "Logistics",
+              "6500",
+              "buyer_a",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1196",
+              "ForgePrime",
+              "Raw Materials",
+              "45000",
+              "buyer_e",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1164",
+              "LubriCorp",
+              "Consumables",
+              "4200",
+              "buyer_b",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1208",
+              "ValveTech",
+              "Components",
+              "1500",
+              "buyer_g",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1145",
+              "ForgePrime",
+              "Raw Materials",
+              "6500",
+              "buyer_g",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1137",
+              "GearHaus",
+              "Components",
+              "24000",
+              "buyer_h",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1186",
+              "BoxLine",
+              "Packaging",
+              "31000",
+              "buyer_f",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1027",
+              "ValveTech",
+              "Components",
+              "31000",
+              "buyer_e",
+              "approved",
+              "yes"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Recorded purchase orders (sample of export)"
+        },
+        {
+          "caption": "",
+          "columns": [
+            "Columns"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order — no goods_receipt or invoice column present"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Export columns present"
+        }
+      ],
+      "domain_overview": "This section documents the current state of the procurement-to-order process as evidenced by the procurement policy and the purchase order export. The policy defines four control requirements: all purchase orders must be raised in the procurement system before goods are ordered; any PO above EUR 50,000 requires approval from the Category Manager and a second approval from Finance before release to the supplier; POs are matched against the goods receipt and the supplier invoice (three-way match); and ordering without a purchase order (maverick spend) is not permitted. The purchase order export is the transactional record of POs raised, capturing the supplier, category, amount, the buyer who raised it, approval status, and whether the PO preceded the order.",
+      "format_taxonomy": [
+        {
+          "description": "Indicator of whether the purchase order was raised before goods were ordered.",
+          "examples": "yes; no",
+          "label": "po_before_order"
+        },
+        {
+          "description": "Approval state recorded for the PO.",
+          "examples": "approved; single_approval_only flag",
+          "label": "approval_status"
+        },
+        {
+          "description": "Spend category on the PO.",
+          "examples": "Packaging, Logistics, Components, Services, Raw Materials, Consumables",
+          "label": "category"
         }
       ],
       "handoff_catalogue": [
         {
-          "from_step": "Raise purchase order",
-          "mechanism": "Recorded approval status against the purchase order",
-          "to_step": "First approval"
+          "from_step": "Buyer raises PO",
+          "mechanism": "Procurement system (POs above EUR 50,000)",
+          "to_step": "Category Manager and Finance approval"
         },
         {
-          "from_step": "First approval",
-          "mechanism": "Manual, with no documented owner or enforcement",
-          "to_step": "Second Finance approval"
-        },
-        {
-          "from_step": "Approval",
-          "mechanism": "Recorded order sequence indicating whether the purchase order preceded the order",
-          "to_step": "Place order with supplier"
+          "from_step": "Approval and release",
+          "mechanism": "Goods receipt and supplier invoice matching",
+          "to_step": "Three-way match"
         }
       ],
       "ownership_map": [
         {
-          "accountable": "Requesting function",
-          "activity": "Raise purchase order",
+          "accountable": "Buyer",
+          "activity": "Raise purchase order before ordering",
           "consulted": "",
           "informed": "",
-          "responsible": "Requesting function"
+          "responsible": "Buyer"
         },
         {
-          "accountable": "Approver",
-          "activity": "First approval",
+          "accountable": "Category Manager",
+          "activity": "First approval of POs above EUR 50,000",
           "consulted": "",
           "informed": "",
-          "responsible": "Approver"
+          "responsible": "Category Manager"
         },
         {
-          "accountable": "Not assigned",
-          "activity": "Mandatory second Finance approval",
-          "consulted": "Finance",
-          "informed": "",
-          "responsible": "Not assigned"
-        },
-        {
-          "accountable": "Not assigned",
-          "activity": "Order-sequence control",
+          "accountable": "Finance",
+          "activity": "Second approval of POs above EUR 50,000 before release",
           "consulted": "",
           "informed": "",
-          "responsible": "Requesting function"
+          "responsible": "Finance"
         },
         {
-          "accountable": "Not assigned",
-          "activity": "Exception detection and remediation",
+          "accountable": "Finance",
+          "activity": "Three-way match against goods receipt and supplier invoice",
           "consulted": "",
           "informed": "",
-          "responsible": "Not assigned"
+          "responsible": "Procurement / Finance"
+        }
+      ],
+      "process_detail": [
+        {
+          "actor": "Buyer",
+          "body": "Policy requires all purchase orders to be raised in the procurement system before goods are ordered. The export records the raising buyer (raised_by) and the po_before_order indicator. Three POs carry po_before_order=no, summing to EUR 216,000, which is 4.7% of total PO value. Two of these maverick POs were raised by buyer_a.",
+          "sources": [
+            {
+              "doc_id": "procurement-policy",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "system": "Procurement system",
+          "title": "PO creation"
+        },
+        {
+          "actor": "Category Manager and Finance",
+          "body": "Policy requires that any purchase order above EUR 50,000 receives approval from the Category Manager and a second approval from Finance before release to the supplier. Seven rows are flagged single_approval_only, all above the EUR 50,000 threshold, carrying EUR 557,000 in total (12% of total PO value).",
+          "sources": [
+            {
+              "doc_id": "procurement-policy",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "system": "Procurement system",
+          "title": "Approval and release"
+        },
+        {
+          "actor": "Procurement / Finance",
+          "body": "Policy states purchase orders are matched against the goods receipt and the supplier invoice in a three-way match. The export contains seven columns and no goods_receipt or invoice column. EUR 4,625,800 of PO value is without match evidence in the export.",
+          "sources": [
+            {
+              "doc_id": "procurement-policy",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "system": "Procurement system",
+          "title": "Three-way match"
         }
       ],
       "process_flow": [
         {
-          "actor": "Requesting function",
-          "description": "A purchase order is created and recorded in the commitments export with its value and approval status.",
+          "actor": "Buyer",
+          "description": "A named buyer raises the purchase order in the procurement system. Policy requires that all purchase orders are raised in the procurement system before goods are ordered. The export records the raising buyer in the raised_by field and whether the PO preceded the order in po_before_order. Three POs carry po_before_order=no, summing to EUR 216,000.",
           "failure_points": [],
-          "name": "Raise purchase order",
+          "name": "Raise purchase order in procurement system",
           "seq": 1,
           "sources": [
             {
-              "doc_id": "purchase-order-export",
+              "doc_id": "procurement-policy",
               "locator": "",
               "quote": ""
-            }
-          ],
-          "system": "Commitments export"
-        },
-        {
-          "actor": "Approver",
-          "description": "A first approval is recorded against the purchase order. The export carries two distinct approval states.",
-          "failure_points": [
-            "Large orders can proceed with only this single approval recorded"
-          ],
-          "name": "Apply first approval",
-          "seq": 2,
-          "sources": [
+            },
             {
               "doc_id": "purchase-order-export",
               "locator": "",
               "quote": ""
             }
           ],
-          "system": "Commitments export"
+          "system": "Procurement system"
         },
         {
-          "actor": "Not assigned",
-          "description": "The procurement policy requires a second Finance approval on purchase orders above the defined value threshold. The policy names this control and does not describe how it is enforced or who owns its enforcement.",
-          "failure_points": [
-            "Seven large orders worth EUR 557,000 were released without this second approval recorded"
+          "actor": "Category Manager and Finance",
+          "description": "The purchase order moves through approval and is released to the supplier. Policy states any purchase order above EUR 50,000 requires approval from the Category Manager and a second approval from Finance before it is released to the supplier. Seven rows are flagged single_approval_only, each above the EUR 50,000 threshold.",
+          "failure_points": [],
+          "name": "Approve and release to supplier",
+          "seq": 2,
+          "sources": [
+            {
+              "doc_id": "procurement-policy",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
           ],
-          "name": "Apply mandatory second Finance approval on large spend",
+          "system": "Procurement system"
+        },
+        {
+          "actor": "Procurement / Finance",
+          "description": "Policy states purchase orders are matched against the goods receipt and the supplier invoice in a three-way match. The export columns are po_id, supplier, category, amount_eur, raised_by, approval_status, and po_before_order, with no goods_receipt or invoice column present. EUR 4,625,800 of PO value is without match evidence in the export.",
+          "failure_points": [],
+          "name": "Three-way match against goods receipt and invoice",
           "seq": 3,
           "sources": [
             {
@@ -466,16 +767,1136 @@
               "quote": ""
             }
           ],
-          "system": "Procurement policy"
+          "system": "Procurement system"
+        }
+      ],
+      "process_inventory": [],
+      "process_summary": "Purchase orders are raised by named buyers in the procurement system and progress through approval before release to the supplier. The policy requires PO creation prior to ordering, a dual approval for orders above EUR 50,000, and a three-way match against goods receipt and supplier invoice. The export carries seven columns (po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order); it does not contain a goods receipt or invoice column. Across the recorded population, 7 POs are flagged single_approval_only carrying EUR 557,000 (12% of total PO value), 3 POs were ordered without a prior PO carrying EUR 216,000 (4.7% of total PO value), and EUR 4,625,800 of PO value is without match evidence.",
+      "system_inventory": [
+        {
+          "name": "Procurement system",
+          "purpose": "System in which all purchase orders are raised before goods are ordered",
+          "system_of_record_for": "Purchase orders"
         },
         {
-          "actor": "Requesting function",
-          "description": "The policy requires that a purchase order exists before an order is placed with a supplier. The export records whether each order followed this sequence.",
-          "failure_points": [
-            "Three orders worth EUR 216,000 were placed before any purchase order existed"
+          "name": "Purchase order export",
+          "purpose": "Transactional extract of recorded POs",
+          "system_of_record_for": "PO line records (po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order)"
+        }
+      ],
+      "system_profiles": [
+        {
+          "how_used": "All purchase orders are raised here before goods are ordered; POs above EUR 50,000 route to Category Manager and Finance approval before release; POs are matched against goods receipt and supplier invoice in a three-way match.",
+          "limitations": "The associated export carries seven columns with no goods_receipt or invoice column present.",
+          "name": "Procurement system",
+          "owners": "Procurement / Finance",
+          "role": "System of record for purchase orders"
+        }
+      ]
+    },
+    "dependency_notes": "The maverick-spend and single-approval remediations depend on enforcement being moved from manual judgement into the procurement system's release workflow. The three-way match remediation depends on integrating or surfacing goods-receipt and invoice data alongside the PO record — without those two data elements the match cannot be evidenced regardless of approval discipline. Buyer-level remediation for maverick spend depends on the concentration insight (2 of 3 cases from buyer_a) being available to the accountable role for targeted follow-up.",
+    "evidence_register": [
+      {
+        "confidence": "Verified",
+        "data_point": "\"3. Purchase orders are matched against the goods receipt and the supplier invoice (three-way match)\"",
+        "evidence_type": "policy quote",
+        "finding": "Three-way match is required by policy",
+        "source": "procurement-policy"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "\"Columns: po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order — no goods_receipt or invoice column present\"",
+        "evidence_type": "data structure",
+        "finding": "Export has no fields to evidence matching",
+        "source": "purchase-order-export"
+      },
+      {
+        "confidence": "Amber",
+        "data_point": "Total PO value lacking match evidence (EUR) = 4,625,800",
+        "evidence_type": "computed measure",
+        "finding": "PO value lacking match evidence",
+        "source": "procurement-policy; purchase-order-export"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "\"2. Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second approval from Finance before it is released to the supplier.\"",
+        "evidence_type": "policy quote",
+        "finding": "Orders above EUR 50,000 require dual approval",
+        "source": "procurement-policy"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "\"All 7 single_approval_only rows have amount_eur in {54000,61000,67000,72000,88000,95000,120000}, every value above the 50000 threshold\"",
+        "evidence_type": "data observation",
+        "finding": "Seven POs released on a single approval, all above threshold",
+        "source": "purchase-order-export"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "Value EUR 557,000; 12% of total PO value",
+        "evidence_type": "computed measure",
+        "finding": "Single-approval value and share",
+        "source": "procurement-policy; purchase-order-export"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "\"1. All purchase orders must be raised in the procurement system before goods are ordered.\" / \"4. Maverick spend — ordering without a purchase order — is not permitted under any circumstances.\"",
+        "evidence_type": "policy quote",
+        "finding": "Ordering requires a prior PO; maverick spend prohibited",
+        "source": "procurement-policy"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "\"po_before_order=no: buyer_a count 2, buyer_d count 1; summed amount_eur 216000\"",
+        "evidence_type": "data observation",
+        "finding": "Three maverick-spend POs by buyer, value EUR 216,000",
+        "source": "purchase-order-export"
+      },
+      {
+        "confidence": "Verified",
+        "data_point": "4.7% of total PO value is maverick spend",
+        "evidence_type": "computed measure",
+        "finding": "Maverick spend share of total",
+        "source": "procurement-policy; purchase-order-export"
+      }
+    ],
+    "executive_summary": {
+      "headline": "Seven purchase orders worth EUR 557,000 — 12% of total PO value — were released to suppliers on a single approval, in breach of the dual-approval rule that applies above the EUR 50,000 threshold.",
+      "opportunity": "The concentration of exposure is clear and addressable: EUR 557,000 of single-approval orders and EUR 216,000 of maverick spend together represent the most immediate compliance risk, with maverick spend further concentrated in one buyer. The priority is to remediate the dual-approval breaches on the high-value orders, address the maverick-spend pattern at the buyer level, and close the visibility gap by capturing goods-receipt and invoice data so the EUR 4,625,800 in unmatched PO value can be three-way matched.",
+      "situation": "A review of the purchase-order export against the procurement policy surfaced three distinct control gaps. First, 7 POs totalling EUR 557,000 (12% of total PO value) cleared on single approval only, despite every one of these orders exceeding the EUR 50,000 limit that requires both Category Manager and Finance sign-off before release. Second, 3 POs worth EUR 216,000 (4.7% of total PO value) were placed as maverick spend — goods ordered without a prior purchase order — which the policy prohibits under any circumstances; 2 of these were raised by a single buyer (buyer_a). Third, the export carries no goods-receipt or invoice fields, leaving EUR 4,625,800 of PO value without evidence of the required three-way match."
+    },
+    "fact_store": {
+      "entities": [
+        {
+          "attributes": {
+            "amount_eur": "45000",
+            "approval_status": "approved",
+            "category": "Packaging",
+            "po_before_order": "yes",
+            "raised_by": "buyer_e",
+            "supplier": "PackRight"
+          },
+          "kind": "transaction",
+          "name": "PO-1007",
+          "sources": [
+            "purchase-order-export"
           ],
-          "name": "Confirm purchase order precedes order",
-          "seq": 4,
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "18500",
+            "approval_status": "approved",
+            "category": "Logistics",
+            "po_before_order": "yes",
+            "raised_by": "buyer_h",
+            "supplier": "CargoLink"
+          },
+          "kind": "transaction",
+          "name": "PO-1203",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "45000",
+            "approval_status": "approved",
+            "category": "Components",
+            "po_before_order": "yes",
+            "raised_by": "buyer_h",
+            "supplier": "PrecisionParts"
+          },
+          "kind": "transaction",
+          "name": "PO-1054",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "2800",
+            "approval_status": "approved",
+            "category": "Services",
+            "po_before_order": "yes",
+            "raised_by": "buyer_b",
+            "supplier": "ITPartner"
+          },
+          "kind": "transaction",
+          "name": "PO-1003",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "6500",
+            "approval_status": "approved",
+            "category": "Logistics",
+            "po_before_order": "yes",
+            "raised_by": "buyer_a",
+            "supplier": "FreightOne"
+          },
+          "kind": "transaction",
+          "name": "PO-1050",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "45000",
+            "approval_status": "approved",
+            "category": "Raw Materials",
+            "po_before_order": "yes",
+            "raised_by": "buyer_e",
+            "supplier": "ForgePrime"
+          },
+          "kind": "transaction",
+          "name": "PO-1196",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "4200",
+            "approval_status": "approved",
+            "category": "Consumables",
+            "po_before_order": "yes",
+            "raised_by": "buyer_b",
+            "supplier": "LubriCorp"
+          },
+          "kind": "transaction",
+          "name": "PO-1164",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "1500",
+            "approval_status": "approved",
+            "category": "Components",
+            "po_before_order": "yes",
+            "raised_by": "buyer_g",
+            "supplier": "ValveTech"
+          },
+          "kind": "transaction",
+          "name": "PO-1208",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "6500",
+            "approval_status": "approved",
+            "category": "Raw Materials",
+            "po_before_order": "yes",
+            "raised_by": "buyer_g",
+            "supplier": "ForgePrime"
+          },
+          "kind": "transaction",
+          "name": "PO-1145",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "24000",
+            "approval_status": "approved",
+            "category": "Components",
+            "po_before_order": "yes",
+            "raised_by": "buyer_h",
+            "supplier": "GearHaus"
+          },
+          "kind": "transaction",
+          "name": "PO-1137",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "31000",
+            "approval_status": "approved",
+            "category": "Packaging",
+            "po_before_order": "yes",
+            "raised_by": "buyer_f",
+            "supplier": "BoxLine"
+          },
+          "kind": "transaction",
+          "name": "PO-1186",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        },
+        {
+          "attributes": {
+            "amount_eur": "31000",
+            "approval_status": "approved",
+            "category": "Components",
+            "po_before_order": "yes",
+            "raised_by": "buyer_e",
+            "supplier": "ValveTech"
+          },
+          "kind": "transaction",
+          "name": "PO-1027",
+          "sources": [
+            "purchase-order-export"
+          ],
+          "tier": "verified"
+        }
+      ],
+      "quant": [
+        {
+          "label": "POs flagged single_approval_only",
+          "sources": [
+            "procurement-policy",
+            "purchase-order-export"
+          ],
+          "tier": "verified",
+          "unit": "count",
+          "value": 7.0
+        },
+        {
+          "label": "Value of single_approval_only POs (EUR)",
+          "sources": [
+            "procurement-policy",
+            "purchase-order-export"
+          ],
+          "tier": "verified",
+          "unit": "eur",
+          "value": 557000.0
+        },
+        {
+          "label": "Pct of total PO value from single-approval POs",
+          "sources": [
+            "procurement-policy",
+            "purchase-order-export"
+          ],
+          "tier": "verified",
+          "unit": "percent",
+          "value": 12.0
+        },
+        {
+          "label": "POs ordered without a prior PO (po_before_order=no)",
+          "sources": [
+            "procurement-policy",
+            "purchase-order-export"
+          ],
+          "tier": "verified",
+          "unit": "count",
+          "value": 3.0
+        },
+        {
+          "label": "Value of maverick-spend POs (EUR)",
+          "sources": [
+            "procurement-policy",
+            "purchase-order-export"
+          ],
+          "tier": "verified",
+          "unit": "eur",
+          "value": 216000.0
+        },
+        {
+          "label": "Pct of total PO value that is maverick spend",
+          "sources": [
+            "procurement-policy",
+            "purchase-order-export"
+          ],
+          "tier": "verified",
+          "unit": "percent",
+          "value": 4.7
+        },
+        {
+          "label": "Maverick POs raised by buyer_a",
+          "sources": [
+            "procurement-policy",
+            "purchase-order-export"
+          ],
+          "tier": "verified",
+          "unit": "count",
+          "value": 2.0
+        },
+        {
+          "label": "Total PO value lacking match evidence (EUR)",
+          "sources": [
+            "procurement-policy",
+            "purchase-order-export"
+          ],
+          "tier": "amber",
+          "unit": "eur",
+          "value": 4625800.0
+        }
+      ],
+      "quotes": [
+        {
+          "doc_id": "procurement-policy",
+          "locator": "Approval threshold (EUR)",
+          "text": "2. Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second",
+          "tier": "verified"
+        },
+        {
+          "doc_id": "procurement-policy",
+          "locator": "line 5",
+          "text": "approval from Finance before it is released to the supplier.",
+          "tier": "verified"
+        },
+        {
+          "doc_id": "purchase-order-export",
+          "locator": "group_by approval_status x amount_eur",
+          "text": "All 7 single_approval_only rows have amount_eur in {54000,61000,67000,72000,88000,95000,120000}, every value above the 50000 threshold",
+          "tier": "verified"
+        },
+        {
+          "doc_id": "procurement-policy",
+          "locator": "line 3",
+          "text": "1. All purchase orders must be raised in the procurement system before goods are ordered.",
+          "tier": "verified"
+        },
+        {
+          "doc_id": "procurement-policy",
+          "locator": "line 8",
+          "text": "4. Maverick spend — ordering without a purchase order — is not permitted under any circumstances.",
+          "tier": "verified"
+        },
+        {
+          "doc_id": "purchase-order-export",
+          "locator": "group_by po_before_order x raised_by",
+          "text": "po_before_order=no: buyer_a count 2, buyer_d count 1; summed amount_eur 216000",
+          "tier": "verified"
+        },
+        {
+          "doc_id": "procurement-policy",
+          "locator": "line 6",
+          "text": "3. Purchase orders are matched against the goods receipt and the supplier invoice (three-way match)",
+          "tier": "amber"
+        },
+        {
+          "doc_id": "purchase-order-export",
+          "locator": "describe schema",
+          "text": "Columns: po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order — no goods_receipt or invoice column present",
+          "tier": "amber"
+        }
+      ],
+      "relations": []
+    },
+    "metrics_framework": [
+      {
+        "definition": "Total EUR value of purchase orders above the EUR 50,000 threshold released without the required second (Finance) approval. Baseline: EUR 557,000 across 7 POs, equal to 12 percent of total PO value.",
+        "name": "Single-approval breach value",
+        "target": "Reduce toward zero — no above-threshold PO released on a single approval."
+      },
+      {
+        "definition": "Total EUR value of purchase orders where goods were ordered before a PO existed (po_before_order=no). Baseline: EUR 216,000 across 3 POs, equal to 4.7 percent of total PO value, with 2 POs from buyer_a.",
+        "name": "Maverick-spend value",
+        "target": "Reduce toward zero — eliminate ordering ahead of an approved PO."
+      },
+      {
+        "definition": "Total EUR value of POs that cannot be evidenced against goods receipt and supplier invoice because the procurement record lacks the supporting columns. Baseline: EUR 4,625,800.",
+        "name": "PO value lacking match evidence",
+        "target": "Reduce toward zero as goods-receipt and invoice data are made available for matching."
+      },
+      {
+        "definition": "Share of maverick-spend POs attributable to a single buyer. Baseline: 2 of 3 maverick POs raised by buyer_a.",
+        "name": "Buyer concentration of maverick spend",
+        "target": "Reduce concentration through targeted control and coaching of the highest-exposure buyer."
+      }
+    ],
+    "opportunities": [
+      {
+        "addresses_pain_point": "PP1",
+        "after_process": [
+          {
+            "actor": "System",
+            "description": "The full purchase order population is loaded from the export into a single review workspace.",
+            "failure_points": [],
+            "name": "Ingest PO population",
+            "seq": 1,
+            "sources": [
+              {
+                "doc_id": "purchase-order-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Verification workflow"
+          },
+          {
+            "actor": "System",
+            "description": "Each purchase order is automatically paired with its goods receipt and invoice records to form a candidate three-way match.",
+            "failure_points": [],
+            "name": "Assemble match evidence",
+            "seq": 2,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Verification workflow"
+          },
+          {
+            "actor": "System",
+            "description": "Purchase orders whose evidence is missing or does not reconcile are flagged and queued for a human reviewer.",
+            "failure_points": [],
+            "name": "Route exceptions to reviewer",
+            "seq": 3,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Verification workflow"
+          },
+          {
+            "actor": "Accounts Payable reviewer",
+            "description": "A reviewer confirms matched orders and resolves or escalates exceptions, recording the decision.",
+            "failure_points": [],
+            "name": "Human review and disposition",
+            "seq": 4,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Verification workflow"
+          },
+          {
+            "actor": "System",
+            "description": "An auditable record is generated showing that the three-way match was performed for each purchase order.",
+            "failure_points": [],
+            "name": "Produce audit record",
+            "seq": 5,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Verification workflow"
+          }
+        ],
+        "before_process": [
+          {
+            "actor": "Requester",
+            "description": "A requester creates a purchase order which is recorded in the purchase order export.",
+            "failure_points": [
+              "PO is captured without a structured link to downstream receipt and invoice records"
+            ],
+            "name": "Raise purchase order",
+            "seq": 1,
+            "sources": [
+              {
+                "doc_id": "purchase-order-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          },
+          {
+            "actor": "Receiving and Accounts Payable",
+            "description": "Goods are received and the supplier invoice arrives, but these records sit outside the verifiable export.",
+            "failure_points": [
+              "Goods receipt and invoice evidence is not joined back to the PO in a structured way"
+            ],
+            "name": "Receive goods and invoice",
+            "seq": 2,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Finance system"
+          },
+          {
+            "actor": "Accounts Payable clerk",
+            "description": "A clerk tries to confirm the PO, receipt, and invoice agree before approving payment, as the policy requires.",
+            "failure_points": [
+              "Match evidence is incomplete or absent, so the control cannot be demonstrated"
+            ],
+            "name": "Attempt three-way match",
+            "seq": 3,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Manual / spreadsheet"
+          },
+          {
+            "actor": "Approver",
+            "description": "The invoice is approved for payment without a verifiable record that the three-way match was completed.",
+            "failure_points": [
+              "No auditable trail proving the policy control was satisfied",
+              "Risk of paying unmatched or duplicate invoices"
+            ],
+            "name": "Approve and pay",
+            "seq": 4,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Finance system"
+          }
+        ],
+        "business_impact": {
+          "derivation": "Impact is described qualitatively because no verified numeric facts were supplied for this section; the procurement policy establishes the three-way match requirement and the purchase order export is the population against which evidence completeness must be measured.",
+          "narrative": "Without verifiable three-way match evidence, the organisation cannot demonstrate compliance with its own procurement policy and is exposed to paying invoices that were never matched to a receipt and a purchase order. This creates audit findings, potential overpayment and duplicate-payment risk, and reliance on manual reconciliation that does not scale. Establishing a human-in-the-loop verification workflow restores a demonstrable control: every purchase order is paired with its evidence, exceptions are surfaced for review, and an auditable trail proves the match was completed before payment.",
+          "quantified": []
+        },
+        "data_readiness": "The purchase order export provides the population, but goods receipt and invoice evidence is not currently joined to it in a verifiable, structured form; data linkage work is a prerequisite.",
+        "dependencies": [],
+        "document_formats": [
+          "Purchase order export"
+        ],
+        "escalation": "Unresolved or non-reconciling exceptions are escalated to the procurement compliance lead for disposition.",
+        "expected_behaviour": "Every purchase order should be paired with its goods receipt and invoice, exceptions should be surfaced for human review, and an auditable record should confirm the three-way match was performed before payment.",
+        "feasibility_rating": "medium",
+        "feasibility_score": 3,
+        "id": "OPP1",
+        "implementation_approach": "Stand up a verification workspace, link evidence to the PO population, route exceptions to reviewers, and persist an audit record.",
+        "knowledge_sources": [
+          "Procurement policy three-way match requirement",
+          "Purchase order export population"
+        ],
+        "matrix_quadrant": "do_first",
+        "operational_readiness": "A reviewer role and exception-handling process must be established before routing can go live; the policy already defines the underlying control.",
+        "overview": "The procurement policy requires a three-way match — purchase order, goods receipt, and supplier invoice — before an invoice is approved for payment. However, the available purchase order export does not carry the linked goods receipt and invoice evidence in a verifiable, structured form. As a result, the control that the policy mandates cannot be demonstrated across the purchase order population: reviewers cannot confirm, line by line, that each payment was supported by a matched receipt and invoice. This opportunity establishes a human-in-the-loop verification workflow that surfaces every purchase order alongside its matching evidence, routes exceptions to a reviewer, and produces an auditable record that the three-way match was performed.",
+        "pattern": "hitl_workflow",
+        "personas": [
+          "Accounts Payable reviewer",
+          "Procurement compliance lead",
+          "Internal audit"
+        ],
+        "prerequisite_for": [],
+        "required_integrations": [
+          "Purchase order export source",
+          "Goods receipt records",
+          "Supplier invoice records"
+        ],
+        "risks": [
+          "Goods receipt and invoice records may not be linkable to purchase orders without additional source data",
+          "Historical purchase orders may lack evidence entirely, requiring a remediation backlog",
+          "Reviewer capacity may be insufficient if the exception volume is high",
+          "Match logic may produce false positives that mask genuine control gaps"
+        ],
+        "sources": [
+          {
+            "doc_id": "procurement-policy",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "purchase-order-export",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "success_metrics": [
+          "Share of the purchase order population with a complete, verifiable three-way match",
+          "Number of exceptions routed to and cleared by reviewers",
+          "Time to resolve a flagged exception",
+          "Proportion of payments with an auditable match record at point of approval"
+        ],
+        "technical_complexity": "Moderate: the core challenge is reliably linking purchase orders to goods receipts and invoices and persisting an audit trail, rather than complex automation logic.",
+        "title": "Address: Three-way match evidence cannot be verified across the PO population",
+        "value_rating": "high",
+        "value_score": 4
+      },
+      {
+        "addresses_pain_point": "PP3",
+        "after_process": [
+          {
+            "actor": "Requester",
+            "description": "A requester creates a purchase order for goods or services in the procurement system.",
+            "failure_points": [],
+            "name": "Requisition raised",
+            "seq": 1,
+            "sources": [
+              {
+                "doc_id": "purchase-order-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          },
+          {
+            "actor": "Procurement system",
+            "description": "The system checks the order value and flags any purchase order at or above the high-value threshold for dual approval.",
+            "failure_points": [],
+            "name": "Value-based routing",
+            "seq": 2,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          },
+          {
+            "actor": "Approver",
+            "description": "The primary approver reviews and authorises the purchase order as today.",
+            "failure_points": [],
+            "name": "First approval",
+            "seq": 3,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          },
+          {
+            "actor": "Second approver",
+            "description": "High-value orders are routed to a separate, independent approver who must sign off before release.",
+            "failure_points": [],
+            "name": "Independent second approval",
+            "seq": 4,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          },
+          {
+            "actor": "Procurement system",
+            "description": "Once both approvals are recorded, the order is released and the dual sign-off is logged for audit.",
+            "failure_points": [],
+            "name": "Order released with audit trail",
+            "seq": 5,
+            "sources": [
+              {
+                "doc_id": "purchase-order-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          },
+          {
+            "actor": "Finance",
+            "description": "The committed spend is booked against the budget with a complete approval history attached.",
+            "failure_points": [],
+            "name": "Commitment recorded",
+            "seq": 6,
+            "sources": [
+              {
+                "doc_id": "purchase-order-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          }
+        ],
+        "before_process": [
+          {
+            "actor": "Requester",
+            "description": "A requester creates a purchase order for goods or services in the procurement system.",
+            "failure_points": [],
+            "name": "Requisition raised",
+            "seq": 1,
+            "sources": [
+              {
+                "doc_id": "purchase-order-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          },
+          {
+            "actor": "Approver",
+            "description": "The purchase order is routed to one approver who reviews and authorises it.",
+            "failure_points": [
+              "No second reviewer for high-value spend",
+              "Segregation-of-duties control not enforced"
+            ],
+            "name": "Single approver reviews",
+            "seq": 2,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          },
+          {
+            "actor": "Procurement system",
+            "description": "On the single approval, the purchase order is released to the supplier without further checks.",
+            "failure_points": [
+              "High-value commitment released on one signature",
+              "Limited audit trail of independent review"
+            ],
+            "name": "Order released",
+            "seq": 3,
+            "sources": [
+              {
+                "doc_id": "purchase-order-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          },
+          {
+            "actor": "Finance",
+            "description": "The committed spend is booked against the budget once the order is live.",
+            "failure_points": [],
+            "name": "Commitment recorded",
+            "seq": 4,
+            "sources": [
+              {
+                "doc_id": "purchase-order-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement system"
+          }
+        ],
+        "business_impact": {
+          "derivation": "No verified numeric facts were provided in the inputs for this opportunity, so no measured figures are stated. All quantification is deferred to a measurement step against the purchase-order export and the policy threshold.",
+          "narrative": "Releasing high-value purchase orders on a single approval leaves material spend commitments without the independent second review the procurement policy is designed to enforce. This creates exposure to error, unauthorised commitment and fraud on the orders that carry the largest financial consequence, and it weakens the audit trail finance relies on. Introducing a value-based dual-approval step restores segregation of duties on exactly the orders where it matters most, improves auditability, and reduces the risk of an incorrect or unauthorised high-value commitment reaching a supplier. Because no verified quantitative values were supplied for this opportunity, the impact is presented qualitatively; the count and euro value of affected purchase orders should be measured from the purchase-order export before benefits are sized.",
+          "quantified": []
+        },
+        "data_readiness": "The purchase-order export is available to identify the affected high-value order population, but the threshold and affected counts must be measured before benefits can be quantified.",
+        "dependencies": [],
+        "document_formats": [
+          "Procurement policy document",
+          "Purchase order export"
+        ],
+        "escalation": "Where the second approval is not provided within the agreed turnaround, the order is escalated to a designated backup approver rather than released.",
+        "expected_behaviour": "Every purchase order at or above the high-value threshold is held until a second, independent approver signs off, with both approvals recorded in the audit trail before release.",
+        "feasibility_rating": "high",
+        "feasibility_score": 4,
+        "id": "OPP2",
+        "implementation_approach": "Configure a value-based routing rule in the procurement system so that any purchase order at or above the high-value threshold defined in the procurement policy is automatically held for a second, independent approval before release. Map approver roles so the second approver cannot be the same person as the first, enforcing segregation of duties in the workflow itself. Add the dual sign-off to the order's audit log so finance can evidence the control. Validate the rule against historical orders from the purchase-order export to confirm the routing fires on the correct population before go-live.",
+        "knowledge_sources": [
+          "Procurement policy approval thresholds",
+          "Purchase order export"
+        ],
+        "matrix_quadrant": "do_first",
+        "operational_readiness": "Requires confirmed approver role assignments and a backup approver path before activation; the control reuses the existing approval process and adds a second step.",
+        "overview": "High-value purchase orders are being released into the order pipeline on the strength of a single approval, bypassing the segregation-of-duties control that the procurement policy expects for spend above the established threshold. This opportunity introduces a human-in-the-loop dual-approval workflow that routes any purchase order at or above the high-value threshold to a second, independent approver before release. The aim is to close a control gap that currently allows material commitments to be authorised by one individual, restoring the layered sign-off the policy intends while keeping the approval path fast and auditable.",
+        "pattern": "hitl_workflow",
+        "personas": [
+          "Requester",
+          "Approver",
+          "Second approver",
+          "Finance"
+        ],
+        "prerequisite_for": [],
+        "required_integrations": [
+          "Procurement system approval workflow",
+          "Audit logging"
+        ],
+        "risks": [
+          "Approval cycle time may increase if the second approver is unavailable, requiring a defined backup approver",
+          "If the high-value threshold is set incorrectly, the control may either miss material orders or create unnecessary friction on routine ones",
+          "Approver role mappings must be kept current to prevent the same person fulfilling both approvals",
+          "Benefit sizing cannot be confirmed until the affected order population is measured from the export"
+        ],
+        "sources": [
+          {
+            "doc_id": "procurement-policy",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "purchase-order-export",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "success_metrics": [
+          "Share of high-value purchase orders released with two independent approvals reaches the target level",
+          "Number of high-value orders released on a single approval falls to zero",
+          "Complete dual-approval audit trail available for every high-value order",
+          "No increase in average approval cycle time beyond the agreed tolerance"
+        ],
+        "technical_complexity": "Low to moderate — value-based routing and dual-approval steps are standard configuration in most procurement workflow tools and do not require custom development.",
+        "title": "Address: High-value purchase orders released on a single approval",
+        "value_rating": "high",
+        "value_score": 4
+      },
+      {
+        "addresses_pain_point": "PP2",
+        "after_process": [
+          {
+            "actor": "Requester",
+            "description": "A staff member identifies a need and enters a requisition into the procurement workflow.",
+            "failure_points": [],
+            "name": "Need identified by requester",
+            "seq": 1,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement workflow"
+          },
+          {
+            "actor": "Procurement",
+            "description": "A purchase order is created and routed for approval before any order is placed with the supplier.",
+            "failure_points": [],
+            "name": "Purchase order raised and approved",
+            "seq": 2,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement workflow"
+          },
+          {
+            "actor": "Detection control",
+            "description": "Incoming orders and invoices are screened to flag any commitment that has no prior approved purchase order.",
+            "failure_points": [],
+            "name": "Maverick-spend detection",
+            "seq": 3,
+            "sources": [
+              {
+                "doc_id": "purchase-order-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement workflow"
+          },
+          {
+            "actor": "Procurement reviewer",
+            "description": "A reviewer examines each flagged order, confirms whether it is genuine maverick spend, and decides on remediation.",
+            "failure_points": [],
+            "name": "Human review of flagged orders",
+            "seq": 4,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement workflow"
+          },
+          {
+            "actor": "Procurement",
+            "description": "Confirmed maverick spend is logged, the requester is coached, and recurring offenders are escalated to bring behaviour back into compliance.",
+            "failure_points": [],
+            "name": "Remediation and feedback",
+            "seq": 5,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": "Procurement workflow"
+          }
+        ],
+        "before_process": [
+          {
+            "actor": "Requester",
+            "description": "A staff member identifies a need for goods or services and proceeds to source them directly.",
+            "failure_points": [],
+            "name": "Need identified by requester",
+            "seq": 1,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": ""
+          },
+          {
+            "actor": "Requester",
+            "description": "The requester contacts the supplier and places the order without first raising a purchase order.",
+            "failure_points": [
+              "No purchase order exists, so the commitment is unapproved and unbudgeted at the point of order"
+            ],
+            "name": "Order placed with supplier",
+            "seq": 2,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": ""
+          },
+          {
+            "actor": "Receiving/Finance",
+            "description": "Goods arrive or an invoice is presented before any procurement control has been applied.",
+            "failure_points": [
+              "Finance must match an invoice to a purchase order that was never created"
+            ],
+            "name": "Goods or invoice received",
+            "seq": 3,
+            "sources": [
+              {
+                "doc_id": "purchase-order-export",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": ""
+          },
+          {
+            "actor": "Procurement",
+            "description": "A purchase order is created after the fact to allow the invoice to be paid, defeating the preventive control.",
+            "failure_points": [
+              "After-the-fact approval cannot prevent off-contract pricing or unauthorised commitments"
+            ],
+            "name": "Retrospective purchase order raised",
+            "seq": 4,
+            "sources": [
+              {
+                "doc_id": "procurement-policy",
+                "locator": "",
+                "quote": ""
+              }
+            ],
+            "system": ""
+          }
+        ],
+        "business_impact": {
+          "derivation": "No numeric VERIFIED FACTS were provided for this section, so no measured counts, values, or percentages are stated. Quantification of maverick-spend volume and value is to be derived directly from the purchase-order-export once those figures are confirmed.",
+          "narrative": "Maverick spend bypasses the preventive controls in the procurement policy: commitments are made before approval, off-contract pricing cannot be challenged, and Finance is forced to raise retrospective purchase orders simply to pay invoices. Introducing a detection-and-review control surfaces these cases at the point of order rather than at invoice, restores the policy-mandated sequence of approve-then-order, and provides an audit trail of non-compliant purchasing. Because no verified figures for the volume or value of maverick spend were supplied to this section, the impact is described qualitatively and the underlying counts should be quantified from the purchase order export before targets are set.",
+          "quantified": []
+        },
+        "data_readiness": "The purchase order export is available and the procurement policy defines the required approve-then-order sequence. Reliability of order date versus purchase order approval date in the export should be confirmed before detection logic is finalised, and maverick-spend volume and value must be quantified from the export before numeric targets are committed.",
+        "dependencies": [],
+        "document_formats": [
+          "Purchase order export"
+        ],
+        "escalation": "Confirmed maverick-spend cases and repeat offenders are escalated through procurement leadership for remediation and policy enforcement.",
+        "expected_behaviour": "Every order with a commitment value is preceded by an approved purchase order; any exceptions are detected, reviewed by a human, and remediated rather than silently paid through a retrospective purchase order.",
+        "feasibility_rating": "medium",
+        "feasibility_score": 3,
+        "id": "OPP3",
+        "implementation_approach": "Implement a screening control over the purchase order export and incoming invoices that identifies orders with no matching prior approved purchase order. Flagged items are routed to a procurement reviewer who confirms whether the order is genuine maverick spend, records the outcome, and triggers remediation. Pair the control with feedback to requesters and an escalation path for repeat offenders so the policy-mandated approve-then-order sequence becomes the default behaviour.",
+        "knowledge_sources": [
+          "procurement-policy",
+          "purchase-order-export"
+        ],
+        "matrix_quadrant": "plan_for",
+        "operational_readiness": "A procurement reviewer and an invoice-matching control in Accounts Payable are needed to operate the human-in-the-loop step. Escalation and coaching routes for repeat offenders should be agreed with procurement leadership.",
+        "overview": "Maverick spend occurs when goods or services are ordered without a purchase order being raised and approved beforehand, meaning the commitment is created outside the controlled procurement workflow.",
+        "pattern": "hitl_workflow",
+        "personas": [
+          "Requester",
+          "Procurement reviewer",
+          "Finance/Accounts Payable"
+        ],
+        "prerequisite_for": [],
+        "required_integrations": [
+          "Procurement workflow / purchase order system",
+          "Accounts payable invoice matching"
+        ],
+        "risks": [
+          "The purchase order export may not reliably capture order date versus purchase order approval date, limiting detection accuracy",
+          "Reviewers may approve flagged items without genuine challenge, weakening the control",
+          "Retrospective purchase orders could continue if Finance lacks an enforced block on unmatched invoices",
+          "Volume of flagged items may exceed review capacity if the detection threshold is too broad"
+        ],
+        "sources": [
+          {
+            "doc_id": "procurement-policy",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "purchase-order-export",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "success_metrics": [
+          "Reduction in the count of invoices matched to retrospectively raised purchase orders",
+          "Proportion of orders with an approved purchase order dated before the order date",
+          "Number of flagged maverick-spend cases reviewed and remediated",
+          "Reduction in repeat maverick-spend offenders after coaching and escalation"
+        ],
+        "technical_complexity": "Moderate: the core capability is matching orders and invoices against prior approved purchase orders in existing systems, with a review queue for exceptions.",
+        "title": "Address: Maverick spend — goods ordered without a prior purchase order",
+        "value_rating": "high",
+        "value_score": 4
+      }
+    ],
+    "pain_points": [
+      {
+        "business_consequence": "Without match evidence, the organisation cannot confirm that goods were received or that invoices correspond to authorised orders, exposing it to overpayment, duplicate payment and undetected supplier billing errors.",
+        "category": "Control evidence / financial assurance",
+        "description": "Procurement policy requires every purchase order to be matched against the goods receipt and the supplier invoice (three-way match). However, the purchase order export carries no goods_receipt or invoice column, so there is no field-level evidence that any matching took place. As a result, a large body of PO value cannot be confirmed as matched.",
+        "detail_table": {
+          "caption": "Match evidence gap",
+          "columns": [
+            "Policy requirement",
+            "Data field expected",
+            "Field present?",
+            "Value affected (EUR)"
+          ],
+          "note": "The export columns are po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order — no goods_receipt or invoice column present. Value affected is reported with Amber confidence.",
+          "rows": [
+            [
+              "Three-way match (PO vs goods receipt vs invoice)",
+              "goods_receipt",
+              "No",
+              "4,625,800"
+            ],
+            [
+              "Three-way match (PO vs goods receipt vs invoice)",
+              "invoice",
+              "No",
+              "4,625,800"
+            ]
+          ],
           "sources": [
             {
               "doc_id": "procurement-policy",
@@ -488,662 +1909,209 @@
               "quote": ""
             }
           ],
-          "system": "Procurement policy"
+          "title": ""
         },
-        {
-          "actor": "Requesting function",
-          "description": "The order is committed with the supplier. There is no documented detective or remediation step covering orders that reached this point in an exception state.",
-          "failure_points": [
-            "No documented owner or follow-up for orders recorded in an exception state"
+        "failure_pattern": "Control mandated by policy but not evidenced in the operational dataset — assurance gap rather than a confirmed breach.",
+        "from_finding": "Total PO value lacking match evidence (EUR) = 4,625,800 (amber)",
+        "id": "PP1",
+        "impact_rank": 1,
+        "opportunity_signal": "OPP1",
+        "quantified": [
+          {
+            "label": "PO value lacking match evidence",
+            "sources": [],
+            "text": "EUR 4,625,800 of PO value has no match evidence in the dataset",
+            "unit": "eur",
+            "value": 4625800.0
+          }
+        ],
+        "root_cause": "The system of record used to manage and export purchase orders does not capture goods receipt or invoice references, leaving the three-way match control unsupported by data.",
+        "severity": "high",
+        "sources": [
+          {
+            "doc_id": "procurement-policy",
+            "locator": "",
+            "quote": ""
+          },
+          {
+            "doc_id": "purchase-order-export",
+            "locator": "",
+            "quote": ""
+          }
+        ],
+        "title": "Three-way match evidence cannot be verified across the PO population"
+      },
+      {
+        "business_consequence": "High-value commitments are entered into without independent Finance challenge, increasing the risk of unbudgeted spend, pricing errors and fraud on the orders carrying the greatest financial exposure.",
+        "category": "Authorisation / segregation of duties",
+        "description": "Policy requires any purchase order above EUR 50,000 to carry approval from the Category Manager AND a second approval from Finance before release to the supplier. Seven purchase orders, every one of them above the EUR 50,000 threshold, were released on a single approval only.",
+        "detail_table": {
+          "caption": "Single-approval high-value orders against the EUR 50,000 threshold",
+          "columns": [
+            "Metric",
+            "Value"
           ],
-          "name": "Place order with supplier",
-          "seq": 5,
+          "note": "All 7 single_approval_only rows have amounts above the EUR 50,000 dual-approval threshold.",
+          "rows": [
+            [
+              "POs flagged single_approval_only",
+              "7"
+            ],
+            [
+              "Total value (EUR)",
+              "557,000"
+            ],
+            [
+              "Share of total PO value",
+              "12%"
+            ],
+            [
+              "Approval threshold breached (EUR)",
+              "above 50,000"
+            ],
+            [
+              "Observed amounts (EUR)",
+              "54,000; 61,000; 67,000; 72,000; 88,000; 95,000; 120,000"
+            ]
+          ],
           "sources": [
+            {
+              "doc_id": "procurement-policy",
+              "locator": "",
+              "quote": ""
+            },
             {
               "doc_id": "purchase-order-export",
               "locator": "",
               "quote": ""
             }
           ],
-          "system": "Commitments export"
-        }
-      ],
-      "process_inventory": [
-        {
-          "name": "Purchase order approval",
-          "purpose": "Authorise a purchase commitment, including the mandatory second Finance approval on large spend.",
-          "system_of_record_for": ""
+          "title": ""
         },
-        {
-          "name": "Order-sequence control",
-          "purpose": "Ensure a purchase order exists before any order is placed with a supplier.",
-          "system_of_record_for": ""
-        },
-        {
-          "name": "Exception handling",
-          "purpose": "Detect, own, and remediate orders recorded in an exception state. Currently not described in any document.",
-          "system_of_record_for": ""
-        }
-      ],
-      "process_summary": "Purchase orders are raised and recorded with an approval status and an indication of whether the order followed or preceded the purchase order. The procurement policy requires a second Finance approval above a defined value threshold and requires that a purchase order exists before ordering. The recorded commitments show two distinct approval states in use, with seven large orders carrying only a single approval and three orders placed before any purchase order existed. The policy describes the controls that should apply and does not describe who detects, owns, or remediates orders that fall into these exception states.",
-      "system_inventory": [
-        {
-          "name": "Commitments export",
-          "purpose": "Record of purchase orders, their value, approval status, and order sequence",
-          "system_of_record_for": "Purchase commitments and their recorded approval state"
-        },
-        {
-          "name": "Procurement policy",
-          "purpose": "Written rulebook setting the second-approval and order-sequence controls",
-          "system_of_record_for": "The control requirements that should govern purchase commitments"
-        }
-      ],
-      "system_profiles": [
-        {
-          "how_used": "Used to record and review purchase commitments. It already distinguishes two approval states and already marks which orders were placed before a purchase order existed.",
-          "limitations": "It records the approval state and order sequence and does not itself enforce the second-approval or order-sequence rules; orders can be recorded in an exception state without any follow-up step attached.",
-          "name": "Commitments export",
-          "owners": "Owned by the procurement and finance functions that maintain the commitments record.",
-          "role": "The structured record of purchase orders, capturing each order's value, its approval status, and whether the order followed or preceded the purchase order."
-        },
-        {
-          "how_used": "Referenced as the source of the control requirements that approvals and ordering should follow.",
-          "limitations": "It names the second-approval control and does not describe how that control is detected or enforced, and it does not assign an owner or remediation step to the exception states the export already records.",
-          "name": "Procurement policy",
-          "owners": "Owned by the function accountable for procurement governance.",
-          "role": "The written rulebook that defines the mandatory second Finance approval on large spend and the requirement to have a purchase order before an order is placed."
-        }
-      ]
-    },
-    "dependency_notes": "The purchase-order-first gate depends on the second-approval checkpoint, and exception monitoring depends on both being live so that the states it surfaces are genuine residual exceptions rather than uncontrolled releases.",
-    "executive_summary": {
-      "headline": "This assessment reviewed how high-value purchase commitments are approved and recorded against the company's own procurement policy. The single most important finding is that EUR 557,000 of large commitments were released without the second Finance approval the policy requires.",
-      "opportunity": "The value lies in turning the controls the policy already names into controls the business can actually enforce and monitor. The first move is a structured approval checkpoint that holds large commitments until a second Finance approval is recorded, supported by a routine that surfaces the exception states the export already captures.",
-      "situation": "Purchase commitments are recorded in a structured export and governed by a written procurement policy. Today, that policy mandates a second Finance approval on large spend and prohibits ordering before a purchase order exists, but the recorded commitments show seven large orders released on a single approval and three ordered entirely outside the controlled process. The policy itself does not describe how these exception states should be detected or owned."
-    },
-    "metrics_framework": [
-      {
-        "definition": "The share of large purchase orders that release only after a second Finance approval is recorded, measured against today's seven orders and EUR 557,000 released on a single approval.",
-        "name": "Large commitments released under dual control",
-        "target": "Near-complete coverage — a material reduction in single-approval releases against the EUR 557,000 baseline, moving toward zero large orders released without a second approval."
-      },
-      {
-        "definition": "The value of large commitments held until dual control is satisfied, relative to the EUR 557,000 and 12.0 percent of total value currently bypassing the second approval.",
-        "name": "Value protected by enforced second approval",
-        "target": "A sustained reduction in value released without a second approval against the EUR 557,000 baseline."
-      },
-      {
-        "definition": "The share of orders confirmed to have a valid purchase order before being placed, measured against today's three maverick orders worth EUR 216,000.",
-        "name": "Orders placed with a purchase order first",
-        "target": "Near-complete compliance — a material reduction in orders placed outside the process against the EUR 216,000 baseline."
-      },
-      {
-        "definition": "The share of orders in a recorded exception state that have a named owner and a documented remediation outcome, across the two recorded approval states.",
-        "name": "Recorded exceptions with an assigned owner",
-        "target": "Full ownership coverage — every recorded exception assigned to an owner, improving as the monitoring routine beds in."
-      },
-      {
-        "definition": "The share of surfaced exceptions driven to a recorded outcome within the agreed review window, relative to the EUR 557,000 and EUR 216,000 currently left unactioned.",
-        "name": "Exceptions remediated within the review cycle",
-        "target": "A rising share of recorded exceptions remediated each cycle, improving through tuning of the review routine."
-      }
-    ],
-    "opportunities": [
-      {
-        "addresses_pain_point": "PP1",
-        "after_process": [
-          {
-            "actor": "Requesting function",
-            "description": "A large purchase order is raised and its value is checked against the large-spend threshold.",
-            "failure_points": [],
-            "name": "Raise purchase order",
-            "seq": 1,
-            "sources": [
-              {
-                "doc_id": "purchase-order-export",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          },
-          {
-            "actor": "Finance approver",
-            "description": "Any order above the threshold is held and routed to a second Finance approver. It cannot be released until that second approval is recorded.",
-            "failure_points": [],
-            "name": "Hold for second Finance approval",
-            "seq": 2,
-            "sources": [
-              {
-                "doc_id": "procurement-policy",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          },
-          {
-            "actor": "Finance approver",
-            "description": "The order releases only once both approvals are recorded.",
-            "failure_points": [],
-            "name": "Release on dual control",
-            "seq": 3,
-            "sources": [
-              {
-                "doc_id": "purchase-order-export",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          }
-        ],
-        "before_process": [
-          {
-            "actor": "Requesting function",
-            "description": "A large purchase order is raised and recorded with a single approval.",
-            "failure_points": [],
-            "name": "Raise purchase order",
-            "seq": 1,
-            "sources": [
-              {
-                "doc_id": "purchase-order-export",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          },
-          {
-            "actor": "Approver",
-            "description": "The order is released with only one approval recorded, even though its value requires a second.",
-            "failure_points": [
-              "Seven large orders worth EUR 557,000 released on a single approval"
-            ],
-            "name": "Release on single approval",
-            "seq": 2,
-            "sources": [
-              {
-                "doc_id": "procurement-policy",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          }
-        ],
-        "business_impact": {
-          "derivation": "Based on the seven large orders released on single approval and their recorded value.",
-          "narrative": "This directly addresses the EUR 557,000 of large commitments released without a second approval, which today represent 12.0 percent of total purchase order value. By holding large orders until dual control is satisfied, the company restores the control the policy already mandates and removes the single-approval release path.",
-          "quantified": [
-            {
-              "label": "Value brought under dual control",
-              "sources": [],
-              "text": "EUR 557,000 of large commitments brought under enforced dual control",
-              "unit": "eur",
-              "value": 557000.0
-            },
-            {
-              "label": "Orders affected",
-              "sources": [],
-              "text": "seven large orders that would now require a second approval",
-              "unit": "orders",
-              "value": 7
-            },
-            {
-              "label": "Share of value protected",
-              "sources": [],
-              "text": "12.0 percent of total purchase order value protected",
-              "unit": "percent",
-              "value": 12.0
-            }
-          ]
-        },
-        "data_readiness": "high — the approval status and order value already exist as structured information in the commitments record",
-        "dependencies": [],
-        "document_formats": [
-          "Structured transactional record",
-          "Governing policy document"
-        ],
-        "escalation": "If a held order is not approved within the agreed window, it is escalated to the Finance approver's manager for a decision; the system never auto-approves.",
-        "expected_behaviour": "Day to day, it checks every order's value at approval and holds those above the threshold until a second Finance approval is recorded. It never releases a large order on a single approval and never grants the second approval itself.",
-        "feasibility_rating": "high",
-        "feasibility_score": 5,
-        "id": "OPP1",
-        "implementation_approach": "Define the large-spend threshold from the policy, configure an approval hold for orders above it, and route held orders to a Finance approver. Embed the rule at the point of approval in the commitments record so release is impossible without the second approval.",
-        "knowledge_sources": [
-          "The commitments record",
-          "The procurement policy's threshold and approval rules"
-        ],
-        "matrix_quadrant": "do_first",
-        "operational_readiness": "medium — requires Finance to staff and own the second-approval step, which is currently not assigned",
-        "overview": "Introduce a controlled approval checkpoint that holds any purchase order above the large-spend threshold until a second Finance approval is recorded, turning the policy's mandated dual-control from an advisory rule into an enforced step.",
-        "pattern": "hitl_workflow",
-        "personas": [
-          "Requesting function",
-          "Finance approver",
-          "Procurement lead"
-        ],
-        "prerequisite_for": [
-          "OPP2",
-          "OPP3"
-        ],
-        "required_integrations": [],
-        "risks": [],
-        "sources": [
-          {
-            "doc_id": "procurement-policy",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "purchase-order-export",
-            "locator": "",
-            "quote": ""
-          }
-        ],
-        "success_metrics": [],
-        "technical_complexity": "low — the rule is a value threshold and an approval hold applied to existing information",
-        "title": "Enforced second-approval checkpoint for large commitments",
-        "value_rating": "high",
-        "value_score": 5
-      },
-      {
-        "addresses_pain_point": "PP3",
-        "after_process": [
-          {
-            "actor": "Requesting function",
-            "description": "Before an order can be placed, the control confirms a valid purchase order is already in place.",
-            "failure_points": [],
-            "name": "Check purchase order exists",
-            "seq": 1,
-            "sources": [
-              {
-                "doc_id": "purchase-order-export",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          },
-          {
-            "actor": "Procurement lead",
-            "description": "If no purchase order exists, the order cannot proceed and is returned to the requesting function to raise one first.",
-            "failure_points": [],
-            "name": "Block order without a purchase order",
-            "seq": 2,
-            "sources": [
-              {
-                "doc_id": "procurement-policy",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          }
-        ],
-        "before_process": [
-          {
-            "actor": "Requesting function",
-            "description": "An order is placed with a supplier before any purchase order exists.",
-            "failure_points": [
-              "Three orders worth EUR 216,000 placed outside the controlled process, all also lacking a second approval"
-            ],
-            "name": "Place order without a purchase order",
-            "seq": 1,
-            "sources": [
-              {
-                "doc_id": "procurement-policy",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          }
-        ],
-        "business_impact": {
-          "derivation": "Based on the three orders recorded as placed before a purchase order existed and their value.",
-          "narrative": "This addresses the EUR 216,000 of orders placed entirely outside the controlled process — 4.7 percent of total purchase order value — by requiring a purchase order before any order can be committed. Because all three maverick orders also lacked a second approval, this gate works alongside the dual-control checkpoint to close the path that left these commitments with no preventive control at all.",
-          "quantified": [
-            {
-              "label": "Value brought into the controlled process",
-              "sources": [],
-              "text": "EUR 216,000 of maverick spend brought into the controlled process",
-              "unit": "eur",
-              "value": 216000.0
-            },
-            {
-              "label": "Orders affected",
-              "sources": [],
-              "text": "three orders that would now require a purchase order first",
-              "unit": "orders",
-              "value": 3
-            },
-            {
-              "label": "Share of value addressed",
-              "sources": [],
-              "text": "4.7 percent of total purchase order value",
-              "unit": "percent",
-              "value": 4.7
-            }
-          ]
-        },
-        "data_readiness": "high — the order sequence already exists as structured information in the commitments record",
-        "dependencies": [
-          "OPP1"
-        ],
-        "document_formats": [
-          "Structured transactional record",
-          "Governing policy document"
-        ],
-        "escalation": "Where a genuine urgent need exists, the blocked order is escalated to the Procurement lead for an authorised exception decision, recorded against the order; the control never grants the exception itself.",
-        "expected_behaviour": "Day to day, it confirms a valid purchase order exists before any order is placed and stops those that do not have one. It never lets an order proceed without a purchase order and never creates the purchase order on the requester's behalf.",
-        "feasibility_rating": "high",
-        "feasibility_score": 4,
-        "id": "OPP2",
-        "implementation_approach": "Apply a control at the point of ordering that requires a valid purchase order reference before an order can be committed, using the order-sequence indicator already recorded. Return non-compliant orders to the requesting function.",
-        "knowledge_sources": [
-          "The commitments record",
-          "The procurement policy's order-sequence rule"
-        ],
-        "matrix_quadrant": "do_first",
-        "operational_readiness": "medium — needs an agreed, owned route for genuine urgent exceptions so the gate is not worked around",
-        "overview": "Introduce a control that prevents an order from being placed with a supplier unless a valid purchase order already exists, enforcing the policy's absolute prohibition on maverick spend.",
-        "pattern": "automation",
-        "personas": [
-          "Requesting function",
-          "Procurement lead",
-          "Finance approver"
-        ],
-        "prerequisite_for": [
-          "OPP3"
-        ],
-        "required_integrations": [],
-        "risks": [],
-        "sources": [
-          {
-            "doc_id": "procurement-policy",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "purchase-order-export",
-            "locator": "",
-            "quote": ""
-          }
-        ],
-        "success_metrics": [],
-        "technical_complexity": "low — the check confirms a purchase order reference is present before ordering",
-        "title": "Purchase-order-first ordering gate",
-        "value_rating": "high",
-        "value_score": 4
-      },
-      {
-        "addresses_pain_point": "PP2",
-        "after_process": [
-          {
-            "actor": "Procurement lead",
-            "description": "A regular review surfaces every order recorded in a single-approval or maverick state.",
-            "failure_points": [],
-            "name": "Surface recorded exceptions",
-            "seq": 1,
-            "sources": [
-              {
-                "doc_id": "purchase-order-export",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          },
-          {
-            "actor": "Finance approver",
-            "description": "Each surfaced order is assigned to a named owner who drives it to remediation and records the outcome.",
-            "failure_points": [],
-            "name": "Assign owner and remediate",
-            "seq": 2,
-            "sources": [
-              {
-                "doc_id": "procurement-policy",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          }
-        ],
-        "before_process": [
-          {
-            "actor": "Not assigned",
-            "description": "The record marks orders as single-approval or placed before a purchase order existed, but no one is accountable for detecting or remediating them.",
-            "failure_points": [
-              "EUR 557,000 and EUR 216,000 of recorded exceptions sit without an owner"
-            ],
-            "name": "Exception recorded but unactioned",
-            "seq": 1,
-            "sources": [
-              {
-                "doc_id": "procurement-policy",
-                "locator": "",
-                "quote": ""
-              }
-            ],
-            "system": "Commitments export"
-          }
-        ],
-        "business_impact": {
-          "derivation": "Based on the recorded single-approval and maverick values that currently have no owner.",
-          "narrative": "This makes the EUR 557,000 of single-approval commitments and the EUR 216,000 of maverick commitments visible and owned, so recorded exceptions are detected and actioned rather than persisting unaddressed. It closes the policy's silence on exception handling by assigning accountability to the states the record already captures.",
-          "quantified": [
-            {
-              "label": "Single-approval value brought under monitoring",
-              "sources": [],
-              "text": "EUR 557,000 of single-approval commitments brought under monitoring",
-              "unit": "eur",
-              "value": 557000.0
-            },
-            {
-              "label": "Maverick value brought under monitoring",
-              "sources": [],
-              "text": "EUR 216,000 of maverick commitments brought under monitoring",
-              "unit": "eur",
-              "value": 216000.0
-            },
-            {
-              "label": "Approval states to be monitored",
-              "sources": [],
-              "text": "the two recorded approval states to be monitored",
-              "unit": "count",
-              "value": 2
-            }
-          ]
-        },
-        "data_readiness": "high — the exception states are already recorded in the commitments export",
-        "dependencies": [
-          "OPP1",
-          "OPP2"
-        ],
-        "document_formats": [
-          "Structured transactional record",
-          "Governing policy document"
-        ],
-        "escalation": "Exceptions not remediated within the agreed window are escalated to internal audit or the governance owner for review; the routine never marks an exception as resolved without a human decision.",
-        "expected_behaviour": "Day to day, it surfaces every order recorded in an exception state and routes it to a named owner for remediation. It never closes an exception by itself and never overrides the underlying control.",
-        "feasibility_rating": "high",
-        "feasibility_score": 4,
-        "id": "OPP3",
-        "implementation_approach": "Define exception ownership in the policy, set a regular review of orders in an exception state drawn from the commitments record, and record remediation against each. Extend the policy to name the exception-handling control it currently omits.",
-        "knowledge_sources": [
-          "The commitments record",
-          "The procurement policy's controls"
-        ],
-        "matrix_quadrant": "plan_for",
-        "operational_readiness": "low — requires the policy to assign exception ownership, which is currently absent",
-        "overview": "Establish a routine that surfaces every order recorded in an exception state, assigns a clear owner, and drives each to remediation — filling the policy's silence on exception handling.",
-        "pattern": "hitl_workflow",
-        "personas": [
-          "Procurement lead",
-          "Finance approver",
-          "Internal audit"
-        ],
-        "prerequisite_for": [],
-        "required_integrations": [],
-        "risks": [],
-        "sources": [
-          {
-            "doc_id": "procurement-policy",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "purchase-order-export",
-            "locator": "",
-            "quote": ""
-          }
-        ],
-        "success_metrics": [],
-        "technical_complexity": "low — surfacing recorded exception states for review",
-        "title": "Exception monitoring and ownership for recorded exceptions",
-        "value_rating": "medium",
-        "value_score": 4
-      }
-    ],
-    "pain_points": [
-      {
-        "description": "Seven purchase orders, each above the large-spend threshold, were released carrying only a single approval. Together these represent EUR 557,000 of commitments and 12.0 percent of total purchase order value, released without the second Finance approval the policy mandates. The largest single order in the record reached EUR 150,000.",
-        "failure_pattern": "Single-approval release of large spend — the dual-control designed to prevent unauthorised large commitments is bypassed because it is advisory rather than enforced.",
-        "from_finding": "F1",
-        "id": "PP1",
-        "impact_rank": 1,
-        "opportunity_signal": "OPP1",
-        "quantified": [
-          {
-            "label": "Large orders on single approval",
-            "sources": [],
-            "text": "seven large orders released with only a single approval",
-            "unit": "orders",
-            "value": 7
-          },
-          {
-            "label": "Value released without second approval",
-            "sources": [],
-            "text": "EUR 557,000 released without the mandated second approval",
-            "unit": "eur",
-            "value": 557000.0
-          },
-          {
-            "label": "Share of total value bypassing second approval",
-            "sources": [],
-            "text": "12.0 percent of total purchase order value",
-            "unit": "percent",
-            "value": 12.0
-          },
-          {
-            "label": "Largest single order",
-            "sources": [],
-            "text": "the largest single order reached EUR 150,000",
-            "unit": "eur",
-            "value": 150000.0
-          }
-        ],
-        "root_cause": "The second-approval control is named in the policy but is not enforced at the point of approval; nothing holds a large order until a second approval is recorded.",
-        "sources": [
-          {
-            "doc_id": "purchase-order-export",
-            "locator": "",
-            "quote": ""
-          },
-          {
-            "doc_id": "procurement-policy",
-            "locator": "",
-            "quote": ""
-          }
-        ],
-        "title": "Large commitments released without the mandatory second Finance approval"
-      },
-      {
-        "description": "Three orders, worth EUR 216,000 and representing 4.7 percent of total purchase order value, were placed before any purchase order existed — outside the controlled procurement process entirely, against an absolute prohibition. All three of these orders also lacked the second approval, meaning no preventive control applied to them at any point.",
-        "failure_pattern": "Maverick spend with compounded control failure — ordering outside the process, combined with the absence of any second approval, leaves these commitments with no preventive control whatsoever.",
-        "from_finding": "F2",
+        "failure_pattern": "Mandatory second-level authorisation bypassed specifically on the largest orders, where the control matters most.",
+        "from_finding": "POs flagged single_approval_only = 7; value EUR 557,000; 12% of total PO value",
         "id": "PP2",
         "impact_rank": 2,
         "opportunity_signal": "OPP3",
         "quantified": [
           {
-            "label": "Orders placed before a purchase order existed",
+            "label": "Single-approval POs",
             "sources": [],
-            "text": "three orders placed outside the controlled process",
-            "unit": "orders",
-            "value": 3
+            "text": "7 purchase orders released on a single approval only",
+            "unit": "count",
+            "value": 7.0
           },
           {
-            "label": "Value committed outside the process",
+            "label": "Value of single-approval POs",
             "sources": [],
-            "text": "EUR 216,000 committed outside the controlled process",
+            "text": "EUR 557,000 of PO value released on a single approval",
             "unit": "eur",
-            "value": 216000.0
+            "value": 557000.0
           },
           {
-            "label": "Share of total value from maverick spend",
+            "label": "Share of total PO value",
             "sources": [],
-            "text": "4.7 percent of total purchase order value",
+            "text": "12% of total PO value came from single-approval POs",
             "unit": "percent",
-            "value": 4.7
-          },
-          {
-            "label": "Maverick orders also lacking second approval",
-            "sources": [],
-            "text": "all three also lacked the second approval",
-            "unit": "orders",
-            "value": 3
+            "value": 12.0
           }
         ],
-        "root_cause": "There is no enforced checkpoint requiring a purchase order to exist before an order is placed, so commitments can be made entirely outside the controlled process.",
+        "root_cause": "The dual-approval control for high-value orders is not enforced at the point of release, allowing orders above the threshold to proceed without the required second (Finance) sign-off.",
+        "severity": "high",
         "sources": [
-          {
-            "doc_id": "purchase-order-export",
-            "locator": "",
-            "quote": ""
-          },
           {
             "doc_id": "procurement-policy",
             "locator": "",
             "quote": ""
+          },
+          {
+            "doc_id": "purchase-order-export",
+            "locator": "",
+            "quote": ""
           }
         ],
-        "title": "Orders placed before any purchase order existed, with no preventive control at all"
+        "title": "High-value purchase orders released on a single approval"
       },
       {
-        "description": "The procurement policy names a 'second approval' control, yet the term appears zero times in the written rulebook, and no document assigns an owner or a detective or remediation step to the exception states the export already records. As a result, the EUR 557,000 of single-approval commitments and the EUR 216,000 of maverick commitments can persist without anyone detecting or actioning them.",
-        "failure_pattern": "Ungoverned exception states — the system records the exception, but no role is accountable for acting on it, so recorded exceptions sit unaddressed.",
-        "from_finding": "F3",
+        "business_consequence": "Commitments are made outside the controlled procurement flow, removing the opportunity for budget checks, approval and negotiated pricing, and undermining supplier and spend governance.",
+        "category": "Process compliance / spend control",
+        "description": "Policy states that all purchase orders must be raised in the procurement system before goods are ordered, and that maverick spend — ordering without a purchase order — is not permitted under any circumstances. Three purchase orders were recorded with po_before_order = no, indicating goods were ordered before the PO existed.",
+        "detail_table": {
+          "caption": "Maverick spend by buyer",
+          "columns": [
+            "Buyer",
+            "Maverick PO count",
+            "Summed value (EUR)"
+          ],
+          "note": "po_before_order=no: buyer_a count 2, buyer_d count 1; summed amount_eur 216,000. Per-buyer value split is not provided in the dataset.",
+          "rows": [
+            [
+              "buyer_a",
+              "2",
+              ""
+            ],
+            [
+              "buyer_d",
+              "1",
+              ""
+            ],
+            [
+              "Total",
+              "3",
+              "216,000"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "procurement-policy",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": ""
+        },
+        "failure_pattern": "Recurring off-policy ordering concentrated in specific buyers, with buyer_a accounting for two of the three cases.",
+        "from_finding": "POs without a prior PO = 3; value EUR 216,000; 4.7% of total; buyer_a = 2",
         "id": "PP3",
         "impact_rank": 3,
         "opportunity_signal": "OPP2",
         "quantified": [
           {
-            "label": "Approval states recorded",
+            "label": "Maverick POs",
             "sources": [],
-            "text": "the record carries two distinct approval states",
+            "text": "3 POs raised without a prior PO (po_before_order=no)",
             "unit": "count",
-            "value": 2
+            "value": 3.0
           },
           {
-            "label": "Single-approval value left ungoverned",
+            "label": "Maverick spend value",
             "sources": [],
-            "text": "EUR 557,000 of single-approval commitments left ungoverned",
-            "unit": "eur",
-            "value": 557000.0
-          },
-          {
-            "label": "Maverick value left ungoverned",
-            "sources": [],
-            "text": "EUR 216,000 of maverick commitments left ungoverned",
+            "text": "EUR 216,000 of maverick spend",
             "unit": "eur",
             "value": 216000.0
+          },
+          {
+            "label": "Share of total PO value",
+            "sources": [],
+            "text": "4.7% of total PO value is maverick spend",
+            "unit": "percent",
+            "value": 4.7
+          },
+          {
+            "label": "Maverick POs by buyer_a",
+            "sources": [],
+            "text": "buyer_a raised 2 of the 3 maverick POs",
+            "unit": "count",
+            "value": 2.0
           }
         ],
-        "root_cause": "The policy describes the controls that should apply but is silent on exception handling — there is no defined ownership for detecting or remediating recorded exceptions.",
+        "root_cause": "There is no preventive control stopping buyers from committing to suppliers before a PO is raised; the PO is created retrospectively after the order is placed.",
+        "severity": "high",
         "sources": [
           {
             "doc_id": "procurement-policy",
@@ -1156,7 +2124,219 @@
             "quote": ""
           }
         ],
-        "title": "No owner or remediation defined for the exception states the record already captures"
+        "title": "Maverick spend — goods ordered without a prior purchase order"
+      }
+    ],
+    "planning_assumptions": [
+      {
+        "basis": "7 POs worth EUR 557,000 flagged single_approval_only, all above the EUR 50,000 dual-approval threshold",
+        "kind": "sequence",
+        "statement": "Re-validate and obtain retrospective dual sign-off on the 7 single-approval POs above EUR 50,000 as the first remediation step."
+      },
+      {
+        "basis": "Maverick POs raised by buyer_a = 2; policy prohibits ordering without a PO",
+        "kind": "owner",
+        "statement": "Hold a control review with buyer_a, who raised 2 of the 3 maverick-spend POs, to address off-process ordering."
+      },
+      {
+        "basis": "EUR 4,625,800 of PO value lacks match evidence; export has no goods_receipt or invoice column",
+        "kind": "sequence",
+        "statement": "Add goods-receipt and invoice fields to the procurement export so three-way matching can be evidenced."
+      },
+      {
+        "basis": "EUR 4,625,800 of PO value has no match evidence because no goods_receipt or invoice column is present in the export.",
+        "kind": "sequence",
+        "statement": "Add goods_receipt and invoice reference fields to the PO system export so three-way match can be evidenced and reported, closing the assurance gap on the EUR 4,625,800 currently unverifiable."
+      },
+      {
+        "basis": "Policy requires dual approval above EUR 50,000, yet 7 POs (all above the threshold) were released on a single approval.",
+        "kind": "threshold",
+        "statement": "Enforce a system-level block that prevents release of any PO above EUR 50,000 without both Category Manager and Finance approval."
+      },
+      {
+        "basis": "buyer_a accounts for 2 of the 3 po_before_order=no cases.",
+        "kind": "owner",
+        "statement": "Prioritise buyer-level remediation starting with buyer_a, who raised 2 of the 3 maverick-spend orders."
+      },
+      {
+        "basis": "3 POs were recorded with po_before_order=no, totalling EUR 216,000 of maverick spend.",
+        "kind": "sequence",
+        "statement": "Introduce a preventive control requiring a PO to exist before any supplier order is placed, removing the ability to create POs retrospectively."
+      },
+      {
+        "basis": "Single-approval breach is the largest quantified exposure (EUR 557,000, 12 percent); maverick spend is smaller (EUR 216,000, 4.7 percent); match data gap (EUR 4,625,800) underpins assurance for both.",
+        "kind": "sequence",
+        "statement": "Sequence the dual-approval enforcement first, maverick-spend blocking second, and the goods-receipt/invoice data integration in parallel as a structural enabler."
+      },
+      {
+        "basis": "7 single-approval POs above the EUR 50,000 policy threshold.",
+        "kind": "owner",
+        "statement": "Assign the dual-approval workflow enforcement to the Head of Procurement."
+      },
+      {
+        "basis": "3 maverick POs, 2 of them from buyer_a.",
+        "kind": "owner",
+        "statement": "Assign maverick-spend blocking and buyer coaching to the Procurement Operations Manager."
+      },
+      {
+        "basis": "EUR 4,625,800 PO value lacks match evidence; PO export has no goods-receipt or invoice column.",
+        "kind": "owner",
+        "statement": "Assign goods-receipt and invoice data integration to the Finance Controller."
+      },
+      {
+        "basis": "All 7 single-approval POs exceed the EUR 50,000 policy threshold.",
+        "kind": "threshold",
+        "statement": "Set a target of zero above-threshold POs released on a single approval, with periodic monitoring against the baseline."
+      },
+      {
+        "basis": "Breach counts and values are currently derivable from the PO export.",
+        "kind": "cadence",
+        "statement": "Establish a regular review cadence of breach metrics (single-approval, maverick, match-evidence) once data is reproducible from the record."
+      },
+      {
+        "basis": "EUR 4,625,800 of PO value is flagged amber for lacking match evidence.",
+        "kind": "sequence",
+        "statement": "Defer any assertion that controls are operating until the match-evidence data gap is closed."
+      },
+      {
+        "basis": "7 single-approval POs worth EUR 557,000 and 3 maverick POs worth EUR 216,000 are verified breaches",
+        "kind": "date",
+        "statement": "H1 spans the first 0-6 months to prioritise the highest-value, policy-explicit breaches."
+      },
+      {
+        "basis": "EUR 4,625,800 of PO value lacks match evidence (amber) and the export has no goods_receipt or invoice column",
+        "kind": "date",
+        "statement": "H2 spans 6-18 months to allow data extension before assessing the match-evidence exposure."
+      },
+      {
+        "basis": "policy mandates dual approval above EUR 50,000, PO-before-order, and three-way match",
+        "kind": "date",
+        "statement": "H3 covers 18+ months for systemic prevention and continuous monitoring."
+      },
+      {
+        "basis": "policy requires Category Manager AND Finance approval above EUR 50,000",
+        "kind": "sequence",
+        "statement": "Retroactive secondary approval should be obtained for each single-approval PO before any further release to affected suppliers."
+      },
+      {
+        "basis": "maverick spend concentrated on buyer_a (2) and buyer_d (1)",
+        "kind": "owner",
+        "statement": "A named control owner (e.g. Head of Procurement) should sign off remediation of the maverick and single-approval POs."
+      },
+      {
+        "basis": "policy states maverick spend is not permitted under any circumstances",
+        "kind": "threshold",
+        "statement": "Set a zero-tolerance target threshold for new maverick spend once system enforcement is live."
+      },
+      {
+        "basis": "policy requires PO-to-receipt-to-invoice three-way match",
+        "kind": "cadence",
+        "statement": "Three-way match monitoring should run on a recurring (e.g. monthly) cadence once receipt and invoice data is captured."
+      },
+      {
+        "basis": "export columns currently omit goods_receipt and invoice fields",
+        "kind": "cost",
+        "statement": "Extending the export schema and enforcing system controls will require IT/procurement-system investment to be budgeted."
+      },
+      {
+        "basis": "Three-way match approval responsibility defined in the procurement policy",
+        "kind": "owner",
+        "statement": "A named Accounts Payable owner should be accountable for the exception review queue."
+      },
+      {
+        "basis": "Policy requirement that the three-way match precede payment",
+        "kind": "sla",
+        "statement": "Set a target service level for clearing flagged exceptions before payment approval."
+      },
+      {
+        "basis": "PO population available in the purchase order export",
+        "kind": "threshold",
+        "statement": "Define a minimum acceptable threshold for the share of the PO population carrying verifiable match evidence."
+      },
+      {
+        "basis": "Ongoing nature of the three-way match control in the procurement policy",
+        "kind": "cadence",
+        "statement": "Run evidence-completeness reporting on a regular cadence to monitor control health."
+      },
+      {
+        "basis": "Need to confirm data linkage reliability against the purchase order export",
+        "kind": "sequence",
+        "statement": "Begin with a read-only completeness assessment before enabling reviewer routing and audit records."
+      },
+      {
+        "basis": "procurement-policy specifies approval expectations for higher-value spend",
+        "kind": "threshold",
+        "statement": "Define the high-value spend threshold that triggers mandatory dual approval, aligned to the procurement policy."
+      },
+      {
+        "basis": "after_process requires an independent second approver distinct from the first",
+        "kind": "owner",
+        "statement": "Assign an accountable owner for maintaining approver role mappings and the routing rule."
+      },
+      {
+        "basis": "risk that the second approval step lengthens cycle time",
+        "kind": "sla",
+        "statement": "Agree a maximum turnaround time for the second approval and a backup approver where the SLA is at risk."
+      },
+      {
+        "basis": "purchase-order-export provides historical orders to test routing",
+        "kind": "sequence",
+        "statement": "Validate the routing rule against historical export data before enabling it in production."
+      },
+      {
+        "basis": "Procurement policy requires a purchase order before goods are ordered.",
+        "kind": "threshold",
+        "statement": "Define a minimum commitment value above which orders without a prior purchase order are flagged for human review."
+      },
+      {
+        "basis": "After-process human review step requires an accountable reviewer.",
+        "kind": "owner",
+        "statement": "Assign a named procurement reviewer to triage and remediate flagged maverick-spend cases."
+      },
+      {
+        "basis": "Detection occurs at point of order/invoice in the after-process.",
+        "kind": "sla",
+        "statement": "Set a target turnaround for reviewing each flagged order before invoice payment."
+      },
+      {
+        "basis": "Detection control operates over the purchase-order-export data.",
+        "kind": "cadence",
+        "statement": "Run the maverick-spend detection screen on a regular cycle against the purchase order export."
+      },
+      {
+        "basis": "Retrospective purchase orders are evidenced in the before-process.",
+        "kind": "threshold",
+        "statement": "Set a target reduction percentage for retrospective purchase orders against a measured baseline once volumes are quantified from the export."
+      }
+    ],
+    "risk_register": [
+      {
+        "impact": "High",
+        "likelihood": "High",
+        "mitigation": "Move the EUR 50,000 dual-approval rule into the system release workflow so above-threshold POs cannot be released without both Category Manager and Finance approval captured.",
+        "owner": "Head of Procurement",
+        "risk": "Dual-approval rule above EUR 50,000 remains manually enforced, allowing further single-approval releases to recur as seen in the 7 POs worth EUR 557,000."
+      },
+      {
+        "impact": "High",
+        "likelihood": "Medium",
+        "mitigation": "Block ordering ahead of an approved PO in the system and run targeted coaching for the highest-exposure buyer (buyer_a, 2 of 3 cases).",
+        "owner": "Procurement Operations Manager",
+        "risk": "Maverick spend continues at source, repeating the EUR 216,000 ordered-before-PO pattern, with concentration in individual buyers."
+      },
+      {
+        "impact": "High",
+        "likelihood": "High",
+        "mitigation": "Integrate goods-receipt and invoice data into the PO record so the three-way match can be produced and audited from source.",
+        "owner": "Finance Controller",
+        "risk": "Three-way match cannot be evidenced because the procurement record lacks goods-receipt and invoice columns, leaving EUR 4,625,800 of PO value unassured."
+      },
+      {
+        "impact": "Medium",
+        "likelihood": "Medium",
+        "mitigation": "Withhold any 'controls operating' assertion until the data gap is closed and breach metrics are reproducible from the record.",
+        "owner": "Internal Audit Lead",
+        "risk": "Control improvements are reported as complete before match evidence exists, creating false assurance over the EUR 4,625,800 amber population."
       }
     ],
     "roadmap": [
@@ -1165,12 +2345,18 @@
         "items": [
           {
             "depends_on": [],
-            "opportunity_id": "OPP1",
-            "rationale": "Addresses the largest exposure — EUR 557,000 across seven orders — and lays the dual-control foundation the later interventions build on.",
-            "title": "Enforced second-approval checkpoint for large commitments"
+            "opportunity_id": "OPP-DUAL-APPROVAL",
+            "rationale": "7 POs worth EUR 557,000 (12% of total PO value) were released on single approval, yet policy requires Category Manager AND Finance approval above EUR 50,000. All 7 values fall in {54000,61000,67000,72000,88000,95000,120000}, confirming every one breached the threshold. Retroactive secondary review closes the most concentrated, clearly-defined control gap first.",
+            "title": "Remediate the 7 single-approval purchase orders above the EUR 50,000 threshold"
+          },
+          {
+            "depends_on": [],
+            "opportunity_id": "OPP-MAVERICK-SPEND",
+            "rationale": "3 POs worth EUR 216,000 (4.7% of total PO value) were ordered with no prior PO, which policy prohibits under any circumstances. The spend concentrates on buyer_a (2 POs) and buyer_d (1), making remediation targeted and actionable.",
+            "title": "Investigate and recover the 3 maverick-spend purchase orders"
           }
         ],
-        "theme": "Enforce the dual-control the policy already mandates",
+        "theme": "Close the high-value approval and maverick-spend control breaches",
         "window": "0-6 months"
       },
       {
@@ -1178,14 +2364,21 @@
         "items": [
           {
             "depends_on": [
-              "OPP1"
+              "OPP-DUAL-APPROVAL",
+              "OPP-MAVERICK-SPEND"
             ],
-            "opportunity_id": "OPP2",
-            "rationale": "Brings the EUR 216,000 of maverick spend into the controlled process; most effective once the second-approval checkpoint is live, since all three maverick orders also lacked a second approval.",
-            "title": "Purchase-order-first ordering gate"
+            "opportunity_id": "OPP-THREE-WAY-MATCH",
+            "rationale": "Policy requires POs to be matched against goods receipt and supplier invoice, but the export carries no goods_receipt or invoice column, leaving EUR 4,625,800 of PO value without match evidence (amber). This is the single largest exposure and depends on extending the data set before it can be assessed.",
+            "title": "Rebuild three-way match evidence for the EUR 4,625,800 exposure"
+          },
+          {
+            "depends_on": [],
+            "opportunity_id": null,
+            "rationale": "The export columns (po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order) omit goods_receipt and invoice, which is why the match-evidence figure is amber rather than verified. Capturing these fields is a prerequisite to closing the match-evidence gap with confidence.",
+            "title": "Extend the procurement export to capture receipt and invoice fields"
           }
         ],
-        "theme": "Close the ordering route that bypasses the process",
+        "theme": "Restore three-way match evidence and harden the data foundation",
         "window": "6-18 months"
       },
       {
@@ -1193,19 +2386,27 @@
         "items": [
           {
             "depends_on": [
-              "OPP1",
-              "OPP2"
+              "OPP-DUAL-APPROVAL",
+              "OPP-MAVERICK-SPEND"
             ],
-            "opportunity_id": "OPP3",
-            "rationale": "Provides standing oversight of recorded exceptions once both controls are enforced and ownership is defined.",
-            "title": "Exception monitoring and ownership for recorded exceptions"
+            "opportunity_id": null,
+            "rationale": "Once the single-approval and maverick-spend breaches are remediated, the EUR 50,000 dual-approval rule and the mandatory PO-before-order rule should be enforced automatically so that the patterns seen across 7 single-approval and 3 maverick POs cannot recur.",
+            "title": "Enforce dual-approval and PO-before-order rules as system controls"
+          },
+          {
+            "depends_on": [
+              "OPP-THREE-WAY-MATCH"
+            ],
+            "opportunity_id": null,
+            "rationale": "With receipt and invoice data captured, three-way match should move from one-off remediation to ongoing monitoring, sustaining assurance over the value previously exposed at EUR 4,625,800.",
+            "title": "Institutionalise continuous three-way match monitoring"
           }
         ],
-        "theme": "Govern and monitor residual exceptions",
+        "theme": "Embed prevention into systems and governance",
         "window": "18+ months"
       }
     ],
-    "sequencing_rationale": "The enforced second-approval checkpoint comes first because it addresses the largest exposure — EUR 557,000 of single-approval commitments — and establishes the dual-control foundation the other interventions rely on. The purchase-order-first gate follows, because all three maverick orders also lacked a second approval, so the gate is most effective once the dual-control checkpoint is already in place. Exception monitoring comes last, as it watches over both controls and only becomes meaningful once they are enforced and the residual exception states are well defined.",
+    "sequencing_rationale": "Sequencing is driven by exposure size and structural dependency. The single-approval gap is the largest quantified control breach by value (EUR 557,000, 12 percent of total PO value) and maps directly to an existing, unambiguous policy threshold, so enforcing dual approval above EUR 50,000 is the natural first move — it is a rule already written, simply not enforced. Maverick spend follows: it is smaller in value (EUR 216,000, 4.7 percent) but is a categorical policy breach ('not permitted under any circumstances') and is concentrated, with 2 of 3 cases from one buyer, making it tractable through targeted control and coaching. The three-way match data gap is sequenced as a structural enabler running in parallel, because the absence of goods-receipt and invoice columns (EUR 4,625,800 of value lacking match evidence) undermines the assurance value of the first two fixes — approval and pre-order controls are only fully verifiable once match evidence is captured in the record.",
     "source_index": [
       {
         "business_name": "Purchase Order Export",
@@ -1230,11 +2431,48 @@
         "what_we_read": "your Procurement Policy"
       }
     ],
-    "strategic_readiness": "The business is well positioned: both the rulebook and the recorded commitments already exist, and the approval status and order sequence are captured as structured information. The main readiness step is organisational — assigning Finance ownership of the second-approval step and defining exception ownership, both of which are currently not assigned.",
-    "strategy_profile": {
-      "notes": "The business already has both the rulebook and the recorded outcomes; the priority is closing the distance between the two.",
-      "posture": "Control-first: make the policy enforceable and the recorded exceptions visible before scaling spend volume"
+    "strategic_readiness": "Readiness is mixed. The organisation has a clear, written procurement policy covering all three control areas — dual approval above EUR 50,000, mandatory PO-before-order, and three-way match — so the control intent already exists and does not need to be designed from scratch. The discovery export demonstrates the data can be interrogated to surface breaches by count, value and buyer. The principal readiness gap is evidential and systemic: the PO export lacks goods-receipt and invoice columns, so match assurance cannot currently be produced from the procurement record. This is an amber condition affecting EUR 4,625,800 of PO value and should temper confidence in any claim that controls are operating until the data gap is closed.",
+    "strategy": {
+      "direction_type": "",
+      "horizon": "",
+      "out_of_scope": "",
+      "stakeholder_priorities": [],
+      "strategic_constraints": "",
+      "success_definition": ""
     },
-    "target_state": "Once these interventions land, large purchase commitments will only release after a second Finance approval is recorded, and no order will reach a supplier without a purchase order already in place. The dual-control the policy mandates becomes an enforced step rather than an advisory one, and the requirement to have a purchase order before ordering is upheld at the point of ordering. The exception states the record already captures will have named owners and a routine that drives each to remediation, so recorded exceptions are seen and acted on rather than persisting unaddressed. The result is a procurement process where the rulebook and the recorded outcomes converge — the controls the policy describes are the controls the business actually enforces and monitors."
+    "strategy_profile": {
+      "notes": "Sequencing is driven by financial exposure and control severity. The single-approval breach (EUR 557,000, 12% of PO value) and maverick spend (EUR 216,000, 4.7%) are concentrated, verifiable, and policy-explicit, making them immediate priorities. The match-evidence gap (EUR 4,625,800) is the largest exposure but is amber-rated because the export lacks goods-receipt and invoice columns, so it requires data remediation before it can be fully assessed.",
+      "posture": "Controls-first remediation: close the highest-value approval and maverick-spend gaps quickly, then restore three-way match evidence, then embed prevention into systems and governance."
+    },
+    "target_state": "The procurement function operates under enforced, system-level controls that close the three governance gaps surfaced in the discovery data. First, the dual-approval rule for high-value purchases — under which any purchase order above EUR 50,000 requires the Category Manager plus a second Finance approval before release — is enforced automatically rather than by manual discretion. Today 7 purchase orders worth EUR 557,000 (12 percent of total PO value) were released on a single approval, every one of them above the EUR 50,000 threshold. In the target state, no PO above the threshold can be released without both approvals captured.\n\nSecond, maverick spend is eliminated. The policy states that ordering without a purchase order is not permitted under any circumstances, yet 3 POs worth EUR 216,000 (4.7 percent of total PO value) were ordered before a PO existed, with 2 of those raised by a single buyer (buyer_a). In the target state, goods cannot be ordered ahead of an approved PO, removing this exposure at source and addressing the concentration in one buyer's activity.\n\nThird, three-way match evidence is restored to the procurement record. Policy requires POs to be matched against the goods receipt and supplier invoice, but the current PO export carries no goods-receipt or invoice column, leaving EUR 4,625,800 of PO value without match evidence. In the target state, every PO is traceable to receipt and invoice data so that the three-way match can be evidenced rather than assumed.",
+    "traceability": [
+      {
+        "expected_outcome": "No above-threshold PO releasable without both required approvals; single-approval breach value driven toward zero.",
+        "horizon": "Near-term",
+        "opportunity": "Restore enforced segregation of approval authority on the highest-value purchases.",
+        "pain_point": "7 purchase orders worth EUR 557,000 (12 percent of total PO value) were released on a single approval, every one above the EUR 50,000 dual-approval threshold.",
+        "recommendation": "Enforce the policy's dual-approval rule (Category Manager plus Finance) for all POs above EUR 50,000 inside the system release workflow.",
+        "severity": "High",
+        "summary": "Largest quantified control breach by value; rule already written, not enforced."
+      },
+      {
+        "expected_outcome": "Maverick-spend value driven toward zero; reduced single-buyer concentration.",
+        "horizon": "Near-term",
+        "opportunity": "Eliminate off-process spend at source and address buyer-level concentration.",
+        "pain_point": "3 POs worth EUR 216,000 (4.7 percent of total PO value) were ordered before a PO existed, with 2 raised by buyer_a, breaching the policy that maverick spend is not permitted under any circumstances.",
+        "recommendation": "Block ordering ahead of an approved PO in the system and apply targeted control and coaching to the highest-exposure buyer.",
+        "severity": "High",
+        "summary": "Categorical policy breach, smaller value, concentrated and tractable."
+      },
+      {
+        "expected_outcome": "PO value lacking match evidence reduced toward zero; approval and pre-order controls become verifiable.",
+        "horizon": "Parallel structural enabler",
+        "opportunity": "Make control operation provable from source rather than assumed.",
+        "pain_point": "EUR 4,625,800 of PO value lacks three-way match evidence because the PO export carries no goods-receipt or invoice column, despite policy requiring match against receipt and invoice.",
+        "recommendation": "Integrate goods-receipt and supplier-invoice data into the procurement record so the three-way match can be evidenced and audited.",
+        "severity": "High",
+        "summary": "Amber data gap that underpins assurance for the other two fixes."
+      }
+    ]
   }
 }
