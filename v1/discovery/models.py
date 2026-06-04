@@ -46,6 +46,155 @@ class SourceRef:
         return asdict(self)
 
 
+# ── grounded fact-store (the KG-lite that feeds the per-report synthesis fan-out) ───────────────
+@dataclass
+class QuantFact:
+    """A measured number with provenance — the only carrier of figures into the fact-store. Gated
+    against the run's allow-list exactly like a NumberRef."""
+    label: str
+    value: float
+    unit: str = "count"
+    sources: list[str] = field(default_factory=list)   # doc ids
+    tier: str = "verified"                              # verified | amber | gap
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class DocQuote:
+    """A verbatim snippet from a source document — powers pattern-evidence and quote boxes. Must
+    appear verbatim in the document (same rule as a finding's narrative_values)."""
+    text: str
+    doc_id: str
+    locator: str = ""
+    tier: str = "verified"
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class EntityFact:
+    """A grounded entity (system / account / connection / actor / process) with typed attributes —
+    e.g. an account with {erp_limit, crm_limit, migration_source}. Attribute VALUES are strings
+    restated from the source; numeric attributes still trace to the allow-list when rendered."""
+    kind: str                                           # generic, derived from the data (not o2c-specific)
+    name: str
+    attributes: dict[str, str] = field(default_factory=dict)
+    sources: list[str] = field(default_factory=list)
+    tier: str = "verified"
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class Relation:
+    """A grounded relationship between two entities/steps (handoff_to / conflicts_with / owned_by /
+    runs_on / triggers)."""
+    src: str
+    kind: str
+    dst: str
+    sources: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class FactStore:
+    """The grounded data plane the synthesis fan-out reads from — a lightweight knowledge graph of
+    measured numbers, verbatim quotes, typed entities, and relations. Every member carries its
+    source(s) + confidence tier. Domain-agnostic: a domain simply has fewer facts where its data is
+    thinner. Replaces the flat ~3-finding waist as the thing synthesis expands from."""
+    quant: list[QuantFact] = field(default_factory=list)
+    quotes: list[DocQuote] = field(default_factory=list)
+    entities: list[EntityFact] = field(default_factory=list)
+    relations: list[Relation] = field(default_factory=list)
+
+    def numbers_allow(self) -> set[float]:
+        """The measured numbers this store grounds (for the per-section grounding gate)."""
+        out: set[float] = set()
+        for q in self.quant:
+            try:
+                out.add(round(float(q.value), 4))
+            except (TypeError, ValueError):
+                continue
+        return out
+
+    def slice_for(self, *terms: str) -> "FactStore":
+        """The relevant subset of the store for one report/opportunity generation — members whose
+        label/name/text/attributes mention any of the given (case-insensitive) terms. Empty terms →
+        the whole store. Deterministic (preserves order)."""
+        if not terms:
+            return self
+        needles = [t.lower() for t in terms if t]
+
+        def hit(*texts: str) -> bool:
+            blob = " ".join(t.lower() for t in texts if t)
+            return any(n in blob for n in needles)
+        return FactStore(
+            quant=[q for q in self.quant if hit(q.label, q.unit)],
+            quotes=[d for d in self.quotes if hit(d.text, d.doc_id, d.locator)],
+            entities=[e for e in self.entities
+                      if hit(e.kind, e.name, " ".join(f"{k} {v}" for k, v in e.attributes.items()))],
+            relations=[r for r in self.relations if hit(r.src, r.kind, r.dst)])
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"quant": [q.to_dict() for q in self.quant],
+                "quotes": [d.to_dict() for d in self.quotes],
+                "entities": [e.to_dict() for e in self.entities],
+                "relations": [r.to_dict() for r in self.relations]}
+
+
+@dataclass
+class StrategyProfile:
+    """The locked per-engagement strategic direction (read from the domain manifest). Shapes the
+    STRATEGIC reports (03 recommendation, 05 roadmap); the tactical portfolio (04) stays
+    direction-agnostic. A neutral default applies when a manifest declares none."""
+    direction_type: str = ""                            # consolidate|modernize|stabilize|divest|…
+    horizon: str = ""                                   # e.g. "0-6 months"
+    strategic_constraints: str = ""
+    stakeholder_priorities: list[str] = field(default_factory=list)
+    out_of_scope: str = ""
+    success_definition: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    def brief(self) -> str:
+        """A short prompt brief for the strategic-report synthesis calls. '' when neutral."""
+        bits = []
+        if self.direction_type:
+            bits.append(f"Direction: {self.direction_type}")
+        if self.horizon:
+            bits.append(f"Horizon: {self.horizon}")
+        if self.strategic_constraints:
+            bits.append(f"Constraints: {self.strategic_constraints}")
+        if self.stakeholder_priorities:
+            bits.append("Priorities: " + ", ".join(self.stakeholder_priorities))
+        if self.out_of_scope:
+            bits.append(f"Out of scope: {self.out_of_scope}")
+        if self.success_definition:
+            bits.append(f"Success: {self.success_definition}")
+        return " · ".join(bits)
+
+
+@dataclass
+class PlanningAssumption:
+    """A forward-looking statement the data cannot COMPUTE (a date, owner-by-role, SLA, threshold,
+    cadence, cost, or sequence). Generated as a clearly-labelled assumption — never presented as a
+    discovered fact — with the grounded `basis` it is anchored to (if any). The renderer marks it
+    visibly so a reader never mistakes it for measured data."""
+    statement: str
+    kind: str = "sequence"                              # date|owner|sla|threshold|cadence|cost|sequence
+    basis: str = ""                                     # the grounded fact it is anchored to
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
 @dataclass
 class Document:
     doc_id: str
@@ -526,6 +675,12 @@ class SynthesisContent:                    # everything reports 00-06 render
     # code-owned chart series, derived from grounded numbers in build (never model-set). Each entry:
     # {"key","title","unit","segments":[{"label","value"}]}. Renderer draws these as donut/bar.
     charts: list[dict[str, Any]] = field(default_factory=list)
+    # deep-live-pipeline (feature 003): the grounded fact-store the fan-out expanded from, the locked
+    # strategy profile, and the clearly-labelled planning assumptions. All optional — the fixture and
+    # the legacy single-emit path leave them empty and render unchanged.
+    fact_store: "FactStore | None" = None
+    strategy: "StrategyProfile | None" = None
+    planning_assumptions: list[PlanningAssumption] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {"current_state": self.current_state.to_dict(),
@@ -544,7 +699,10 @@ class SynthesisContent:                    # everything reports 00-06 render
                 "evidence_register": [e.to_dict() for e in self.evidence_register],
                 "risk_register": [r.to_dict() for r in self.risk_register],
                 "traceability": [t.to_dict() for t in self.traceability],
-                "charts": self.charts}
+                "charts": self.charts,
+                "fact_store": self.fact_store.to_dict() if self.fact_store else None,
+                "strategy": self.strategy.to_dict() if self.strategy else None,
+                "planning_assumptions": [p.to_dict() for p in self.planning_assumptions]}
 
 
 @dataclass
