@@ -5,6 +5,7 @@ import { DataTable } from "../primitives/DataTable";
 import { ProcessFlow } from "../charts/ProcessFlow";
 import { DonutChart } from "../charts/DonutChart";
 import { BarChart } from "../charts/BarChart";
+import { BoundedContextMap } from "../charts/BoundedContextMap";
 
 /* current_state is count-agnostic: o2c has rich data_tables/handoffs, p2p has far fewer and some
  * sections are empty. Every section is guarded and rendered only when it has rows. Several
@@ -88,6 +89,16 @@ export default function CurrentStatePage() {
         <Section title="Overview">
           {cs.domain_overview ? <p>{cs.domain_overview}</p> : null}
           {cs.process_summary ? <p>{cs.process_summary}</p> : null}
+        </Section>
+      ) : null}
+
+      {(cs.bounded_contexts ?? []).length > 1 ? (
+        <Section title="Domain landscape">
+          <p className="muted small">
+            The subdomains that make up this domain, how each is classified, who owns it, and how
+            they relate — the bounded-context view of the current state.
+          </p>
+          <BoundedContextMap contexts={cs.bounded_contexts ?? []} domainLabel={store.domainLabel} />
         </Section>
       ) : null}
 

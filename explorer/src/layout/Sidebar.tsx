@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { Logo } from "./Logo";
 
 /* The navy left rail. Nav items carry .secnum chips mirroring the print suite's report numbering
@@ -27,7 +27,7 @@ const PROVENANCE: NavItem[] = [
 
 function Item({ domain, item }: { domain: string; item: NavItem }) {
   return (
-    <NavLink to={`/${domain}/${item.to}`} className={({ isActive }) => (isActive ? "active" : "")}>
+    <NavLink to={`/suite/${domain}/${item.to}`} className={({ isActive }) => (isActive ? "active" : "")}>
       <span className="secnum">{item.num}</span>
       <span>{item.label}</span>
     </NavLink>
@@ -64,6 +64,9 @@ export function Sidebar({
         {PROVENANCE.map((it) => (
           <Item key={it.to} domain={domain} item={it} />
         ))}
+        <Link to="/" className="console-back">
+          ← Discovery console
+        </Link>
       </nav>
     </aside>
   );

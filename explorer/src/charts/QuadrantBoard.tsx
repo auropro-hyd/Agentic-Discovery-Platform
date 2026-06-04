@@ -53,7 +53,7 @@ export function QuadrantBoard({
             {lane.items.map((o) => (
               <Link
                 key={o.id}
-                to={`/${domain}/opportunities/${o.id}`}
+                to={`/suite/${domain}/opportunities/${o.id}`}
                 className={cx("qb-card", selected === o.id && "is-highlight")}
                 onMouseEnter={() => onHover?.(o.id)}
                 onMouseLeave={() => onHover?.(null)}

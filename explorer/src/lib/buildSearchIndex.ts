@@ -39,7 +39,7 @@ export function buildSearchIndex(store: DomainStore): DocRecord[] {
         kind: "pain_point",
         title: pp.title || pp.id,
         snippet: [pp.description, pp.root_cause, pp.business_consequence].filter(Boolean).join(" "),
-        route: `/${d}/pain-points/${pp.id}`,
+        route: `/suite/${d}/pain-points/${pp.id}`,
       }),
     );
   }
@@ -50,7 +50,7 @@ export function buildSearchIndex(store: DomainStore): DocRecord[] {
         kind: "opportunity",
         title: opp.title || opp.id,
         snippet: [opp.overview, opp.implementation_approach, opp.expected_behaviour].filter(Boolean).join(" "),
-        route: `/${d}/opportunities/${opp.id}`,
+        route: `/suite/${d}/opportunities/${opp.id}`,
       }),
     );
   }
@@ -61,7 +61,7 @@ export function buildSearchIndex(store: DomainStore): DocRecord[] {
         kind: "assumption",
         title: pa.statement || "Planning assumption",
         snippet: [pa.kind && `(${pa.kind})`, pa.basis].filter(Boolean).join(" "),
-        route: `/${d}/assumptions`,
+        route: `/suite/${d}/assumptions`,
       }),
     );
   });
@@ -72,7 +72,7 @@ export function buildSearchIndex(store: DomainStore): DocRecord[] {
         kind: "evidence",
         title: e.finding || e.data_point || "Evidence",
         snippet: [e.data_point, e.evidence_type, e.source, e.confidence].filter(Boolean).join(" "),
-        route: `/${d}/evidence`,
+        route: `/suite/${d}/evidence`,
       }),
     );
   });
@@ -83,14 +83,14 @@ export function buildSearchIndex(store: DomainStore): DocRecord[] {
         kind: "source",
         title: src.business_name || src.doc_id,
         snippet: [src.doc_type, src.what_we_read].filter(Boolean).join(" "),
-        route: `/${d}/evidence`,
+        route: `/suite/${d}/evidence`,
       }),
     );
   }
   (s.fact_store?.quotes ?? []).forEach((q, i) => {
     if (!q.text) return;
     out.push(
-      rec({ id: `q-${i}`, kind: "quote", title: q.text, snippet: q.doc_id, route: `/${d}/evidence` }),
+      rec({ id: `q-${i}`, kind: "quote", title: q.text, snippet: q.doc_id, route: `/suite/${d}/evidence` }),
     );
   });
   (s.current_state?.data_tables ?? []).forEach((t, i) => {
@@ -100,7 +100,7 @@ export function buildSearchIndex(store: DomainStore): DocRecord[] {
         kind: "table",
         title: t.title || t.caption || "Data table",
         snippet: [t.caption, (t.columns ?? []).join(" ")].filter(Boolean).join(" "),
-        route: `/${d}/current-state`,
+        route: `/suite/${d}/current-state`,
       }),
     );
   });

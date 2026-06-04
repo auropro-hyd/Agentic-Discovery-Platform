@@ -14,7 +14,7 @@ export function DomainLayout() {
 
   if (!isKnownDomain(domain)) {
     const fallback = DOMAIN_SLUGS[0] ?? "o2c";
-    return <Navigate to={`/${fallback}`} replace />;
+    return <Navigate to={`/suite/${fallback}`} replace />;
   }
 
   return (

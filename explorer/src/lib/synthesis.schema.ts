@@ -281,6 +281,26 @@ const CurrentState = z
     system_profiles: z.array(z.any()).default([]),
     handoff_catalogue: z.array(z.any()).default([]),
     format_taxonomy: z.array(z.any()).default([]),
+    bounded_contexts: z
+      .array(
+        z
+          .object({
+            name: z.string().default(""),
+            kind: z.string().default("core"), // core | supporting | generic | external
+            owner: z.string().default(""),
+            responsibilities: z.string().default(""),
+            is_shared_kernel: z.boolean().default(false),
+            relationships: z
+              .array(
+                z
+                  .object({ to: z.string().default(""), kind: z.string().default(""), label: z.string().default("") })
+                  .passthrough(),
+              )
+              .default([]),
+          })
+          .passthrough(),
+      )
+      .default([]),
   })
   .partial()
   .passthrough();

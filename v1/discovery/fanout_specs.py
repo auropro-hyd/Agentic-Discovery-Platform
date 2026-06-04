@@ -99,7 +99,27 @@ def _r01_schema(doc_keys):
             "label": _STR, "description": _STR, "examples": _STR}, "required": ["label"]}},
         "handoff_catalogue": {"type": "array", "items": {"type": "object", "properties": {
             "from_step": _STR, "to_step": _STR, "mechanism": _STR},
-            "required": ["from_step", "to_step"]}}},
+            "required": ["from_step", "to_step"]}},
+        "bounded_contexts": {"type": "array", "description": "a Domain-Driven-Design view of the "
+            "domain: each subdomain as a bounded context, classified and owned, with its "
+            "relationships to other contexts. Derive ONLY from the documents — name the real "
+            "subdomains, owners and systems; do not invent. Omit if the documents don't support it.",
+            "items": {"type": "object", "properties": {
+                "name": _STR,
+                "kind": {"type": "string", "enum": ["core", "supporting", "generic", "external"],
+                         "description": "core = differentiating; supporting = enabling; generic = "
+                                        "commodity; external = outside the org / a TSA / a partner"},
+                "owner": _STR,
+                "responsibilities": _STR,
+                "is_shared_kernel": {"type": "boolean", "description": "true only for the single "
+                                     "authoritative system-of-record shared across contexts"},
+                "relationships": {"type": "array", "items": {"type": "object", "properties": {
+                    "to": _STR,
+                    "kind": {"type": "string", "enum": [
+                        "customer_supplier", "conformist", "anti_corruption_layer",
+                        "open_host_service", "shared_kernel", "partnership"]},
+                    "label": _STR}, "required": ["to", "kind"]}}},
+                "required": ["name", "kind"]}}},
         "required": ["domain_overview", "process_summary", "process_flow"]},
         "planning_assumptions": _PLANNING}}
 

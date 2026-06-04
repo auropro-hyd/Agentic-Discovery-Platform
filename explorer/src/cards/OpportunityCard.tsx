@@ -5,7 +5,7 @@ import { PatternChip, QuadrantBadge, RatingPill } from "../primitives/badges";
 /* An opportunity summary card for the portfolio grid. */
 export function OpportunityCard({ domain, opp }: { domain: string; opp: Opportunity }) {
   return (
-    <Link to={`/${domain}/opportunities/${opp.id}`} className="card">
+    <Link to={`/suite/${domain}/opportunities/${opp.id}`} className="card">
       <div className="card-meta">
         <span className="tiny muted" style={{ fontWeight: 800, color: "var(--blue)" }}>{opp.id}</span>
         {opp.pattern && <PatternChip pattern={opp.pattern} />}

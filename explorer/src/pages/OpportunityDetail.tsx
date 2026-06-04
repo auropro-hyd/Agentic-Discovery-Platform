@@ -20,7 +20,7 @@ export default function OpportunityDetail() {
   if (!opp) {
     return (
       <div>
-        <BackChip to={`/${store.domain}/opportunities`} label="Opportunity portfolio" />
+        <BackChip to={`/suite/${store.domain}/opportunities`} label="Opportunity portfolio" />
         <EmptyState>No such opportunity in this domain.</EmptyState>
       </div>
     );
@@ -61,7 +61,7 @@ export default function OpportunityDetail() {
 
   return (
     <div>
-      <BackChip to={`/${store.domain}/opportunities`} label="Opportunity portfolio" />
+      <BackChip to={`/suite/${store.domain}/opportunities`} label="Opportunity portfolio" />
 
       <header className="page-head">
         <div className="eyebrow">Opportunity · {opp.id}</div>
@@ -80,7 +80,7 @@ export default function OpportunityDetail() {
       {targetPp ? (
         <Section title="Addresses">
           <div className="linkrail">
-            <Link to={`/${store.domain}/pain-points/${targetPp.id}`}>
+            <Link to={`/suite/${store.domain}/pain-points/${targetPp.id}`}>
               {targetPp.id} · {targetPp.title}
             </Link>
           </div>

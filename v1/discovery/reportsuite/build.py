@@ -12,10 +12,10 @@ from __future__ import annotations
 
 from .. import docnames
 from ..models import (
-    BusinessImpact, CurrentState, DataTable, EvidenceRow, ExecutiveSummary, FormatPattern, Handoff,
-    InventoryItem, KeyStat, MatrixQuadrant, MetricItem, NumberRef, Opportunity, OppPattern, PainPoint,
-    ProcessDetail, ProcessStep, RaciRow, RiskItem, RoadmapHorizon, RoadmapItem, SourceDoc, SourceRef,
-    SynthesisContent, SystemProfile, TraceRow,
+    BoundedContext, BusinessImpact, ContextRelationship, CurrentState, DataTable, EvidenceRow,
+    ExecutiveSummary, FormatPattern, Handoff, InventoryItem, KeyStat, MatrixQuadrant, MetricItem,
+    NumberRef, Opportunity, OppPattern, PainPoint, ProcessDetail, ProcessStep, RaciRow, RiskItem,
+    RoadmapHorizon, RoadmapItem, SourceDoc, SourceRef, SynthesisContent, SystemProfile, TraceRow,
 )
 from ..synthesis import OPP_TO_PP, PP_TO_OPP, allowed_numbers, validate_synthesis
 
@@ -1104,6 +1104,14 @@ def _from_payload(payload: dict) -> SynthesisContent:
         handoff_catalogue=[Handoff(from_step=h["from_step"], to_step=h["to_step"],
                                    mechanism=h.get("mechanism", ""))
                            for h in cs.get("handoff_catalogue", [])],
+        bounded_contexts=[BoundedContext(
+            name=b["name"], kind=b.get("kind", "core"), owner=b.get("owner", ""),
+            responsibilities=b.get("responsibilities", ""),
+            is_shared_kernel=bool(b.get("is_shared_kernel", False)),
+            relationships=[ContextRelationship(to=r["to"], kind=r.get("kind", ""),
+                                               label=r.get("label", ""))
+                           for r in b.get("relationships", []) if r.get("to")])
+            for b in cs.get("bounded_contexts", []) if b.get("name")],
         system_profiles=[SystemProfile(name=p["name"], role=p.get("role", ""),
                                        how_used=p.get("how_used", ""), owners=p.get("owners", ""),
                                        limitations=p.get("limitations", ""))

@@ -339,70 +339,76 @@
     "current_state": {
       "baseline_stats": [
         {
-          "label": "Single-approval-only POs",
-          "sublabel": "count",
+          "label": "POs flagged single-approval only",
+          "sublabel": "all above EUR 50,000 threshold",
           "value": "7"
         },
         {
-          "label": "Value of single-approval-only POs",
-          "sublabel": "twelve percent of total PO value",
+          "label": "Value of single-approval POs",
+          "sublabel": "12% of total PO value",
           "value": "EUR 557,000"
         },
         {
-          "label": "POs ordered without a prior PO",
-          "sublabel": "po_before_order = no",
+          "label": "POs raised without a prior PO",
+          "sublabel": "po_before_order=no",
           "value": "3"
         },
         {
           "label": "Value of maverick-spend POs",
-          "sublabel": "4.7 percent of total PO value",
+          "sublabel": "4.7% of total PO value",
           "value": "EUR 216,000"
         },
         {
-          "label": "Maverick POs raised by buyer_a",
-          "sublabel": "count",
-          "value": "2"
-        },
-        {
-          "label": "PO value lacking match evidence",
-          "sublabel": "no goods_receipt or invoice column",
+          "label": "PO value without match evidence",
+          "sublabel": "no goods receipt / invoice column in export",
           "value": "EUR 4,625,800"
         }
       ],
+      "bounded_contexts": [],
       "data_tables": [
         {
           "caption": "",
           "columns": [
-            "Measure",
-            "Count",
-            "Value (EUR)",
-            "Share of total PO value"
+            "#",
+            "Requirement"
           ],
-          "note": "All seven single_approval_only rows have amount_eur in {54000,61000,67000,72000,88000,95000,120000}, every value above the 50000 threshold. po_before_order=no: buyer_a count 2, buyer_d count 1; summed amount_eur 216000.",
+          "note": "",
           "rows": [
             [
-              "Single-approval-only POs",
-              "7",
-              "557000",
-              "12%"
+              "1",
+              "All purchase orders must be raised in the procurement system before goods are ordered."
             ],
             [
-              "POs ordered without a prior PO",
-              "3",
-              "216000",
-              "4.7%"
-            ],
-            [
-              "Maverick POs raised by buyer_a",
               "2",
-              "—",
-              "—"
+              "Any purchase order above EUR 50,000 requires approval from the Category Manager AND a second approval from Finance before it is released to the supplier."
             ],
             [
-              "PO value lacking match evidence",
-              "—",
-              "4625800",
-              "—"
+              "3",
+              "Purchase orders are matched against the goods receipt and the supplier invoice (three-way match)."
+            ],
+            [
+              "4",
+              "Maverick spend — ordering without a purchase order — is not permitted under any circumstances."
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "procurement-policy",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Procurement control requirements (policy)"
+        },
+        {
+          "caption": "",
+          "columns": [
+            "Finding"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "All 7 single_approval_only rows have amount_eur in {54000,61000,67000,72000,88000,95000,120000}, every value above the 50000 threshold"
             ]
           ],
           "sources": [
@@ -410,74 +416,230 @@
               "doc_id": "purchase-order-export",
               "locator": "",
               "quote": ""
-            },
+            }
+          ],
+          "title": "Single-approval-only POs"
+        },
+        {
+          "caption": "",
+          "columns": [
+            "Finding"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "po_before_order=no: buyer_a count 2, buyer_d count 1; summed amount_eur 216000"
+            ]
+          ],
+          "sources": [
             {
-              "doc_id": "procurement-policy",
+              "doc_id": "purchase-order-export",
               "locator": "",
               "quote": ""
             }
           ],
-          "title": "Approval and ordering observations"
+          "title": "POs ordered without a prior PO (po_before_order=no)"
+        },
+        {
+          "caption": "",
+          "columns": [
+            "po_id",
+            "supplier",
+            "category",
+            "amount_eur",
+            "raised_by",
+            "approval_status",
+            "po_before_order"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "PO-1007",
+              "PackRight",
+              "Packaging",
+              "45000",
+              "buyer_e",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1203",
+              "CargoLink",
+              "Logistics",
+              "18500",
+              "buyer_h",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1054",
+              "PrecisionParts",
+              "Components",
+              "45000",
+              "buyer_h",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1003",
+              "ITPartner",
+              "Services",
+              "2800",
+              "buyer_b",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1050",
+              "FreightOne",
+              "Logistics",
+              "6500",
+              "buyer_a",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1196",
+              "ForgePrime",
+              "Raw Materials",
+              "45000",
+              "buyer_e",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1164",
+              "LubriCorp",
+              "Consumables",
+              "4200",
+              "buyer_b",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1208",
+              "ValveTech",
+              "Components",
+              "1500",
+              "buyer_g",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1145",
+              "ForgePrime",
+              "Raw Materials",
+              "6500",
+              "buyer_g",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1137",
+              "GearHaus",
+              "Components",
+              "24000",
+              "buyer_h",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1186",
+              "BoxLine",
+              "Packaging",
+              "31000",
+              "buyer_f",
+              "approved",
+              "yes"
+            ],
+            [
+              "PO-1027",
+              "ValveTech",
+              "Components",
+              "31000",
+              "buyer_e",
+              "approved",
+              "yes"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Recorded purchase orders (sample of export)"
+        },
+        {
+          "caption": "",
+          "columns": [
+            "Columns"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order — no goods_receipt or invoice column present"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "purchase-order-export",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Export columns present"
         }
       ],
-      "domain_overview": "This section documents the current state of the procurement-to-purchase-order process as evidenced by the procurement policy and the purchase order export. The procurement policy sets out four control statements governing how purchase orders are raised, approved, matched, and how ordering without a purchase order is treated. The purchase order export is the transactional record of issued purchase orders, carrying the fields po_id, supplier, category, amount_eur, raised_by, approval_status, and po_before_order.",
+      "domain_overview": "This section documents the current state of the procurement-to-order process as evidenced by the procurement policy and the purchase order export. The policy defines four control requirements: all purchase orders must be raised in the procurement system before goods are ordered; any PO above EUR 50,000 requires approval from the Category Manager and a second approval from Finance before release to the supplier; POs are matched against the goods receipt and the supplier invoice (three-way match); and ordering without a purchase order (maverick spend) is not permitted. The purchase order export is the transactional record of POs raised, capturing the supplier, category, amount, the buyer who raised it, approval status, and whether the PO preceded the order.",
       "format_taxonomy": [
         {
-          "description": "Purchase orders recorded as approved in the export.",
-          "examples": "Suppliers include PackRight, CargoLink, PrecisionParts",
-          "label": "approval_status = approved"
+          "description": "Indicator of whether the purchase order was raised before goods were ordered.",
+          "examples": "yes; no",
+          "label": "po_before_order"
         },
         {
-          "description": "Purchase orders carrying a single approval, all with amounts above the threshold.",
-          "examples": "Seven POs totalling EUR 557,000",
-          "label": "single_approval_only"
+          "description": "Approval state recorded for the PO.",
+          "examples": "approved; single_approval_only flag",
+          "label": "approval_status"
         },
         {
-          "description": "Purchase order raised in the procurement system before goods were ordered.",
-          "examples": "Suppliers include ITPartner, FreightOne, ForgePrime",
-          "label": "po_before_order = yes"
-        },
-        {
-          "description": "Goods ordered without a prior purchase order.",
-          "examples": "Three POs totalling EUR 216,000",
-          "label": "po_before_order = no"
+          "description": "Spend category on the PO.",
+          "examples": "Packaging, Logistics, Components, Services, Raw Materials, Consumables",
+          "label": "category"
         }
       ],
       "handoff_catalogue": [
         {
-          "from_step": "Raise purchase order",
-          "mechanism": "Procurement system routes POs above the threshold for Category Manager and Finance approval",
-          "to_step": "Approve purchase order"
+          "from_step": "Buyer raises PO",
+          "mechanism": "Procurement system (POs above EUR 50,000)",
+          "to_step": "Category Manager and Finance approval"
         },
         {
-          "from_step": "Approve purchase order",
-          "mechanism": "Release to supplier after second approval from Finance",
-          "to_step": "Release to supplier and order goods"
-        },
-        {
-          "from_step": "Release to supplier and order goods",
-          "mechanism": "Purchase order matched against goods receipt and supplier invoice",
+          "from_step": "Approval and release",
+          "mechanism": "Goods receipt and supplier invoice matching",
           "to_step": "Three-way match"
         }
       ],
       "ownership_map": [
         {
           "accountable": "Buyer",
-          "activity": "Raise purchase order in procurement system before ordering goods",
+          "activity": "Raise purchase order before ordering",
           "consulted": "",
           "informed": "",
           "responsible": "Buyer"
         },
         {
           "accountable": "Category Manager",
-          "activity": "First approval for POs above the threshold",
+          "activity": "First approval of POs above EUR 50,000",
           "consulted": "",
           "informed": "",
           "responsible": "Category Manager"
         },
         {
           "accountable": "Finance",
-          "activity": "Second approval for POs above the threshold before release to supplier",
+          "activity": "Second approval of POs above EUR 50,000 before release",
           "consulted": "",
           "informed": "",
           "responsible": "Finance"
@@ -487,13 +649,13 @@
           "activity": "Three-way match against goods receipt and supplier invoice",
           "consulted": "",
           "informed": "",
-          "responsible": "Finance"
+          "responsible": "Procurement / Finance"
         }
       ],
       "process_detail": [
         {
           "actor": "Buyer",
-          "body": "Policy statement one requires all purchase orders to be raised in the procurement system before goods are ordered. The export captures the po_before_order field, which records three purchase orders as no, summing to EUR 216,000; buyer_a accounts for two of these and buyer_d for one.",
+          "body": "Policy requires all purchase orders to be raised in the procurement system before goods are ordered. The export records the raising buyer (raised_by) and the po_before_order indicator. Three POs carry po_before_order=no, summing to EUR 216,000, which is 4.7% of total PO value. Two of these maverick POs were raised by buyer_a.",
           "sources": [
             {
               "doc_id": "procurement-policy",
@@ -507,11 +669,11 @@
             }
           ],
           "system": "Procurement system",
-          "title": "Raising purchase orders"
+          "title": "PO creation"
         },
         {
-          "actor": "Category Manager; Finance",
-          "body": "Policy statement two requires any purchase order above the fifty-thousand-euro threshold to receive approval from the Category Manager and a second approval from Finance before it is released to the supplier. The export flags seven purchase orders as single_approval_only, all with amounts above the threshold, totalling EUR 557,000 or twelve percent of total purchase order value.",
+          "actor": "Category Manager and Finance",
+          "body": "Policy requires that any purchase order above EUR 50,000 receives approval from the Category Manager and a second approval from Finance before release to the supplier. Seven rows are flagged single_approval_only, all above the EUR 50,000 threshold, carrying EUR 557,000 in total (12% of total PO value).",
           "sources": [
             {
               "doc_id": "procurement-policy",
@@ -525,11 +687,11 @@
             }
           ],
           "system": "Procurement system",
-          "title": "Approval thresholds"
+          "title": "Approval and release"
         },
         {
-          "actor": "Finance",
-          "body": "Policy statement three states purchase orders are matched against the goods receipt and the supplier invoice in a three-way match. The export columns are po_id, supplier, category, amount_eur, raised_by, approval_status, and po_before_order, with no goods_receipt or invoice column present. EUR 4,625,800 of purchase order value lacks match evidence.",
+          "actor": "Procurement / Finance",
+          "body": "Policy states purchase orders are matched against the goods receipt and the supplier invoice in a three-way match. The export contains seven columns and no goods_receipt or invoice column. EUR 4,625,800 of PO value is without match evidence in the export.",
           "sources": [
             {
               "doc_id": "procurement-policy",
@@ -543,33 +705,15 @@
             }
           ],
           "system": "Procurement system",
-          "title": "Three-way matching"
-        },
-        {
-          "actor": "Buyer",
-          "body": "Policy statement four states that maverick spend — ordering without a purchase order — is not permitted under any circumstances. The export records three such purchase orders valued at EUR 216,000, representing 4.7 percent of total purchase order value.",
-          "sources": [
-            {
-              "doc_id": "procurement-policy",
-              "locator": "",
-              "quote": ""
-            },
-            {
-              "doc_id": "purchase-order-export",
-              "locator": "",
-              "quote": ""
-            }
-          ],
-          "system": "Procurement system",
-          "title": "Ordering without a purchase order"
+          "title": "Three-way match"
         }
       ],
       "process_flow": [
         {
           "actor": "Buyer",
-          "description": "A buyer raises a purchase order in the procurement system. Policy states all purchase orders must be raised in the procurement system before goods are ordered. The export records three purchase orders where po_before_order is no, valued at EUR 216,000, with buyer_a accounting for two of them.",
+          "description": "A named buyer raises the purchase order in the procurement system. Policy requires that all purchase orders are raised in the procurement system before goods are ordered. The export records the raising buyer in the raised_by field and whether the PO preceded the order in po_before_order. Three POs carry po_before_order=no, summing to EUR 216,000.",
           "failure_points": [],
-          "name": "Raise purchase order",
+          "name": "Raise purchase order in procurement system",
           "seq": 1,
           "sources": [
             {
@@ -587,9 +731,9 @@
         },
         {
           "actor": "Category Manager and Finance",
-          "description": "Purchase orders above the fifty-thousand-euro threshold require approval from the Category Manager and a second approval from Finance before release to the supplier. The export flags seven purchase orders as single_approval_only, valued at EUR 557,000, representing twelve percent of total purchase order value; all carry amounts above the threshold.",
+          "description": "The purchase order moves through approval and is released to the supplier. Policy states any purchase order above EUR 50,000 requires approval from the Category Manager and a second approval from Finance before it is released to the supplier. Seven rows are flagged single_approval_only, each above the EUR 50,000 threshold.",
           "failure_points": [],
-          "name": "Approve purchase order",
+          "name": "Approve and release to supplier",
           "seq": 2,
           "sources": [
             {
@@ -606,26 +750,11 @@
           "system": "Procurement system"
         },
         {
-          "actor": "Buyer",
-          "description": "Following approval, the purchase order is released to the supplier and goods are ordered against it.",
+          "actor": "Procurement / Finance",
+          "description": "Policy states purchase orders are matched against the goods receipt and the supplier invoice in a three-way match. The export columns are po_id, supplier, category, amount_eur, raised_by, approval_status, and po_before_order, with no goods_receipt or invoice column present. EUR 4,625,800 of PO value is without match evidence in the export.",
           "failure_points": [],
-          "name": "Release to supplier and order goods",
+          "name": "Three-way match against goods receipt and invoice",
           "seq": 3,
-          "sources": [
-            {
-              "doc_id": "procurement-policy",
-              "locator": "",
-              "quote": ""
-            }
-          ],
-          "system": "Procurement system"
-        },
-        {
-          "actor": "Finance",
-          "description": "Purchase orders are matched against the goods receipt and the supplier invoice in a three-way match. The export carries the columns po_id, supplier, category, amount_eur, raised_by, approval_status, and po_before_order, with no goods_receipt or invoice column present. Total purchase order value lacking match evidence is EUR 4,625,800.",
-          "failure_points": [],
-          "name": "Three-way match",
-          "seq": 4,
           "sources": [
             {
               "doc_id": "procurement-policy",
@@ -641,50 +770,27 @@
           "system": "Procurement system"
         }
       ],
-      "process_inventory": [
-        {
-          "name": "Purchase order raising",
-          "purpose": "Create a purchase order in the procurement system before goods are ordered.",
-          "system_of_record_for": ""
-        },
-        {
-          "name": "Approval",
-          "purpose": "Apply Category Manager and Finance approval for orders above the threshold before release.",
-          "system_of_record_for": ""
-        },
-        {
-          "name": "Three-way matching",
-          "purpose": "Match the purchase order against the goods receipt and the supplier invoice.",
-          "system_of_record_for": ""
-        }
-      ],
-      "process_summary": "Purchase orders are raised in the procurement system before goods are ordered. Orders above the fifty-thousand-euro threshold require approval from the Category Manager and a second approval from Finance before release to the supplier. Once goods are received and the supplier invoice arrives, the purchase order is matched against the goods receipt and the supplier invoice in a three-way match. The export covers buyers identified as buyer_a through buyer_h across categories including Components, Logistics, Raw Materials, Packaging, Services, and Consumables.",
+      "process_inventory": [],
+      "process_summary": "Purchase orders are raised by named buyers in the procurement system and progress through approval before release to the supplier. The policy requires PO creation prior to ordering, a dual approval for orders above EUR 50,000, and a three-way match against goods receipt and supplier invoice. The export carries seven columns (po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order); it does not contain a goods receipt or invoice column. Across the recorded population, 7 POs are flagged single_approval_only carrying EUR 557,000 (12% of total PO value), 3 POs were ordered without a prior PO carrying EUR 216,000 (4.7% of total PO value), and EUR 4,625,800 of PO value is without match evidence.",
       "system_inventory": [
         {
           "name": "Procurement system",
-          "purpose": "System in which all purchase orders must be raised before goods are ordered",
-          "system_of_record_for": "Purchase orders, approvals, and three-way matching"
+          "purpose": "System in which all purchase orders are raised before goods are ordered",
+          "system_of_record_for": "Purchase orders"
         },
         {
           "name": "Purchase order export",
-          "purpose": "Transactional extract of issued purchase orders",
-          "system_of_record_for": "po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order"
+          "purpose": "Transactional extract of recorded POs",
+          "system_of_record_for": "PO line records (po_id, supplier, category, amount_eur, raised_by, approval_status, po_before_order)"
         }
       ],
       "system_profiles": [
         {
-          "how_used": "Buyers raise purchase orders before goods are ordered; Category Manager and Finance approve orders above the threshold; purchase orders are matched against goods receipt and supplier invoice.",
-          "limitations": "The export carries no goods_receipt or invoice column.",
+          "how_used": "All purchase orders are raised here before goods are ordered; POs above EUR 50,000 route to Category Manager and Finance approval before release; POs are matched against goods receipt and supplier invoice in a three-way match.",
+          "limitations": "The associated export carries seven columns with no goods_receipt or invoice column present.",
           "name": "Procurement system",
-          "owners": "Buyers, Category Manager, Finance",
-          "role": "Records purchase orders, applies approval thresholds, and supports three-way matching as set out in the procurement policy."
-        },
-        {
-          "how_used": "Holds the fields po_id, supplier, category, amount_eur, raised_by, approval_status, and po_before_order across buyers buyer_a through buyer_h.",
-          "limitations": "No goods_receipt or invoice column present.",
-          "name": "Purchase order export",
-          "owners": "Procurement",
-          "role": "Provides the transactional record of purchase orders for review."
+          "owners": "Procurement / Finance",
+          "role": "System of record for purchase orders"
         }
       ]
     },

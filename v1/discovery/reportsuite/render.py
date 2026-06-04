@@ -204,6 +204,14 @@ def r01(s: SynthesisContent, meta) -> str:
     for t in _tables_titled(cs.data_tables, "channel mix"):
         d.raw(_data_table(t))
 
+    # 1b. Domain landscape — the DDD bounded-context map (omits itself if not emitted)
+    bc = bounded_context_svg(cs.bounded_contexts, meta.get("domain_label", ""))
+    if bc:
+        d.h2("Domain landscape")
+        d.p("The subdomains that make up this domain, how each is classified, who owns it, and how "
+            "they relate — the bounded-context view of the current state.")
+        d.raw(bc)
+
     # 2. Process flow — diagram + step table
     d.h1("Process flow")
     d.p("The end-to-end flow, who performs each step and on which system:")
@@ -982,6 +990,109 @@ def context_map_svg(steps, handoffs) -> str:
     out.append("</svg>")
     return _fig("Where work crosses between steps and systems", "".join(out),
                 "Boxes are process steps; arrows are the handoffs recorded between them.")
+
+
+_BC_STYLE = {  # kind -> (fill, stroke, title-fill, sub-fill, tag-fill, tag-label)
+    "core": ("#eef3fb", "#2563eb", "#1a2f50", "#3665a8", "#1a2f50", "CORE"),
+    "supporting": ("#ecfdf5", "#059669", "#065f46", "#047857", "#059669", "SUPPORTING"),
+    "generic": ("#f3f4f6", "#9ca3af", "#374151", "#6b7280", "#6b7280", "GENERIC"),
+    "external": ("#fffbeb", "#d97706", "#92400e", "#b45309", "#d97706", "EXTERNAL"),
+}
+_REL_ABBR = {  # DDD relationship -> short edge label
+    "customer_supplier": "C/S", "conformist": "CF", "anti_corruption_layer": "ACL",
+    "open_host_service": "OHS", "shared_kernel": "SK", "partnership": "P",
+}
+
+
+def bounded_context_svg(contexts, domain_label: str = "") -> str:
+    """The Domain-Driven-Design bounded-context map: each subdomain as a box, coloured by kind
+    (core / supporting / generic / external), placed inside the domain boundary, with the shared
+    kernel as a band beneath and DDD relationships drawn as labelled connectors. Mirrors the
+    reference reports' signature diagram. Grounded: boxes/owners/relationships are exactly what the
+    synthesis emitted. Empty (no contexts) → ''."""
+    contexts = [c for c in (contexts or []) if getattr(c, "name", "")]
+    if len(contexts) < 2:
+        return ""
+    kernel = next((c for c in contexts if getattr(c, "is_shared_kernel", False)), None)
+    cells = [c for c in contexts if c is not kernel]
+
+    NW, NH, GAP_X, GAP_Y, PAD, TOP = 188, 70, 30, 30, 22, 34
+    COLS = 3
+    rows = (len(cells) + COLS - 1) // COLS
+    cols = min(COLS, len(cells)) or 1
+    width = PAD * 2 + cols * NW + (cols - 1) * GAP_X
+    body_h = rows * NH + (rows - 1) * GAP_Y
+    kernel_h = 40 if kernel else 0
+    height = TOP + PAD + body_h + (kernel_h + 14 if kernel else 0) + PAD
+
+    pos: dict[str, tuple[float, float]] = {}
+
+    def cxy(i):
+        r, c = i // COLS, i % COLS
+        return PAD + c * (NW + GAP_X), TOP + PAD + r * (NH + GAP_Y)
+
+    out = [f"<svg class='chart' viewBox='0 0 {width} {height}' width='100%' role='img' "
+           f"aria-label='Bounded context map' xmlns='http://www.w3.org/2000/svg'>", _SVG_DEFS]
+    # domain boundary frame + label
+    out.append(f"<rect x='3' y='3' width='{width-6}' height='{height-6}' rx='12' fill='none' "
+               f"stroke='#cbd5e1' stroke-width='1.3' stroke-dasharray='5 4'/>")
+    label = (domain_label or "Domain").upper() + " — DOMAIN BOUNDARY"
+    out.append(f"<text x='{width/2}' y='22' text-anchor='middle' font-size='9' font-weight='700' "
+               f"fill='#3665a8' letter-spacing='1.1'>{esc(label)}</text>")
+
+    # relationship edges first (so boxes sit on top); resolve names case-insensitively
+    for i, c in enumerate(cells):
+        pos[(c.name or "").strip().lower()] = cxy(i)
+    for c in cells:
+        a = pos.get((c.name or "").strip().lower())
+        for rel in getattr(c, "relationships", []) or []:
+            b = pos.get((getattr(rel, "to", "") or "").strip().lower())
+            if not a or not b or a == b:
+                continue
+            x1, y1 = a[0] + NW / 2, a[1] + NH / 2
+            x2, y2 = b[0] + NW / 2, b[1] + NH / 2
+            out.append(f"<line x1='{x1}' y1='{y1}' x2='{x2}' y2='{y2}' stroke='#94a3b8' "
+                       f"stroke-width='1.2' marker-end='url(#arr)'/>")
+            tag = _REL_ABBR.get((getattr(rel, "kind", "") or "").lower(), "")
+            if tag:
+                out.append(f"<text x='{(x1+x2)/2}' y='{(y1+y2)/2-3}' text-anchor='middle' "
+                           f"font-size='7.5' font-weight='700' fill='#475569'>{esc(tag)}</text>")
+
+    # context boxes
+    for i, c in enumerate(cells):
+        x, y = cxy(i)
+        fill, stroke, tf, sf, tagf, taglbl = _BC_STYLE.get(
+            (c.kind or "core").lower(), _BC_STYLE["core"])
+        out.append(f"<g filter='url(#sh)'><rect x='{x}' y='{y}' width='{NW}' height='{NH}' rx='9' "
+                   f"fill='{fill}' stroke='{stroke}' stroke-width='1.3'/>"
+                   f"<text x='{x+NW/2}' y='{y+22}' text-anchor='middle' font-size='11' "
+                   f"font-weight='800' fill='{tf}'>{esc(_clipw(c.name, 26))}</text>")
+        if c.owner:
+            out.append(f"<text x='{x+NW/2}' y='{y+37}' text-anchor='middle' font-size='8' "
+                       f"fill='{sf}'>{esc(_clipw(c.owner, 32))}</text>")
+        if c.responsibilities:
+            out.append(f"<text x='{x+NW/2}' y='{y+50}' text-anchor='middle' font-size='8' "
+                       f"fill='{sf}'>{esc(_clipw(c.responsibilities, 34))}</text>")
+        # the kind tag chip, bottom-left
+        out.append(f"<rect x='{x+8}' y='{y+NH-15}' width='{8.5*len(taglbl)+8}' height='12' rx='3' "
+                   f"fill='{tagf}'/><text x='{x+8+(8.5*len(taglbl)+8)/2}' y='{y+NH-6}' "
+                   f"text-anchor='middle' font-size='7' font-weight='700' fill='#fff'>{taglbl}</text></g>")
+
+    # shared-kernel band
+    if kernel:
+        ky = TOP + PAD + body_h + 14
+        out.append(f"<rect x='{PAD}' y='{ky}' width='{width-2*PAD}' height='{kernel_h}' rx='8' "
+                   f"fill='#fffbeb' stroke='#d97706' stroke-width='1.3'/>"
+                   f"<text x='{width/2}' y='{ky+17}' text-anchor='middle' font-size='9.5' "
+                   f"font-weight='800' fill='#92400e'>{esc(_clipw(kernel.name, 60))} — Shared Kernel</text>")
+        if kernel.responsibilities:
+            out.append(f"<text x='{width/2}' y='{ky+31}' text-anchor='middle' font-size='8' "
+                       f"fill='#b45309'>{esc(_clipw(kernel.responsibilities, 90))}</text>")
+    out.append("</svg>")
+    foot = ("Subdomains classified core / supporting / generic / external; connectors show DDD "
+            "relationships (C/S customer-supplier, CF conformist, ACL anti-corruption layer, "
+            "OHS open-host service).")
+    return _fig("Domain landscape — bounded context map", "".join(out), foot)
 
 
 def root_cause_svg(pain_points, patterns) -> str:

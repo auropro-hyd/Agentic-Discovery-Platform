@@ -17,9 +17,9 @@ from discovery.reportsuite.render import (  # noqa: E402
     REPORTS, _Doc, _cite, _cite_links, _clipw, _data_table, _ev_quote, _first_sentence,
     _fmt_compact, _fmt_money, _level_badge, _mini_stats, _metric, _opp_horizon, _pain_point_card,
     _principles, _rating_cell, _rec_actions, _rec_card, _scrub_names, _secnum_chips, _seq_order,
-    _severity, _stat_icon, _tables_titled, context_map_svg, data_flow_svg, dependency_map_svg,
-    donut_svg, impact_bars_svg, process_flow_svg, render_charts, render_suite, roadmap_timeline_svg,
-    root_cause_svg, stat_tiles, value_bar_svg, value_matrix_svg,
+    _severity, _stat_icon, _tables_titled, bounded_context_svg, context_map_svg, data_flow_svg,
+    dependency_map_svg, donut_svg, impact_bars_svg, process_flow_svg, render_charts, render_suite,
+    roadmap_timeline_svg, root_cause_svg, stat_tiles, value_bar_svg, value_matrix_svg,
 )
 
 
@@ -367,6 +367,43 @@ def test_context_map_svg_empty_and_populated():
     assert "<path" in context_map_svg(many, ho2)
 
 
+def test_bounded_context_svg_empty_and_populated():
+    # empty / single context -> omitted
+    assert bounded_context_svg([], "O2C") == ""
+    assert bounded_context_svg([m.BoundedContext(name="Solo")], "O2C") == ""
+    ctx = [
+        m.BoundedContext(name="Order Management", kind="core", owner="CS Team",
+                         responsibilities="Receipt",
+                         relationships=[m.ContextRelationship(to="Credit Control",
+                                                              kind="customer_supplier", label="U/D"),
+                                        m.ContextRelationship(to="Order Management",  # self -> skipped
+                                                              kind="conformist"),
+                                        m.ContextRelationship(to="Nowhere", kind="conformist")]),  # unresolved
+        m.BoundedContext(name="Credit Control", kind="core", owner="Finance",
+                         relationships=[m.ContextRelationship(to="EDI Integration",
+                                                              kind="weird_unknown_kind")]),  # tag="" arc
+        m.BoundedContext(name="EDI Integration", kind="supporting", responsibilities="connections"),
+        m.BoundedContext(name="Sanofi TSA", kind="external"),
+        m.BoundedContext(name="SAP S/4HANA", kind="core", is_shared_kernel=True,
+                         responsibilities="Authoritative data model"),
+    ]
+    svg = bounded_context_svg(ctx, "Order-to-Cash")
+    assert "<svg" in svg
+    assert "CORE" in svg and "SUPPORTING" in svg and "EXTERNAL" in svg   # kind tags
+    assert "Shared Kernel" in svg                                         # kernel band
+    assert "ORDER-TO-CASH — DOMAIN BOUNDARY" in svg                       # boundary frame
+    assert "C/S" in svg                                                   # a resolved relationship label
+    # an unknown kind falls back to the core style without crashing; a shared kernel with NO
+    # responsibilities still renders its band (no sub-line)
+    assert "<svg" in bounded_context_svg(
+        [m.BoundedContext(name="A", kind="mystery"),
+         m.BoundedContext(name="K", is_shared_kernel=True)], "")
+    # a populated map with NO shared kernel renders without the kernel band
+    nok = bounded_context_svg(
+        [m.BoundedContext(name="A", kind="core"), m.BoundedContext(name="B", kind="supporting")], "")
+    assert "<svg" in nok and "Shared Kernel" not in nok
+
+
 def test_root_cause_svg_empty_patterns_and_fallback():
     assert root_cause_svg([], []) == ""
     pps = [m.PainPoint(id="PP1", title="A", impact_rank=1, failure_pattern="data drift"),
@@ -491,7 +528,14 @@ def test_exec_and_pp_tiles_via_render(tmp_path):
     registry.setup_domain(ROOT / "inputs" / "o2c", freeze=True)
     cs = m.CurrentState(domain_overview="o", process_summary="s",
                         process_flow=[m.ProcessStep(seq=1, name="S", actor="A", system="X",
-                                                    description="d")])
+                                                    description="d")],
+                        bounded_contexts=[
+                            m.BoundedContext(name="Order Mgmt", kind="core", owner="CS",
+                                             relationships=[m.ContextRelationship(
+                                                 to="Credit", kind="customer_supplier")]),
+                            m.BoundedContext(name="Credit", kind="core"),
+                            m.BoundedContext(name="SAP", kind="core", is_shared_kernel=True,
+                                             responsibilities="system of record")])
     pp = m.PainPoint(id="PP1", title="Money issue", impact_rank=1,
                      quantified=[m.NumberRef(value=600000, unit="eur", label="small gap"),
                                  m.NumberRef(value=30675000, unit="eur", label="big divergence"),
@@ -510,6 +554,9 @@ def test_exec_and_pp_tiles_via_render(tmp_path):
     assert "€30.7M" in exec_pg and "67%" in exec_pg          # largest money + first percent
     r02 = (out / "02-pain-points.html").read_text()
     assert "high severity" in r02 and "medium severity" in r02
+    # the bounded-context map renders in current-state (r01 'Domain landscape')
+    r01 = (out / "01-current-state.html").read_text()
+    assert "Domain landscape" in r01 and "DOMAIN BOUNDARY" in r01 and "Shared Kernel" in r01
     # the donut chart renders in the supporting-artefacts report (r06 'Where the failures concentrate')
     r06 = (out / "06-supporting-artefacts.html").read_text()
     assert "Where the failures concentrate" in r06 and "Value by channel" in r06

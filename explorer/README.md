@@ -1,14 +1,33 @@
-# Discovery Explorer
+# Discovery Console & Explorer
 
-An interactive, client-facing web companion to the AuroPro discovery report suite — the
-**explorable** version of the static print/PDF deliverable. Same grounded data, same navy/blue
-identity, but you can cross-link pain points ↔ opportunities, filter and sort the opportunity
-portfolio, browse the evidence and fact store, read the planning-assumptions ledger, and search
-the whole suite.
+A **React + Vite + TypeScript** app with two layers:
 
-It is a **React + Vite + TypeScript** single-page app. It ships as static files (no server at view
-time): the built `dist/` opens from any static host or directly from `file://`, with deep-linkable
-hash URLs (`#/o2c/opportunities/OPP1`).
+1. **Discovery Console** (the landing page, `#/`) — the operator flow that wraps the live pipeline
+   in six stages: *upload → assessment → discovery copilot → analysis → preview → report
+   generation*. It drives the real Python engine (`run.py`) via a small backend, shows a progress
+   stepper + live activity feed, surfaces the discovery-copilot gaps for SME feedback, and embeds
+   the report suite at the Preview stage. A **skip-to-compiled-reports** breakpoint jumps straight
+   to the suite for a demo.
+2. **Report Explorer** (`#/suite/<domain>/…`) — the explorable version of the static print/PDF
+   deliverable: cross-link pain points ↔ opportunities, filter/sort the portfolio, browse the
+   evidence and fact store, read the planning-assumptions ledger, and search the whole suite.
+
+The Explorer ships as static files (no server at view time) — the built `dist/` opens from any
+static host or `file://`, deep-linkable via hash URLs. The Console additionally needs the backend
+running to drive a live/replay run.
+
+## Backend (for the Console)
+
+The Console talks to `v1/server.py` — a stdlib-only backend (no extra Python deps) that launches
+`run.py` as a subprocess, parses its phase signals, and streams them to the browser over SSE.
+
+```bash
+cd v1 && uv run python server.py        # http://127.0.0.1:8742
+```
+
+Run modes from the Console: **Replay** (`--golden`, cached, ~30–60s, $0 — for the demo) or
+**Live** (the real pipeline, minutes, costs API credits). The Explorer alone needs no backend.
+Override the API base with `VITE_CONSOLE_API` at build time if hosting the backend elsewhere.
 
 ## Data
 

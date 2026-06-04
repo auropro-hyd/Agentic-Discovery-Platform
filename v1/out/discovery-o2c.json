@@ -683,13 +683,13 @@
     "current_state": {
       "baseline_stats": [
         {
-          "label": "EDI share of order volume",
-          "sublabel": "5,667 orders",
-          "value": "67.3%"
+          "label": "EDI orders",
+          "sublabel": "67.3% of order volume",
+          "value": "5,667"
         },
         {
           "label": "EDI order value",
-          "sublabel": "66.8% of value",
+          "sublabel": "66.8% of order value",
           "value": "EUR 59,711,399.53"
         },
         {
@@ -698,43 +698,146 @@
           "value": "1,196"
         },
         {
-          "label": "Accounts with credit-limit difference",
+          "label": "Fax orders",
+          "sublabel": "EUR 1,771,828.67",
+          "value": "184"
+        },
+        {
+          "label": "Fax NOT_FULFILLED orders",
+          "sublabel": "legacy-account derogation",
+          "value": "40"
+        },
+        {
+          "label": "'EDI order not processed' escalations",
+          "sublabel": "43% of escalations",
+          "value": "34"
+        },
+        {
+          "label": "Accounts with credit-limit mismatch",
           "sublabel": "CRM vs ERP",
           "value": "267 of 318"
         },
         {
-          "label": "Accounts with payment-terms difference",
+          "label": "Accounts with payment-terms mismatch",
           "sublabel": "CRM vs ERP",
           "value": "228"
         },
         {
           "label": "Aggregate absolute credit-limit delta",
-          "sublabel": "across reviewed accounts",
+          "sublabel": "across accounts",
           "value": "EUR 30,675,000"
         },
         {
-          "label": "Largest single credit-limit item",
+          "label": "Largest single discrepancy",
           "sublabel": "Carrefour France",
           "value": "EUR 600,000"
         },
         {
-          "label": "EDI-order-not-processed escalations",
-          "sublabel": "43% of escalations",
-          "value": "34"
+          "label": "CRM total credit limit",
+          "sublabel": "SAP CRM",
+          "value": "EUR 61,225,000"
+        },
+        {
+          "label": "ERP total credit limit",
+          "sublabel": "SAP S/4HANA",
+          "value": "EUR 58,975,000"
+        }
+      ],
+      "bounded_contexts": [
+        {
+          "is_shared_kernel": false,
+          "kind": "core",
+          "name": "Order Management",
+          "owner": "Customer Service / Order Management",
+          "relationships": [
+            {
+              "kind": "customer_supplier",
+              "label": "passes captured orders for fulfilment",
+              "to": "Order Fulfilment"
+            },
+            {
+              "kind": "conformist",
+              "label": "uses customer credit master",
+              "to": "Customer Master & Credit"
+            }
+          ],
+          "responsibilities": "Capture and processing of manual (telephone) and email orders under the Order Management SOP and O2C RACI."
+        },
+        {
+          "is_shared_kernel": false,
+          "kind": "core",
+          "name": "EDI Order Channel",
+          "owner": "Customer Service (informal working notes)",
+          "relationships": [
+            {
+              "kind": "customer_supplier",
+              "label": "feeds orders to fulfilment",
+              "to": "Order Fulfilment"
+            },
+            {
+              "kind": "customer_supplier",
+              "label": "connection support via helpdesk",
+              "to": "EDI Connectivity (Sanofi IT)"
+            }
+          ],
+          "responsibilities": "Electronic order capture carrying 67.3% of volume and 66.8% of value; outside the Order Management SOP and O2C RACI."
+        },
+        {
+          "is_shared_kernel": true,
+          "kind": "supporting",
+          "name": "Customer Master & Credit",
+          "owner": "Accounts Receivable / Credit Management",
+          "relationships": [
+            {
+              "kind": "open_host_service",
+              "label": "provides credit master",
+              "to": "Order Management"
+            }
+          ],
+          "responsibilities": "Customer credit limits and payment terms across CRM and ERP; SAP S/4HANA designated authoritative."
+        },
+        {
+          "is_shared_kernel": false,
+          "kind": "supporting",
+          "name": "Customer Service Escalations",
+          "owner": "Customer Service",
+          "relationships": [
+            {
+              "kind": "customer_supplier",
+              "label": "handles fulfilment exceptions",
+              "to": "Order Fulfilment"
+            }
+          ],
+          "responsibilities": "Logging and resolution of order and delivery exceptions."
+        },
+        {
+          "is_shared_kernel": false,
+          "kind": "external",
+          "name": "EDI Connectivity (Sanofi IT)",
+          "owner": "Sanofi IT helpdesk",
+          "relationships": [
+            {
+              "kind": "customer_supplier",
+              "label": "connection support",
+              "to": "EDI Order Channel"
+            }
+          ],
+          "responsibilities": "Support for certain EDI connections post-carve-out."
         }
       ],
       "data_tables": [
         {
-          "caption": "Order channel volume, value, and fulfilment status from order-flow analysis",
+          "caption": "Order volume and value by channel",
           "columns": [
             "Channel",
             "Orders",
             "Order value (EUR)",
-            "Share of volume",
-            "Share of value",
-            "NOT_FULFILLED orders"
+            "Volume share",
+            "Value share",
+            "NOT_FULFILLED orders",
+            "NOT_FULFILLED value (EUR)"
           ],
-          "note": "EDI NOT_FULFILLED value EUR 12,362,493.74. Fax orders accepted under derogation from legacy accounts.",
+          "note": "",
           "rows": [
             [
               "EDI",
@@ -742,7 +845,8 @@
               "59,711,399.53",
               "67.3%",
               "66.8%",
-              "1,196"
+              "1,196",
+              "12,362,493.74"
             ],
             [
               "Fax",
@@ -750,7 +854,8 @@
               "1,771,828.67",
               "—",
               "—",
-              "40"
+              "40",
+              "—"
             ]
           ],
           "sources": [
@@ -770,7 +875,7 @@
               "quote": ""
             },
             {
-              "doc_id": "sanofi-consumer-healthcare-o2c-sop-2023",
+              "doc_id": "customer-service-escalation-log-2025",
               "locator": "",
               "quote": ""
             }
@@ -778,36 +883,36 @@
           "title": "Order channel mix"
         },
         {
-          "caption": "Credit-limit and payment-term comparison across SAP CRM and SAP S/4HANA",
+          "caption": "Customer credit-limit totals and mismatch counts across the two systems",
           "columns": [
             "Measure",
             "Value"
           ],
-          "note": "Carrefour France: CRM EUR 2,400,000; ERP EUR 1,800,000; delta EUR 600,000. CRM source note: 'manually updated by account manager post-carve-out'.",
+          "note": "",
           "rows": [
             [
-              "CRM total credit limit (EUR)",
-              "61,225,000"
+              "CRM total credit limit",
+              "EUR 61,225,000"
             ],
             [
-              "ERP total credit limit (EUR)",
-              "58,975,000"
+              "ERP total credit limit",
+              "EUR 58,975,000"
             ],
             [
-              "Aggregate absolute credit-limit delta (EUR)",
-              "30,675,000"
-            ],
-            [
-              "Accounts with credit-limit difference (of 318)",
+              "Accounts with credit-limit mismatch (of 318)",
               "267"
             ],
             [
-              "Accounts with payment-terms difference",
+              "Accounts with payment-terms mismatch",
               "228"
             ],
             [
-              "Largest single item — Carrefour France (EUR)",
-              "600,000"
+              "Aggregate absolute credit-limit delta",
+              "EUR 30,675,000"
+            ],
+            [
+              "Largest single discrepancy — Carrefour France",
+              "EUR 600,000"
             ]
           ],
           "sources": [
@@ -832,10 +937,49 @@
               "quote": ""
             }
           ],
-          "title": "Credit master comparison — CRM vs ERP"
+          "title": "Credit-limit master data — CRM vs ERP"
         },
         {
-          "caption": "Logged customer service escalations with channel, root cause, and resolution time",
+          "caption": "Largest single account discrepancy",
+          "columns": [
+            "System",
+            "Credit limit (EUR)",
+            "Note"
+          ],
+          "note": "",
+          "rows": [
+            [
+              "CRM",
+              "2,400,000",
+              "manually updated by account manager post-carve-out"
+            ],
+            [
+              "ERP",
+              "1,800,000",
+              "—"
+            ],
+            [
+              "Delta",
+              "600,000",
+              "—"
+            ]
+          ],
+          "sources": [
+            {
+              "doc_id": "sap-crm-customer-export",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "accounts-receivable-review-notes-q4-2025",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "title": "Carrefour France credit-limit detail"
+        },
+        {
+          "caption": "Logged escalations with channel, root cause and resolution time",
           "columns": [
             "Date",
             "Customer",
@@ -844,7 +988,7 @@
             "Root cause",
             "Resolution (hrs)"
           ],
-          "note": "'EDI order not processed — manual intervention required' accounts for 34 escalations (43% share) across the full log.",
+          "note": "",
           "rows": [
             [
               "2025-01-18",
@@ -948,34 +1092,22 @@
               "doc_id": "customer-service-escalation-log-2025",
               "locator": "",
               "quote": ""
-            },
-            {
-              "doc_id": "edi-dispute-resolution-cs-working-notes",
-              "locator": "",
-              "quote": ""
-            },
-            {
-              "doc_id": "order-flow-analysis-export-2025",
-              "locator": "",
-              "quote": ""
             }
           ],
-          "title": "Customer service escalation log (2025)"
+          "title": "Customer service escalation log (Q1 2025)"
         },
         {
-          "caption": "Representative order records across channels and accounts",
+          "caption": "Representative orders illustrating channel and account coverage (units ordered)",
           "columns": [
-            "Order date",
             "Customer",
             "Country",
             "Channel",
             "SKU",
-            "Units ordered"
+            "Units"
           ],
           "note": "",
           "rows": [
             [
-              "2025-10-06",
               "Coop Group",
               "EU",
               "EDI",
@@ -983,7 +1115,6 @@
               "1,952"
             ],
             [
-              "2025-01-25",
               "Boots UK",
               "UK",
               "EDI",
@@ -991,7 +1122,6 @@
               "878"
             ],
             [
-              "2025-05-27",
               "Lidl Europe",
               "EU",
               "EDI",
@@ -999,7 +1129,6 @@
               "821"
             ],
             [
-              "2025-01-21",
               "Mercadona",
               "ES",
               "Manual",
@@ -1007,7 +1136,6 @@
               "1,479"
             ],
             [
-              "2025-02-15",
               "Carrefour France",
               "FR",
               "EDI",
@@ -1015,7 +1143,6 @@
               "836"
             ],
             [
-              "2025-04-18",
               "E.Leclerc",
               "FR",
               "EDI",
@@ -1023,7 +1150,6 @@
               "1,350"
             ],
             [
-              "2025-12-19",
               "dm (Drogerie Markt)",
               "DE",
               "Manual",
@@ -1031,7 +1157,6 @@
               "1,136"
             ],
             [
-              "2025-11-03",
               "Lidl Europe",
               "EU",
               "Fax",
@@ -1039,7 +1164,6 @@
               "1,308"
             ],
             [
-              "2025-11-19",
               "Carrefour France",
               "FR",
               "EDI",
@@ -1047,7 +1171,6 @@
               "1,624"
             ],
             [
-              "2025-09-19",
               "Coop Group",
               "EU",
               "EDI",
@@ -1055,7 +1178,6 @@
               "1,212"
             ],
             [
-              "2025-11-03",
               "Lidl Europe",
               "EU",
               "Email",
@@ -1063,7 +1185,6 @@
               "1,425"
             ],
             [
-              "2025-05-22",
               "Boots UK",
               "UK",
               "EDI",
@@ -1078,79 +1199,93 @@
               "quote": ""
             }
           ],
-          "title": "Sample order transactions (2025)"
+          "title": "Sample orders by channel and account"
         }
       ],
-      "domain_overview": "This section documents the current state of Opella Europe's Order-to-Cash (O2C) operation following carve-out from Sanofi. The domain spans order capture across EDI, manual (telephone), email, and fax channels; customer master and credit data held in SAP CRM and SAP S/4HANA; customer service escalation handling; and accounts-receivable review. Customer credit master data is maintained across two systems (SAP CRM and SAP S/4HANA), with the credit-management policy naming SAP S/4HANA as the sole authoritative source for customer credit limits. Order capture is dominated by EDI, which accounts for 67.3% of order volume and 66.8% of order value, while the governing Order Management SOP and the O2C RACI explicitly cover only manual (telephone) and email channels.",
+      "domain_overview": "This section documents the factual current state of Opella Europe's order-to-cash (O2C) domain following the carve-out from Sanofi. The domain spans retail customer order capture across multiple channels (EDI, manual telephone, email and fax), order fulfilment, customer service escalation handling, and credit management governed by customer master data held in two systems — SAP CRM and SAP S/4HANA. EDI is the dominant order channel by both volume and value, while the published Order Management SOP and the O2C RACI cover only the manual telephone and email channels. Customer credit limits and payment terms are maintained in parallel across CRM and the ERP, with SAP S/4HANA designated as the sole authoritative source.",
       "format_taxonomy": [
         {
-          "description": "Electronic Data Interchange order channel",
-          "examples": "5,667 orders; EUR 59,711,399.53; 67.3% of volume",
+          "description": "Electronic Data Interchange order channel; largest by volume and value; not covered by the Order Management SOP or O2C RACI",
+          "examples": "5,667 orders; EUR 59,711,399.53",
           "label": "EDI"
         },
         {
-          "description": "Telephone order channel covered by SOP and RACI",
-          "examples": "Mercadona and dm manual orders in the transaction sample",
+          "description": "Telephone order channel defined in Section 4 of the Order Management SOP and covered by the O2C RACI",
+          "examples": "Mercadona manual order; dm manual order",
           "label": "Manual (telephone)"
         },
         {
-          "description": "Email order channel covered by SOP and RACI",
-          "examples": "Lidl Europe email order in the transaction sample",
+          "description": "Email order channel defined in the Order Management SOP and covered by the O2C RACI",
+          "examples": "Lidl Europe email order",
           "label": "Email"
         },
         {
-          "description": "Legacy channel accepted under derogation",
-          "examples": "184 orders; EUR 1,771,828.67; Lidl Europe fax order in the sample",
+          "description": "Legacy fax orders accepted under derogation for certain markets",
+          "examples": "184 orders; EUR 1,771,828.67; Lidl Europe fax order",
           "label": "Fax"
         },
         {
-          "description": "Phone channel recorded in escalation log",
-          "examples": "Tesco UK and Lidl Europe phone escalations",
-          "label": "Phone"
+          "description": "Telephone channel recorded within the customer-service escalation log",
+          "examples": "Tesco UK; Lidl Europe escalations",
+          "label": "Phone (escalation)"
         }
       ],
       "handoff_catalogue": [
         {
-          "from_step": "EDI order capture",
-          "mechanism": "Manual intervention required where EDI order not processed (34 escalations; 43% share)",
+          "from_step": "Order capture (EDI / manual / email / fax)",
+          "mechanism": "Captured orders pass to fulfilment in SAP S/4HANA",
+          "to_step": "Order fulfilment"
+        },
+        {
+          "from_step": "Order fulfilment",
+          "mechanism": "NOT_FULFILLED and exception orders raised as escalations into the escalation log",
           "to_step": "Customer service escalation handling"
         },
         {
-          "from_step": "Order capture",
-          "mechanism": "Credit limit and payment-term lookup across SAP CRM and SAP S/4HANA",
-          "to_step": "Credit master check"
+          "from_step": "EDI order processing",
+          "mechanism": "Connection issues for certain connections routed to the Sanofi IT helpdesk",
+          "to_step": "EDI connectivity support"
         },
         {
-          "from_step": "Credit master check",
-          "mechanism": "Comparison of CRM and ERP credit limits and payment terms across 318 accounts",
-          "to_step": "Accounts-receivable review"
-        },
-        {
-          "from_step": "Certain EDI connections",
-          "mechanism": "Contact for the other connections per working notes",
-          "to_step": "Sanofi IT helpdesk"
+          "from_step": "Customer credit maintenance (CRM)",
+          "mechanism": "Credit limits and payment terms maintained in both systems; S/4HANA designated authoritative",
+          "to_step": "Authoritative credit master (SAP S/4HANA)"
         }
       ],
       "ownership_map": [
         {
-          "accountable": "Per O2C RACI (manual and email scope)",
+          "accountable": "Order Management (per O2C RACI)",
           "activity": "Manual (telephone) and email order processing",
           "consulted": "",
           "informed": "",
-          "responsible": "Order management / customer service"
+          "responsible": "Customer Service order handler"
         },
         {
-          "accountable": "SAP S/4HANA as sole authoritative source",
-          "activity": "Credit limit authority",
+          "accountable": "Not covered by the O2C RACI",
+          "activity": "EDI order processing",
           "consulted": "",
           "informed": "",
-          "responsible": "Credit management"
+          "responsible": "Not covered by the O2C RACI (EDI-related rows excluded)"
+        },
+        {
+          "accountable": "Customer Service",
+          "activity": "Customer service escalation resolution",
+          "consulted": "",
+          "informed": "",
+          "responsible": "Customer Service"
+        },
+        {
+          "accountable": "Credit Management (SAP S/4HANA as authoritative source)",
+          "activity": "Customer credit limit master data",
+          "consulted": "",
+          "informed": "",
+          "responsible": "Accounts Receivable / Credit"
         }
       ],
       "process_detail": [
         {
-          "actor": "EDI integration",
-          "body": "EDI carries 5,667 orders (67.3% of volume; EUR 59,711,399.53; 66.8% of value). The Order Management SOP states 'EDI is not covered by this version of the SOP' and the working notes state the official SOP 'does not cover EDI ... it accounts for around 67% of our total order volume.' Of EDI orders, 1,196 (EUR 12,362,493.74) are NOT_FULFILLED.",
+          "actor": "Retail customer / EDI connection",
+          "body": "Electronic orders enter via EDI, which accounts for around 67% of total order volume — 5,667 orders (67.3%) worth EUR 59,711,399.53 (66.8% of value). The published Order Management SOP states EDI is not covered by that version of the SOP, and the O2C RACI excludes EDI-related rows. Working notes for EDI dispute resolution are maintained outside the official SOP set.",
           "sources": [
             {
               "doc_id": "edi-dispute-resolution-cs-working-notes",
@@ -1163,17 +1298,17 @@
               "quote": ""
             },
             {
-              "doc_id": "order-flow-analysis-export-2025",
+              "doc_id": "o2c-process-raci-opella-europe",
               "locator": "",
               "quote": ""
             }
           ],
           "system": "EDI",
-          "title": "EDI order processing"
+          "title": "EDI order capture"
         },
         {
-          "actor": "Order management",
-          "body": "The Order Management SOP covers 'Manual (telephone) and email order channels as defined in Section 4.' The O2C RACI covers 'Manual (telephone) and Email order channels only,' with EDI-related rows excluded.",
+          "actor": "Customer Service order handler",
+          "body": "Telephone and email orders are processed under the Order Management SOP, which defines the manual (telephone) and email order channels in Section 4. The O2C RACI covers the manual (telephone) and email order channels only.",
           "sources": [
             {
               "doc_id": "order-management-sop-opella-europe",
@@ -1186,62 +1321,36 @@
               "quote": ""
             }
           ],
-          "system": "Order management",
-          "title": "Manual and email order processing"
+          "system": "SAP S/4HANA",
+          "title": "Manual and email order capture"
         },
         {
-          "actor": "Order management",
-          "body": "Fax orders total 184 (EUR 1,771,828.67), of which 40 are NOT_FULFILLED. The 2023 SOP describes 'a very small number of fax orders from legacy accounts in certain markets, accepted under derogation.'",
+          "actor": "Customer Service order handler",
+          "body": "A very small number of fax orders from legacy accounts in certain markets are accepted under derogation. The fax channel carries 184 orders worth EUR 1,771,828.67, of which 40 close as NOT_FULFILLED.",
           "sources": [
-            {
-              "doc_id": "order-flow-analysis-export-2025",
-              "locator": "",
-              "quote": ""
-            },
             {
               "doc_id": "sanofi-consumer-healthcare-o2c-sop-2023",
               "locator": "",
               "quote": ""
+            },
+            {
+              "doc_id": "order-flow-analysis-export-2025",
+              "locator": "",
+              "quote": ""
             }
           ],
-          "system": "Order management",
-          "title": "Fax order processing"
+          "system": "Fax / manual entry",
+          "title": "Fax order capture"
         },
         {
-          "actor": "Credit management / account management",
-          "body": "The credit-management policy states 'SAP S/4HANA is the sole authoritative source for all customer credit limits.' For Carrefour France, CRM holds EUR 2,400,000 and ERP holds EUR 1,800,000 (delta EUR 600,000), with the CRM record noted as 'manually updated by account manager post-carve-out.'",
+          "actor": "Customer Service",
+          "body": "Order and delivery exceptions are logged and resolved through customer service. 'EDI order not processed — manual intervention required' accounts for 34 escalations (43% share). Logged root causes also include delivery short / quantity variance, pricing discrepancy on invoice, delivery date change requested, returns authorisation, payment application query and credit note dispute.",
           "sources": [
             {
-              "doc_id": "credit-management-policy-opella-europe",
+              "doc_id": "customer-service-escalation-log-2025",
               "locator": "",
               "quote": ""
             },
-            {
-              "doc_id": "sap-crm-customer-export",
-              "locator": "",
-              "quote": ""
-            },
-            {
-              "doc_id": "accounts-receivable-review-notes-q4-2025",
-              "locator": "",
-              "quote": ""
-            }
-          ],
-          "system": "SAP CRM and SAP S/4HANA",
-          "title": "Credit master maintenance"
-        }
-      ],
-      "process_flow": [
-        {
-          "actor": "EDI integration",
-          "description": "EDI is the primary order entry channel, carrying 5,667 orders (67.3% of volume) worth EUR 59,711,399.53 (66.8% of value). Of these, 1,196 orders worth EUR 12,362,493.74 are recorded as NOT_FULFILLED.",
-          "failure_points": [
-            "EDI is not covered by the Order Management SOP",
-            "EDI rows are excluded from the O2C RACI"
-          ],
-          "name": "Order capture — EDI",
-          "seq": 1,
-          "sources": [
             {
               "doc_id": "edi-dispute-resolution-cs-working-notes",
               "locator": "",
@@ -1251,49 +1360,20 @@
               "doc_id": "order-flow-analysis-export-2025",
               "locator": "",
               "quote": ""
-            },
-            {
-              "doc_id": "order-management-sop-opella-europe",
-              "locator": "",
-              "quote": ""
             }
           ],
-          "system": "EDI"
+          "system": "Customer-service escalation log",
+          "title": "Escalation handling"
         },
         {
-          "actor": "Customer service / order management",
-          "description": "Manual (telephone) and email orders are processed under the Order Management SOP. Fax orders total 184 (EUR 1,771,828.67), accepted under derogation from legacy accounts in certain markets, of which 40 are NOT_FULFILLED.",
-          "failure_points": [],
-          "name": "Order capture — manual, email, and fax",
-          "seq": 2,
+          "actor": "Accounts Receivable / Credit",
+          "body": "Credit limits and payment terms are held in both SAP CRM and SAP S/4HANA. Of 318 accounts, 267 show a credit-limit mismatch and 228 a payment-terms mismatch. CRM totals EUR 61,225,000 and ERP totals EUR 58,975,000, with an aggregate absolute delta of EUR 30,675,000. The largest single account difference is Carrefour France at EUR 600,000 (CRM EUR 2,400,000; ERP EUR 1,800,000). The Credit Management Policy designates SAP S/4HANA as the sole authoritative source for all customer credit limits.",
           "sources": [
             {
-              "doc_id": "order-management-sop-opella-europe",
+              "doc_id": "accounts-receivable-review-notes-q4-2025",
               "locator": "",
               "quote": ""
             },
-            {
-              "doc_id": "order-flow-analysis-export-2025",
-              "locator": "",
-              "quote": ""
-            },
-            {
-              "doc_id": "sanofi-consumer-healthcare-o2c-sop-2023",
-              "locator": "",
-              "quote": ""
-            }
-          ],
-          "system": "Order management"
-        },
-        {
-          "actor": "Accounts receivable / credit management",
-          "description": "Customer credit limits and payment terms are held in SAP CRM and SAP S/4HANA. The credit-management policy names SAP S/4HANA as the sole authoritative source. Across 318 accounts, 267 show a credit-limit difference and 228 show a payment-terms difference between systems.",
-          "failure_points": [
-            "Credit limit recorded differently between CRM and ERP for 267 of 318 accounts"
-          ],
-          "name": "Credit and customer master check",
-          "seq": 3,
-          "sources": [
             {
               "doc_id": "credit-management-policy-opella-europe",
               "locator": "",
@@ -1308,22 +1388,90 @@
               "doc_id": "sap-s4-customer-master-export",
               "locator": "",
               "quote": ""
+            }
+          ],
+          "system": "SAP CRM and SAP S/4HANA",
+          "title": "Credit and master-data maintenance"
+        }
+      ],
+      "process_flow": [
+        {
+          "actor": "Retail customer / EDI connection",
+          "description": "Retail customers transmit orders electronically via EDI. EDI carries 5,667 orders (67.3% of volume), valued at EUR 59,711,399.53 (66.8% of value). This channel is explicitly not covered by the Order Management SOP or the O2C RACI.",
+          "failure_points": [],
+          "name": "Order capture — EDI",
+          "seq": 1,
+          "sources": [
+            {
+              "doc_id": "edi-dispute-resolution-cs-working-notes",
+              "locator": "",
+              "quote": ""
             },
             {
-              "doc_id": "accounts-receivable-review-notes-q4-2025",
+              "doc_id": "order-management-sop-opella-europe",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "o2c-process-raci-opella-europe",
               "locator": "",
               "quote": ""
             }
           ],
-          "system": "SAP CRM and SAP S/4HANA"
+          "system": "EDI"
         },
         {
-          "actor": "Customer service",
-          "description": "Escalations are logged by customer, country, channel, and root cause with resolution times in hours. 'EDI order not processed — manual intervention required' accounts for 34 escalations (43% share).",
+          "actor": "Customer Service order handler",
+          "description": "Orders received by telephone and email are captured and processed under the published Order Management SOP, which defines manual (telephone) and email order channels in Section 4. The O2C RACI covers these same channels.",
           "failure_points": [],
-          "name": "Customer service escalation handling",
+          "name": "Order capture — manual telephone and email",
+          "seq": 2,
+          "sources": [
+            {
+              "doc_id": "order-management-sop-opella-europe",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "o2c-process-raci-opella-europe",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "system": "SAP S/4HANA"
+        },
+        {
+          "actor": "Customer Service order handler",
+          "description": "A small number of fax orders from legacy accounts in certain markets are accepted under derogation. Fax carries 184 orders valued at EUR 1,771,828.67.",
+          "failure_points": [],
+          "name": "Order capture — fax (derogation)",
+          "seq": 3,
+          "sources": [
+            {
+              "doc_id": "sanofi-consumer-healthcare-o2c-sop-2023",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "order-flow-analysis-export-2025",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "system": "Fax / manual entry"
+        },
+        {
+          "actor": "Fulfilment / supply",
+          "description": "Captured orders proceed to fulfilment. A portion close as NOT_FULFILLED: 1,196 EDI orders worth EUR 12,362,493.74 and 40 fax orders.",
+          "failure_points": [],
+          "name": "Order fulfilment",
           "seq": 4,
           "sources": [
+            {
+              "doc_id": "order-flow-analysis-export-2025",
+              "locator": "",
+              "quote": ""
+            },
             {
               "doc_id": "customer-service-escalation-log-2025",
               "locator": "",
@@ -1335,17 +1483,47 @@
               "quote": ""
             }
           ],
-          "system": "Customer service escalation log"
+          "system": "SAP S/4HANA"
         },
         {
-          "actor": "Accounts receivable",
-          "description": "AR review compares credit limits and payment terms across systems. CRM total credit limit is EUR 61,225,000 and ERP total is EUR 58,975,000; aggregate absolute credit-limit delta is EUR 30,675,000. The largest single item is Carrefour France (CRM EUR 2,400,000; ERP EUR 1,800,000; delta EUR 600,000).",
+          "actor": "Customer Service",
+          "description": "Order and delivery exceptions are logged and resolved through the customer-service escalation process. 'EDI order not processed — manual intervention required' accounts for 34 escalations (43% share). Logged resolution times range from three to sixty-seven hours.",
           "failure_points": [],
-          "name": "Accounts-receivable review",
+          "name": "Customer service escalation handling",
           "seq": 5,
           "sources": [
             {
+              "doc_id": "customer-service-escalation-log-2025",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "edi-dispute-resolution-cs-working-notes",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "order-flow-analysis-export-2025",
+              "locator": "",
+              "quote": ""
+            }
+          ],
+          "system": "Customer-service escalation log"
+        },
+        {
+          "actor": "Accounts Receivable / Credit",
+          "description": "Customer credit limits and payment terms are maintained across SAP CRM and SAP S/4HANA. Of 318 accounts, 267 show a credit-limit mismatch and 228 a payment-terms mismatch; the aggregate absolute credit-limit delta is EUR 30,675,000. SAP S/4HANA is designated the sole authoritative source for customer credit limits.",
+          "failure_points": [],
+          "name": "Credit management and master-data governance",
+          "seq": 6,
+          "sources": [
+            {
               "doc_id": "accounts-receivable-review-notes-q4-2025",
+              "locator": "",
+              "quote": ""
+            },
+            {
+              "doc_id": "credit-management-policy-opella-europe",
               "locator": "",
               "quote": ""
             },
@@ -1366,84 +1544,74 @@
       "process_inventory": [
         {
           "name": "Order capture",
-          "purpose": "Receive customer orders via EDI, manual (telephone), email, and fax channels",
+          "purpose": "Receive customer orders across EDI, manual telephone, email and fax channels",
           "system_of_record_for": ""
         },
         {
-          "name": "Order management",
-          "purpose": "Process and fulfil manual and email orders per the Order Management SOP",
+          "name": "Order fulfilment",
+          "purpose": "Fulfil captured orders; record fulfilment outcome including NOT_FULFILLED",
           "system_of_record_for": ""
         },
         {
-          "name": "EDI order processing",
-          "purpose": "Process electronic orders; not covered by the current SOP or RACI",
+          "name": "Escalation handling",
+          "purpose": "Log and resolve order and delivery exceptions",
           "system_of_record_for": ""
         },
         {
-          "name": "Credit and customer master maintenance",
-          "purpose": "Maintain credit limits and payment terms in SAP CRM and SAP S/4HANA",
-          "system_of_record_for": ""
-        },
-        {
-          "name": "Customer service escalation handling",
-          "purpose": "Log and resolve order, delivery, pricing, and payment escalations",
-          "system_of_record_for": ""
-        },
-        {
-          "name": "Accounts-receivable review",
-          "purpose": "Review credit-limit and payment-term consistency across systems",
+          "name": "Credit and master-data management",
+          "purpose": "Maintain customer credit limits and payment terms across CRM and ERP",
           "system_of_record_for": ""
         }
       ],
-      "process_summary": "Orders enter through four channels: EDI (5,667 orders; EUR 59,711,399.53; 67.3% of volume), manual/telephone, email, and fax (184 orders; EUR 1,771,828.67). EDI is the largest channel by volume and value yet is excluded from both the Order Management SOP and the O2C RACI. Customer and credit data is held in SAP CRM and SAP S/4HANA; across 318 accounts reviewed, 267 show a credit-limit difference between the two systems and 228 show a payment-terms difference. The aggregate absolute credit-limit delta is EUR 30,675,000, with the single largest item at Carrefour France (EUR 600,000). Customer service logs escalations across channels, with 'EDI order not processed — manual intervention required' representing 34 escalations (43% share).",
+      "process_summary": "Retail orders enter Opella through four channels. EDI is the largest, carrying 5,667 orders (67.3% of volume) worth EUR 59,711,399.53 (66.8% of value). Manual telephone and email orders are processed under the published Order Management SOP and the O2C RACI; both documents explicitly exclude the EDI channel. Fax carries 184 orders worth EUR 1,771,828.67, accepted under derogation for legacy accounts. Orders flow to fulfilment, where a portion close as NOT_FULFILLED (EDI 1,196 orders / EUR 12,362,493.74; Fax 40 orders). Exceptions surface through a customer-service escalation process; 'EDI order not processed — manual intervention required' accounts for 34 escalations (43% share). Credit governance draws on customer master data maintained in SAP CRM and SAP S/4HANA, where 267 of 318 accounts show a credit-limit mismatch and 228 show a payment-terms mismatch.",
       "system_inventory": [
         {
-          "name": "SAP S/4HANA (ERP)",
-          "purpose": "Customer master and credit management",
-          "system_of_record_for": "Customer credit limits (sole authoritative source per credit-management policy)"
+          "name": "SAP S/4HANA",
+          "purpose": "ERP and customer master; designated sole authoritative source for customer credit limits",
+          "system_of_record_for": "Customer credit limits and customer master (authoritative)"
         },
         {
           "name": "SAP CRM",
-          "purpose": "Customer relationship and credit data",
-          "system_of_record_for": "Customer-facing credit and account data (CRM total credit limit EUR 61,225,000)"
+          "purpose": "Customer relationship management holding parallel customer credit limit and payment-terms data",
+          "system_of_record_for": "Customer relationship data (credit limits also held here)"
         },
         {
           "name": "EDI",
-          "purpose": "Electronic order capture",
-          "system_of_record_for": "EDI orders (5,667; EUR 59,711,399.53)"
+          "purpose": "Electronic order capture channel carrying 67.3% of order volume",
+          "system_of_record_for": "EDI order intake"
         },
         {
-          "name": "Order management",
-          "purpose": "Manual, email, and fax order processing",
-          "system_of_record_for": "Manual and email orders per SOP"
+          "name": "Customer-service escalation log",
+          "purpose": "Record of logged order and delivery escalations with root cause and resolution time",
+          "system_of_record_for": "Escalation history"
         },
         {
-          "name": "Customer service escalation log",
-          "purpose": "Escalation recording",
-          "system_of_record_for": "Logged escalations by customer, channel, and root cause"
+          "name": "Fax / manual entry",
+          "purpose": "Legacy order intake accepted under derogation",
+          "system_of_record_for": "Fax order intake"
         }
       ],
       "system_profiles": [
         {
-          "how_used": "Holds customer credit limits and payment terms; named in the credit-management policy as 'the sole authoritative source for all customer credit limits.' ERP total credit limit is EUR 58,975,000.",
-          "limitations": "Of 318 accounts, 267 hold a different credit limit and 228 a different payment term versus CRM.",
-          "name": "SAP S/4HANA (ERP)",
-          "owners": "Credit management",
-          "role": "ERP and customer credit master"
+          "how_used": "Holds customer master, credit limits and payment terms; designated the sole authoritative source for all customer credit limits. ERP total credit limit recorded at EUR 58,975,000.",
+          "limitations": "Stated facts only.",
+          "name": "SAP S/4HANA",
+          "owners": "Credit Management / Accounts Receivable",
+          "role": "ERP and authoritative customer master"
         },
         {
-          "how_used": "Holds customer credit and account data; CRM total credit limit is EUR 61,225,000. Carrefour France record carries EUR 2,400,000, noted as 'manually updated by account manager post-carve-out.'",
-          "limitations": "Aggregate absolute credit-limit delta versus ERP is EUR 30,675,000.",
+          "how_used": "Maintains customer credit limits and payment terms in parallel with the ERP. CRM total credit limit recorded at EUR 61,225,000; 267 of 318 accounts differ from the ERP credit limit and 228 differ on payment terms.",
+          "limitations": "Carrefour France credit limit recorded as manually updated by account manager post-carve-out.",
           "name": "SAP CRM",
-          "owners": "Account management / credit management",
-          "role": "Customer relationship and credit data"
+          "owners": "Account management / Credit",
+          "role": "Customer relationship management system"
         },
         {
-          "how_used": "Captures 67.3% of order volume and 66.8% of order value across 5,667 orders.",
-          "limitations": "Not covered by the Order Management SOP or the O2C RACI; 1,196 orders NOT_FULFILLED (EUR 12,362,493.74).",
-          "name": "EDI",
-          "owners": "EDI integration / Sanofi IT helpdesk for certain connections",
-          "role": "Electronic order capture"
+          "how_used": "Carries 5,667 orders (67.3% of volume) worth EUR 59,711,399.53 (66.8% of value). Explicitly excluded from the Order Management SOP and the O2C RACI.",
+          "limitations": "EDI connectivity support routed through the Sanofi IT helpdesk for some connections.",
+          "name": "EDI channel",
+          "owners": "Customer Service (dispute resolution working notes maintained informally)",
+          "role": "Electronic order interchange"
         }
       ]
     },
@@ -4945,19 +5113,34 @@
         "statement": "Note that resolution of EDI connection issues can depend on the Sanofi IT helpdesk with a 24–48 hour turnaround, which constrains how quickly some EDI exceptions can be cleared."
       },
       {
-        "basis": "Working-notes quote: 'the other 6 connections ... you need to contact the Sanofi IT helpdesk ... it can take 24 to 48 hours'",
-        "kind": "sla",
-        "statement": "Restoring certain EDI connections depends on contacting the Sanofi IT helpdesk, with a stated turnaround of 24 to 48 hours for the other connections."
-      },
-      {
-        "basis": "Credit-management policy: 'SAP S/4HANA is the sole authoritative source for all customer credit limits'",
+        "basis": "EDI carries 5,667 orders (67.3% of volume) yet the SOP and RACI explicitly exclude the EDI channel.",
         "kind": "owner",
-        "statement": "SAP S/4HANA is intended to act as the single authoritative owner of all customer credit limits going forward."
+        "statement": "Define an accountable owner for the EDI order channel, which is currently outside both the Order Management SOP and the O2C RACI."
       },
       {
-        "basis": "SOP: 'EDI is not covered by this version of the SOP'; RACI: 'This RACI covers Manual (telephone) and Email order channels only'",
+        "basis": "Credit Management Policy states SAP S/4HANA is the sole authoritative source; 267 of 318 accounts currently differ between CRM and ERP.",
+        "kind": "owner",
+        "statement": "Confirm SAP S/4HANA as the single operating system of record for credit limits and reconcile CRM values to it."
+      },
+      {
+        "basis": "Logged Q1 2025 resolution times range from three to sixty-seven hours.",
+        "kind": "sla",
+        "statement": "Establish a target resolution-time service level for customer-service escalations."
+      },
+      {
+        "basis": "Working notes record connection support routed to the Sanofi IT helpdesk.",
+        "kind": "sla",
+        "statement": "Establish a target turnaround for EDI connection support currently routed to the Sanofi IT helpdesk, where notes record a 24-to-48-hour turnaround."
+      },
+      {
+        "basis": "Aggregate absolute credit-limit delta is EUR 30,675,000, with the largest single account difference EUR 600,000 (Carrefour France).",
+        "kind": "threshold",
+        "statement": "Set a tolerance threshold for acceptable CRM-vs-ERP credit-limit variance."
+      },
+      {
+        "basis": "EDI represents the majority of volume and value but is documented only through informal working notes.",
         "kind": "sequence",
-        "statement": "EDI processing would need to be brought into the scope of the Order Management SOP and the O2C RACI, which currently cover only manual (telephone) and email channels."
+        "statement": "Sequence extension of the Order Management SOP and RACI to cover EDI ahead of the manual and fax channels."
       },
       {
         "basis": "Policy already names S/4HANA as sole authoritative source, yet 267 of 318 accounts show credit-limit drift from manual CRM edits.",

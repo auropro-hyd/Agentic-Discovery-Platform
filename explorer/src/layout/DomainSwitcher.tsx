@@ -11,10 +11,10 @@ export function DomainSwitcher({ current }: { current: string }) {
 
   function go(slug: string) {
     if (slug === current) return;
-    // pathname looks like /<domain>/<section>[/<id>]
-    const parts = pathname.split("/").filter(Boolean); // [domain, section, id?]
-    const section = parts[1] ?? "overview";
-    navigate(`/${slug}/${section}`);
+    // pathname looks like /suite/<domain>/<section>[/<id>]
+    const parts = pathname.split("/").filter(Boolean); // [suite, domain, section, id?]
+    const section = parts[2] ?? "overview";
+    navigate(`/suite/${slug}/${section}`);
   }
 
   if (DOMAIN_SLUGS.length < 2) return null;

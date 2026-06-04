@@ -22,7 +22,7 @@ export default function PainPointDetail() {
   if (!pp) {
     return (
       <div>
-        <BackChip to={`/${domain}/pain-points`} label="All pain points" />
+        <BackChip to={`/suite/${domain}/pain-points`} label="All pain points" />
         <div className="empty">No such pain point in this domain.</div>
       </div>
     );
@@ -42,7 +42,7 @@ export default function PainPointDetail() {
 
   return (
     <div>
-      <BackChip to={`/${domain}/pain-points`} label="All pain points" />
+      <BackChip to={`/suite/${domain}/pain-points`} label="All pain points" />
 
       <header className="page-head">
         <div className="eyebrow">Pain point</div>
@@ -139,7 +139,7 @@ export default function PainPointDetail() {
         {addressedBy.length > 0 ? (
           <div className="linkrail">
             {addressedBy.map((opp) => (
-              <Link key={opp.id} to={`/${domain}/opportunities/${opp.id}`} className="tag">
+              <Link key={opp.id} to={`/suite/${domain}/opportunities/${opp.id}`} className="tag">
                 <strong>{opp.id}</strong> {opp.title}
               </Link>
             ))}

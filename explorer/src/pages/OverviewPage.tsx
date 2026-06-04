@@ -58,7 +58,7 @@ export default function OverviewPage() {
           <>
             <QuadrantBoard domain={domain} opportunities={opportunities} />
             <div className="linkrail">
-              <Link to={`/${domain}/opportunities`}>View full portfolio →</Link>
+              <Link to={`/suite/${domain}/opportunities`}>View full portfolio →</Link>
             </div>
           </>
         ) : (
@@ -75,7 +75,7 @@ export default function OverviewPage() {
               ))}
             </div>
             <div className="linkrail">
-              <Link to={`/${domain}/pain-points`}>View all pain points →</Link>
+              <Link to={`/suite/${domain}/pain-points`}>View all pain points →</Link>
             </div>
           </>
         ) : (

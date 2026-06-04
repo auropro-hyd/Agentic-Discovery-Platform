@@ -1,7 +1,6 @@
 import { lazy, Suspense } from "react";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DomainLayout } from "./layout/DomainLayout";
-import { DOMAIN_SLUGS } from "./lib/domains";
 
 const OverviewPage = lazy(() => import("./pages/OverviewPage"));
 const CurrentStatePage = lazy(() => import("./pages/CurrentStatePage"));
@@ -16,15 +15,16 @@ const TraceabilityPage = lazy(() => import("./pages/TraceabilityPage"));
 const SearchResultsPage = lazy(() => import("./pages/SearchResultsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const HOME = DOMAIN_SLUGS[0] ?? "o2c";
+const ConsolePage = lazy(() => import("./console/ConsolePage"));
 
 export function App() {
   return (
     <HashRouter>
       <Suspense fallback={<div className="loading">Loading…</div>}>
         <Routes>
-          <Route path="/" element={<Navigate to={`/${HOME}`} replace />} />
-          <Route path="/:domain" element={<DomainLayout />}>
+          {/* the Console (operator flow) is the landing page; the report suite lives under /suite */}
+          <Route path="/" element={<ConsolePage />} />
+          <Route path="/suite/:domain" element={<DomainLayout />}>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<OverviewPage />} />
             <Route path="current-state" element={<CurrentStatePage />} />

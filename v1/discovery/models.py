@@ -372,6 +372,31 @@ class Handoff:
 
 
 @dataclass
+class ContextRelationship:                # a DDD relationship between two bounded contexts
+    to: str                               # the other context's name
+    kind: str = ""                        # customer_supplier|conformist|anti_corruption_layer|…
+    label: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class BoundedContext:                     # a DDD bounded context (subdomain) for the context map
+    name: str
+    kind: str = "core"                    # core | supporting | generic | external
+    owner: str = ""
+    responsibilities: str = ""
+    is_shared_kernel: bool = False        # the single authoritative system-of-record, if any
+    relationships: list[ContextRelationship] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"name": self.name, "kind": self.kind, "owner": self.owner,
+                "responsibilities": self.responsibilities, "is_shared_kernel": self.is_shared_kernel,
+                "relationships": [r.to_dict() for r in self.relationships]}
+
+
+@dataclass
 class SystemProfile:                      # a deep, narrative per-system/source profile (Report 01)
     name: str
     role: str = ""                        # what it is / what it's for
@@ -446,6 +471,7 @@ class CurrentState:                       # Report 01 — NO severity/confidence
     ownership_map: list[RaciRow] = field(default_factory=list)
     system_inventory: list[InventoryItem] = field(default_factory=list)
     handoff_catalogue: list[Handoff] = field(default_factory=list)
+    bounded_contexts: list[BoundedContext] = field(default_factory=list)  # DDD context-map view
     # deeper grounded baseline (all optional — a domain without them simply omits the section)
     baseline_stats: list[KeyStat] = field(default_factory=list)          # §1 volume baseline tiles
     data_tables: list[DataTable] = field(default_factory=list)           # channel mix, EDI, DCs, …
@@ -461,6 +487,7 @@ class CurrentState:                       # Report 01 — NO severity/confidence
                 "ownership_map": [r.to_dict() for r in self.ownership_map],
                 "system_inventory": [i.to_dict() for i in self.system_inventory],
                 "handoff_catalogue": [h.to_dict() for h in self.handoff_catalogue],
+                "bounded_contexts": [b.to_dict() for b in self.bounded_contexts],
                 "baseline_stats": [k.to_dict() for k in self.baseline_stats],
                 "data_tables": [t.to_dict() for t in self.data_tables],
                 "process_detail": [p.to_dict() for p in self.process_detail]}

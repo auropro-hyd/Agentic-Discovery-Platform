@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from discovery.llm import ToolTurn  # noqa: E402
-from discovery.models import MatrixQuadrant  # noqa: E402
+from discovery.models import BoundedContext, ContextRelationship, MatrixQuadrant  # noqa: E402
 from discovery.reportsuite import build  # noqa: E402
 from _payloads import depth_doc_keys, depth_synthesis_payload  # noqa: E402
 
@@ -185,3 +185,13 @@ def test_derive_charts_empty_when_no_breakdown():
     # only one channel present -> not enough for a breakdown
     raw = {"findings": [{"computed_values": [{"label": "Unfulfilled EDI orders", "value": 5}]}]}
     assert build.derive_charts(raw) == []
+
+
+def test_bounded_context_to_dict_roundtrips():
+    bc = BoundedContext(name="Order Mgmt", kind="core", owner="CS", responsibilities="Receipt",
+                        is_shared_kernel=False,
+                        relationships=[ContextRelationship(to="Credit", kind="customer_supplier",
+                                                           label="U/D")])
+    d = bc.to_dict()
+    assert d["name"] == "Order Mgmt" and d["kind"] == "core" and d["is_shared_kernel"] is False
+    assert d["relationships"][0] == {"to": "Credit", "kind": "customer_supplier", "label": "U/D"}

@@ -5,7 +5,7 @@ import { SeverityBadge, CategoryBadge } from "../primitives/badges";
 /* A pain-point summary card for the list view. UI-chrome only (no client figures computed). */
 export function PainPointCard({ domain, pp }: { domain: string; pp: PainPoint }) {
   return (
-    <Link to={`/${domain}/pain-points/${pp.id}`} className="card">
+    <Link to={`/suite/${domain}/pain-points/${pp.id}`} className="card">
       <div className="card-meta">
         <span className="tiny muted" style={{ fontWeight: 800, color: "var(--blue)" }}>{pp.id}</span>
         <SeverityBadge severity={pp.severity} />

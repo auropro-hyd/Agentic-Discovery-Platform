@@ -10,7 +10,7 @@ export function SearchBar({ domain }: { domain: string }) {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const query = q.trim();
-    if (query) navigate(`/${domain}/search?q=${encodeURIComponent(query)}`);
+    if (query) navigate(`/suite/${domain}/search?q=${encodeURIComponent(query)}`);
   }
 
   return (

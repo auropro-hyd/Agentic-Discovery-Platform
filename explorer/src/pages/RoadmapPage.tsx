@@ -81,7 +81,7 @@ export default function RoadmapPage() {
               ))}
             </div>
             <div className="linkrail">
-              <Link to={`/${domain}/assumptions`}>See all planning assumptions →</Link>
+              <Link to={`/suite/${domain}/assumptions`}>See all planning assumptions →</Link>
             </div>
           </>
         )}
