@@ -1,7 +1,9 @@
 """The agent tool-use loop — the agent genuinely discovers the findings.
 
-The agent is given generic data/text tools and asked to investigate an O2C document set and
-emit exactly 3 findings. It is NOT told what the findings are. It calls describe/group_by/
+The agent is given generic data/text tools and asked to investigate a document set and emit the
+material findings the evidence supports (typically 3-5; the report DEPTH comes from the fact-store +
+per-report fan-out downstream, not from the finding count). It is NOT told what the findings are. It
+calls describe/group_by/
 join_diff/filter_count/aggregate/find_mentions, reasons over the results, and terminates by
 calling emit_findings. Every quantitative claim is grounded against a real tool result.
 
@@ -163,8 +165,10 @@ def run_discovery(llm: LLMClient, csv_ids: list[str], doc_ids: list[str],
     system = build_system_prompt(csv_ids, doc_ids, narrative_text, domain_label)
     schemas = tools.schemas() + [EMIT_TOOL]
     messages: list[dict] = [{"role": "user", "content":
-                             f"Investigate this {domain_label} landscape and emit exactly 3 "
-                             "findings. Begin by orienting on each data file per the protocol."}]
+                             f"Investigate this {domain_label} landscape and emit the material, "
+                             "evidence-backed findings (typically 3-5), each a distinct cross-source "
+                             "issue ranked by business impact. Begin by orienting on each data file "
+                             "per the protocol, then emit_findings once."}]
     seen, findings = set(), None
     for _ in range(MAX_TURNS):
         turn = llm.messages_with_tools(system=system, messages=messages, tools=schemas, model=model)
@@ -173,7 +177,10 @@ def run_discovery(llm: LLMClient, csv_ids: list[str], doc_ids: list[str],
         if on_activity:
             for tu in tool_uses:
                 on_activity(narrate(tu))
-        if turn.stop_reason != "tool_use" or not tool_uses:
+        # The API requires a tool_result for EVERY tool_use, regardless of stop_reason — a turn that
+        # ends with tool_use blocks (even on a non-"tool_use" stop, e.g. max_tokens mid-call) must
+        # still be answered with results, or the next request 400s on an unpaired tool_use.
+        if not tool_uses:
             messages.append({"role": "user", "content":
                              "You must finish by calling emit_findings exactly once. Do that now."})
             continue

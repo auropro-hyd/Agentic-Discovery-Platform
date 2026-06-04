@@ -81,7 +81,18 @@ table.usecase td{ font-size:.8rem; }
 table.rationale, table.trace{ table-layout:fixed; }
 table.rationale td, table.trace td{ font-size:.82rem; word-break:normal; overflow-wrap:break-word; }
 table.rationale .rate{ white-space:normal; }    /* let the badge wrap with its reason if needed */
-table.trace td:first-child{ width:11%; }         /* the short id/summary column */
+/* the traceability matrix is 7 narrow columns on A4 — shrink the header type and assign explicit
+   widths so the header words ("Recommendation"/"Opportunity"/"Expected outcome") wrap cleanly
+   instead of colliding. */
+table.trace th{ font-size:.62rem; padding:.4rem .45rem; letter-spacing:.02em; }
+table.trace td{ font-size:.78rem; padding:.45rem .45rem; }
+table.trace th:nth-child(1), table.trace td:nth-child(1){ width:18%; }   /* pain point */
+table.trace th:nth-child(2), table.trace td:nth-child(2){ width:20%; }   /* summary */
+table.trace th:nth-child(3), table.trace td:nth-child(3){ width:8%; }    /* severity */
+table.trace th:nth-child(4), table.trace td:nth-child(4){ width:18%; }   /* recommendation */
+table.trace th:nth-child(5), table.trace td:nth-child(5){ width:10%; }   /* opportunity */
+table.trace th:nth-child(6), table.trace td:nth-child(6){ width:18%; }   /* expected outcome */
+table.trace th:nth-child(7), table.trace td:nth-child(7){ width:8%; }    /* horizon */
 .dt{ margin:1.2rem 0; }
 .dt h4{ margin:0 0 .2rem; }
 .dt-cap{ font-size:.82rem; color:var(--muted); margin-bottom:.2rem; }

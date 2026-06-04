@@ -11,8 +11,23 @@ ordering is stable and row harvesting is capped + sorted, so a golden replay is 
 """
 from __future__ import annotations
 
+import re
+
 from . import docnames, tools
 from .models import DocQuote, EntityFact, FactStore, QuantFact, Relation, StrategyProfile
+
+# Raw tool-output field names / engine jargon a model may copy verbatim into a quote. These are
+# internal to the tool layer and must never reach a client-facing brief or report. We strip the
+# token (keeping the human numbers/words around it); a quote that is *only* such jargon is dropped.
+_TOOL_JARGON = re.compile(
+    r"\b(?:n_mismatch|sum_delta|from_tool|group_by|join_diff|filter_count|find_mentions)\b"
+    r"\s*[:=]?\s*",
+    re.I,
+)
+# residue left after a key is stripped: braces/quotes, then orphaned separators (": :" / ", :" /
+# leading-or-trailing ";"). Applied repeatedly so chained residue ("{ : : 267") fully collapses.
+_QUOTE_BRACES = re.compile(r"[{}\"]")
+_QUOTE_RESIDUE = re.compile(r"\s*[:,]\s*(?=[:,])|^\s*[:,;]\s*|\s*[:,;]\s*$")
 
 # how many entity rows to harvest per CSV (deterministic cap — the reports surface the top accounts,
 # not every row; full data lives in the source pages / provenance).
@@ -50,7 +65,8 @@ def _harvest_quants_and_quotes(raw_payload: dict, fs: FactStore) -> None:
             fs.quant.append(QuantFact(label=label, value=num, unit=_unit_of(label),
                                       sources=srcs, tier=tier))
         for nv in f.get("narrative_values", []):
-            quote, doc = str(nv.get("quote", "")).strip(), docnames.stem(nv.get("doc_id", ""))
+            quote = _clean_quote(str(nv.get("quote", "")))
+            doc = docnames.stem(nv.get("doc_id", ""))
             if not quote or not doc:
                 continue
             key = (doc, quote[:60].lower())
@@ -60,7 +76,8 @@ def _harvest_quants_and_quotes(raw_payload: dict, fs: FactStore) -> None:
             fs.quotes.append(DocQuote(text=quote, doc_id=doc,
                                       locator=str(nv.get("label", "")), tier=tier))
         for s in f.get("sources", []):
-            quote, doc = str(s.get("quote", "")).strip(), docnames.stem(s.get("doc_id", ""))
+            quote = _clean_quote(str(s.get("quote", "")))
+            doc = docnames.stem(s.get("doc_id", ""))
             if not quote or not doc:
                 continue
             key = (doc, quote[:60].lower())
@@ -128,6 +145,30 @@ def strategy_from_manifest(manifest: dict | None) -> StrategyProfile:
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────────────────────────
+def _clean_quote(quote: str) -> str:
+    """Strip raw tool-output field names / engine jargon a model may have copied into a quote, so
+    internal tokens never reach a client-facing brief. Returns "" when, after stripping, nothing of
+    substance remains (the quote was essentially a raw tool dump) — caller then drops it.
+
+    Deterministic and domain-agnostic: it removes only the fixed internal token set, leaving the
+    human numbers and words intact (e.g. "n_mismatch 267; sum_delta 30675000" → "267; 30675000",
+    which carries no meaning on its own and so is dropped; a real prose quote is left untouched)."""
+    q = quote.strip()
+    if not q or not _TOOL_JARGON.search(q):
+        return q
+    cleaned = _QUOTE_BRACES.sub("", _TOOL_JARGON.sub("", q))
+    prev = None
+    while prev != cleaned:               # collapse orphaned separators until stable
+        prev = cleaned
+        cleaned = _QUOTE_RESIDUE.sub("", cleaned)
+    cleaned = cleaned.strip(" ;,:")
+    # If what remains is only digits / punctuation / separators, the quote carried no prose meaning
+    # of its own — it was a raw tool-output echo. Drop it rather than surface a bare number string.
+    if not re.search(r"[A-Za-z]", cleaned):
+        return ""
+    return cleaned
+
+
 def _num(v) -> float | None:
     try:
         return float(v)

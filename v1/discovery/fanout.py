@@ -145,9 +145,15 @@ def synth_section(llm, *, tool_name: str, schema: dict, fact_store: FactStore,
 
 def collect_planning(section: dict | None) -> list[PlanningAssumption]:
     """Pull a section's labelled planning assumptions into typed objects (kept out of the measured
-    grounding gate). Unknown kinds default to 'sequence'."""
+    grounding gate). Defensive: the model occasionally emits an item as a bare STRING instead of a
+    {statement, kind, basis} object — treat that as the statement. Unknown kinds default to
+    'sequence'."""
     out = []
     for pa in (section or {}).get("planning_assumptions", []) or []:
+        if isinstance(pa, str):
+            pa = {"statement": pa}
+        elif not isinstance(pa, dict):
+            continue
         stmt = str(pa.get("statement", "")).strip()
         if not stmt:
             continue
@@ -200,23 +206,31 @@ def run_synthesis_fanout(llm, fact_store: FactStore, strategy: StrategyProfile, 
         if not spec:
             continue
         fs = fact_store.slice_for(*spec.get("slice", [])) if spec.get("slice") else fact_store
-        section = synth_section(
-            llm, tool_name=spec["tool"], schema=spec["schema"], fact_store=fs, allow=allow,
-            strategy=strategy if key in _STRATEGIC else None,
-            instruction=spec["instruction"], doc_keys=doc_keys,
-            factual=key in _FACTUAL, max_tokens=spec.get("max_tokens", 6000), model=model)
-        planning += collect_planning(section)
-        _merge(merged, section)
+        # a malformed/oddly-shaped emit from ONE report must omit just that report, never abort the
+        # suite (the live model can return an unexpected shape; resilience over all-or-nothing).
+        try:
+            section = synth_section(
+                llm, tool_name=spec["tool"], schema=spec["schema"], fact_store=fs, allow=allow,
+                strategy=strategy if key in _STRATEGIC else None,
+                instruction=spec["instruction"], doc_keys=doc_keys,
+                factual=key in _FACTUAL, max_tokens=spec.get("max_tokens", 6000), model=model)
+            planning += collect_planning(section)
+            _merge(merged, section)
+        except (AttributeError, TypeError, KeyError, ValueError):
+            continue
 
     # per-opportunity deep generation for the centrepiece portfolio (report 04)
     opps = []
     for seed in opp_seeds:
         spec = report_specs.get("04-opportunity-portfolio", {})
-        opp = synth_section(
-            llm, tool_name="emit_opportunity", schema=spec.get("opp_schema", _MIN_OPP_SCHEMA),
-            fact_store=fact_store.slice_for(*([seed.get("topic")] if seed.get("topic") else [])),
-            allow=allow, strategy=None, instruction=_opp_instruction(seed), doc_keys=doc_keys,
-            max_tokens=spec.get("opp_max_tokens", 6000), model=model)
+        try:
+            opp = synth_section(
+                llm, tool_name="emit_opportunity", schema=spec.get("opp_schema", _MIN_OPP_SCHEMA),
+                fact_store=fact_store.slice_for(*([seed.get("topic")] if seed.get("topic") else [])),
+                allow=allow, strategy=None, instruction=_opp_instruction(seed), doc_keys=doc_keys,
+                max_tokens=spec.get("opp_max_tokens", 6000), model=model)
+        except (AttributeError, TypeError, KeyError, ValueError):
+            opp = None
         if opp is not None:
             planning += collect_planning(opp)
             opps.append(opp)
@@ -246,8 +260,10 @@ def _opp_instruction(seed: dict) -> str:
     return (f"Write the FULL working documentation for opportunity {seed.get('id','')} — "
             f"\"{seed.get('title','')}\": overview, before/after process, quantified business impact "
             f"(verified numbers only, with derivation), implementation approach, success metrics, "
-            f"dependencies and risks. Put any dates/owners/SLAs/thresholds in planning_assumptions. "
-            f"Emit emit_opportunity once.")
+            f"dependencies and risks. EVERY before/after process step MUST have a one-line "
+            f"`description` (never leave a step with only a name). Write all prose in normal "
+            f"sentence case (not ALL CAPS). Put any dates/owners/SLAs/thresholds in "
+            f"planning_assumptions. Emit emit_opportunity once.")
 
 
 # a minimal opportunity schema so Phase 1 is runnable; Phase 2 supplies the full reference schema.

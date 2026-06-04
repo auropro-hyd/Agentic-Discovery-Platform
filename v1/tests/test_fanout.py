@@ -152,10 +152,13 @@ def test_collect_planning_typed_and_filtered():
     section = {"planning_assumptions": [
         {"statement": "Migrate Carrefour in Q4", "kind": "date", "basis": "register"},
         {"statement": "Owner: Credit Controller", "kind": "weird"},   # unknown kind -> sequence
-        {"statement": "", "kind": "date"}]}                            # empty -> dropped
+        {"statement": "", "kind": "date"},                            # empty -> dropped
+        "A bare-string assumption from the model",                    # str item -> treated as statement
+        12345]}                                                       # non-str/dict -> skipped
     pas = collect_planning(section)
-    assert len(pas) == 2
+    assert len(pas) == 3
     assert pas[0].kind == "date" and pas[1].kind == "sequence"
+    assert pas[2].statement == "A bare-string assumption from the model" and pas[2].kind == "sequence"
     assert collect_planning(None) == []
 
 
@@ -207,6 +210,47 @@ def test_fanout_skips_report_with_no_spec_and_omits_failed_opp():
         opp_seeds=[{"id": "OPP9", "title": "t", "topic": ""}])
     assert "opportunities" not in merged                     # the single opp failed grounding -> omitted
     assert planning == []
+
+
+def test_fanout_omits_a_report_that_raises(monkeypatch):
+    """A malformed emit that makes section assembly raise must omit ONLY that report, not abort the
+    suite (resilience over all-or-nothing)."""
+    fs = _fs()
+    calls = {"n": 0}
+    real = fanout.synth_section
+
+    def flaky(*a, **k):
+        calls["n"] += 1
+        if k.get("tool_name") == "emit_r02":
+            raise TypeError("simulated malformed emit shape")   # report 02 blows up
+        return real(*a, **k)
+    monkeypatch.setattr(fanout, "synth_section", flaky)
+    specs = {
+        "02-pain-points": {"tool": "emit_r02", "schema": {"type": "object", "properties": {}},
+                           "instruction": "x"},
+        "03-recommendation": {"tool": "emit_r03", "schema": {"type": "object", "properties": {}},
+                              "instruction": "y"},
+    }
+    llm = FakeLLM([{"sequencing_rationale": "OPP1 first"}])    # only r03 will reach the LLM
+    merged, planning = run_synthesis_fanout(llm, fs, m.StrategyProfile(), doc_keys={"flow"},
+                                            report_specs=specs)
+    assert "pain_points" not in merged                        # r02 omitted (raised), suite survived
+    assert merged.get("sequencing_rationale") == "OPP1 first"  # r03 still assembled
+
+
+def test_fanout_omits_an_opportunity_that_raises(monkeypatch):
+    fs = _fs()
+    real = fanout.synth_section
+
+    def flaky(*a, **k):
+        if k.get("tool_name") == "emit_opportunity":
+            raise ValueError("bad opp shape")
+        return real(*a, **k)
+    monkeypatch.setattr(fanout, "synth_section", flaky)
+    merged, _ = run_synthesis_fanout(FakeLLM([]), fs, m.StrategyProfile(), doc_keys={"flow"},
+                                     report_specs={"04-opportunity-portfolio": {}},
+                                     opp_seeds=[{"id": "OPP1", "title": "t", "topic": ""}])
+    assert "opportunities" not in merged                      # the raising opp omitted, no crash
 
 
 def test_fanout_merge_concats_lists_and_keeps_first_scalar():

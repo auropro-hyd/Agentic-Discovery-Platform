@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT))
 
 from discovery import factstore, registry  # noqa: E402
 from discovery import models as m  # noqa: E402
-from discovery.factstore import _entity_kind, _name_column, _unit_of  # noqa: E402
+from discovery.factstore import _clean_quote, _entity_kind, _name_column, _unit_of  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -35,14 +35,19 @@ def reg_o2c():
 
 def test_fact_store_grounds_the_expected_facts(raw_o2c, reg_o2c):
     fs = factstore.build_fact_store(raw_o2c, reg_o2c)
-    # measured numbers harvested from findings' computed_values
+    # measured numbers harvested from findings' computed_values. 267 (account mismatch count) and
+    # 30,675,000 (aggregate EUR divergence) are the core join_diff facts that survive every bake;
+    # we assert on those durable values, not bake-specific magic numbers.
     vals = {round(q.value, 4) for q in fs.quant}
-    assert 267.0 in vals and 30675000.0 in vals and 1800000.0 in vals
+    assert 267.0 in vals and 30675000.0 in vals
     # the account-count label is classified as accounts, not eur, despite naming 'credit_limit_eur'
     q267 = next(q for q in fs.quant if q.value == 267)
     assert q267.unit == "accounts"
     # verbatim quotes harvested
     assert fs.quotes and any("authoritative" in d.text.lower() for d in fs.quotes)
+    # and NO raw tool-output jargon leaks into any harvested quote (the _clean_quote guard)
+    assert not any("n_mismatch" in d.text or "sum_delta" in d.text or "from_tool" in d.text
+                   for d in fs.quotes)
     # typed entities with field-level attributes; the escalation log is an incident, not an account
     kinds = {e.kind for e in fs.entities}
     assert "account" in kinds and "incident" in kinds
@@ -138,6 +143,38 @@ def test_name_column_pick():
     assert _name_column(["region", "customer_id", "x"]) == "customer_id"
     assert _name_column(["alpha", "beta"]) == "alpha"
     assert _name_column([]) == ""
+
+
+def test_clean_quote_strips_tool_jargon():
+    # a quote that is ONLY raw tool-output keys + numbers is dropped (no prose meaning of its own)
+    assert _clean_quote("n_mismatch 267; sum_delta 30675000.0") == ""
+    # a real prose quote is left exactly as-is (no jargon token present -> early return)
+    prose = "EDI is the sole authoritative system of record for credit limits."
+    assert _clean_quote(prose) == prose
+    # jargon embedded in prose: the token is removed, the human words survive
+    assert _clean_quote("from_tool join_diff produced 267 mismatches") == "produced 267 mismatches"
+    # a JSON-ish dump loses braces/quotes and orphaned separators collapse (no "': :'")
+    assert _clean_quote('{"col": {"n_mismatch": 267, "sum_delta": 5.0}}') == "col: 267: 5.0"
+    # empty / whitespace-only -> empty
+    assert _clean_quote("   ") == ""
+
+
+def test_harvest_drops_quote_that_is_only_tool_jargon():
+    """End-to-end: a finding whose narrative quote is a raw tool-output dump yields NO DocQuote, so
+    internal field names (n_mismatch / sum_delta) can never reach a client-facing brief."""
+    raw = {"findings": [{
+        "id": "F1", "confidence": "verified",
+        "sources": [{"doc_id": "sap-s4-customer-master-export"}],
+        "narrative_values": [
+            {"quote": "n_mismatch 267; sum_delta 30675000.0", "doc_id": "sap-s4-customer-master-export"},
+            {"quote": "EDI is the sole authoritative system of record.",
+             "doc_id": "credit-management-policy-opella-europe"},
+        ],
+    }]}
+    fs = factstore.build_fact_store(raw, {"csv_ids": []})
+    texts = [q.text for q in fs.quotes]
+    assert "EDI is the sole authoritative system of record." in texts
+    assert not any("n_mismatch" in t or "sum_delta" in t for t in texts)
 
 
 def test_strategy_from_manifest():

@@ -1544,8 +1544,12 @@ def _steps(steps) -> str:
     for st in steps:
         who = " · ".join(x for x in [st.actor, st.system] if x)
         fp = "".join(f"<span class='failpoint'>{esc(p)}</span>" for p in st.failure_points)
+        # omit the description div when empty (a model occasionally emits a step with only a name —
+        # don't leave a hollow gap under it)
+        desc = f"<div>{esc(_deshout(st.description))}</div>" if st.description else ""
+        whod = f"<div class='who'>{esc(who)}</div>" if who else ""
         out.append(f"<div class='step'><strong>{st.seq}. {esc(st.name)}</strong>"
-                   f"<div class='who'>{esc(who)}</div><div>{esc(st.description)}</div>{fp}</div>")
+                   f"{whod}{desc}{fp}</div>")
     return "\n".join(out)
 
 
@@ -1563,10 +1567,24 @@ _ACRONYM = re.compile(r"\b(ERP|EDI|CRM|SAP|RACI|SOP|O2C|P2P|AR|AP|KPI|TSA|SLA|PO
                       r"S/4HANA|NET\d+)\b", re.I)
 
 
+# a raw SHOUTY_SNAKE enum value (a CSV status the model copied verbatim, e.g. NOT_FULFILLED,
+# ON_HOLD). Two+ underscore-joined all-caps segments — narrow enough to never touch a real acronym.
+_SNAKE_ENUM = re.compile(r"\b[A-Z][A-Z0-9]+(?:_[A-Z0-9]+)+\b")
+
+
+def _humanize_enums(text: str) -> str:
+    """Turn a raw CSV enum value the model copied into prose (NOT_FULFILLED, ON_HOLD) into plain
+    words ('not fulfilled'). Cosmetic only — changes casing/underscores, never numbers or meaning;
+    leaves genuine acronyms (single tokens like EDI/SAP) untouched."""
+    return _SNAKE_ENUM.sub(lambda m: m.group(0).replace("_", " ").lower(), text)
+
+
 def _deshout(text: str) -> str:
     """Down-case a SHOUTING (all-caps) reason for readability while preserving acronyms. A
     cosmetic display fix for a model that occasionally writes a cell in CAPS — it changes only
-    casing, never words or numbers. Leaves normally-cased text untouched."""
+    casing, never words or numbers. Leaves normally-cased text untouched. Also humanises any raw
+    SHOUTY_SNAKE enum value embedded in otherwise-normal prose."""
+    text = _humanize_enums(text)
     letters = [c for c in text if c.isalpha()]
     if not letters or sum(c.isupper() for c in letters) / len(letters) < 0.7:
         return text                              # not shouting → leave as authored
@@ -1674,7 +1692,11 @@ def _src_page(title: str, body: str) -> str:
 
 
 def esc(x) -> str:
-    return html.escape(str(x or ""))
+    # Humanise any raw SHOUTY_SNAKE enum value (a CSV status the model copied verbatim, e.g.
+    # NOT_FULFILLED) before escaping — these are never legitimate prose and read as raw-data leakage
+    # in a board report. Cosmetic only: it rewrites X_Y all-caps tokens, never numbers or meaning,
+    # and esc() is used solely for visible text (never for href/src/id/class attributes).
+    return html.escape(_humanize_enums(str(x or "")))
 
 
 def _strip_tags(htmlfrag: str) -> str:

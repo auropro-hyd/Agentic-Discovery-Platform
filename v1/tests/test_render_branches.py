@@ -583,6 +583,20 @@ def test_deshout():
     # no letters → unchanged (no crash)
     assert _deshout("267 / 318") == "267 / 318"
     assert _deshout("") == ""
+    # a raw SHOUTY_SNAKE enum embedded in normal prose is humanised
+    assert _deshout("1,196 orders in a NOT_FULFILLED state") == "1,196 orders in a not fulfilled state"
+
+
+def test_humanize_enums_preserves_acronyms():
+    from discovery.reportsuite.render import _humanize_enums, esc
+    # multi-segment SHOUTY_SNAKE enum → plain words
+    assert _humanize_enums("status NOT_FULFILLED today") == "status not fulfilled today"
+    assert _humanize_enums("ON_HOLD and PARTIALLY_SHIPPED") == "on hold and partially shipped"
+    # single-token acronyms are NOT touched (no underscore → no match)
+    assert _humanize_enums("EDI via SAP S/4HANA and CRM") == "EDI via SAP S/4HANA and CRM"
+    # esc() humanises before escaping (visible text only)
+    assert "not fulfilled" in esc("orders NOT_FULFILLED")
+    assert "EDI" in esc("an EDI connection")
 
 
 def test_cite_and_cite_links():
