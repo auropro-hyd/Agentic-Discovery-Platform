@@ -3,6 +3,7 @@ import { useDomainData } from "../lib/useDomainData";
 import type { PainPoint } from "../lib/types";
 import { SeverityOrder } from "../lib/types";
 import { PainPointCard } from "../cards/PainPointCard";
+import { ImpactBars } from "../charts/ImpactBars";
 import { EmptyState } from "../primitives/EmptyState";
 
 /* Pain-point list with a shareable filter+sort toolbar (state in the URL via useSearchParams).
@@ -57,6 +58,13 @@ export default function PainPointList() {
           by severity or re-sort — the view is shareable via the URL.
         </p>
       </header>
+
+      {all.length > 1 && (
+        <div className="panel" style={{ marginBottom: 18 }}>
+          <h3 style={{ marginTop: 0 }}>Impact ranking</h3>
+          <ImpactBars domain={store.domain} painPoints={all} />
+        </div>
+      )}
 
       <div className="toolbar">
         <label>Severity</label>

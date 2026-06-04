@@ -13,7 +13,9 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from discovery.llm import ToolTurn  # noqa: E402
-from discovery.models import BoundedContext, ContextRelationship, MatrixQuadrant  # noqa: E402
+from discovery.models import (  # noqa: E402
+    BoundedContext, ContextRelationship, CurrentState, DataTable, MatrixQuadrant,
+)
 from discovery.reportsuite import build  # noqa: E402
 from _payloads import depth_doc_keys, depth_synthesis_payload  # noqa: E402
 
@@ -185,6 +187,57 @@ def test_derive_charts_empty_when_no_breakdown():
     # only one channel present -> not enough for a breakdown
     raw = {"findings": [{"computed_values": [{"label": "Unfulfilled EDI orders", "value": 5}]}]}
     assert build.derive_charts(raw) == []
+
+
+def test_derive_charts_from_data_tables():
+    cs = CurrentState(data_tables=[
+        # a clean categorical + numeric table -> a donut (<=5 cats); values copied verbatim
+        DataTable(title="Order channel mix", columns=["Channel", "Orders", "Value (EUR)"],
+                  rows=[["EDI", "5,667", "59,711,399"], ["Fax", "184", "1,771,828"]]),
+        # CRM vs ERP measures -> a bar (eur unit detected from the column name)
+        DataTable(title="Credit CRM vs ERP", columns=["Measure", "Value (EUR)"],
+                  rows=[["CRM total", "EUR 61,225,000"], ["ERP total", "EUR 58,975,000"],
+                        ["Delta", "EUR 30,675,000"]]),
+        # a date-led LOG must be REJECTED (no useful breakdown) — exercises the categorical guard
+        DataTable(title="Escalation log", columns=["Date", "Resolution (hrs)"],
+                  rows=[["2025-01-18", "6"], ["2025-01-25", "67"], ["2025-02-07", "54"]]),
+        # too few rows -> skipped
+        DataTable(title="One row", columns=["A", "N"], rows=[["x", "1"]]),
+        # categorical labels but NO numeric column -> skipped (num_col is None)
+        DataTable(title="All text", columns=["System", "Notes"],
+                  rows=[["SAP", "core"], ["CRM", "supporting"], ["EDI", "external"]]),
+        # numeric column found (col 1 has >=2 numeric cells), but the row loop drops a short row
+        # (105) and two empty-label rows (108) — leaving only ONE valid segment (<2) -> skipped (112).
+        DataTable(title="Ragged", columns=["Cat", "Count"],
+                  rows=[["A", "5"], ["nine"], ["", "9"], ["", "8"]]),
+        # a DUPLICATE title is skipped the second time (seen_titles guard)
+        DataTable(title="Order channel mix", columns=["Channel", "Orders"],
+                  rows=[["X", "1"], ["Y", "2"]]),
+    ])
+    charts = build.derive_charts({}, cs)
+    titles = [c["title"] for c in charts]
+    assert "Order channel mix" in titles and "Credit CRM vs ERP" in titles
+    assert "Escalation log" not in titles                       # date-led log rejected
+    assert "One row" not in titles and "All text" not in titles and "Ragged" not in titles
+    mix = next(c for c in charts if c["title"] == "Order channel mix")
+    assert mix["kind"] == "donut" and [s["value"] for s in mix["segments"]] == [5667.0, 184.0]
+    crm = next(c for c in charts if c["title"] == "Credit CRM vs ERP")
+    assert crm["unit"] == "eur" and crm["segments"][0]["value"] == 61225000.0   # sorted desc, verbatim
+
+
+def test_derive_charts_helpers():
+    assert build._num_cell("5,667") == 5667.0
+    assert build._num_cell("EUR 61,225,000") == 61225000.0
+    assert build._num_cell("67.3%") == 67.3
+    assert build._num_cell("n/a") is None and build._num_cell(None) is None
+    # categorical: a small repeated/fixed set is a category; dates / all-unique IDs are not
+    assert build._is_categorical("Channel", ["EDI", "Fax", "EDI"]) is True
+    assert build._is_categorical("Date", ["2025-01-01", "2025-02-01"]) is False   # date header
+    assert build._is_categorical("When", ["2025-01-01", "2025-02-01", "2025-03-01"]) is False  # date VALUES
+    assert build._is_categorical("Order ID", [f"ORD-{i}" for i in range(20)]) is False
+    assert build._is_categorical("Measure", []) is False
+    assert build._unit_from_col("Value (EUR)") == "eur" and build._unit_from_col("Share %") == "percent"
+    assert build._unit_from_col("Orders") == ""
 
 
 def test_bounded_context_to_dict_roundtrips():

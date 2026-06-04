@@ -10,6 +10,8 @@ deterministic source index.
 """
 from __future__ import annotations
 
+import re
+
 from .. import docnames
 from ..models import (
     BoundedContext, BusinessImpact, ContextRelationship, CurrentState, DataTable, EvidenceRow,
@@ -65,39 +67,130 @@ def build_synthesis(raw_payload: dict, *, domain: str = "o2c", live=False, llm=N
             f"(a fixture from another domain must never be reused here).")
     _apply_derived_links(content)
     content.source_index = build_source_index(raw_payload, doc_keys)
-    content.charts = derive_charts(raw_payload)
+    content.charts = derive_charts(raw_payload, content.current_state)
     return content
 
 
-def derive_charts(raw_payload: dict) -> list[dict]:
-    """Code-owned chart series, built ONLY from the grounded numbers the tools returned this run
-    (findings' computed_values). Never model-set, so a chart can't carry a fabricated figure. Each
-    series is included only if its components are all present — otherwise it is silently omitted
-    (graceful, generic; no domain constants). Returns [] when nothing chartable is found."""
-    # index every computed value by a normalised label substring -> value
-    vals: dict[str, float] = {}
-    for f in raw_payload.get("findings", []):
-        for cv in f.get("computed_values", []):
-            label = str(cv.get("label", "")).lower()
-            try:
-                vals[label] = float(cv["value"])
-            except (TypeError, ValueError, KeyError):
-                continue
+def derive_charts(raw_payload: dict, current_state: CurrentState | None = None) -> list[dict]:
+    """Code-owned chart series, built ONLY from grounded numbers (the tools' computed_values AND the
+    synthesis data tables). Never model-set, so a chart can't carry a fabricated figure — every
+    segment value is copied verbatim from a real cell/computed value. Domain-agnostic and graceful:
+    a chart is included only when it has >= 2 real numeric segments; otherwise omitted.
 
+    Two sources, in order of richness:
+      1. data_tables — any table with a categorical first column + a numeric column becomes a chart
+         (the natural business breakdowns: channel mix, credit CRM-vs-ERP, escalations by cause…).
+      2. findings' computed_values — the legacy "unfulfilled by channel" pattern, as a fallback."""
     charts: list[dict] = []
-    # unfulfilled orders by channel — a fully-grounded multi-category whole (every segment is a
-    # real count from the tools; nothing derived/subtracted). Render BOTH a magnitude bar and a
-    # share-of-failures donut — bars show "how much more", donuts show "what share".
-    unf = [(lbl.split("unfulfilled")[1].split("order")[0].strip().title() or "Channel", v)
-           for lbl, v in vals.items() if "unfulfilled" in lbl and "order" in lbl and "value" not in lbl]
-    unf = [(c, v) for c, v in unf if v > 0]
-    if len(unf) >= 2:
-        seg = [{"label": c, "value": v} for c, v in sorted(unf, key=lambda x: -x[1])]
-        charts.append({"key": "unfulfilled_by_channel", "unit": "orders", "kind": "bar",
-                       "title": "Unfulfilled orders by channel", "segments": seg})
-        charts.append({"key": "unfulfilled_share", "unit": "orders", "kind": "donut",
-                       "title": "Share of unfulfilled orders by channel", "segments": seg})
+    seen_titles: set[str] = set()
+
+    # ---- 1. charts from the grounded data tables ----
+    for t in (current_state.data_tables if current_state else []):
+        cols = [str(c) for c in (t.columns or [])]
+        rows = t.rows or []
+        if len(cols) < 2 or len(rows) < 2:
+            continue
+        label_col = 0
+        # only chart tables whose first column is a real CATEGORY (channel, system, measure…), not
+        # a date or a per-row id/log — those produce noise, not a useful business breakdown.
+        if not _is_categorical(cols[label_col], [r[label_col] for r in rows if r]):
+            continue
+        # pick the FIRST numeric column (most tables lead with a name then a count/amount)
+        num_col = _first_numeric_col(cols, rows)
+        if num_col is None or num_col == label_col:
+            continue
+        segs = []
+        for r in rows:
+            if num_col >= len(r) or label_col >= len(r):
+                continue
+            v = _num_cell(r[num_col])
+            lab = str(r[label_col]).strip()
+            if v is None or not lab:
+                continue
+            segs.append({"label": lab, "value": v})
+        if len(segs) < 2:
+            continue
+        title = (t.title or t.caption or cols[num_col]).strip()
+        if title.lower() in seen_titles:
+            continue
+        seen_titles.add(title.lower())
+        unit = _unit_from_col(cols[num_col])
+        # a small set of categories → donut (share); more → bar (magnitude). Cap at the top 8.
+        segs = sorted(segs, key=lambda s: -s["value"])[:8]
+        kind = "donut" if 2 <= len(segs) <= 5 else "bar"
+        charts.append({"key": f"tbl-{len(charts)}", "unit": unit, "kind": kind,
+                       "title": title, "segments": segs})
+        if len(charts) >= 4:           # keep the suite focused — the richest few, not every table
+            break
+
+    # ---- 2. fallback: unfulfilled-by-channel from computed_values (only if tables gave nothing) ----
+    if not charts:
+        vals: dict[str, float] = {}
+        for f in raw_payload.get("findings", []):
+            for cv in f.get("computed_values", []):
+                try:
+                    vals[str(cv.get("label", "")).lower()] = float(cv["value"])
+                except (TypeError, ValueError, KeyError):
+                    continue
+        unf = [(lbl.split("unfulfilled")[1].split("order")[0].strip().title() or "Channel", v)
+               for lbl, v in vals.items()
+               if "unfulfilled" in lbl and "order" in lbl and "value" not in lbl]
+        unf = [(c, v) for c, v in unf if v > 0]
+        if len(unf) >= 2:
+            seg = [{"label": c, "value": v} for c, v in sorted(unf, key=lambda x: -x[1])]
+            charts.append({"key": "unfulfilled_by_channel", "unit": "orders", "kind": "bar",
+                           "title": "Unfulfilled orders by channel", "segments": seg})
+            charts.append({"key": "unfulfilled_share", "unit": "orders", "kind": "donut",
+                           "title": "Share of unfulfilled orders by channel", "segments": seg})
     return charts
+
+
+def _num_cell(cell) -> float | None:
+    """Parse a numeric value out of a table cell ("5,667", "EUR 61,225,000", "67.3%"). Returns the
+    bare number (verbatim magnitude) or None if the cell isn't numeric."""
+    if cell is None:
+        return None
+    s = str(cell).strip().replace(",", "")
+    m = re.search(r"-?\d+(?:\.\d+)?", s)
+    return float(m.group()) if m else None
+
+
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}|^\d{1,2}[/-]\d{1,2}")
+
+
+def _is_categorical(header: str, cells: list) -> bool:
+    """True if a label column is a genuine category to group by (Channel, System, Measure…), not a
+    date column or a per-row log/id. Heuristic: reject date-headed/date-valued columns, and reject
+    columns where almost every value is unique (a log, not a breakdown)."""
+    lo = header.lower()
+    if lo in ("date", "datetime", "timestamp", "time", "id", "order id", "po id"):
+        return False
+    vals = [str(c).strip() for c in cells if str(c).strip()]
+    if not vals:
+        return False
+    if sum(1 for v in vals if _DATE_RE.match(v)) > len(vals) // 2:
+        return False
+    # a useful breakdown repeats categories OR has a small fixed set; a log is nearly all-unique
+    uniq = len(set(v.lower() for v in vals))
+    return uniq <= 8 or uniq <= len(vals) * 0.6
+
+
+def _first_numeric_col(cols: list[str], rows: list) -> int | None:
+    """The index of the first column (after col 0) whose cells are predominantly numeric."""
+    for c in range(1, len(cols)):
+        nums = sum(1 for r in rows if c < len(r) and _num_cell(r[c]) is not None)
+        if nums >= max(2, len(rows) // 2):
+            return c
+    return None
+
+
+def _unit_from_col(col: str) -> str:
+    lo = col.lower()
+    if "%" in col or "share" in lo or "percent" in lo:
+        return "percent"
+    if "eur" in lo or "value" in lo or "€" in col or "amount" in lo:
+        return "eur"
+    return ""
 
 
 # ---------------------------------------------------------------------------

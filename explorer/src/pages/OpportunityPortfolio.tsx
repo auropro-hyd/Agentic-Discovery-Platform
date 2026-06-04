@@ -5,6 +5,7 @@ import type { Opportunity } from "../lib/types";
 import { QuadrantLabel, PatternLabel } from "../lib/types";
 import { cx } from "../lib/cx";
 import { QuadrantBoard } from "../charts/QuadrantBoard";
+import { ValueMatrix } from "../charts/ValueMatrix";
 import { OpportunityCard } from "../cards/OpportunityCard";
 import { EmptyState } from "../primitives/EmptyState";
 
@@ -82,6 +83,13 @@ export default function OpportunityPortfolio() {
         selected={hoverId}
         onHover={setHoverId}
       />
+
+      {filtered.some((o) => typeof o.value_score === "number" && typeof o.feasibility_score === "number") && (
+        <div className="panel" style={{ marginTop: 16 }}>
+          <h3 style={{ marginTop: 0 }}>Value × feasibility</h3>
+          <ValueMatrix domain={store.domain} opportunities={filtered} />
+        </div>
+      )}
 
       <div className="toolbar">
         <label>Pattern</label>

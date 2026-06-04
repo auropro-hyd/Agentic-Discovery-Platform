@@ -665,7 +665,116 @@
   "process_summary": "",
   "recommendations": [],
   "synthesis": {
-    "charts": [],
+    "charts": [
+      {
+        "key": "tbl-0",
+        "kind": "donut",
+        "segments": [
+          {
+            "label": "EDI",
+            "value": 5667.0
+          },
+          {
+            "label": "Fax",
+            "value": 184.0
+          }
+        ],
+        "title": "Order channel mix",
+        "unit": ""
+      },
+      {
+        "key": "tbl-1",
+        "kind": "bar",
+        "segments": [
+          {
+            "label": "CRM total credit limit",
+            "value": 61225000.0
+          },
+          {
+            "label": "ERP total credit limit",
+            "value": 58975000.0
+          },
+          {
+            "label": "Aggregate absolute credit-limit delta",
+            "value": 30675000.0
+          },
+          {
+            "label": "Largest single discrepancy — Carrefour France",
+            "value": 600000.0
+          },
+          {
+            "label": "Accounts with credit-limit mismatch (of 318)",
+            "value": 267.0
+          },
+          {
+            "label": "Accounts with payment-terms mismatch",
+            "value": 228.0
+          }
+        ],
+        "title": "Credit-limit master data — CRM vs ERP",
+        "unit": "eur"
+      },
+      {
+        "key": "tbl-2",
+        "kind": "donut",
+        "segments": [
+          {
+            "label": "CRM",
+            "value": 2400000.0
+          },
+          {
+            "label": "ERP",
+            "value": 1800000.0
+          },
+          {
+            "label": "Delta",
+            "value": 600000.0
+          }
+        ],
+        "title": "Carrefour France credit-limit detail",
+        "unit": "eur"
+      },
+      {
+        "key": "tbl-3",
+        "kind": "bar",
+        "segments": [
+          {
+            "label": "dm (Drogerie Markt)",
+            "value": 1000.0
+          },
+          {
+            "label": "Lidl Europe",
+            "value": 1000.0
+          },
+          {
+            "label": "Carrefour France",
+            "value": 500.0
+          },
+          {
+            "label": "Mercadona",
+            "value": 400.0
+          },
+          {
+            "label": "Coop Group",
+            "value": 375.0
+          },
+          {
+            "label": "Carrefour France",
+            "value": 375.0
+          },
+          {
+            "label": "Coop Group",
+            "value": 180.0
+          },
+          {
+            "label": "Boots UK",
+            "value": 180.0
+          }
+        ],
+        "title": "Sample orders by channel and account",
+        "unit": ""
+      }
+    ],
     "cross_process_patterns": [
       {
         "description": "The highest-volume order channel (EDI, 67.3% of volume) and the customer master (267 of 318 accounts with credit-limit drift) were both shaped by post-carve-out gaps — EDI descoped from all controlled procedures and CRM credit limits manually overwritten — indicating documentation and data governance did not keep pace with the separation from Sanofi.",

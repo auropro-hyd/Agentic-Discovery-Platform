@@ -3,6 +3,8 @@ import { useDomainData } from "../lib/useDomainData";
 import { StatGrid, type StatItem } from "../primitives/StatGrid";
 import { EmptyState, Section } from "../primitives/EmptyState";
 import { QuadrantBoard } from "../charts/QuadrantBoard";
+import { DonutChart } from "../charts/DonutChart";
+import { BarChart } from "../charts/BarChart";
 import { PainPointCard } from "../cards/PainPointCard";
 
 /* Landing page for a domain. Everything rendered is verbatim from the engine JSON — no view math.
@@ -14,6 +16,7 @@ export default function OverviewPage() {
   const summary = synthesis.executive_summary;
   const baselineStats = synthesis.current_state?.baseline_stats ?? [];
   const opportunities = synthesis.opportunities;
+  const charts = synthesis.charts ?? [];
   const painPoints = synthesis.pain_points;
 
   const headline = summary?.headline || `${domainLabel} discovery`;
@@ -42,6 +45,18 @@ export default function OverviewPage() {
           <EmptyState>No baseline statistics recorded for this domain.</EmptyState>
         )}
       </Section>
+
+      {charts.length > 0 ? (
+        <Section title="By the numbers">
+          <div className="grid cols-2">
+            {charts.slice(0, 2).map((c, i) => (
+              <div className="panel" key={i}>
+                {(c.kind || "").toLowerCase() === "donut" ? <DonutChart spec={c} /> : <BarChart spec={c} />}
+              </div>
+            ))}
+          </div>
+        </Section>
+      ) : null}
 
       <Section title="The opportunity">
         <div className="panel">
