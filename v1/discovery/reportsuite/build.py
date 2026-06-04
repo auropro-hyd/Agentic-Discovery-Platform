@@ -34,8 +34,24 @@ class NoFixtureForDomain(Exception):
 
 
 def build_synthesis(raw_payload: dict, *, domain: str = "o2c", live=False, llm=None,
-                    doc_keys=None, model=None, suppress_names=None) -> SynthesisContent:
-    if live:
+                    doc_keys=None, model=None, suppress_names=None, reg=None,
+                    fanout=True) -> SynthesisContent:
+    """Build the report content. Live runs use the DEEP per-report fan-out by default (fact-store →
+    per-report/per-opportunity generation → reference-depth SynthesisContent); pass fanout=False for
+    the legacy single-emit path. `reg` (the domain registry) is required by the fan-out to build the
+    grounded fact-store; it falls back to the legacy path when absent."""
+    if live and fanout and reg is not None:
+        from .. import fanout_specs
+        merged, planning, fs, strat = fanout_specs.run_report_fanout(
+            llm, raw_payload, reg, doc_keys=doc_keys, model=model)
+        content = _from_payload(merged)
+        content.fact_store = fs
+        content.strategy = strat
+        content.planning_assumptions = planning
+        # surface only the NON-EMPTY strategy fields alongside r05's posture (don't blank anything)
+        content.strategy_profile = {**content.strategy_profile,
+                                    **{k: v for k, v in strat.to_dict().items() if v}}
+    elif live:
         from .. import synthesis
         payload = synthesis.run_synthesis(llm, raw_payload, doc_keys or [], model=model,
                                           suppress_names=suppress_names)

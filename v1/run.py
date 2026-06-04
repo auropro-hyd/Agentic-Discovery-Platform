@@ -145,10 +145,12 @@ def main(argv=None) -> int:
     use_fixture = args.use_fixture and has_fixture
     if args.use_fixture and not has_fixture:
         print(f"  (no fixture exists for '{args.domain}'; generating live instead)")
+    reg["manifest"] = manifest          # the deep fan-out reads the StrategyProfile from here
     try:
         result.synthesis = build.build_synthesis(
             payload, domain=args.domain, live=not use_fixture, llm=llm,
-            doc_keys=reg["csv_ids"] + reg["doc_ids"], model=None, suppress_names=suppress_names)
+            doc_keys=reg["csv_ids"] + reg["doc_ids"], model=None, suppress_names=suppress_names,
+            reg=reg)
     except Exception as e:
         if has_fixture and not use_fixture:
             print(f"! live synthesis failed ({type(e).__name__}: {e}); "

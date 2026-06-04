@@ -62,6 +62,69 @@ def test_build_synthesis_live_maps_depth_fields():
     assert "OPP3" in opp1.prerequisite_for
 
 
+class _FanoutLLM:
+    """A fake that emits a grounded payload per report tool (drives the deep fan-out path)."""
+    _EMITS = {
+        "emit_exec": {"executive_summary": {"headline": "h", "situation": "s", "opportunity": "o"}},
+        "emit_current_state": {"current_state": {"domain_overview": "o", "process_summary": "s",
+            "process_flow": [{"seq": 1, "name": "A", "description": "d"},
+                             {"seq": 2, "name": "B", "description": "d"},
+                             {"seq": 3, "name": "C", "description": "d"}]}},
+        "emit_pain_points": {"pain_points": [{"id": "PP1", "title": "EDI fails", "impact_rank": 1,
+                                              "description": "d", "root_cause": "rc",
+                                              "severity": "high"}]},
+        "emit_recommendation": {"transformation": {"sequencing_rationale": "seq",
+                                                   "strategic_readiness": "sr"},
+                                "metrics_framework": [{"name": "m1", "definition": "d", "target": "t"},
+                                                      {"name": "m2", "definition": "d", "target": "t"},
+                                                      {"name": "m3", "definition": "d", "target": "t"}]},
+        "emit_roadmap": {"roadmap": [
+            {"horizon": "H1", "window": "0-6 months", "theme": "t", "items": [{"title": "i",
+                                                                              "rationale": "r"}]},
+            {"horizon": "H2", "window": "6-18 months", "theme": "t", "items": [{"title": "i",
+                                                                               "rationale": "r"}]},
+            {"horizon": "H3", "window": "18+ months", "theme": "t", "items": [{"title": "i",
+                                                                              "rationale": "r"}]}]},
+        "emit_opportunity": {"id": "OPP1", "title": "Fix", "pattern": "automation", "overview": "o",
+            "before_process": [{"seq": 1, "name": "b", "description": "d"},
+                               {"seq": 2, "name": "b2", "description": "d"}],
+            "after_process": [{"seq": 1, "name": "a", "description": "d"},
+                              {"seq": 2, "name": "a2", "description": "d"}],
+            "business_impact": {"narrative": "n"}},
+    }
+
+    def messages_with_tools(self, *, system, messages, tools, model=None, max_tokens=4096):
+        name = tools[0]["name"]
+        return ToolTurn(content=[{"type": "tool_use", "id": "e", "name": name,
+                                  "input": self._EMITS.get(name, {})}], stop_reason="tool_use")
+
+
+def test_build_synthesis_live_uses_fanout_when_reg_present():
+    """With reg + live + fanout=True, build_synthesis routes through the deep per-report fan-out and
+    attaches the fact-store, strategy, and planning assumptions."""
+    reg = {"csv_ids": [], "doc_ids": [], "manifest": {"strategy_profile": {
+        "direction_type": "consolidate", "horizon": "0-6 months"}}}
+    content = build.build_synthesis(_raw(), domain="o2c", live=True, llm=_FanoutLLM(),
+                                    doc_keys=[], reg=reg)
+    assert content.fact_store is not None                       # fact-store attached
+    assert content.strategy and content.strategy.direction_type == "consolidate"
+    assert content.strategy_profile.get("direction_type") == "consolidate"  # merged in
+    assert len(content.pain_points) == 1 and len(content.opportunities) == 1
+    assert len(content.roadmap) == 3 and len(content.metrics_framework) == 3
+
+
+def test_build_synthesis_live_falls_back_to_single_emit_without_reg():
+    """No reg → legacy single-emit path (back-compat), even with fanout left at its default True."""
+    llm = FakeSynthLLM(depth_synthesis_payload())
+    content = build.build_synthesis(_raw(), domain="o2c", live=True, llm=llm,
+                                    doc_keys=sorted(depth_doc_keys()))   # reg omitted, fanout default
+    assert content.fact_store is None and content.current_state.system_profiles
+    # and explicitly disabling fan-out takes the same legacy path
+    content2 = build.build_synthesis(_raw(), domain="o2c", live=True, llm=llm,
+                                     doc_keys=sorted(depth_doc_keys()), fanout=False, reg={"x": 1})
+    assert content2.fact_store is None
+
+
 def test_from_payload_tolerates_missing_optional_keys():
     """A minimal/partial emit must degrade, not crash (defensive mapper)."""
     minimal = {
