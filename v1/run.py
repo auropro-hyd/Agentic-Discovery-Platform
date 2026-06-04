@@ -171,6 +171,15 @@ def main(argv=None) -> int:
     internal = {**result.to_dict(), "internal_trace": result.raw_payload or {}}
     if refresh_diff is not None:
         internal["refresh_diff"] = refresh_diff
+    # Confidentiality hand-off for downstream client-facing consumers (e.g. the explorer SPA):
+    # the names that must NOT be shown on screen for this run, plus the neutral label to use
+    # instead. The print suite already scrubs these at render; this lets the SPA's sync step do the
+    # same so the suppressed name never even ships to a static host. (Internal trace keeps the
+    # real text — this block only declares what to scrub for the client-facing view.)
+    internal["_confidential"] = {
+        "suppress_names": suppress_names,
+        "client_display": client or "the organisation",
+    }
     (OUT / f"discovery-{args.domain}.json").write_text(
         json.dumps(internal, indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8")
     print(f"\nDone. Open the suite: {index.relative_to(ROOT)}")

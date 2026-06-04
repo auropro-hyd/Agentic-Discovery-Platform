@@ -1,0 +1,57 @@
+/* Design tokens — lifted VERBATIM from the print suite (v1/out/o2c/assets/report.css :root)
+ * so the explorer SPA and the printed/PDF deliverable share one visual identity.
+ * scripts/check-tokens.mjs warns if the brand colours drift. Offline-safe: system font, no CDN.
+ *
+ * Colour discipline (inherited from the print suite): navy/blue is the brand; the RED/AMBER/GREEN
+ * status colours are used ONLY to signal severity / priority / readiness — never for decoration. */
+:root {
+  --navy: #1a2f50;
+  --blue: #2563eb;
+  --blue-mid: #3665a8;
+  --blue-deep: #1d4ed8;
+  --ink: #111827;
+  --muted: #6b7280;
+  --line: #d1d5db;
+  --line-soft: #eaecf0;
+  --bg: #f3f5f8;
+  --bg-light: #f9fafb;
+  --bg-alt: #f2f4f7;
+  --panel: #ffffff;
+  --note-bg: #eff6ff;
+
+  /* status (signalling only) */
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --red-bd: #fca5a5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --amber-bd: #fcd34d;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --green-bd: #6ee7b7;
+  --purple: #6d28d9;
+  --purple-bg: #f3f0ff;
+
+  /* chart series ramp — navy/blue family (NOT status) */
+  --c1: #1a2f50;
+  --c2: #2563eb;
+  --c3: #3665a8;
+  --c4: #60a5fa;
+  --c5: #a9c7f0;
+
+  /* system sans stack (offline-safe) — matches the reference */
+  --sans: "Helvetica Neue", Arial, "Liberation Sans", "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+  --s1: 0.5rem;
+  --s2: 1rem;
+  --s3: 1.5rem;
+  --s4: 2rem;
+
+  --radius: 8px;
+  --radius-sm: 5px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
+  --shadow-lg: 0 10px 24px rgba(16, 24, 40, 0.12);
+  --sidebar-w: 252px;
+  --topbar-h: 56px;
+}

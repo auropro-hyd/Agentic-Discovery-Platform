@@ -1,4 +1,8 @@
 {
+  "_confidential": {
+    "client_display": "Acme Manufacturing",
+    "suppress_names": []
+  },
   "documents": [
     {
       "category": "unknown",
