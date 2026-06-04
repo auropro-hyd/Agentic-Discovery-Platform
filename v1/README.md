@@ -50,26 +50,50 @@ v1/
                         #   VERIFIED_NUMBERS.md           — independently verified O2C figures
 ```
 
-## Setup (uv-based)
+## Setup
+
+**Easiest — from the repo root** (drives this engine + the explorer; no key needed for the demo):
+
+```bash
+make setup && make run                 # macOS / Linux
+python tasks.py setup && python tasks.py run   # Windows (or anywhere; identical behaviour)
+```
+
+`run` is an offline **golden replay** — no credentials, no cost. See the root [README](../README.md#quickstart).
+
+**Engine only (uv-based, from `v1/`):**
 
 ```bash
 cd v1
 uv sync                 # creates .venv and installs deps + dev tools (pytest, pyrefly)
-cp .env.example .env    # then add your ANTHROPIC_API_KEY (or the Azure vars)
-uv run python scripts/doctor.py          # verify provider connectivity
+cp .env.example .env    # only needed for LIVE runs — add your ANTHROPIC_API_KEY (or the Azure vars)
+uv run python scripts/doctor.py          # (live only) verify provider connectivity
 ```
 
-## Usage (once creds are set)
+## Usage
+
+**Offline demo (no key, no cost) — start here:**
 
 ```bash
-uv run python run.py --domain o2c                  # live run (generates everything live)
+uv run python run.py --domain o2c --golden --auto-resolve   # replay the saved run offline → out/o2c/
+```
+
+**Live runs (generate everything live — need credentials in `v1/.env`):**
+
+```bash
+uv run python run.py --domain o2c                  # live run (interactive SME resolve)
 uv run python run.py --domain o2c --auto-resolve   # non-interactive
 uv run python run.py --domain o2c --use-fixture    # pre-built O2C fixture — the full reference-depth suite
-uv run python run.py --domain o2c --golden         # replay a saved run offline
 uv run python run.py --domain o2c --refresh        # diff against the previous run (new/resolved/changed)
 uv run python run.py --domain o2c --no-verify      # skip the adversarial verification pass
 uv run python run.py --domain p2p --auto-resolve   # any other domain — generated live
 ```
+
+> **Live runs preflight your credentials.** If `v1/.env` has no real key (or still has the
+> `.env.example` `sk-ant-...` placeholder), the run stops immediately with a one-line fix and a
+> pointer to `--golden` — instead of a traceback or a misleading "no cached response" message.
+> The on-disk `.cache/` is gitignored, so a fresh clone has nothing to replay *live*; the committed
+> `golden/` is what `--golden` replays.
 
 > **Reference-depth O2C suite.** `--use-fixture` renders the hand-grounded O2C fixture — the full
 > reference-grade suite (per-report cover + own TOC, the channel-mix / lead-time / credit-band /
