@@ -82,3 +82,35 @@ def test_phrase_collapse_leaves_unpaired_docs_alone():
     out = dn.business_phrase_list(["sap-s4-customer-export", "order-management-sop"]).lower()
     # no shared trailing noun -> not collapsed; both phrases present, joined by "and"
     assert "export" in out and "order" in out and " and " in out
+
+
+# ── expand_suppress_names: full phrase + significant tokens (confidentiality-critical) ──────────
+def test_expand_suppress_names_empty_and_blank():
+    assert dn.expand_suppress_names("") == []
+    assert dn.expand_suppress_names("   ") == []
+
+
+def test_expand_suppress_names_single_word_unchanged():
+    # a single-word name is not expanded — only the phrase is returned
+    assert dn.expand_suppress_names("Opella") == ["Opella"]
+
+
+def test_expand_suppress_names_multiword_adds_significant_tokens():
+    # full phrase ALWAYS first, then each significant token; region/legal qualifier dropped
+    assert dn.expand_suppress_names("Opella Europe") == ["Opella Europe", "Opella"]
+    assert dn.expand_suppress_names("Acme Manufacturing") == ["Acme Manufacturing", "Acme"]
+    assert dn.expand_suppress_names("Northwind Trading Group") == [
+        "Northwind Trading Group", "Northwind", "Trading"]
+
+
+def test_expand_suppress_names_skips_short_and_stopword_tokens():
+    # a <3-char token and a generic stopword are not added as standalone scrub tokens
+    out = dn.expand_suppress_names("BP Customer Co")
+    assert out[0] == "BP Customer Co"                    # phrase always kept
+    assert "BP" not in out[1:] and "Co" not in out[1:]   # 2-char tokens skipped
+    assert "Customer" not in out[1:]                     # generic stopword skipped
+
+
+def test_expand_suppress_names_dedupes_repeated_token():
+    # a token equal (case-insensitively) to one already present is not duplicated
+    assert dn.expand_suppress_names("Acme acme") == ["Acme acme", "Acme"]

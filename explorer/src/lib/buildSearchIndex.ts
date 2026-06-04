@@ -104,17 +104,9 @@ export function buildSearchIndex(store: DomainStore): DocRecord[] {
       }),
     );
   });
-  for (const m of s.metrics_framework) {
-    out.push(
-      rec({
-        id: m.name,
-        kind: "metric",
-        title: m.name,
-        snippet: [m.definition, m.target].filter(Boolean).join(" "),
-        route: `/${d}/opportunities`,
-      }),
-    );
-  }
+  /* metrics_framework is intentionally NOT indexed: it has no dedicated page/anchor to deep-link to
+   * (it previously routed to /opportunities, a dead-end with no metric anchor). Re-add a `metric`
+   * record here once a metrics view exists to route into. */
   return out;
 }
 

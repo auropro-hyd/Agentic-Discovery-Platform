@@ -43,7 +43,7 @@ export async function loadDomain(slug: string): Promise<DomainStore> {
   }
 
   const doc = parsed.data;
-  const clientDisplay = doc._confidential?.client_display || doc.domain_label || slug;
+  const clientDisplay = doc.client_display || doc.domain_label || slug;
   const store = buildStore(slug, doc.domain_label || slug, clientDisplay, doc.synthesis);
 
   // dev-only fabrication scan: warn if an opportunity's business-impact narrative cites a number

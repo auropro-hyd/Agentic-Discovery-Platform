@@ -499,7 +499,10 @@ def test_exec_and_pp_tiles_via_render(tmp_path):
     pp2 = m.PainPoint(id="PP2", title="Other", impact_rank=2)
     s = m.SynthesisContent(current_state=cs, pain_points=[pp, pp2],
                            opportunities=[m.Opportunity(id="OPP1", title="o")],
-                           source_index=[m.SourceDoc(doc_id="d", business_name="D", doc_type="x")])
+                           source_index=[m.SourceDoc(doc_id="d", business_name="D", doc_type="x")],
+                           charts=[{"kind": "donut", "unit": "eur", "title": "Value by channel",
+                                    "segments": [{"label": "EDI", "value": 6_000_000},
+                                                 {"label": "Other", "value": 2_000_000}]}])
     s.executive_summary = m.ExecutiveSummary(headline="H", situation="sit", opportunity="opp")
     out = tmp_path / "tiles"
     render_suite(s, {"client": "", "domain_label": "Process"}, out)
@@ -507,6 +510,9 @@ def test_exec_and_pp_tiles_via_render(tmp_path):
     assert "€30.7M" in exec_pg and "67%" in exec_pg          # largest money + first percent
     r02 = (out / "02-pain-points.html").read_text()
     assert "high severity" in r02 and "medium severity" in r02
+    # the donut chart renders in the supporting-artefacts report (r06 'Where the failures concentrate')
+    r06 = (out / "06-supporting-artefacts.html").read_text()
+    assert "Where the failures concentrate" in r06 and "Value by channel" in r06
 
 
 def test_exec_tiles_no_money(tmp_path):

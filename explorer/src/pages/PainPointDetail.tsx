@@ -4,6 +4,8 @@ import { SeverityBadge, CategoryBadge } from "../primitives/badges";
 import { BackChip } from "../layout/Breadcrumb";
 import { DataTable } from "../primitives/DataTable";
 import { EmptyState, Section } from "../primitives/EmptyState";
+import { GroundedNumber } from "../primitives/GroundedNumber";
+import { factFromNumberRef } from "../lib/store";
 
 /* Detail for a single pain point. Reads :ppId from the route, looks it up in store.painPointById,
  * and renders the engine's verbatim strings (description, root cause, failure pattern, business
@@ -26,7 +28,15 @@ export default function PainPointDetail() {
     );
   }
 
-  const quantified = pp.quantified ?? [];
+  /* Quantified evidence sentences. A NumberRef carries an optional surrounding sentence (text) plus
+   * a label/value/unit/sources tuple. We drop entries whose composed display would be empty (a bare
+   * ": " when text/label are blank), then — where a figure carries sources — render its value via
+   * <GroundedNumber> so the SourceCite provenance popover (the differentiator vs the static PDF) is
+   * exercised. Uncited entries keep showing the engine's verbatim text. */
+  const quantified = (pp.quantified ?? []).filter((q) => {
+    const hasFigure = q.value !== undefined && q.value !== null && q.value !== "";
+    return Boolean(q.text) || Boolean(q.label) || hasFigure;
+  });
   const sources = pp.sources ?? [];
   const addressedBy = store.oppByPainPoint.get(pp.id) ?? [];
 
@@ -79,11 +89,24 @@ export default function PainPointDetail() {
       <Section title="Evidence">
         {quantified.length > 0 ? (
           <ul className="linkrail">
-            {quantified.map((q, i) => (
-              <li key={i}>
-                {q.text ? q.text : q.label + ": " + String(q.value ?? "") + q.unit}
-              </li>
-            ))}
+            {quantified.map((q, i) => {
+              const hasFigure = q.value !== undefined && q.value !== null && q.value !== "";
+              const cited = hasFigure && (q.sources ?? []).length > 0;
+              return (
+                <li key={i}>
+                  {cited ? (
+                    <>
+                      {q.label ? `${q.label}: ` : q.text ? `${q.text} ` : null}
+                      <GroundedNumber fact={factFromNumberRef(q)} />
+                    </>
+                  ) : q.text ? (
+                    q.text
+                  ) : (
+                    `${q.label}: ${String(q.value ?? "")}${q.unit}`
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <EmptyState />

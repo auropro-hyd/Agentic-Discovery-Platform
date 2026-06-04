@@ -42,7 +42,9 @@ export default function PainPointList() {
   function setParam(key: string, value: string) {
     const next = new URLSearchParams(params);
     next.set(key, value);
-    setParams(next);
+    // replace (not push) so each filter/sort click doesn't stack a history entry — matches
+    // OpportunityPortfolio and keeps the back button behaving (one back = leave the list).
+    setParams(next, { replace: true });
   }
 
   return (

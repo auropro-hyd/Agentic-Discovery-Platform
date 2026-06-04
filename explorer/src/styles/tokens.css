@@ -42,16 +42,37 @@
   /* system sans stack (offline-safe) — matches the reference */
   --sans: "Helvetica Neue", Arial, "Liberation Sans", "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  /* a refined DISPLAY stack for headings — a high-contrast transitional serif (offline-safe,
+   * ships on macOS/Windows/Linux), giving the suite an editorial, board-report character that the
+   * sans body lacks. Falls back gracefully where a serif isn't present. */
+  --display: "Georgia", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Hoefler Text", serif;
+
+  /* type scale (1.2 minor-third) — consistent vertical rhythm across every page */
+  --t-eyebrow: 0.72rem;
+  --t-sm: 0.84rem;
+  --t-base: 0.94rem;
+  --t-h3: 1.05rem;
+  --t-h2: 1.32rem;
+  --t-h1: 2.05rem;
+  --t-hero: 2.6rem;
 
   --s1: 0.5rem;
   --s2: 1rem;
   --s3: 1.5rem;
   --s4: 2rem;
 
-  --radius: 8px;
-  --radius-sm: 5px;
-  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
-  --shadow-lg: 0 10px 24px rgba(16, 24, 40, 0.12);
-  --sidebar-w: 252px;
-  --topbar-h: 56px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  /* layered elevation — soft, tight ambient + a longer diffuse shadow for real depth */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 2px 6px rgba(16, 24, 40, 0.07);
+  --shadow-lg: 0 4px 10px rgba(16, 24, 40, 0.08), 0 18px 36px rgba(26, 47, 80, 0.13);
+  --shadow-navy: 0 14px 34px rgba(26, 47, 80, 0.28);
+  --ring: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sidebar-w: 264px;
+  --topbar-h: 60px;
+  /* page atmosphere — a barely-there cool wash + hairline grid, never flat white */
+  --page-grad: radial-gradient(1200px 600px at 82% -8%, rgba(37, 99, 235, 0.05), transparent 60%),
+    linear-gradient(180deg, #f5f7fb 0%, var(--bg) 38%);
 }

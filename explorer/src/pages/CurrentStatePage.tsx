@@ -3,6 +3,8 @@ import { Section, EmptyState } from "../primitives/EmptyState";
 import { StatGrid, type StatItem } from "../primitives/StatGrid";
 import { DataTable } from "../primitives/DataTable";
 import { ProcessFlow } from "../charts/ProcessFlow";
+import { DonutChart } from "../charts/DonutChart";
+import { BarChart } from "../charts/BarChart";
 
 /* current_state is count-agnostic: o2c has rich data_tables/handoffs, p2p has far fewer and some
  * sections are empty. Every section is guarded and rendered only when it has rows. Several
@@ -64,6 +66,12 @@ export default function CurrentStatePage() {
   const handoffs = asArray(cs.handoff_catalogue) as HandoffRow[];
   const formats = asArray(cs.format_taxonomy) as FormatRow[];
 
+  /* Pre-aggregated charts come from synthesis.charts[] (currently EMPTY in both shipped domains).
+   * Guarded by charts.length so the Section never renders empty; lights up if the engine bakes
+   * charts later. Chart geometry math lives in the chart components under charts/ (ESLint-exempt);
+   * this page only dispatches by kind and passes the verbatim spec through. */
+  const charts = store.synthesis.charts ?? [];
+
   const hasOverview = Boolean(cs.domain_overview) || Boolean(cs.process_summary);
 
   return (
@@ -94,6 +102,18 @@ export default function CurrentStatePage() {
           {dataTables.map((t, i) => (
             <DataTable table={t} key={i} />
           ))}
+        </Section>
+      ) : null}
+
+      {charts.length > 0 ? (
+        <Section title="Charts">
+          {charts.map((c, i) =>
+            (c.kind || "").toLowerCase() === "donut" ? (
+              <DonutChart spec={c} key={i} />
+            ) : (
+              <BarChart spec={c} key={i} />
+            ),
+          )}
         </Section>
       ) : null}
 

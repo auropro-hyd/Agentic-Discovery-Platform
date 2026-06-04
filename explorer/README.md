@@ -45,8 +45,12 @@ UI never fabricates or derives a figure**, and forward-looking content is shown 
    place (`src/lib/store.ts`) straight from parsed JSON. Passing a computed number is a *compile*
    error.
 2. **No view-layer arithmetic** — an ESLint rule bans `* / %` and `Number()/parseFloat/parseInt`
-   inside `src/pages/**`. Displayed values come verbatim from the JSON; charts draw only
-   pre-aggregated `synthesis.charts[]` segments.
+   inside `src/pages/**` (the rule covers `pages/` only; `src/charts/**` is intentionally exempt —
+   it does pre-aggregated drawing geometry, never a displayed figure). Displayed values come
+   verbatim from the JSON; charts render the verbatim segment value and draw only pre-aggregated
+   `synthesis.charts[]` geometry. The Current-state page wires the chart subsystem
+   (`DonutChart`/`BarChart`), guarded by `charts.length` — it lights up automatically once the
+   engine bakes charts (`synthesis.charts[]` is empty in both shipped domains today).
 3. **Planning isolation** — `planning_assumptions` render only through `<PlanningBadge>` /
    `<PlanningRow>` (the dashed-amber badge mirroring the print suite), and have their own
    first-class `/assumptions` ledger route.

@@ -18,12 +18,12 @@ const NO_ARITHMETIC = {
       {
         selector: "BinaryExpression[operator=/^[*/%]$/]",
         message:
-          "Grounding rule: no multiplication/division/modulo on client figures in pages/ or charts/. Display numbers verbatim from the JSON via <GroundedNumber>.",
+          "Grounding rule: no multiplication/division/modulo on client figures in pages/. Display numbers verbatim from the JSON via <GroundedNumber>.",
       },
       {
         selector: "CallExpression[callee.name=/^(Number|parseFloat|parseInt)$/]",
         message:
-          "Grounding rule: no Number()/parseFloat()/parseInt() in pages/ or charts/. Numbers must come verbatim from the JSON.",
+          "Grounding rule: no Number()/parseFloat()/parseInt() in pages/. Numbers must come verbatim from the JSON.",
       },
     ],
   },

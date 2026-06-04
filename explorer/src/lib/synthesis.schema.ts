@@ -25,7 +25,10 @@ const SourceRef = z
 // and detail_tables). Accept either, everywhere, so the SPA tolerates both without per-field rules.
 const SourceList = z.array(z.union([z.string(), SourceRef])).default([]);
 
-const Tier = z.string().default(""); // "verified" | "amber" | "gap" (kept open)
+// Tier stays string-typed: the data is LLM-emitted and may drift. Real domain (documented, NOT
+// enforced — never tighten to z.enum without .catch(""), or drift would fail the whole load):
+//   "verified" | "amber" | "gap"
+const Tier = z.string().default("");
 
 const FactQuant = z
   .object({
@@ -137,7 +140,9 @@ const Opportunity = z
     id: z.string(),
     title: z.string().default(""),
     overview: z.string().default(""),
-    pattern: z.string().default(""), // hitl_workflow | automation | modernisation | ai_agent
+    // kept string for LLM drift-tolerance. Real domain (documented, not enforced):
+    //   "hitl_workflow" | "automation" | "modernisation" | "ai_agent"
+    pattern: z.string().default(""),
     addresses_pain_point: z.string().default(""), // a PainPoint id (or "")
     business_impact: BusinessImpact.optional().nullable(),
     before_process: z.array(ProcessStep).default([]),
@@ -146,7 +151,9 @@ const Opportunity = z
     value_score: z.number().optional(),
     feasibility_rating: z.string().default(""),
     feasibility_score: z.number().optional(),
-    matrix_quadrant: z.string().default(""), // do_first | plan_for | consider | deprioritise
+    // kept string for LLM drift-tolerance. Real domain (documented, not enforced):
+    //   "do_first" | "plan_for" | "consider" | "deprioritise"
+    matrix_quadrant: z.string().default(""),
     technical_complexity: z.string().default(""),
     data_readiness: z.string().default(""),
     operational_readiness: z.string().default(""),
@@ -165,6 +172,9 @@ const Opportunity = z
   })
   .passthrough();
 
+// A planning assumption is prose only — it intentionally has NO value/sources fields, so it can
+// never be minted into a FactValue or rendered as a grounded fact (it surfaces via <PlanningBadge>/
+// <PlanningRow> instead). Do not add a numeric `value` here.
 const PlanningAssumption = z
   .object({
     statement: z.string().default(""),
@@ -314,20 +324,15 @@ export const Synthesis = z
   .passthrough();
 
 // the root document the engine writes (we only constrain what the UI reads).
-// _confidential carries the client display name to show on screen (and, in the raw engine output,
-// the names the sync step scrubbed from the prose). After sync, the synthesis is already clean;
-// client_display is the label to show in the header/cover.
+// The sync step writes a top-level `client_display` string (the neutral label to show in the
+// header/cover) into the SHIPPED doc and no longer emits `_confidential`. We read client_display
+// only. `_confidential` is still tolerated via .passthrough() so a raw (pre-sync) engine file can
+// also parse, but the UI never reads it — a suppressed client name must never reach the client view.
 export const DiscoveryDoc = z
   .object({
     domain: z.string().default(""),
     domain_label: z.string().default(""),
+    client_display: z.string().optional(),
     synthesis: Synthesis,
-    _confidential: z
-      .object({
-        suppress_names: z.array(z.string()).default([]),
-        client_display: z.string().default(""),
-      })
-      .partial()
-      .optional(),
   })
   .passthrough();

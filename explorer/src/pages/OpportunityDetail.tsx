@@ -4,6 +4,8 @@ import { PatternChip, QuadrantBadge, RatingPill } from "../primitives/badges";
 import { EmptyState, Section } from "../primitives/EmptyState";
 import { BackChip } from "../layout/Breadcrumb";
 import { BeforeAfterProcess } from "../charts/BeforeAfterProcess";
+import { GroundedNumber } from "../primitives/GroundedNumber";
+import { factFromNumberRef } from "../lib/store";
 
 /* Detail for a single opportunity. Reads :oppId from the route and resolves it from
  * store.opportunityById; an unknown id degrades to an .empty notice rather than crashing.
@@ -25,7 +27,16 @@ export default function OpportunityDetail() {
   }
 
   const impact = opp.business_impact;
-  const impactQuant = impact?.quantified ?? [];
+  /* Quantified impact figures. A NumberRef carries an optional surrounding sentence (text) and a
+   * label/value/unit/sources tuple. We drop entries that would compose to an empty bullet, and —
+   * where a figure carries sources — render its value through <GroundedNumber> so the SourceCite
+   * provenance popover (the differentiator vs the static PDF) is exercised. To avoid double-
+   * rendering the number, the cited value renders ONLY via GroundedNumber and text is shown as the
+   * surrounding sentence; uncited entries keep showing text verbatim. */
+  const impactQuant = (impact?.quantified ?? []).filter((q) => {
+    const hasFigure = q.value !== undefined && q.value !== null && q.value !== "";
+    return Boolean(q.text) || Boolean(q.label) || hasFigure;
+  });
 
   const targetId = (opp.addresses_pain_point || "").trim();
   const targetPp = targetId ? store.painPointById.get(targetId) : undefined;
@@ -82,9 +93,26 @@ export default function OpportunityDetail() {
             {impact.narrative ? <p>{impact.narrative}</p> : null}
             {impactQuant.length > 0 ? (
               <ul>
-                {impactQuant.map((q, i) => (
-                  <li key={i}>{q.text}</li>
-                ))}
+                {impactQuant.map((q, i) => {
+                  const hasFigure = q.value !== undefined && q.value !== null && q.value !== "";
+                  const cited = hasFigure && (q.sources ?? []).length > 0;
+                  return (
+                    <li key={i}>
+                      {cited ? (
+                        <>
+                          {q.label ? `${q.label}: ` : q.text ? `${q.text} ` : null}
+                          <GroundedNumber fact={factFromNumberRef(q)} />
+                        </>
+                      ) : q.text ? (
+                        q.text
+                      ) : q.label ? (
+                        q.label
+                      ) : (
+                        `${String(q.value ?? "")}${q.unit}`
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             ) : null}
             {impact.derivation ? (

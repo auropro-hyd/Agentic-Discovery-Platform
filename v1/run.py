@@ -130,7 +130,11 @@ def main(argv=None) -> int:
         client = ""
     else:
         client = detected
-    suppress_names = [detected] if (suppress and detected) else []
+    # Expand a multi-word detected name into the full phrase PLUS each significant token so a bare
+    # token ("Acme" from "Acme Manufacturing") can't leak in prose. Fixed at the SOURCE so BOTH the
+    # print render and the SPA sync (which read suppress_names) scrub every variant. Conservative:
+    # the full phrase always stays first; we only ADD tokens.
+    suppress_names = docnames.expand_suppress_names(detected) if (suppress and detected) else []
     docnames.set_noise_words(suppress_names)
     print(f"  client: {client or '(none — neutral)'}"
           + (f"  [suppressed on screen: {detected}]" if suppress_names else ""))
