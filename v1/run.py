@@ -79,6 +79,21 @@ def main(argv=None) -> int:
     if args.golden:
         _activate_golden_cache(args.domain)
         os.environ["DISCOVERY_OFFLINE"] = "1"
+    else:
+        # LIVE path (anything but --golden) needs provider credentials. Check BEFORE doing any work
+        # so a first-timer gets one clear, actionable line instead of either a deep SDK traceback
+        # ("Could not resolve authentication method") or the misleading cache-miss/offline message.
+        missing = env.missing_credentials(os.environ.get("DISCOVERY_PROVIDER"))
+        if missing:
+            provider = os.environ.get("DISCOVERY_PROVIDER", "anthropic").lower()
+            print(f"error: this is a LIVE run but the '{provider}' provider has no usable "
+                  f"credentials (missing/placeholder: {', '.join(missing)}).")
+            print("  Fix one of these, then re-run:")
+            print("    • Add your key to v1/.env  (cp .env.example .env, then fill it in),")
+            print("    • verify it with:  uv run python scripts/doctor.py")
+            print("  Or run the OFFLINE demo with no key and no cost:")
+            print(f"    uv run python run.py --domain {args.domain} --golden --auto-resolve")
+            return 2
     if args.fresh:
         os.environ["DISCOVERY_NO_CACHE"] = "1"
         print("  (fresh run: bypassing the LLM cache — this will take minutes and spend credits)")

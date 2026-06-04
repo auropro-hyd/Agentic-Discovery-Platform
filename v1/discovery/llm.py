@@ -90,8 +90,9 @@ class LLMClient:
 
         if self.offline:
             raise LLMError(
-                f"offline mode: no cached response for this call (key={key}). "
-                "Run online once to populate the cache, or use the golden run."
+                f"offline mode (DISCOVERY_OFFLINE=1): no cached response for this call (key={key}). "
+                "This is cache-only mode — it does NOT call the provider. If you meant to run live, "
+                "unset DISCOVERY_OFFLINE and set your API key; for the demo, use --golden."
             )
 
         response = self._call_provider(system, prompt, model, max_tokens)
@@ -120,8 +121,9 @@ class LLMClient:
             return ToolTurn.from_json(cached)
         if self.offline:
             raise LLMError(
-                f"offline mode: no cached tool-turn for this state (key={key}). "
-                "Run online once to populate the cache, or use the scripted/golden path."
+                f"offline mode (DISCOVERY_OFFLINE=1): no cached tool-turn for this state (key={key}). "
+                "This is cache-only mode — it does NOT call the provider. If you meant to run live, "
+                "unset DISCOVERY_OFFLINE and set your API key; for the demo, use --golden."
             )
         turn = self._call_anthropic_tools(system, messages, tools, model, max_tokens)
         self._write_cache(key, system, json.dumps(messages, sort_keys=True, ensure_ascii=False),
@@ -143,6 +145,26 @@ class LLMClient:
         deprecated = ("claude-opus-4-8",)
         return {} if any(model.startswith(d) for d in deprecated) else {"temperature": 0}
 
+    @staticmethod
+    def _provider_error(provider: str, e: Exception) -> LLMError:
+        """Turn any provider-SDK failure into one clean, actionable LLMError (no traceback leak).
+
+        The most common first-run failure is no/invalid credentials: the Anthropic SDK raises a
+        TypeError ("Could not resolve authentication method") when no key is set, or an
+        AuthenticationError on a bad key. Either way, point the operator at the real fix instead of
+        surfacing a stack trace or the misleading 'offline / use golden' message."""
+        name = type(e).__name__
+        msg = str(e) or name
+        auth = "authentication" in msg.lower() or "api_key" in msg.lower() or name in (
+            "AuthenticationError", "PermissionDeniedError")
+        if auth:
+            keyvar = "AZURE_OPENAI_API_KEY" if provider == "azure" else "ANTHROPIC_API_KEY"
+            return LLMError(
+                f"{provider} credentials rejected or missing ({name}). Check {keyvar} in v1/.env "
+                "(verify with: uv run python scripts/doctor.py), or run with --golden for the "
+                "offline demo.")
+        return LLMError(f"{provider} call failed ({name}): {msg}")
+
     def _call_anthropic_tools(self, system, messages, tools, model, max_tokens):
         try:
             import anthropic
@@ -150,12 +172,17 @@ class LLMClient:
             raise LLMError("pip install anthropic") from e
         if self._client is None:
             self._client = anthropic.Anthropic()
-        # we never stream, so .create() returns a Message (not a Stream); narrow for the checker
-        msg: Any = self._client.messages.create(
-            model=model, max_tokens=max_tokens, **self._temp_kwargs(model),
-            system=system, tools=tools, tool_choice={"type": "auto"},
-            messages=messages,
-        )
+        try:
+            # we never stream, so .create() returns a Message (not a Stream); narrow for the checker
+            msg: Any = self._client.messages.create(
+                model=model, max_tokens=max_tokens, **self._temp_kwargs(model),
+                system=system, tools=tools, tool_choice={"type": "auto"},
+                messages=messages,
+            )
+        except LLMError:
+            raise
+        except Exception as e:  # pragma: no cover - provider/network failure, exercised live only
+            raise self._provider_error(self.provider, e) from e
         blocks = []
         for b in msg.content:
             if b.type == "text":
@@ -182,13 +209,16 @@ class LLMClient:
             raise LLMError("pip install anthropic") from e
         if self._client is None:
             self._client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY
-        msg: Any = self._client.messages.create(   # non-streaming -> Message; narrow for the checker
-            model=model,
-            max_tokens=max_tokens,
-            **self._temp_kwargs(model),
-            system=system,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        try:
+            msg: Any = self._client.messages.create(   # non-streaming -> Message; narrow for the checker
+                model=model,
+                max_tokens=max_tokens,
+                **self._temp_kwargs(model),
+                system=system,
+                messages=[{"role": "user", "content": prompt}],
+            )
+        except Exception as e:  # pragma: no cover - provider/network failure, exercised live only
+            raise self._provider_error(self.provider, e) from e
         return "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
 
     def _call_azure(self, system: str, prompt: str, model: str, max_tokens: int) -> str:
