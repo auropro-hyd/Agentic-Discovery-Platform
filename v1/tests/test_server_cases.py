@@ -62,3 +62,33 @@ def test_archive_artefacts_exist_on_disk():
 def test_input_doc_kinds_are_known():
     # the UI colour-codes by kind; keep them to the handled set
     assert {d["kind"] for d in server.OPELLA_INPUT_DOCS} <= {"pdf", "csv", "txt"}
+
+
+# ── "Initiate new case" upload helpers (do_POST /api/ingest support) ──────────
+def test_slugify_makes_a_safe_domain():
+    assert server._slugify("Acme · Procure-to-Pay 2026!") == "acme-procure-to-pay-2026"
+    assert server._slugify("   ") == "case"            # empty → a sensible default, never ""
+    assert len(server._slugify("x" * 200)) <= 40       # bounded so it can't blow up a path
+
+
+def test_safe_name_strips_path_components():
+    # an uploaded filename must never escape inputs/<slug>/ — only the basename survives
+    assert server._safe_name("../../etc/passwd") == "passwd"
+    assert server._safe_name("/abs/report.pdf") == "report.pdf"
+    assert server._safe_name("plain.csv") == "plain.csv"
+
+
+def test_ingest_accepts_only_pipeline_extensions():
+    # the picker offers these; the backend enforces them so a bad upload can't reach the pipeline
+    assert {".pdf", ".csv", ".txt"} <= server.INGEST_EXTS
+    assert ".exe" not in server.INGEST_EXTS and ".sh" not in server.INGEST_EXTS
+
+
+def test_run_tracks_label_and_latest_stage():
+    """The in-progress indicator (/api/runs) reads Run.label + Run.stage; emitting a stage event
+    must advance Run.stage, and the friendly label defaults to the domain."""
+    r = server.Run("o2c", label="Acme · O2C")
+    assert r.label == "Acme · O2C" and r.stage == "upload" and r.ok is None and not r.done
+    r.emit({"type": "stage", "stage": "assessment", "state": "active"})
+    assert r.stage == "assessment"
+    assert server.Run("p2p").label == "P2P"          # no label → domain (upper) is the fallback

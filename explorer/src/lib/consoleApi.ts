@@ -70,11 +70,28 @@ export interface GapLedgerItem {
 }
 
 export interface CaseDetail extends CaseCard {
+  /** "archive" = a curated, signed-off case with a deliverable suite; "live" = a fresh ingested run
+   *  (no archive deliverable — the case shell shows the live run honestly). */
+  kind?: "archive" | "live";
   input_docs: InputDoc[];
   gap_ledger: GapLedgerItem[];
   reports: ReportLink[];
   copilot_audit_url: string;
   preview_url: string;
+}
+
+/** An in-progress run (for the dashboard's "run in progress" indicator). */
+export interface ActiveRun {
+  run_id: string;
+  domain: string;
+  label: string;
+  stage: StageId;
+}
+
+/** A single file staged for ingestion (browser File → name + base64 payload). */
+export interface UploadFile {
+  name: string;
+  content_b64: string;
 }
 
 export async function getCases(): Promise<CaseCard[]> {
@@ -137,6 +154,47 @@ export async function startRun(domain: string): Promise<string> {
   });
   if (!r.ok) throw new Error((await r.json().catch(() => ({})))?.error || `run failed (${r.status})`);
   return (await r.json()).run_id as string;
+}
+
+/** List in-progress runs (drives the dashboard's "run in progress" indicator). */
+export async function getActiveRuns(): Promise<ActiveRun[]> {
+  try {
+    const r = await fetch(`${API_BASE}/api/runs`, { signal: AbortSignal.timeout(2500) });
+    if (!r.ok) return [];
+    return ((await r.json()).runs ?? []) as ActiveRun[];
+  } catch {
+    return [];
+  }
+}
+
+/** Read a browser File into the {name, content_b64} shape the ingest endpoint expects. */
+export function fileToUpload(file: File): Promise<UploadFile> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error(`could not read ${file.name}`));
+    reader.onload = () => {
+      // FileReader.readAsDataURL → "data:<mime>;base64,<payload>"; keep the payload only
+      const b64 = String(reader.result).split(",", 2)[1] ?? "";
+      resolve({ name: file.name, content_b64: b64 });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/** Initiate a new case from uploaded documents: stages them on the backend and starts a LIVE run.
+ *  Returns the new {domain, run_id} so the UI can route into the case and stream the run. */
+export async function ingestDocs(
+  title: string,
+  files: UploadFile[],
+): Promise<{ domain: string; run_id: string }> {
+  const r = await fetch(`${API_BASE}/api/ingest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, files }),
+  });
+  if (!r.ok) throw new Error((await r.json().catch(() => ({})))?.error || `ingest failed (${r.status})`);
+  const j = await r.json();
+  return { domain: j.domain as string, run_id: j.run_id as string };
 }
 
 /** Open the SSE stream; calls onEvent per event. Returns a close() to stop. */

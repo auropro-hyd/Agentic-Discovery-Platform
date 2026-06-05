@@ -24,9 +24,11 @@ the curated archive/ suite. The phase model mirrors run.py's stdout and Akhilesh
 """
 from __future__ import annotations
 
+import base64
 import json
 import os
 import queue
+import re
 import subprocess
 import threading
 import uuid
@@ -36,7 +38,24 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 REPO = ROOT.parent                       # repo root (v1/ lives one level down)
 OUT = ROOT / "out"
+INPUTS = ROOT / "inputs"
 PORT = int(os.environ.get("DISCOVERY_UI_PORT", "8742"))
+
+# ── document-upload (Initiate new case → upload your own) limits ──────────────
+INGEST_EXTS = {".pdf", ".csv", ".txt", ".md", ".docx", ".xlsx", ".json"}  # what the pipeline reads
+INGEST_MAX_FILES = 30
+INGEST_MAX_BYTES = 25 * 1024 * 1024      # 25 MB per file (decoded)
+
+
+def _slugify(text: str) -> str:
+    """A filesystem-safe domain slug for a freshly-ingested case (lowercase, hyphenated)."""
+    s = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    return s[:40] or "case"
+
+
+def _safe_name(name: str) -> str:
+    """Strip any path components from an uploaded filename — only the basename is kept."""
+    return Path(name).name
 
 
 def _find_archive() -> Path:
@@ -160,9 +179,12 @@ _PHASE_SIGNALS: list[tuple[str, str]] = [
 class Run:
     """One pipeline run: its subprocess, an event queue per subscriber, and shared feedback."""
 
-    def __init__(self, domain: str) -> None:
+    def __init__(self, domain: str, label: str | None = None) -> None:
         self.id = uuid.uuid4().hex[:12]
         self.domain = domain
+        self.label = label or domain.upper()   # human title for the in-progress indicator
+        self.stage = "upload"                   # latest stage reached (drives /api/runs)
+        self.ok: bool | None = None             # None while running; True/False once done
         self.events: list[dict] = []  # full history (so a late subscriber can replay)
         self.subscribers: list[queue.Queue] = []
         self.done = False
@@ -171,6 +193,8 @@ class Run:
 
     def emit(self, event: dict) -> None:
         with self._lock:
+            if event.get("type") == "stage" and event.get("stage"):
+                self.stage = str(event["stage"])
             self.events.append(event)
             for q in self.subscribers:
                 q.put(event)
@@ -235,6 +259,7 @@ def _spawn(run: Run) -> None:
     ok = code == 0 and (OUT / f"discovery-{run.domain}.json").exists()
     if ok:
         run.emit({"type": "stage", "stage": "report_generation", "state": "done"})
+    run.ok = ok
     run.emit({"type": "done", "ok": ok, "domain": run.domain})
     run.done = True
 
@@ -269,17 +294,22 @@ class Handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self) -> None:  # CORS preflight
         self._send(204, b"", "text/plain")
 
+    def _start_run(self, domain: str, label: str | None = None) -> None:
+        run = Run(domain, label)       # always live (--fresh); no mode selector
+        RUNS[run.id] = run
+        threading.Thread(target=_spawn, args=(run,), daemon=True).start()
+        self._json(200, {"run_id": run.id, "domain": domain,
+                         "stages": [{"id": s, "label": lbl} for s, lbl in STAGES]})
+
     def do_POST(self) -> None:
         if self.path == "/api/run":
             body = self._read_json()
             domain = str(body.get("domain", "o2c")).strip() or "o2c"
-            if not (ROOT / "inputs" / domain).is_dir():
+            if not (INPUTS / domain).is_dir():
                 return self._json(400, {"error": f"unknown domain '{domain}'"})
-            run = Run(domain)          # always live (--fresh); no mode selector
-            RUNS[run.id] = run
-            threading.Thread(target=_spawn, args=(run,), daemon=True).start()
-            return self._json(200, {"run_id": run.id, "stages": [
-                {"id": s, "label": lbl} for s, lbl in STAGES]})
+            return self._start_run(domain, label=str(body.get("label", "")).strip() or None)
+        if self.path == "/api/ingest":
+            return self._ingest()
         if self.path == "/api/feedback":
             body = self._read_json()
             run = RUNS.get(str(body.get("run_id", "")))
@@ -292,9 +322,55 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(200, {"ok": True, "count": len(run.feedback)})
         self._json(404, {"error": "not found"})
 
+    def _ingest(self) -> None:
+        """Initiate a new case from uploaded documents. Body: {title, files:[{name, content_b64}]}.
+        Files are decoded, validated (extension/size/count), written to a fresh inputs/<slug>/, then
+        a genuinely LIVE run is launched on that domain. This is a real new case — it has no curated
+        archive deliverable, so the case shell shows the live run honestly (see CaseDetail.kind)."""
+        body = self._read_json()
+        title = str(body.get("title", "")).strip() or "Untitled case"
+        files = body.get("files")
+        if not isinstance(files, list) or not files:
+            return self._json(400, {"error": "no files supplied"})
+        if len(files) > INGEST_MAX_FILES:
+            return self._json(400, {"error": f"too many files (max {INGEST_MAX_FILES})"})
+
+        decoded: list[tuple[str, bytes]] = []
+        for f in files:
+            name = _safe_name(str((f or {}).get("name", "")).strip())
+            if not name or Path(name).suffix.lower() not in INGEST_EXTS:
+                return self._json(400, {"error": f"unsupported file: {name or '(unnamed)'}"})
+            try:
+                data = base64.b64decode(str((f or {}).get("content_b64", "")), validate=True)
+            except (ValueError, TypeError):
+                return self._json(400, {"error": f"could not decode {name}"})
+            if len(data) > INGEST_MAX_BYTES:
+                return self._json(400, {"error": f"{name} exceeds the 25 MB limit"})
+            decoded.append((name, data))
+
+        # a unique inputs/<slug>/ for this case (suffix on collision so we never clobber o2c/p2p)
+        base = _slugify(title)
+        domain = base
+        n = 2
+        while (INPUTS / domain).exists():
+            domain = f"{base}-{n}"
+            n += 1
+        dest = INPUTS / domain
+        try:
+            dest.mkdir(parents=True)
+            for name, data in decoded:
+                (dest / name).write_bytes(data)
+        except OSError as e:
+            return self._json(500, {"error": f"could not stage documents: {e}"})
+        return self._start_run(domain, label=title)
+
     def do_GET(self) -> None:
         if self.path == "/healthz":
             return self._json(200, {"ok": True})
+        if self.path == "/api/runs":
+            return self._json(200, {"runs": [
+                {"run_id": r.id, "domain": r.domain, "label": r.label, "stage": r.stage}
+                for r in RUNS.values() if not r.done]})
         if self.path.startswith("/api/stream/"):
             return self._stream(self.path.rsplit("/", 1)[-1])
         if self.path.startswith("/api/reports/"):
@@ -324,6 +400,7 @@ class Handler(BaseHTTPRequestHandler):
         c = OPELLA_CASE
         return self._json(200, {
             **_case_card(c),
+            "kind": "archive",                 # a curated, signed-off case (vs a fresh live run)
             "input_docs": OPELLA_INPUT_DOCS,
             "gap_ledger": OPELLA_GAP_LEDGER,   # rendered natively by the Co-pilot stage
             "reports": [{**r, "url": f"/archive/output/{r['file']}"} for r in OPELLA_REPORTS],
