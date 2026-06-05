@@ -144,10 +144,17 @@ export default function CasePage() {
           <div><dt>Documents</dt><dd>{detail.doc_count}</dd></div>
           <div><dt>Status</dt><dd className="ok">{running ? "Running…" : detail.status}</dd></div>
         </dl>
-        <button className="run-live" onClick={onRunLive} disabled={running}>
-          {running ? "● Live run in progress…" : "Run live"}
-        </button>
       </section>
+
+      {/* Live re-execution is available but deliberately understated — the demo reads as a
+          polished, completed platform first. */}
+      <div className="case-reexec">
+        {running ? (
+          <span className="rx-running">● Live re-run in progress — {fmt(elapsed)}</span>
+        ) : (
+          <button className="rx-link" onClick={onRunLive}>↻ Re-run this discovery live</button>
+        )}
+      </div>
 
       {/* ── the stage navigator (clickable progress bar) ── */}
       <nav className="case-stepper" aria-label="discovery stages">
@@ -321,18 +328,23 @@ function FindingsReviewStage({
 }
 
 function ReportStage({ detail }: { detail: CaseDetail }) {
+  const urlOf = (r: CaseDetail["reports"][number]) => archiveUrl(r.url.replace(/^\/archive\//, ""));
   return (
     <div className="panel stage-panel">
       <StageHead n={6} title="Report Generation"
-        blurb="The signed-off six-report client suite. Every finding is source-cited; each report is a standalone deliverable." />
+        blurb="The signed-off six-report client suite. Every finding is source-cited; each report is a standalone deliverable — view it or download it." />
       <div className="report-grid">
         {detail.reports.map((r) => (
-          <a key={r.id} className="report-card" href={archiveUrl(r.url.replace(/^\/archive\//, ""))}
-             target="_blank" rel="noreferrer">
+          <div key={r.id} className="report-card">
             <span className="rc-id">{r.id}</span>
             <span className="rc-title">{r.title}</span>
-            <span className="rc-open">Open →</span>
-          </a>
+            <span className="rc-actions">
+              <a href={urlOf(r)} target="_blank" rel="noreferrer">Open ↗</a>
+              {/* ?download=1 → backend sets Content-Disposition: attachment (the <a download>
+                  attribute is ignored cross-origin, so we force it server-side) */}
+              <a href={`${urlOf(r)}?download=1`}>Download</a>
+            </span>
+          </div>
         ))}
       </div>
     </div>

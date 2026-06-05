@@ -202,11 +202,13 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args) -> None:  # quiet  # noqa: A002
         pass
 
-    def _send(self, code: int, body: bytes, ctype: str) -> None:
+    def _send(self, code: int, body: bytes, ctype: str, disposition: str | None = None) -> None:
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        if disposition:                     # forces a download even cross-origin (the download=
+            self.send_header("Content-Disposition", disposition)   # attribute is ignored x-origin)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -345,13 +347,17 @@ class Handler(BaseHTTPRequestHandler):
                ".csv": "text/csv", ".txt": "text/plain", ".png": "image/png"}
 
     def _serve_under(self, base: Path, rel: str) -> None:
-        """Serve base/<rel> as a static file, guarding against path traversal outside base."""
-        rel = rel.split("?", 1)[0].split("#", 1)[0]
-        target = (base / rel).resolve()
+        """Serve base/<rel> as a static file, guarding against path traversal outside base.
+        `?download=1` forces an attachment download (the HTML <a download> attribute is ignored for
+        cross-origin requests, and the app on :5173 fetches archive files from :8742)."""
+        path, _, query = rel.partition("?")
+        path = path.split("#", 1)[0]
+        target = (base / path).resolve()
         if not str(target).startswith(str(base.resolve())) or not target.is_file():
             return self._json(404, {"error": "not found"})
         ctype = self._CTYPES.get(target.suffix.lower(), "application/octet-stream")
-        self._send(200, target.read_bytes(), ctype)
+        disposition = f'attachment; filename="{target.name}"' if "download=1" in query else None
+        self._send(200, target.read_bytes(), ctype, disposition)
 
     def _static(self, rel: str) -> None:
         self._serve_under(OUT, rel)
