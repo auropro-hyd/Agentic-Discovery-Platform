@@ -1,0 +1,12 @@
+# Freshly-ingested demo cases (Console → "Initiate a new discovery" → upload your own documents)
+# stage their files under inputs/<slug>/ and write results under out/<slug>/. These are transient
+# run artefacts. The committed reference corpora (o2c, p2p) are already tracked, so git ignores
+# never affect them — this only keeps NEW untracked ingest dirs out of the working tree.
+inputs/*/
+out/*/
+
+# keep the committed reference domains addable
+!inputs/o2c/
+!inputs/p2p/
+!out/o2c/
+!out/p2p/

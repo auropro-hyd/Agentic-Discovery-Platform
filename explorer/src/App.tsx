@@ -15,15 +15,19 @@ const TraceabilityPage = lazy(() => import("./pages/TraceabilityPage"));
 const SearchResultsPage = lazy(() => import("./pages/SearchResultsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const ConsolePage = lazy(() => import("./console/ConsolePage"));
+const DashboardPage = lazy(() => import("./console/DashboardPage"));
+const CasePage = lazy(() => import("./console/CasePage"));
 
 export function App() {
   return (
     <HashRouter>
       <Suspense fallback={<div className="loading">Loading…</div>}>
         <Routes>
-          {/* the Console (operator flow) is the landing page; the report suite lives under /suite */}
-          <Route path="/" element={<ConsolePage />} />
+          {/* Dashboard (case list) is the landing page; a case opens the 6-stage shell. The
+              explorable report suite lives under /suite (embedded at the Findings Review stage). */}
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/case/:caseId" element={<CasePage />} />
+          <Route path="/case/:caseId/:stageId" element={<CasePage />} />
           <Route path="/suite/:domain" element={<DomainLayout />}>
             <Route index element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<OverviewPage />} />

@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AI Opportunity Portfolio — Opella Europe O2C</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #adb5bd; padding: 40px 0; }
+:root {
+  --navy: #1a2f50; --blue: #2563eb; --blue-mid: #3665a8;
+  --text: #1f2937; --text-sec: #6b7280;
+  --border: #e5e7eb; --bg-light: #f9fafb;
+  --verified: #065f46; --amber: #92400e; --gap: #991b1b;
+  --ai: #6d28d9; --ai-bg: rgba(109,40,217,0.08); --ai-border: rgba(109,40,217,0.2);
+}
+
+/* ── PAGE SHELL ── */
+.page {
+  width: 794px; min-height: 1123px;
+  background: #fff; margin: 0 auto 32px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.25);
+  display: flex; flex-direction: column;
+}
+.ph {
+  height: 34px; background: var(--navy);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; flex-shrink: 0;
+}
+.ph-left { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; }
+.ph-right { font-size: 9px; color: rgba(255,255,255,0.4); }
+.pc { flex: 1; padding: 28px 36px; display: flex; flex-direction: column; }
+.pf {
+  height: 30px; background: #f9fafb; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; flex-shrink: 0;
+}
+.pf-note { font-size: 8px; color: #9ca3af; }
+.pf-num { font-size: 8px; color: #9ca3af; }
+
+/* ── COVER ── */
+.cover-band { height: 6px; background: linear-gradient(90deg,var(--navy) 0%,var(--ai) 100%); }
+.cover-inner { padding: 52px 52px 40px; flex: 1; display: flex; flex-direction: column; }
+.cover-series { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ai); margin-bottom: 8px; }
+.cover-title { font-size: 32px; font-weight: 900; color: var(--navy); line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 6px; }
+.cover-sub { font-size: 14px; color: var(--text-sec); margin-bottom: 36px; }
+.cover-divider { height: 1px; background: var(--border); margin-bottom: 28px; }
+.cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 32px; }
+.cover-meta { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; }
+.cm-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-sec); margin-bottom: 4px; }
+.cm-value { font-size: 12px; font-weight: 600; color: var(--text); }
+.cover-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 32px; }
+.cs-box { text-align: center; background: var(--ai-bg); border: 1px solid var(--ai-border); border-radius: 8px; padding: 16px 10px; }
+.cs-val { font-size: 26px; font-weight: 900; color: var(--ai); line-height: 1; margin-bottom: 4px; }
+.cs-lbl { font-size: 9px; color: var(--ai); opacity: 0.8; line-height: 1.4; }
+.cover-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; }
+.cover-confid { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #9ca3af; }
+.cover-logo { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--navy); }
+
+/* ── TYPOGRAPHY ── */
+.sec-title { font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--navy); }
+.sub-title { font-size: 12px; font-weight: 700; color: var(--text); margin: 14px 0 8px; }
+.body-p { font-size: 10px; color: var(--text); line-height: 1.7; margin-bottom: 10px; }
+.caption { font-size: 9px; color: var(--text-sec); margin-top: 6px; text-align: center; font-style: italic; }
+
+/* ── TABLES ── */
+table { width: 100%; border-collapse: collapse; font-size: 9.5px; margin-bottom: 14px; }
+th { background: var(--navy); color: #fff; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 7px 10px; text-align: left; }
+td { padding: 7px 10px; color: var(--text); border-bottom: 1px solid var(--border); line-height: 1.5; }
+tr:nth-child(even) td { background: #f2f4f7; }
+tr:last-child td { border-bottom: none; }
+
+/* ── STAT BOXES ── */
+.stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px; }
+.stat-box { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; text-align: center; }
+.stat-val { font-size: 22px; font-weight: 900; color: var(--blue); line-height: 1; margin-bottom: 3px; }
+.stat-lbl { font-size: 8.5px; color: var(--text-sec); line-height: 1.4; }
+.stat-ai .stat-val { color: var(--ai); }
+.stat-grn .stat-val { color: #059669; }
+
+/* ── USE CASE CARD ── */
+.uc-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+.uc-hdr { background: var(--navy); padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px; }
+.uc-id { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.6); line-height: 1.4; white-space: nowrap; flex-shrink: 0; }
+.uc-title-wrap { flex: 1; }
+.uc-title { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 2px; }
+.uc-sub { font-size: 9.5px; color: rgba(255,255,255,0.6); }
+.uc-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.uc-badge { font-size: 8px; font-weight: 700; border-radius: 3px; padding: 2px 8px; }
+.badge-critical { background: #fef2f2; color: #991b1b; }
+.badge-h1 { background: rgba(37,99,235,0.15); color: #1d4ed8; }
+.badge-ai { background: var(--ai-bg); color: var(--ai); border: 1px solid var(--ai-border); }
+.uc-body { padding: 14px 16px; }
+
+/* ── SPEC SECTIONS ── */
+.spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.spec-block { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+.spec-label { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-sec); margin-bottom: 6px; }
+.spec-list { list-style: none; }
+.spec-list li { font-size: 9.5px; color: var(--text); line-height: 1.6; padding-left: 10px; position: relative; margin-bottom: 2px; }
+.spec-list li::before { content: '–'; position: absolute; left: 0; color: var(--blue-mid); }
+
+/* ── NOTE BOX ── */
+.note-box { background: var(--ai-bg); border: 1px solid var(--ai-border); border-left: 3px solid var(--ai); border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 12px; }
+.note-box-title { font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--ai); margin-bottom: 5px; }
+.note-box p { font-size: 9.5px; color: var(--text); line-height: 1.6; }
+.warn-box { background: #fefce8; border: 1px solid #fde68a; border-left: 3px solid #d97706; border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 12px; }
+.warn-box p { font-size: 9.5px; color: #78350f; line-height: 1.6; }
+
+/* ── PATTERN CARDS ── */
+.pattern-card { display: flex; gap: 10px; margin-bottom: 8px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+.pattern-id { font-size: 9px; font-weight: 800; color: #fff; background: var(--ai); border-radius: 4px; padding: 3px 7px; flex-shrink: 0; align-self: flex-start; margin-top: 1px; }
+.pattern-body { flex: 1; }
+.pattern-name { font-size: 10px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.pattern-desc { font-size: 9px; color: var(--text-sec); line-height: 1.55; }
+
+/* ── FLOW DIAGRAM ── */
+.flow-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.flow-node { border: 1px solid var(--border); border-radius: 6px; padding: 7px 11px; font-size: 9px; font-weight: 600; color: var(--text); background: var(--bg-light); text-align: center; flex: 1; }
+.flow-node.src { background: rgba(37,99,235,0.08); border-color: rgba(37,99,235,0.25); color: #1d4ed8; }
+.flow-node.ai { background: var(--ai-bg); border-color: var(--ai-border); color: var(--ai); font-weight: 700; }
+.flow-node.out { background: rgba(5,150,105,0.08); border-color: rgba(5,150,105,0.25); color: #065f46; }
+.flow-arrow { font-size: 14px; color: #9ca3af; flex-shrink: 0; }
+
+/* ── KPI PILLS ── */
+.kpi-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.kpi-pill { font-size: 8.5px; padding: 3px 10px; border-radius: 10px; border: 1px solid var(--border); background: #fff; color: var(--text-sec); }
+.kpi-pill.blue { background: rgba(37,99,235,0.08); color: #1d4ed8; border-color: rgba(37,99,235,0.25); }
+.kpi-pill.green { background: rgba(5,150,105,0.08); color: #065f46; border-color: rgba(5,150,105,0.25); }
+.kpi-pill.purple { background: var(--ai-bg); color: var(--ai); border-color: var(--ai-border); }
+
+/* ── TOC ── */
+.toc-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 5px; }
+.toc-label { font-size: 10px; color: var(--text); flex: 1; }
+.toc-dots { flex: 1; border-bottom: 1px dotted var(--border); margin: 0 4px 3px; }
+.toc-page { font-size: 9.5px; color: var(--text-sec); font-variant-numeric: tabular-nums; }
+.toc-section { font-weight: 700; color: var(--navy); }
+.toc-sub { padding-left: 16px; }
+
+/* ── RISK TABLE ── */
+.risk-hi { color: #991b1b; font-weight: 700; }
+.risk-med { color: #92400e; font-weight: 700; }
+.risk-lo { color: #065f46; font-weight: 700; }
+
+/* ── BADGES (inline) ── */
+.badge { display: inline-block; font-size: 8.5px; font-weight: 700; border-radius: 3px; padding: 2px 8px; }
+.badge-verified { background: rgba(5,150,105,0.1); color: #065f46; }
+.badge-amber { background: rgba(217,119,6,0.1); color: #92400e; }
+.badge-gap { background: rgba(220,38,38,0.08); color: #991b1b; }
+.badge-blue { background: rgba(37,99,235,0.1); color: #1d4ed8; }
+.badge-purple { background: var(--ai-bg); color: var(--ai); }
+
+/* ── PAGE SECTION HEADING ── */
+.pg-sec { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--blue); margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ PAGE 1 — COVER ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="cover-band"></div>
+  <div class="cover-inner">
+    <div class="cover-series">Report 04 of 06 — Autonomous Discovery Platform</div>
+    <div class="cover-title">AI Opportunity<br>Portfolio</div>
+    <div class="cover-sub">Use Case Specifications — O2C Domain · Opella Europe</div>
+    <div class="cover-divider"></div>
+
+    <div class="cover-grid">
+      <div class="cover-meta"><div class="cm-label">Client</div><div class="cm-value">Opella Europe</div></div>
+      <div class="cover-meta"><div class="cm-label">Domain</div><div class="cm-value">Order-to-Cash (O2C)</div></div>
+      <div class="cover-meta"><div class="cm-label">Date</div><div class="cm-value">June 2025</div></div>
+      <div class="cover-meta"><div class="cm-label">Classification</div><div class="cm-value">Confidential</div></div>
+      <div class="cover-meta"><div class="cm-label">Status</div><div class="cm-value">Discovery Output — For Review</div></div>
+      <div class="cover-meta"><div class="cm-label">Prepared by</div><div class="cm-value">AuroPro Autonomous Discovery Platform</div></div>
+    </div>
+
+    <div class="cover-stats">
+      <div class="cs-box"><div class="cs-val">2</div><div class="cs-lbl">AI Use Cases<br>Specified</div></div>
+      <div class="cs-box"><div class="cs-val">H1</div><div class="cs-lbl">Target Deployment<br>Window</div></div>
+      <div class="cs-box"><div class="cs-val">€1.45M</div><div class="cs-lbl">Credit Risk<br>Exposure Addressed</div></div>
+      <div class="cs-box"><div class="cs-val">32pp</div><div class="cs-lbl">EDI Fulfilment Gap<br>to Close</div></div>
+    </div>
+
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:14px 18px;margin-bottom:20px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#6b7280;margin-bottom:6px;">Scope of This Report</div>
+      <div style="font-size:10px;color:#374151;line-height:1.7;">This report expands OPP-01 (Credit Limit Reconciliation) and OPP-04 (EDI Monitoring &amp; Anomaly Detection) from the Pain Points &amp; Opportunity Report (Report 02) into implementable AI use case specifications. Each specification covers: problem framing, AI approach, data inputs, detection or reasoning logic, output design, integration requirements, and measurable success criteria.</div>
+    </div>
+
+    <div class="cover-footer">
+      <div class="cover-confid">Confidential · Opella Internal Use Only</div>
+      <div class="cover-logo">AuroPro</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 2 — DOCUMENT CONTROL ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="sec-title">Document Control</div>
+
+    <table>
+      <tr><th>Field</th><th>Details</th></tr>
+      <tr><td>Document Title</td><td>AI Opportunity Portfolio — Order-to-Cash, Opella Europe</td></tr>
+      <tr><td>Document Reference</td><td>ADP-O2C-RPT-04</td></tr>
+      <tr><td>Report in Series</td><td>Report 04 of 06</td></tr>
+      <tr><td>Predecessor Reports</td><td>Report 02 (Pain Points &amp; Opportunity) · Report 03 (Transformation Recommendation)</td></tr>
+      <tr><td>AI Opportunities Detailed</td><td>OPP-01 · OPP-04 (from Report 02 Opportunity Inventory)</td></tr>
+      <tr><td>Recommendations Supported</td><td>R-01 (Credit Data Authority) · R-04 (EDI Monitoring)</td></tr>
+      <tr><td>Prepared by</td><td>AuroPro Autonomous Discovery Platform — AI Analysis Layer</td></tr>
+      <tr><td>Review by</td><td>Discovery Sponsor · Technical Lead · Credit Controller</td></tr>
+      <tr><td>Status</td><td>Discovery Output — Requires business and technical validation before implementation</td></tr>
+    </table>
+
+    <div class="note-box" style="margin-top:4px;">
+      <div class="note-box-title">Strategy Alignment — Locked Profile</div>
+      <p>All AI specifications in this report are scoped to the locked O2C Strategy Profile: <strong>Direction: Consolidate + Modernise</strong>. AI deployment targets <strong>Horizon H1 (0–6 months)</strong> for lightweight tooling with human-in-the-loop oversight. Fully automated decisioning without human validation is explicitly out of scope for this horizon. Both use cases operate on existing data assets — no new data infrastructure is required for H1 deployment. TSA constraints (6 Sanofi-managed EDI connections) are incorporated into the alert routing design for OPP-04.</p>
+    </div>
+
+    <div class="sub-title" style="margin-top:8px;">Evidence Corpus (12 Input Documents)</div>
+    <table>
+      <tr><th>Ref</th><th>Document</th><th>Primary Relevance</th><th>Tier</th></tr>
+      <tr><td>Doc 02</td><td>Credit Management Policy (OPS-EU-FIN-POL-002 v1.3)</td><td>OPP-01: policy rules for AI reasoning engine</td><td><span class="badge badge-verified">Verified</span></td></tr>
+      <tr><td>Doc 05</td><td>EDI Dispute Resolution — CS Working Notes</td><td>OPP-04: pattern library, escalation logic</td><td><span class="badge badge-amber">Amber</span></td></tr>
+      <tr><td>Doc 06</td><td>CS Escalation Log (142 cases)</td><td>OPP-04: training signal — 34 EDI incidents</td><td><span class="badge badge-verified">Verified</span></td></tr>
+      <tr><td>Doc 07</td><td>O2C Process RACI Matrix (OPS-EU-CS-RACI-001)</td><td>OPP-01 &amp; OPP-04: owner/approver routing</td><td><span class="badge badge-amber">Amber</span></td></tr>
+      <tr><td>Doc 08</td><td>SAP S/4HANA Customer Master (340 accounts)</td><td>OPP-01: authoritative credit limit source</td><td><span class="badge badge-verified">Verified</span></td></tr>
+      <tr><td>Doc 09</td><td>CRM Customer Export (318 accounts)</td><td>OPP-01: discrepancy source to reconcile</td><td><span class="badge badge-verified">Verified</span></td></tr>
+      <tr><td>Doc 10</td><td>Order Flow Analysis (8,420 orders)</td><td>OPP-04: fulfilment rate baseline and cluster signal</td><td><span class="badge badge-verified">Verified</span></td></tr>
+    </table>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">2</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 3 — TOC + FRAMING ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="sec-title">Contents</div>
+
+    <div style="margin-bottom:24px;">
+      <div class="toc-row"><span class="toc-label toc-section">§1 Executive Summary</span><span class="toc-dots"></span><span class="toc-page">4</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§2 AI Use Case 01 — Credit Limit Reconciliation Engine</span><span class="toc-dots"></span><span class="toc-page">5</span></div>
+      <div class="toc-row toc-sub"><span class="toc-label">2.1 Problem Statement &amp; Data Inputs</span><span class="toc-dots"></span><span class="toc-page">5</span></div>
+      <div class="toc-row toc-sub"><span class="toc-label">2.2 AI Reasoning Approach</span><span class="toc-dots"></span><span class="toc-page">5</span></div>
+      <div class="toc-row toc-sub"><span class="toc-label">2.3 Output Design &amp; Integration</span><span class="toc-dots"></span><span class="toc-page">6</span></div>
+      <div class="toc-row toc-sub"><span class="toc-label">2.4 Success Criteria</span><span class="toc-dots"></span><span class="toc-page">6</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§3 AI Use Case 02 — EDI Anomaly Detection</span><span class="toc-dots"></span><span class="toc-page">7</span></div>
+      <div class="toc-row toc-sub"><span class="toc-label">3.1 Problem Statement &amp; Data Inputs</span><span class="toc-dots"></span><span class="toc-page">7</span></div>
+      <div class="toc-row toc-sub"><span class="toc-label">3.2 Detection Pattern Library</span><span class="toc-dots"></span><span class="toc-page">7</span></div>
+      <div class="toc-row toc-sub"><span class="toc-label">3.3 Alert Routing &amp; Escalation Design</span><span class="toc-dots"></span><span class="toc-page">8</span></div>
+      <div class="toc-row toc-sub"><span class="toc-label">3.4 Seasonal Window Protocol</span><span class="toc-dots"></span><span class="toc-page">8</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§4 Shared Data Architecture</span><span class="toc-dots"></span><span class="toc-page">9</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§5 Implementation Roadmap</span><span class="toc-dots"></span><span class="toc-page">10</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§6 AI Governance &amp; Risk</span><span class="toc-dots"></span><span class="toc-page">11</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">Appendix A — Traceability &amp; Feature Catalogue</span><span class="toc-dots"></span><span class="toc-page">12</span></div>
+    </div>
+
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:14px 18px;margin-bottom:12px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#6b7280;margin-bottom:8px;">Reading This Report</div>
+      <div style="font-size:9.5px;color:#374151;line-height:1.7;">OPP-01 and OPP-04 were identified and scoped in Report 02 as AI-assisted opportunities. This report provides the full specification required to commission, evaluate, and accept each use case. The audience is twofold: (1) business owners who must validate the problem framing and output design, and (2) technical leads who will build or procure the implementation. Sections 2 and 3 are written to serve both audiences — the "AI Reasoning Approach" subsections explain what the AI does in plain language; the "Output Design &amp; Integration" subsections contain the technical interface contract.</div>
+    </div>
+
+    <div class="note-box">
+      <div class="note-box-title">Human-in-the-Loop Requirement (H1 Non-Negotiable)</div>
+      <p>Neither use case makes autonomous decisions in H1. OPP-01 produces a reconciliation report for Credit Controller review and action — it does not write back to SAP. OPP-04 raises alerts for CS team triage — it does not cancel, route, or modify orders. This constraint is deliberate: governance confidence must be established before any automated write-back is considered.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">3</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 4 — EXECUTIVE SUMMARY ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§1 Executive Summary</div>
+
+    <div class="body-p">The discovery process identified five pain points in the Opella Europe O2C pipeline (Report 02). Two of those pain points — PP-01 (Credit Data Integrity Risk) and PP-02/PP-04 (EDI Governance Vacuum and Channel Instability) — have a viable AI-assisted resolution path that can be deployed within the H1 window using existing data assets. This report specifies those two use cases in sufficient detail to begin build.</div>
+
+    <div class="body-p">Both use cases address consequences of the April 2025 carve-out from Sanofi: the credit limit discrepancies emerged during migration, and the EDI monitoring gap exists because Sanofi Shared Services handled EDI operations for 6 connections that were never handed over. AI is not a substitute for the process and governance work specified in Report 03 — it is a force multiplier that makes the human work faster, more reliable, and auditable.</div>
+
+    <div class="stat-row">
+      <div class="stat-box stat-ai"><div class="stat-val">2</div><div class="stat-lbl">AI use cases fully specified</div></div>
+      <div class="stat-box"><div class="stat-val">€1.45M</div><div class="stat-lbl">credit overstatement risk addressed by OPP-01</div></div>
+      <div class="stat-box stat-ai"><div class="stat-val">34</div><div class="stat-lbl">EDI incidents in 2025 — OPP-04 detection target</div></div>
+      <div class="stat-box stat-grn"><div class="stat-val">91%</div><div class="stat-lbl">target EDI fulfilment rate year-round (from 59% cluster low)</div></div>
+    </div>
+
+    <div class="sub-title">Use Case Summary</div>
+    <table>
+      <tr>
+        <th>ID</th><th>Use Case</th><th>Pain Points Addressed</th><th>Priority</th><th>H1 Deliverable</th><th>Owner</th>
+      </tr>
+      <tr>
+        <td><strong>OPP-01</strong></td>
+        <td>Credit Limit Reconciliation Engine</td>
+        <td>PP-01, PP-05</td>
+        <td><span class="badge badge-gap">Critical</span></td>
+        <td>Automated weekly discrepancy report for Credit Controller</td>
+        <td>Raj Patel / Finance</td>
+      </tr>
+      <tr>
+        <td><strong>OPP-04</strong></td>
+        <td>EDI Monitoring &amp; Anomaly Detection</td>
+        <td>PP-02, PP-03, PP-04</td>
+        <td><span class="badge badge-amber">High</span></td>
+        <td>Real-time alert system with TSA-aware routing</td>
+        <td>James Okafor / Opella Digital</td>
+      </tr>
+    </table>
+
+    <div class="sub-title">Relationship to Report 03 Recommendations</div>
+    <table>
+      <tr><th>AI Use Case</th><th>Supports Recommendation</th><th>Dependency</th><th>Sequence</th></tr>
+      <tr>
+        <td>OPP-01 Credit Engine</td>
+        <td>R-01: SAP S/4HANA as Sole Credit Data Authority</td>
+        <td>R-05 Customer Master Dedup (clean master data improves reconciliation accuracy)</td>
+        <td>OPP-01 can begin before R-05 completes; accuracy improves as dedup progresses</td>
+      </tr>
+      <tr>
+        <td>OPP-04 EDI Monitoring</td>
+        <td>R-04: EDI Monitoring + Seasonal Coverage</td>
+        <td>R-02 EDI SOP (alert routing references RACI roles not yet documented)</td>
+        <td>OPP-04 basic alerts can launch before R-02 completes; routing logic requires R-02 outputs</td>
+      </tr>
+    </table>
+
+    <div class="warn-box">
+      <p><strong>Pre-condition for both use cases:</strong> Data access agreements covering SAP S/4HANA customer master, CRM export, and EDI order log must be in place before build begins. Confirm with IT that API or SFTP extract is feasible for each system within H1 timeline.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">4</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 5 — OPP-01 PART 1 ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§2 AI Use Case 01 — Credit Limit Reconciliation Engine</div>
+
+    <div class="uc-card">
+      <div class="uc-hdr">
+        <div class="uc-id">OPP-01</div>
+        <div class="uc-title-wrap">
+          <div class="uc-title">Credit Limit Reconciliation Engine</div>
+          <div class="uc-sub">Automated weekly reconciliation of ERP vs CRM credit data — discrepancy classification, policy breach detection, resolution recommendation</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+          <span class="uc-badge badge-critical">Critical Priority</span>
+          <span class="uc-badge badge-h1">H1 Deployment</span>
+          <span class="uc-badge badge-ai">AI-Assisted</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-title">2.1 Problem Statement</div>
+    <div class="body-p">The SAP S/4HANA ERP and SAP CRM systems hold inconsistent credit limit records for 8 of Opella's highest-value accounts. The Credit Management Policy (OPS-EU-FIN-POL-002 §4.1) is unambiguous: ERP is the sole system of record. CRM figures are not authoritative. However, CRM is the system Account Managers access daily — and there is no automated mechanism to detect when these systems diverge, nor to flag when credit decisions are being made against the lower-authority figure.</div>
+
+    <div class="body-p">The current state produces two compounding risks: (1) EDI orders for accounts over their ERP limit may be auto-released because CS is checking CRM, and (2) the Credit Controller cannot identify which accounts require reconciliation without manual comparison of two system exports.</div>
+
+    <div class="sub-title" style="margin-top:2px;">Discrepancy Register (Current State — Source: Docs 08 &amp; 09)</div>
+    <table>
+      <tr><th>Customer</th><th>Country</th><th>ERP Limit (Auth.)</th><th>CRM Limit</th><th>Overstatement</th><th>Terms Conflict</th><th>Migrated</th></tr>
+      <tr><td><strong>Carrefour France</strong></td><td>FR</td><td>€1,800,000</td><td>€2,400,000</td><td style="color:#991b1b;font-weight:700;">+€600,000</td><td>NET45 vs NET30</td><td><span class="badge badge-gap">Yes</span></td></tr>
+      <tr><td><strong>Boots UK</strong></td><td>UK</td><td>€1,200,000</td><td>€1,550,000</td><td style="color:#991b1b;font-weight:700;">+€350,000</td><td>NET45 vs NET30</td><td><span class="badge badge-gap">Yes</span></td></tr>
+      <tr><td><strong>E.Leclerc</strong></td><td>FR</td><td>€1,100,000</td><td>€1,400,000</td><td style="color:#991b1b;font-weight:700;">+€300,000</td><td>NET45 vs NET30</td><td><span class="badge badge-gap">Yes</span></td></tr>
+      <tr><td><strong>dm (Drogerie Markt)</strong></td><td>DE</td><td>€950,000</td><td>€1,150,000</td><td style="color:#991b1b;font-weight:700;">+€200,000</td><td>NET45 vs NET30</td><td><span class="badge badge-gap">Yes</span></td></tr>
+      <tr><td>Tesco UK</td><td>UK</td><td>€1,000,000</td><td>€1,350,000</td><td>+€350,000</td><td>NET45 vs NET30</td><td><span class="badge badge-blue">No</span></td></tr>
+      <tr><td>Lidl Europe</td><td>EU</td><td>€850,000</td><td>€1,000,000</td><td>+€150,000</td><td>NET45 vs NET30</td><td><span class="badge badge-gap">Yes</span></td></tr>
+      <tr><td>Coop Group</td><td>EU</td><td>€800,000</td><td>€950,000</td><td>+€150,000</td><td>NET45 vs NET30</td><td><span class="badge badge-gap">Yes</span></td></tr>
+      <tr><td>Mercadona</td><td>ES</td><td>€750,000</td><td>€900,000</td><td>+€150,000</td><td>NET45 vs NET30</td><td><span class="badge badge-blue">No</span></td></tr>
+      <tr style="background:#fef2f2;"><td colspan="4" style="font-weight:700;color:#374151;">Total ERP–CRM overstatement across 8 accounts</td><td style="color:#991b1b;font-weight:800;">+€2,250,000</td><td colspan="2" style="color:#6b7280;font-size:9px;">€1.45M in top 4 (Sanofi-migrated) are blocking — per Report 02</td></tr>
+    </table>
+
+    <div class="sub-title">Data Inputs for AI Engine</div>
+    <div class="spec-grid">
+      <div class="spec-block">
+        <div class="spec-label">Primary Inputs</div>
+        <ul class="spec-list">
+          <li>SAP S/4HANA customer master export (CSV/API) — 340 rows: <em>customer_id, credit_limit_eur, payment_terms, migration_source, migration_date</em></li>
+          <li>SAP CRM customer export (CSV/API) — 318 rows: <em>customer_id, credit_limit_eur, payment_terms, last_updated_by, source</em></li>
+          <li>Credit Management Policy (OPS-EU-FIN-POL-002 §2–§4) — rule source for policy breach classification</li>
+        </ul>
+      </div>
+      <div class="spec-block">
+        <div class="spec-label">Reference Inputs</div>
+        <ul class="spec-list">
+          <li>RACI Matrix (OPS-EU-CS-RACI-001) — owner lookup for alert routing</li>
+          <li>Approval tier table (Policy Appendix A) — threshold lookup for breach severity</li>
+          <li>Historical reconciliation outputs — trend detection in future runs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">5</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 6 — OPP-01 PART 2 ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§2 AI Use Case 01 — Credit Limit Reconciliation Engine (continued)</div>
+
+    <div class="sub-title">2.2 AI Reasoning Approach</div>
+    <div class="body-p">The engine is a large language model (LLM) reasoning pipeline that ingests the joined ERP–CRM dataset and the credit policy, and produces a structured reconciliation report. The reasoning chain has four steps:</div>
+
+    <table style="margin-bottom:14px;">
+      <tr><th>Step</th><th>Action</th><th>AI Task Type</th><th>Output</th></tr>
+      <tr>
+        <td><strong>1. Join &amp; Diff</strong></td>
+        <td>Match ERP and CRM records on <code>customer_id</code>; identify accounts present in ERP but missing from CRM (22 accounts); compute delta per matched record</td>
+        <td>Deterministic (script)</td>
+        <td>Discrepancy table JSON</td>
+      </tr>
+      <tr>
+        <td><strong>2. Classify</strong></td>
+        <td>For each discrepancy, classify cause: (A) Sanofi migration artifact — <em>migration_source = "Sanofi Legacy System"</em> and delta &gt; 0; (B) AM override — <em>last_updated_by</em> is an account manager name; (C) System drift — delta present with no identifiable cause</td>
+        <td>LLM classification</td>
+        <td>Cause tag per record</td>
+      </tr>
+      <tr>
+        <td><strong>3. Policy Check</strong></td>
+        <td>For each discrepancy, check against Policy §4.1 (ERP governs), §4.2 (only Credit Controller may modify), §4.4 (review triggers): flag as Breach / Review Required / Informational</td>
+        <td>LLM rule application</td>
+        <td>Policy status per record</td>
+      </tr>
+      <tr>
+        <td><strong>4. Recommend</strong></td>
+        <td>Generate a 1–2 sentence recommended action per account: update CRM to match ERP, escalate to Credit Controller, or schedule formal review — grounded in Policy §4.3 approval tiers</td>
+        <td>LLM generation</td>
+        <td>Action text per record</td>
+      </tr>
+    </table>
+
+    <div class="sub-title">2.3 Output Design</div>
+    <div class="body-p">The engine produces a structured Reconciliation Report delivered as a formatted document to the Credit Controller (Raj Patel) each Monday morning. The report has three sections:</div>
+
+    <div class="spec-grid">
+      <div class="spec-block">
+        <div class="spec-label">Section A — Breach Summary</div>
+        <ul class="spec-list">
+          <li>All accounts where CRM limit exceeds ERP limit and a credit decision may have been made against the CRM figure</li>
+          <li>Each row: account, delta, cause classification, breach severity, recommended action</li>
+          <li>Sorted by overstatement amount descending</li>
+          <li>Policy section reference on each row</li>
+        </ul>
+      </div>
+      <div class="spec-block">
+        <div class="spec-label">Section B — Missing from CRM</div>
+        <ul class="spec-list">
+          <li>22 accounts present in ERP but absent from CRM — cannot be credit-checked by AM without ERP access</li>
+          <li>Flag: "AM cannot verify credit limit — recommend CRM backfill"</li>
+          <li>Owner: Raj Patel to confirm or reassign</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sub-title">Integration Requirements (H1)</div>
+    <table>
+      <tr><th>Integration Point</th><th>Method</th><th>Frequency</th><th>Owner</th></tr>
+      <tr><td>SAP S/4HANA export</td><td>SFTP CSV extract or API pull (coordinate with Opella Digital)</td><td>Weekly (Friday 18:00)</td><td>James Okafor</td></tr>
+      <tr><td>SAP CRM export</td><td>SFTP CSV extract</td><td>Weekly (Friday 18:00)</td><td>Raj Patel</td></tr>
+      <tr><td>Report delivery</td><td>Email PDF to Raj Patel; copy to Marc Dupont (Finance Director)</td><td>Monday 07:00</td><td>Automated</td></tr>
+      <tr><td>ERP write-back</td><td><strong>Not in H1 scope.</strong> Credit Controller updates SAP manually after reviewing report</td><td>On review completion</td><td>Raj Patel</td></tr>
+    </table>
+
+    <div class="sub-title">2.4 Success Criteria</div>
+    <div class="kpi-row">
+      <span class="kpi-pill blue">100% of ERP–CRM discrepancies detected within 1 week of occurrence</span>
+      <span class="kpi-pill green">Zero undetected credit policy breaches (Policy §4.1) after go-live</span>
+      <span class="kpi-pill purple">Reconciliation report produced in &lt;10 minutes from data extract</span>
+      <span class="kpi-pill blue">Credit Controller confirms action taken on ≥90% of flagged accounts within 5 business days</span>
+      <span class="kpi-pill green">CRM credit limit delta vs ERP reduced to £0 for top-8 accounts by end H1</span>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">6</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 7 — OPP-04 PART 1 ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§3 AI Use Case 02 — EDI Monitoring &amp; Anomaly Detection</div>
+
+    <div class="uc-card">
+      <div class="uc-hdr">
+        <div class="uc-id">OPP-04</div>
+        <div class="uc-title-wrap">
+          <div class="uc-title">EDI Monitoring &amp; Anomaly Detection</div>
+          <div class="uc-sub">Real-time detection of EDI channel failures, duplicate orders, mapping errors, and fulfilment rate degradation — with TSA-aware alert routing</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+          <span class="uc-badge badge-amber" style="background:#fef3c7;color:#92400e;">High Priority</span>
+          <span class="uc-badge badge-h1">H1 Deployment</span>
+          <span class="uc-badge badge-ai">AI-Assisted</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-title">3.1 Problem Statement</div>
+    <div class="body-p">EDI accounts for 67.3% of Opella Europe's order volume (5,667 of 8,420 orders in the 2025 dataset). Fulfilment rate on the EDI channel drops from 91% baseline to 59% during seasonal cluster periods (April–May and October–November) — a 32-percentage-point degradation that maps directly to the 19 stockout complaints recorded in the CS escalation log. The current detection mechanism is: a customer calls to complain.</div>
+
+    <div class="body-p">The root cause is a monitoring gap, not a technical failure. The 34 EDI incidents recorded in 2025 were all discovered reactively. There is no automated check that compares expected order acknowledgements against received ones, no alert when a connection's fulfilment rate begins to degrade, and no system that distinguishes between the 8 Opella Digital-managed connections (James Okafor, same-day resolution) and the 6 Sanofi-managed connections (Sanofi IT helpdesk, 24–48hr resolution) for routing purposes.</div>
+
+    <div class="sub-title" style="margin-top:2px;">Data Inputs for Detection Engine</div>
+    <div class="spec-grid">
+      <div class="spec-block">
+        <div class="spec-label">Real-time / Near-real-time</div>
+        <ul class="spec-list">
+          <li>EDI message acknowledgement log (CONTRL / APERAK messages from trading partners)</li>
+          <li>Order management system event stream — order created, order on hold, order released events</li>
+          <li>CS escalation log feed — new case creation triggers cross-reference check</li>
+        </ul>
+      </div>
+      <div class="spec-block">
+        <div class="spec-label">Reference / Batch</div>
+        <ul class="spec-list">
+          <li>Connection registry — 14 connections, 8 Opella-managed vs 6 Sanofi-managed (Doc 05 Annex)</li>
+          <li>Order flow baseline CSV (Doc 10) — 91% EDI fulfilment rate as control</li>
+          <li>Seasonal calendar — Apr–May and Oct–Nov flagged as high-risk windows</li>
+          <li>RACI Matrix — owner lookup for alert routing</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sub-title">3.2 Detection Pattern Library</div>
+    <div class="body-p">The engine monitors for the following pattern types, derived from the 34 EDI incidents in the CS escalation log and the CS working notes authored by Alina Kovacs (Doc 05):</div>
+
+    <div class="pattern-card">
+      <div class="pattern-id">P-01</div>
+      <div class="pattern-body">
+        <div class="pattern-name">Acknowledgement Timeout</div>
+        <div class="pattern-desc">No CONTRL acknowledgement received within 30 minutes of ORDERS message transmission. Trigger: single occurrence for Priority-1 accounts (Carrefour FR, Boots UK); 3 occurrences within 24h for all others. Evidence base: "EDI acknowledgement not received from partner. Manual re-entry required." (34 EDI case notes).</div>
+      </div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-id">P-02</div>
+      <div class="pattern-body">
+        <div class="pattern-name">Duplicate Order Detection</div>
+        <div class="pattern-desc">Two orders from the same customer on the same date with identical PO reference number detected within the order management event stream. Trigger: immediate on any occurrence. Evidence base: "Order duplicate detected on EDI channel. Customer notified." (CS log). Resolution: cancel duplicate, issue email confirmation — do not use EDI for cancellation.</div>
+      </div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-id">P-03</div>
+      <div class="pattern-body">
+        <div class="pattern-name">Mapping Error Cluster</div>
+        <div class="pattern-desc">Three or more orders from the same connection rejected within 48 hours due to unrecognised product codes. Indicates a catalogue update on the customer's side that was not communicated to Opella. Evidence base: "EDI mapping error — incorrect product code in ORDERS message." Escalation differs by connection owner (see §3.3).</div>
+      </div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-id">P-04</div>
+      <div class="pattern-body">
+        <div class="pattern-name">Fulfilment Rate Degradation</div>
+        <div class="pattern-desc">Rolling 7-day EDI fulfilment rate for any single connection falls below 80% (threshold: 91% baseline minus 11pp buffer). During seasonal window (Apr–May, Oct–Nov), threshold tightens to 85%. Trigger: daily batch calculation. Evidence base: 59% cluster-period fulfilment rate detected in order flow analysis (Doc 10).</div>
+      </div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-id">P-05</div>
+      <div class="pattern-body">
+        <div class="pattern-name">Credit Hold on EDI Order</div>
+        <div class="pattern-desc">EDI order automatically placed on credit hold because order value would push account over credit limit. Cross-reference: if account has an ERP–CRM discrepancy (OPP-01 output), flag for Credit Controller before release — do not release on CRM limit alone. Evidence base: "check with Raj before releasing… ERP limit is lower" (Doc 05 §4).</div>
+      </div>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">7</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 8 — OPP-04 PART 2 ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§3 AI Use Case 02 — EDI Monitoring &amp; Anomaly Detection (continued)</div>
+
+    <div class="sub-title">3.3 Alert Routing Design — TSA-Aware</div>
+    <div class="body-p">The single most important routing decision in the alert system is: which of the 14 EDI connections triggered the event? The 6 Sanofi-managed connections have a fundamentally different resolution path and SLA. Routing an Opella Digital ticket for a Sanofi-managed connection (or vice versa) costs hours. The alert system must encode this distinction explicitly.</div>
+
+    <table>
+      <tr><th>Connection Type</th><th>Connections</th><th>Alert Route</th><th>SLA</th><th>Escalation</th></tr>
+      <tr>
+        <td><strong>Opella Digital-managed (8)</strong></td>
+        <td>Tesco UK, Mercadona, + 6 generic</td>
+        <td>Opella Digital helpdesk ticket → James Okafor</td>
+        <td>Same-day response</td>
+        <td>James Okafor direct if no response in 4h</td>
+      </tr>
+      <tr>
+        <td><strong>Sanofi IT-managed (6)</strong></td>
+        <td>Carrefour FR, Boots UK, dm, E.Leclerc, Lidl, Coop</td>
+        <td>Sanofi IT Helpdesk (+33 1 53 77 40 00 opt 3) → reference: Opella / [connection] / EDI</td>
+        <td>2h acknowledgement; 24–48h resolution</td>
+        <td>If P1 and no response in 4h: James Okafor (direct Sanofi EDI team lead line)</td>
+      </tr>
+      <tr>
+        <td><strong>Commercial escalation risk</strong></td>
+        <td>Any Sanofi-managed connection where customer has signalled delist or director escalation</td>
+        <td>CS route → Sophie Marchetti <em>simultaneously</em> with Sanofi helpdesk call</td>
+        <td>Immediate</td>
+        <td>Sophie Marchetti notified before Sanofi SLA window expires</td>
+      </tr>
+    </table>
+
+    <div class="warn-box" style="margin-top:4px;">
+      <p><strong>Known negotiating constraint (Doc 05):</strong> James Okafor has flagged that each escalation to the Sanofi EDI team weakens Opella's negotiating position on the TSA handover timeline. The alert system must log all escalations to the Sanofi helpdesk — this data supports the R-03 TSA Migration business case and should be surfaced in the monthly TSA review meeting.</p>
+    </div>
+
+    <div class="sub-title">Alert Severity Classification</div>
+    <table>
+      <tr><th>Severity</th><th>Definition</th><th>Pattern</th><th>Response Time</th></tr>
+      <tr><td><strong style="color:#991b1b;">P1 — Critical</strong></td><td>Customer cannot transmit orders at all (zero connectivity)</td><td>P-01 on Priority account; or 6+ consec. failures on any connection</td><td>Immediate alert; phone escalation if no ack in 4h</td></tr>
+      <tr><td><strong style="color:#92400e;">P2 — High</strong></td><td>Channel degraded — partial failures, declining fulfilment rate, mapping cluster</td><td>P-03, P-04; P-01 on non-priority account</td><td>Alert within 15 min; ticket same working day</td></tr>
+      <tr><td><strong style="color:#065f46;">P3 — Medium</strong></td><td>Data quality issue requiring CS action; credit hold; duplicate order</td><td>P-02, P-05</td><td>Alert within 30 min; CS triage within 2h</td></tr>
+    </table>
+
+    <div class="sub-title">3.4 Seasonal Window Protocol</div>
+    <div class="body-p">The order flow analysis (Doc 10) confirms two seasonal degradation clusters: April–May (cold/allergy season, Allegra/Doliprane demand spike) and October–November (winter season, Doliprane 500mg stockouts confirmed in CS log). During these windows, the monitoring parameters tighten and the CS team capacity allocation increases.</div>
+
+    <div class="spec-grid">
+      <div class="spec-block">
+        <div class="spec-label">Seasonal Window Adjustments</div>
+        <ul class="spec-list">
+          <li>Fulfilment rate alert threshold: 85% (vs 80% off-season)</li>
+          <li>P-01 acknowledgement timeout: 15 min (vs 30 min off-season)</li>
+          <li>CS duty cover: minimum 2 agents trained on EDI procedures</li>
+          <li>Pre-window check: run P-03 mapping check 2 weeks before window open — catalogue changes cluster pre-season</li>
+        </ul>
+      </div>
+      <div class="spec-block">
+        <div class="spec-label">Success Criteria</div>
+        <ul class="spec-list">
+          <li>EDI fulfilment rate ≥91% year-round (including seasonal windows)</li>
+          <li>Mean time to detect EDI failure: &lt;15 min (from 24–48h manual detection)</li>
+          <li>Zero Sanofi-managed connection escalations resolved by wrong team</li>
+          <li>19 stockout complaint equivalents in 2025 → target &lt;5 in first seasonal window post-deployment</li>
+          <li>All P1 alerts acknowledged within 4 hours, 100% of the time</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">8</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 9 — SHARED DATA ARCHITECTURE ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§4 Shared Data Architecture</div>
+
+    <div class="body-p">OPP-01 and OPP-04 share a common data extraction layer. Consolidating this into a single lightweight data pipeline reduces integration effort and creates a reusable foundation for future AI use cases in the O2C domain.</div>
+
+    <div class="sub-title">Figure 1 — AI System Data Flow</div>
+
+    <svg width="722" height="330" viewBox="0 0 722 330" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 8px;">
+      <defs>
+        <marker id="da-arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#9ca3af"/>
+        </marker>
+        <marker id="da-arr-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#2563eb"/>
+        </marker>
+        <marker id="da-arr-grn" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#059669"/>
+        </marker>
+        <marker id="da-arr-pur" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#7c3aed"/>
+        </marker>
+      </defs>
+
+      <!-- Column headers -->
+      <text x="76" y="18" text-anchor="middle" font-size="9" font-weight="700" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" letter-spacing="0.5">DATA SOURCES</text>
+      <text x="272" y="18" text-anchor="middle" font-size="9" font-weight="700" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" letter-spacing="0.5">EXTRACT LAYER</text>
+      <text x="440" y="18" text-anchor="middle" font-size="9" font-weight="700" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" letter-spacing="0.5">AI ENGINES</text>
+      <text x="630" y="18" text-anchor="middle" font-size="9" font-weight="700" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" letter-spacing="0.5">OUTPUTS</text>
+
+      <!-- Source boxes -->
+      <rect x="10" y="32" width="132" height="36" rx="5" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1"/>
+      <text x="76" y="48" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP S/4HANA</text>
+      <text x="76" y="62" text-anchor="middle" font-size="8.5" fill="#3b82f6" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Customer Master (340)</text>
+
+      <rect x="10" y="80" width="132" height="36" rx="5" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1"/>
+      <text x="76" y="96" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP CRM</text>
+      <text x="76" y="110" text-anchor="middle" font-size="8.5" fill="#3b82f6" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Customer Export (318)</text>
+
+      <rect x="10" y="128" width="132" height="36" rx="5" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1"/>
+      <text x="76" y="144" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit Policy</text>
+      <text x="76" y="158" text-anchor="middle" font-size="8.5" fill="#3b82f6" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPS-EU-FIN-POL-002</text>
+
+      <rect x="10" y="190" width="132" height="36" rx="5" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1"/>
+      <text x="76" y="206" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI Order Stream</text>
+      <text x="76" y="220" text-anchor="middle" font-size="8.5" fill="#3b82f6" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Ack + Order Events</text>
+
+      <rect x="10" y="238" width="132" height="36" rx="5" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1"/>
+      <text x="76" y="254" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">CS Escalation Log</text>
+      <text x="76" y="268" text-anchor="middle" font-size="8.5" fill="#3b82f6" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">142 cases (real-time)</text>
+
+      <rect x="10" y="286" width="132" height="36" rx="5" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1"/>
+      <text x="76" y="302" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Connection Registry</text>
+      <text x="76" y="316" text-anchor="middle" font-size="8.5" fill="#3b82f6" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">14 connections · TSA flags</text>
+
+      <!-- Extract layer box -->
+      <rect x="196" y="32" width="152" height="290" rx="6" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+      <text x="272" y="52" text-anchor="middle" font-size="9.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Shared Extract Pipeline</text>
+      <line x1="212" y1="59" x2="332" y2="59" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="272" y="80" text-anchor="middle" font-size="8.5" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Weekly batch: ERP + CRM</text>
+      <text x="272" y="94" text-anchor="middle" font-size="8.5" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">CSV extract (SFTP)</text>
+      <rect x="212" y="104" width="120" height="22" rx="4" fill="#fff" stroke="#e5e7eb"/>
+      <text x="272" y="119" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">join · diff · normalise</text>
+      <line x1="212" y1="136" x2="332" y2="136" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="272" y="154" text-anchor="middle" font-size="8.5" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Real-time: EDI events +</text>
+      <text x="272" y="168" text-anchor="middle" font-size="8.5" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">CS log feed</text>
+      <rect x="212" y="178" width="120" height="22" rx="4" fill="#fff" stroke="#e5e7eb"/>
+      <text x="272" y="193" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">pattern matching · routing</text>
+      <line x1="212" y1="210" x2="332" y2="210" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="272" y="230" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Reference: Policy rules,</text>
+      <text x="272" y="244" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">RACI, connection registry,</text>
+      <text x="272" y="258" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">seasonal calendar</text>
+
+      <!-- AI Engine boxes -->
+      <rect x="368" y="50" width="144" height="100" rx="6" fill="rgba(109,40,217,0.08)" stroke="rgba(109,40,217,0.3)" stroke-width="1.5"/>
+      <text x="440" y="72" text-anchor="middle" font-size="10" font-weight="800" fill="#6d28d9" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-01</text>
+      <text x="440" y="87" text-anchor="middle" font-size="9" fill="#6d28d9" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit Reconciliation</text>
+      <text x="440" y="101" text-anchor="middle" font-size="9" fill="#6d28d9" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Engine</text>
+      <line x1="380" y1="112" x2="500" y2="112" stroke="rgba(109,40,217,0.2)" stroke-width="1"/>
+      <text x="440" y="128" text-anchor="middle" font-size="8" fill="#7c3aed" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">LLM · classify · check · recommend</text>
+      <text x="440" y="142" text-anchor="middle" font-size="8" fill="#7c3aed" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Weekly batch</text>
+
+      <rect x="368" y="190" width="144" height="100" rx="6" fill="rgba(109,40,217,0.08)" stroke="rgba(109,40,217,0.3)" stroke-width="1.5"/>
+      <text x="440" y="212" text-anchor="middle" font-size="10" font-weight="800" fill="#6d28d9" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-04</text>
+      <text x="440" y="227" text-anchor="middle" font-size="9" fill="#6d28d9" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI Anomaly</text>
+      <text x="440" y="241" text-anchor="middle" font-size="9" fill="#6d28d9" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Detection</text>
+      <line x1="380" y1="252" x2="500" y2="252" stroke="rgba(109,40,217,0.2)" stroke-width="1"/>
+      <text x="440" y="268" text-anchor="middle" font-size="8" fill="#7c3aed" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">pattern match · classify · route</text>
+      <text x="440" y="282" text-anchor="middle" font-size="8" fill="#7c3aed" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Real-time (&lt;15 min)</text>
+
+      <!-- Output boxes -->
+      <rect x="552" y="50" width="160" height="36" rx="5" fill="rgba(5,150,105,0.08)" stroke="rgba(5,150,105,0.25)" stroke-width="1"/>
+      <text x="632" y="65" text-anchor="middle" font-size="9" font-weight="700" fill="#065f46" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Reconciliation Report</text>
+      <text x="632" y="79" text-anchor="middle" font-size="8" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Weekly email → Raj Patel</text>
+
+      <rect x="552" y="98" width="160" height="36" rx="5" fill="rgba(5,150,105,0.08)" stroke="rgba(5,150,105,0.25)" stroke-width="1"/>
+      <text x="632" y="113" text-anchor="middle" font-size="9" font-weight="700" fill="#065f46" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Policy Breach Flags</text>
+      <text x="632" y="127" text-anchor="middle" font-size="8" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Immediate alert on detect</text>
+
+      <rect x="552" y="190" width="160" height="36" rx="5" fill="rgba(5,150,105,0.08)" stroke="rgba(5,150,105,0.25)" stroke-width="1"/>
+      <text x="632" y="205" text-anchor="middle" font-size="9" font-weight="700" fill="#065f46" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">TSA-Routed EDI Alert</text>
+      <text x="632" y="219" text-anchor="middle" font-size="8" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Opella Digital / Sanofi IT</text>
+
+      <rect x="552" y="238" width="160" height="36" rx="5" fill="rgba(5,150,105,0.08)" stroke="rgba(5,150,105,0.25)" stroke-width="1"/>
+      <text x="632" y="253" text-anchor="middle" font-size="9" font-weight="700" fill="#065f46" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Monitoring Dashboard</text>
+      <text x="632" y="267" text-anchor="middle" font-size="8" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Fulfilment rate · open alerts</text>
+
+      <!-- Arrows: Sources → Extract -->
+      <line x1="142" y1="50" x2="194" y2="80" stroke="#9ca3af" stroke-width="1" marker-end="url(#da-arr)"/>
+      <line x1="142" y1="98" x2="194" y2="100" stroke="#9ca3af" stroke-width="1" marker-end="url(#da-arr)"/>
+      <line x1="142" y1="146" x2="194" y2="120" stroke="#9ca3af" stroke-width="1" marker-end="url(#da-arr)"/>
+      <line x1="142" y1="208" x2="194" y2="200" stroke="#9ca3af" stroke-width="1" marker-end="url(#da-arr)"/>
+      <line x1="142" y1="256" x2="194" y2="220" stroke="#9ca3af" stroke-width="1" marker-end="url(#da-arr)"/>
+      <line x1="142" y1="304" x2="194" y2="260" stroke="#9ca3af" stroke-width="1" marker-end="url(#da-arr)"/>
+
+      <!-- Arrows: Extract → AI Engines -->
+      <line x1="348" y1="100" x2="366" y2="100" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#da-arr-pur)"/>
+      <line x1="348" y1="200" x2="366" y2="240" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#da-arr-pur)"/>
+
+      <!-- Arrows: AI → Outputs -->
+      <line x1="512" y1="80" x2="550" y2="68" stroke="#059669" stroke-width="1.5" marker-end="url(#da-arr-grn)"/>
+      <line x1="512" y1="100" x2="550" y2="116" stroke="#059669" stroke-width="1.5" marker-end="url(#da-arr-grn)"/>
+      <line x1="512" y1="220" x2="550" y2="208" stroke="#059669" stroke-width="1.5" marker-end="url(#da-arr-grn)"/>
+      <line x1="512" y1="240" x2="550" y2="256" stroke="#059669" stroke-width="1.5" marker-end="url(#da-arr-grn)"/>
+    </svg>
+    <div class="caption">Figure 1 — Shared data architecture: two AI engines share a common extraction layer; outputs are human-reviewed, not automated</div>
+
+    <div class="sub-title" style="margin-top:12px;">Data Freshness Requirements</div>
+    <table>
+      <tr><th>Data Asset</th><th>Required Freshness</th><th>Method</th><th>Responsible</th></tr>
+      <tr><td>SAP S/4HANA customer master</td><td>Weekly (for OPP-01); daily for OPP-04 credit hold check</td><td>SFTP CSV extract</td><td>James Okafor</td></tr>
+      <tr><td>SAP CRM export</td><td>Weekly</td><td>SFTP CSV extract</td><td>Raj Patel</td></tr>
+      <tr><td>EDI acknowledgement log</td><td>Real-time (≤5 min lag)</td><td>Event stream or API poll</td><td>Opella Digital</td></tr>
+      <tr><td>Order management events</td><td>Real-time (≤5 min lag)</td><td>Order system webhook or API</td><td>Opella Digital</td></tr>
+      <tr><td>Connection registry (TSA flags)</td><td>On-change (low frequency)</td><td>Maintained manually by James Okafor</td><td>James Okafor</td></tr>
+    </table>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">9</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 10 — IMPLEMENTATION ROADMAP ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§5 Implementation Roadmap</div>
+
+    <div class="body-p">Both use cases can be delivered in H1 (0–6 months). The sequencing below staggers their launches by 6 weeks to avoid competing for IT access and change management bandwidth. OPP-04 basic alerting is prioritised first because EDI incidents are ongoing and the next seasonal window (October–November) is the near-term risk horizon.</div>
+
+    <div class="sub-title">Phased Delivery Plan</div>
+    <table>
+      <tr><th>Phase</th><th>Timeline</th><th>Deliverable</th><th>Owner</th><th>Gate Condition</th></tr>
+      <tr>
+        <td><strong>Phase 0</strong><br><span style="font-size:8.5px;color:#6b7280;">Weeks 1–2</span></td>
+        <td>Weeks 1–2</td>
+        <td>Data access confirmed: SAP S/4HANA SFTP extract agreed; EDI event stream API access scoped; CRM export cadence agreed with Raj Patel</td>
+        <td>James Okafor, Raj Patel</td>
+        <td>Both extracts received and validated in test environment</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 1</strong><br><span style="font-size:8.5px;color:#6b7280;">Weeks 3–6</span></td>
+        <td>Weeks 3–6</td>
+        <td><strong>OPP-04 MVP:</strong> P-01 and P-02 detection active (acknowledgement timeout + duplicate); TSA routing logic live; alert delivery to CS team by email/Slack</td>
+        <td>Opella Digital + AuroPro</td>
+        <td>3 P-01 alerts detected and correctly routed in test; CS team sign-off on alert format</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 2</strong><br><span style="font-size:8.5px;color:#6b7280;">Weeks 5–8</span></td>
+        <td>Weeks 5–8</td>
+        <td><strong>OPP-01 MVP:</strong> Weekly credit reconciliation report live; first report delivered to Raj Patel; Credit Controller validates discrepancy classification accuracy on known accounts</td>
+        <td>AuroPro + Raj Patel</td>
+        <td>Raj Patel confirms ≥90% of flagged discrepancies are correctly classified; first remediation action taken</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 3</strong><br><span style="font-size:8.5px;color:#6b7280;">Weeks 9–16</span></td>
+        <td>Weeks 9–16</td>
+        <td><strong>OPP-04 Full:</strong> P-03, P-04, P-05 patterns active; fulfilment rate dashboard live; seasonal window parameters enabled before October window</td>
+        <td>Opella Digital + AuroPro</td>
+        <td>All 5 patterns tested on historical data; fulfilment dashboard reviewed by James Okafor</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 4</strong><br><span style="font-size:8.5px;color:#6b7280;">Weeks 17–24</span></td>
+        <td>Weeks 17–24</td>
+        <td><strong>Steady state + H2 design:</strong> First OCt seasonal window monitored live; OPP-01 accuracy reviewed; OPP-04 escalation log mined for TSA migration evidence; H2 automated write-back feasibility scoped</td>
+        <td>Raj Patel, James Okafor, Sophie Marchetti</td>
+        <td>Seasonal window closes with fulfilment rate ≥85%; escalation log delivered to TSA programme</td>
+      </tr>
+    </table>
+
+    <div class="sub-title">Figure 2 — H1 Implementation Timeline</div>
+    <svg width="722" height="160" viewBox="0 0 722 160" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 6px;">
+      <!-- Week axis -->
+      <line x1="110" y1="20" x2="710" y2="20" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="110" y="14" text-anchor="middle" font-size="8" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">W1</text>
+      <text x="185" y="14" text-anchor="middle" font-size="8" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">W4</text>
+      <text x="260" y="14" text-anchor="middle" font-size="8" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">W7</text>
+      <text x="335" y="14" text-anchor="middle" font-size="8" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">W10</text>
+      <text x="410" y="14" text-anchor="middle" font-size="8" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">W13</text>
+      <text x="485" y="14" text-anchor="middle" font-size="8" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">W16</text>
+      <text x="560" y="14" text-anchor="middle" font-size="8" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">W19</text>
+      <text x="635" y="14" text-anchor="middle" font-size="8" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">W22</text>
+      <text x="710" y="14" text-anchor="middle" font-size="8" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">W24</text>
+
+      <!-- Row labels -->
+      <text x="100" y="48" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Phase 0</text>
+      <text x="100" y="73" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-04 MVP</text>
+      <text x="100" y="98" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-01 MVP</text>
+      <text x="100" y="123" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-04 Full</text>
+      <text x="100" y="148" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Steady State</text>
+
+      <!-- Bars: w1=110, each week=25px -->
+      <!-- Phase 0: W1–W2 -->
+      <rect x="110" y="35" width="50" height="18" rx="4" fill="#e5e7eb"/>
+      <text x="135" y="48" text-anchor="middle" font-size="7.5" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Data Access</text>
+
+      <!-- OPP-04 MVP: W3–W6 -->
+      <rect x="160" y="60" width="100" height="18" rx="4" fill="rgba(109,40,217,0.7)"/>
+      <text x="210" y="73" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">P-01 + P-02 · TSA routing</text>
+
+      <!-- OPP-01 MVP: W5–W8 -->
+      <rect x="210" y="85" width="100" height="18" rx="4" fill="rgba(37,99,235,0.7)"/>
+      <text x="260" y="98" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Weekly reconciliation report</text>
+
+      <!-- OPP-04 Full: W9–W16 -->
+      <rect x="310" y="110" width="200" height="18" rx="4" fill="rgba(109,40,217,0.7)"/>
+      <text x="410" y="123" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">P-03 + P-04 + P-05 · Dashboard · Seasonal setup</text>
+
+      <!-- Steady state: W17–W24 -->
+      <rect x="510" y="135" width="200" height="18" rx="4" fill="rgba(5,150,105,0.6)"/>
+      <text x="610" y="148" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Oct window live · H2 scoping</text>
+
+      <!-- Seasonal window marker -->
+      <rect x="610" y="25" width="100" height="125" rx="0" fill="rgba(217,119,6,0.06)" stroke="rgba(217,119,6,0.3)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="660" y="37" text-anchor="middle" font-size="7.5" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Oct–Nov</text>
+      <text x="660" y="48" text-anchor="middle" font-size="7.5" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">seasonal</text>
+    </svg>
+    <div class="caption">Figure 2 — H1 implementation timeline; amber shading = October seasonal risk window</div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">10</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 11 — AI GOVERNANCE ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§6 AI Governance &amp; Risk</div>
+
+    <div class="body-p">AI systems in financial and operational workflows require explicit governance: who validates outputs, what happens when the AI is wrong, and how confidence degrades over time. The framework below is proportionate to the H1 scope — lightweight, human-in-the-loop, and designed to build institutional confidence before any H2 automation is considered.</div>
+
+    <div class="sub-title">Oversight Model</div>
+    <div class="spec-grid" style="margin-bottom:14px;">
+      <div class="spec-block">
+        <div class="spec-label">OPP-01 — Human Validation Gate</div>
+        <ul class="spec-list">
+          <li>Every weekly report reviewed by Credit Controller (Raj Patel) before any SAP action is taken</li>
+          <li>Credit Controller records action taken against each flagged account in a simple log (Excel or SharePoint)</li>
+          <li>Finance Director (Marc Dupont) receives copy of report; reviews summary metrics monthly</li>
+          <li>No ERP write-back without Credit Controller signature in H1</li>
+        </ul>
+      </div>
+      <div class="spec-block">
+        <div class="spec-label">OPP-04 — Human Validation Gate</div>
+        <ul class="spec-list">
+          <li>All alerts require CS team acknowledgement before action is taken — no auto-routing to Sanofi helpdesk</li>
+          <li>CS agent confirms or dismisses each alert within 2 hours; dismissal requires free-text reason</li>
+          <li>James Okafor reviews alert log weekly; approves or adjusts detection thresholds</li>
+          <li>Alert false-positive rate tracked weekly; threshold adjustment if &gt;20% false-positive rate</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sub-title">AI Risk Register</div>
+    <table>
+      <tr><th>Risk</th><th>Use Case</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr>
+      <tr>
+        <td><strong>False positive — breach flag</strong><br><span style="font-size:8.5px;color:#6b7280;">AI classifies a valid CRM update as a policy breach</span></td>
+        <td>OPP-01</td>
+        <td><span class="risk-med">Medium</span></td>
+        <td><span class="risk-med">Medium</span></td>
+        <td>Credit Controller validates all breach flags before action; dismissal logged with reason; model retrained on dismissal data quarterly</td>
+      </tr>
+      <tr>
+        <td><strong>False negative — missed discrepancy</strong><br><span style="font-size:8.5px;color:#6b7280;">AI misses a real discrepancy due to customer ID format mismatch</span></td>
+        <td>OPP-01</td>
+        <td><span class="risk-lo">Low</span></td>
+        <td><span class="risk-hi">High</span></td>
+        <td>Deterministic join step (script, not LLM) ensures all matched records are diffed; LLM only applies to classification step</td>
+      </tr>
+      <tr>
+        <td><strong>Alert fatigue</strong><br><span style="font-size:8.5px;color:#6b7280;">Too many low-severity alerts cause CS team to dismiss without reading</span></td>
+        <td>OPP-04</td>
+        <td><span class="risk-med">Medium</span></td>
+        <td><span class="risk-hi">High</span></td>
+        <td>Phase 1 launches P-01 + P-02 only (highest signal, lowest noise); threshold tuning in Phase 3 before adding P-03–P-05; CS weekly feedback loop</td>
+      </tr>
+      <tr>
+        <td><strong>Incorrect TSA routing</strong><br><span style="font-size:8.5px;color:#6b7280;">Alert routed to Opella Digital for Sanofi-managed connection</span></td>
+        <td>OPP-04</td>
+        <td><span class="risk-lo">Low</span></td>
+        <td><span class="risk-med">Medium</span></td>
+        <td>Connection registry is deterministic lookup (not AI); routing logic reviewed by James Okafor in Phase 1 UAT; registry updated when TSA connections are handed over</td>
+      </tr>
+      <tr>
+        <td><strong>Model drift over time</strong><br><span style="font-size:8.5px;color:#6b7280;">Classification accuracy degrades as business rules evolve post-TSA</span></td>
+        <td>OPP-01 &amp; OPP-04</td>
+        <td><span class="risk-lo">Low (H1)</span></td>
+        <td><span class="risk-med">Medium</span></td>
+        <td>Quarterly accuracy review; policy document version-pinned in AI context; trigger re-run when Credit Policy or EDI SOP is updated</td>
+      </tr>
+    </table>
+
+    <div class="note-box" style="margin-top:4px;">
+      <div class="note-box-title">H2 Automation Gating Criteria</div>
+      <p>Automated write-back (OPP-01 updating SAP CRM directly) or automated alert dispatch (OPP-04 calling Sanofi helpdesk without CS review) will only be considered if: (1) H1 accuracy rate ≥95% over 3 consecutive months; (2) Credit Controller and CS team lead formally sign off on the specific automation; (3) legal and compliance review is completed for FMCH regulatory requirements. No H2 automation is in scope for this report.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">11</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 12 — APPENDIX ═══════════════════════════════════════ -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">Appendix A — Traceability &amp; Feature Catalogue</div>
+
+    <div class="sub-title">A.1 Full Traceability Chain</div>
+    <table>
+      <tr><th>Pain Point</th><th>Opportunity</th><th>Recommendation</th><th>AI Use Case</th><th>Success Metric</th></tr>
+      <tr>
+        <td>PP-01: Credit Data Integrity Risk</td>
+        <td>OPP-01: Credit Reconciliation AI</td>
+        <td>R-01: SAP as Sole Credit Authority</td>
+        <td>Credit Limit Reconciliation Engine</td>
+        <td>€0 ERP–CRM delta, top-8 accounts, by end H1</td>
+      </tr>
+      <tr>
+        <td>PP-05: Onboarding Data Risk</td>
+        <td>OPP-01 (secondary)</td>
+        <td>R-05: Customer Master Dedup</td>
+        <td>OPP-01 missing-account detection (22 accounts)</td>
+        <td>All 340 ERP accounts present in CRM by end H1</td>
+      </tr>
+      <tr>
+        <td>PP-02: EDI Governance Vacuum</td>
+        <td>OPP-04: EDI Monitoring AI</td>
+        <td>R-02 + R-04: EDI SOP + Monitoring</td>
+        <td>EDI Anomaly Detection</td>
+        <td>Mean detection time &lt;15 min (vs 24–48h today)</td>
+      </tr>
+      <tr>
+        <td>PP-03: TSA Connection Dependency</td>
+        <td>OPP-04 (secondary)</td>
+        <td>R-03: TSA Migration Programme</td>
+        <td>TSA-aware alert routing; escalation log for TSA evidence</td>
+        <td>Zero mis-routed alerts; escalation log supports TSA negotiation</td>
+      </tr>
+      <tr>
+        <td>PP-04: EDI Channel Instability</td>
+        <td>OPP-04</td>
+        <td>R-04: EDI Monitoring</td>
+        <td>P-04 Fulfilment Rate Degradation pattern</td>
+        <td>EDI fulfilment rate ≥91% year-round</td>
+      </tr>
+    </table>
+
+    <div class="sub-title">A.2 OPP-01 Feature Catalogue</div>
+    <table>
+      <tr><th>#</th><th>Feature</th><th>Phase</th><th>AI or Deterministic</th></tr>
+      <tr><td>F1</td><td>ERP–CRM record join on <code>customer_id</code></td><td>Phase 2</td><td>Deterministic (script)</td></tr>
+      <tr><td>F2</td><td>Delta computation per matched record (credit limit + payment terms)</td><td>Phase 2</td><td>Deterministic</td></tr>
+      <tr><td>F3</td><td>Missing-from-CRM detection (22 ERP-only accounts)</td><td>Phase 2</td><td>Deterministic</td></tr>
+      <tr><td>F4</td><td>Cause classification: migration artifact / AM override / system drift</td><td>Phase 2</td><td>LLM classification</td></tr>
+      <tr><td>F5</td><td>Policy breach check against §4.1, §4.2, §4.4 (OPS-EU-FIN-POL-002)</td><td>Phase 2</td><td>LLM rule application</td></tr>
+      <tr><td>F6</td><td>Recommended action per account (1–2 sentences, policy-grounded)</td><td>Phase 2</td><td>LLM generation</td></tr>
+      <tr><td>F7</td><td>Weekly report generation and email delivery</td><td>Phase 2</td><td>Deterministic</td></tr>
+      <tr><td>F8</td><td>Trend comparison vs prior week (new, resolved, persisting discrepancies)</td><td>Phase 4</td><td>Deterministic</td></tr>
+    </table>
+
+    <div class="sub-title">A.3 OPP-04 Feature Catalogue</div>
+    <table>
+      <tr><th>#</th><th>Feature</th><th>Pattern</th><th>Phase</th></tr>
+      <tr><td>F1</td><td>Acknowledgement timeout detection (30 min window)</td><td>P-01</td><td>Phase 1</td></tr>
+      <tr><td>F2</td><td>Duplicate order detection (same customer + PO + date)</td><td>P-02</td><td>Phase 1</td></tr>
+      <tr><td>F3</td><td>TSA-aware routing logic (14-connection registry lookup)</td><td>All</td><td>Phase 1</td></tr>
+      <tr><td>F4</td><td>Alert delivery via email + Slack</td><td>All</td><td>Phase 1</td></tr>
+      <tr><td>F5</td><td>Mapping error cluster detection (3+ rejections / 48h / connection)</td><td>P-03</td><td>Phase 3</td></tr>
+      <tr><td>F6</td><td>Rolling 7-day fulfilment rate computation per connection</td><td>P-04</td><td>Phase 3</td></tr>
+      <tr><td>F7</td><td>Seasonal window parameter switching (Apr–May, Oct–Nov)</td><td>P-04</td><td>Phase 3</td></tr>
+      <tr><td>F8</td><td>Credit hold cross-reference with OPP-01 discrepancy list</td><td>P-05</td><td>Phase 3</td></tr>
+      <tr><td>F9</td><td>Fulfilment rate monitoring dashboard</td><td>P-04</td><td>Phase 3</td></tr>
+      <tr><td>F10</td><td>Escalation log export for TSA migration programme evidence</td><td>All</td><td>Phase 4</td></tr>
+    </table>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-04 · AI Opportunity Portfolio · Confidential</div><div class="pf-num">12</div></div>
+</div>
+
+</body>
+</html>

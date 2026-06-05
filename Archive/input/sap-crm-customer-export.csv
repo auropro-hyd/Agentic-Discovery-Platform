@@ -1,0 +1,319 @@
+customer_id,customer_name,country,credit_limit_eur,payment_terms,last_updated_by,source
+FR001,Carrefour France,FR,2400000,NET30,Account Manager EU,manually updated by account manager post-carve-out
+FR002,E.Leclerc,FR,1400000,NET30,Thomas Beaumont,manually updated by account manager post-carve-out
+UK001,Boots UK,UK,1550000,NET30,Raj Patel,manually updated by account manager post-carve-out
+UK002,Tesco UK,UK,1350000,NET30,Account Manager EU,manually updated by account manager post-carve-out
+DE001,dm (Drogerie Markt),DE,1150000,NET30,Raj Patel,manually updated by account manager post-carve-out
+EU001,Lidl Europe,EU,1000000,NET30,Sophie Marchetti,manually updated by account manager post-carve-out
+EU002,Coop Group,EU,950000,NET30,Thomas Beaumont,manually updated by account manager post-carve-out
+ES001,Mercadona,ES,900000,NET30,Raj Patel,manually updated by account manager post-carve-out
+CUST01000,Pharmacy Account 1000,DE,200000,NET30,System migration,Opella CRM migration 2024
+CUST01001,Co-op Account 1001,UK,300000,NET60,System migration,Opella CRM migration 2024
+CUST01002,Wholesaler Account 1002,IT,250000,NET60,System migration,Opella CRM migration 2024
+CUST01003,Hospital Account 1003,NL,300000,NET45,System migration,Opella CRM migration 2024
+CUST01004,Hospital Account 1004,DE,100000,NET60,System migration,Opella CRM migration 2024
+CUST01005,Co-op Account 1005,UK,50000,NET30,System migration,Opella CRM migration 2024
+CUST01006,Hospital Account 1006,PL,50000,NET45,System migration,Opella CRM migration 2024
+CUST01007,Hospital Account 1007,DE,250000,NET30,System migration,Opella CRM migration 2024
+CUST01008,Pharmacy Account 1008,BE,150000,NET45,System migration,Opella CRM migration 2024
+CUST01009,Independent Retailer Account 1009,AT,75000,NET30,System migration,Opella CRM migration 2024
+CUST01010,Independent Retailer Account 1010,IT,250000,NET30,System migration,Opella CRM migration 2024
+CUST01011,Wholesaler Account 1011,FR,250000,NET60,System migration,Opella CRM migration 2024
+CUST01012,Hospital Account 1012,FR,250000,NET45,System migration,Opella CRM migration 2024
+CUST01013,Wholesaler Account 1013,AT,250000,NET60,System migration,Opella CRM migration 2024
+CUST01014,Independent Retailer Account 1014,CH,75000,NET45,System migration,Opella CRM migration 2024
+CUST01015,Hospital Account 1015,AT,300000,NET60,System migration,Opella CRM migration 2024
+CUST01016,Independent Retailer Account 1016,FR,100000,NET30,System migration,Opella CRM migration 2024
+CUST01017,Co-op Account 1017,ES,50000,NET60,System migration,Opella CRM migration 2024
+CUST01018,Hospital Account 1018,CH,200000,NET45,System migration,Opella CRM migration 2024
+CUST01019,Wholesaler Account 1019,PL,75000,NET30,System migration,Opella CRM migration 2024
+CUST01020,Pharmacy Account 1020,BE,100000,NET30,System migration,Opella CRM migration 2024
+CUST01021,Pharmacy Account 1021,PL,250000,NET45,System migration,Opella CRM migration 2024
+CUST01022,Co-op Account 1022,FR,250000,NET45,System migration,Opella CRM migration 2024
+CUST01023,Independent Retailer Account 1023,DE,75000,NET60,System migration,Opella CRM migration 2024
+CUST01024,Hospital Account 1024,FR,200000,NET60,System migration,Opella CRM migration 2024
+CUST01025,Pharmacy Account 1025,DE,100000,NET30,System migration,Opella CRM migration 2024
+CUST01026,Independent Retailer Account 1026,NL,100000,NET60,System migration,Opella CRM migration 2024
+CUST01027,Independent Retailer Account 1027,CH,250000,NET30,System migration,Opella CRM migration 2024
+CUST01028,Hospital Account 1028,IT,150000,NET30,System migration,Opella CRM migration 2024
+CUST01029,Co-op Account 1029,CH,300000,NET45,System migration,Opella CRM migration 2024
+CUST01030,Wholesaler Account 1030,CH,300000,NET30,System migration,Opella CRM migration 2024
+CUST01031,Hospital Account 1031,IT,150000,NET45,System migration,Opella CRM migration 2024
+CUST01032,Co-op Account 1032,NL,100000,NET45,System migration,Opella CRM migration 2024
+CUST01033,Hospital Account 1033,DE,100000,NET30,System migration,Opella CRM migration 2024
+CUST01034,Independent Retailer Account 1034,UK,250000,NET30,System migration,Opella CRM migration 2024
+CUST01035,Hospital Account 1035,AT,150000,NET45,System migration,Opella CRM migration 2024
+CUST01036,Co-op Account 1036,DE,100000,NET30,System migration,Opella CRM migration 2024
+CUST01037,Co-op Account 1037,IT,250000,NET60,System migration,Opella CRM migration 2024
+CUST01038,Pharmacy Account 1038,BE,75000,NET60,System migration,Opella CRM migration 2024
+CUST01039,Wholesaler Account 1039,ES,200000,NET30,System migration,Opella CRM migration 2024
+CUST01040,Wholesaler Account 1040,CH,100000,NET60,System migration,Opella CRM migration 2024
+CUST01041,Hospital Account 1041,UK,150000,NET30,System migration,Opella CRM migration 2024
+CUST01042,Hospital Account 1042,ES,200000,NET60,System migration,Opella CRM migration 2024
+CUST01043,Hospital Account 1043,DE,100000,NET45,System migration,Opella CRM migration 2024
+CUST01044,Pharmacy Account 1044,UK,50000,NET45,System migration,Opella CRM migration 2024
+CUST01045,Co-op Account 1045,NL,150000,NET60,System migration,Opella CRM migration 2024
+CUST01046,Independent Retailer Account 1046,CH,150000,NET30,System migration,Opella CRM migration 2024
+CUST01047,Independent Retailer Account 1047,UK,250000,NET60,System migration,Opella CRM migration 2024
+CUST01048,Hospital Account 1048,FR,100000,NET30,System migration,Opella CRM migration 2024
+CUST01049,Independent Retailer Account 1049,CH,250000,NET60,System migration,Opella CRM migration 2024
+CUST01050,Independent Retailer Account 1050,UK,75000,NET60,System migration,Opella CRM migration 2024
+CUST01051,Pharmacy Account 1051,FR,50000,NET30,System migration,Opella CRM migration 2024
+CUST01052,Co-op Account 1052,NL,200000,NET30,System migration,Opella CRM migration 2024
+CUST01053,Independent Retailer Account 1053,IT,150000,NET45,System migration,Opella CRM migration 2024
+CUST01054,Co-op Account 1054,UK,250000,NET60,System migration,Opella CRM migration 2024
+CUST01055,Co-op Account 1055,DE,100000,NET60,System migration,Opella CRM migration 2024
+CUST01056,Co-op Account 1056,BE,250000,NET45,System migration,Opella CRM migration 2024
+CUST01057,Independent Retailer Account 1057,FR,50000,NET30,System migration,Opella CRM migration 2024
+CUST01058,Independent Retailer Account 1058,ES,50000,NET30,System migration,Opella CRM migration 2024
+CUST01059,Pharmacy Account 1059,UK,200000,NET30,System migration,Opella CRM migration 2024
+CUST01060,Hospital Account 1060,NL,250000,NET45,System migration,Opella CRM migration 2024
+CUST01061,Co-op Account 1061,BE,75000,NET45,System migration,Opella CRM migration 2024
+CUST01062,Hospital Account 1062,UK,100000,NET45,System migration,Opella CRM migration 2024
+CUST01063,Independent Retailer Account 1063,UK,250000,NET45,System migration,Opella CRM migration 2024
+CUST01064,Wholesaler Account 1064,UK,100000,NET45,System migration,Opella CRM migration 2024
+CUST01065,Hospital Account 1065,AT,100000,NET60,System migration,Opella CRM migration 2024
+CUST01066,Wholesaler Account 1066,PL,150000,NET45,System migration,Opella CRM migration 2024
+CUST01067,Pharmacy Account 1067,AT,150000,NET60,System migration,Opella CRM migration 2024
+CUST01068,Independent Retailer Account 1068,IT,200000,NET45,System migration,Opella CRM migration 2024
+CUST01069,Independent Retailer Account 1069,ES,150000,NET45,System migration,Opella CRM migration 2024
+CUST01070,Independent Retailer Account 1070,FR,100000,NET45,System migration,Opella CRM migration 2024
+CUST01071,Pharmacy Account 1071,NL,100000,NET45,System migration,Opella CRM migration 2024
+CUST01072,Wholesaler Account 1072,CH,250000,NET30,System migration,Opella CRM migration 2024
+CUST01073,Co-op Account 1073,FR,75000,NET45,System migration,Opella CRM migration 2024
+CUST01074,Independent Retailer Account 1074,FR,75000,NET60,System migration,Opella CRM migration 2024
+CUST01075,Hospital Account 1075,BE,250000,NET45,System migration,Opella CRM migration 2024
+CUST01076,Co-op Account 1076,AT,50000,NET60,System migration,Opella CRM migration 2024
+CUST01077,Independent Retailer Account 1077,FR,100000,NET60,System migration,Opella CRM migration 2024
+CUST01078,Co-op Account 1078,ES,300000,NET45,System migration,Opella CRM migration 2024
+CUST01079,Independent Retailer Account 1079,FR,100000,NET30,System migration,Opella CRM migration 2024
+CUST01080,Pharmacy Account 1080,AT,50000,NET45,System migration,Opella CRM migration 2024
+CUST01081,Independent Retailer Account 1081,NL,50000,NET45,System migration,Opella CRM migration 2024
+CUST01082,Independent Retailer Account 1082,IT,50000,NET60,System migration,Opella CRM migration 2024
+CUST01083,Pharmacy Account 1083,FR,100000,NET30,System migration,Opella CRM migration 2024
+CUST01084,Co-op Account 1084,FR,50000,NET60,System migration,Opella CRM migration 2024
+CUST01085,Wholesaler Account 1085,CH,100000,NET30,System migration,Opella CRM migration 2024
+CUST01086,Wholesaler Account 1086,CH,100000,NET30,System migration,Opella CRM migration 2024
+CUST01087,Pharmacy Account 1087,CH,150000,NET30,System migration,Opella CRM migration 2024
+CUST01088,Pharmacy Account 1088,FR,150000,NET60,System migration,Opella CRM migration 2024
+CUST01089,Pharmacy Account 1089,CH,250000,NET30,System migration,Opella CRM migration 2024
+CUST01090,Independent Retailer Account 1090,PL,300000,NET60,System migration,Opella CRM migration 2024
+CUST01091,Co-op Account 1091,PL,200000,NET45,System migration,Opella CRM migration 2024
+CUST01092,Pharmacy Account 1092,CH,250000,NET45,System migration,Opella CRM migration 2024
+CUST01093,Co-op Account 1093,AT,300000,NET60,System migration,Opella CRM migration 2024
+CUST01094,Co-op Account 1094,ES,50000,NET45,System migration,Opella CRM migration 2024
+CUST01095,Co-op Account 1095,DE,250000,NET30,System migration,Opella CRM migration 2024
+CUST01096,Hospital Account 1096,ES,50000,NET45,System migration,Opella CRM migration 2024
+CUST01097,Co-op Account 1097,IT,75000,NET45,System migration,Opella CRM migration 2024
+CUST01098,Co-op Account 1098,DE,200000,NET45,System migration,Opella CRM migration 2024
+CUST01099,Hospital Account 1099,CH,50000,NET30,System migration,Opella CRM migration 2024
+CUST01100,Wholesaler Account 1100,NL,50000,NET45,System migration,Opella CRM migration 2024
+CUST01101,Wholesaler Account 1101,UK,50000,NET30,System migration,Opella CRM migration 2024
+CUST01102,Co-op Account 1102,ES,75000,NET45,System migration,Opella CRM migration 2024
+CUST01103,Wholesaler Account 1103,NL,100000,NET45,System migration,Opella CRM migration 2024
+CUST01104,Hospital Account 1104,FR,150000,NET45,System migration,Opella CRM migration 2024
+CUST01105,Hospital Account 1105,CH,200000,NET60,System migration,Opella CRM migration 2024
+CUST01106,Pharmacy Account 1106,BE,75000,NET45,System migration,Opella CRM migration 2024
+CUST01107,Co-op Account 1107,AT,250000,NET60,System migration,Opella CRM migration 2024
+CUST01108,Hospital Account 1108,DE,100000,NET30,System migration,Opella CRM migration 2024
+CUST01109,Co-op Account 1109,IT,200000,NET60,System migration,Opella CRM migration 2024
+CUST01110,Pharmacy Account 1110,ES,150000,NET60,System migration,Opella CRM migration 2024
+CUST01111,Wholesaler Account 1111,DE,75000,NET45,System migration,Opella CRM migration 2024
+CUST01112,Independent Retailer Account 1112,ES,200000,NET45,System migration,Opella CRM migration 2024
+CUST01113,Pharmacy Account 1113,UK,100000,NET30,System migration,Opella CRM migration 2024
+CUST01114,Wholesaler Account 1114,CH,50000,NET45,System migration,Opella CRM migration 2024
+CUST01115,Co-op Account 1115,CH,300000,NET30,System migration,Opella CRM migration 2024
+CUST01116,Independent Retailer Account 1116,PL,300000,NET60,System migration,Opella CRM migration 2024
+CUST01117,Independent Retailer Account 1117,CH,300000,NET45,System migration,Opella CRM migration 2024
+CUST01118,Hospital Account 1118,IT,200000,NET30,System migration,Opella CRM migration 2024
+CUST01119,Co-op Account 1119,NL,100000,NET60,System migration,Opella CRM migration 2024
+CUST01120,Co-op Account 1120,NL,100000,NET30,System migration,Opella CRM migration 2024
+CUST01121,Pharmacy Account 1121,BE,100000,NET30,System migration,Opella CRM migration 2024
+CUST01122,Hospital Account 1122,DE,200000,NET60,System migration,Opella CRM migration 2024
+CUST01123,Wholesaler Account 1123,FR,300000,NET60,System migration,Opella CRM migration 2024
+CUST01124,Independent Retailer Account 1124,AT,100000,NET30,System migration,Opella CRM migration 2024
+CUST01125,Wholesaler Account 1125,UK,100000,NET60,System migration,Opella CRM migration 2024
+CUST01126,Hospital Account 1126,NL,50000,NET60,System migration,Opella CRM migration 2024
+CUST01127,Hospital Account 1127,DE,50000,NET45,System migration,Opella CRM migration 2024
+CUST01128,Independent Retailer Account 1128,IT,50000,NET30,System migration,Opella CRM migration 2024
+CUST01129,Hospital Account 1129,AT,250000,NET30,System migration,Opella CRM migration 2024
+CUST01130,Pharmacy Account 1130,IT,50000,NET30,System migration,Opella CRM migration 2024
+CUST01131,Wholesaler Account 1131,BE,150000,NET45,System migration,Opella CRM migration 2024
+CUST01132,Pharmacy Account 1132,NL,200000,NET45,System migration,Opella CRM migration 2024
+CUST01133,Independent Retailer Account 1133,FR,150000,NET30,System migration,Opella CRM migration 2024
+CUST01134,Wholesaler Account 1134,AT,150000,NET60,System migration,Opella CRM migration 2024
+CUST01135,Hospital Account 1135,ES,75000,NET60,System migration,Opella CRM migration 2024
+CUST01136,Pharmacy Account 1136,BE,150000,NET30,System migration,Opella CRM migration 2024
+CUST01137,Co-op Account 1137,BE,250000,NET45,System migration,Opella CRM migration 2024
+CUST01138,Wholesaler Account 1138,IT,200000,NET30,System migration,Opella CRM migration 2024
+CUST01139,Independent Retailer Account 1139,PL,300000,NET60,System migration,Opella CRM migration 2024
+CUST01140,Pharmacy Account 1140,NL,100000,NET60,System migration,Opella CRM migration 2024
+CUST01141,Pharmacy Account 1141,CH,150000,NET45,System migration,Opella CRM migration 2024
+CUST01142,Wholesaler Account 1142,UK,200000,NET60,System migration,Opella CRM migration 2024
+CUST01143,Hospital Account 1143,DE,250000,NET30,System migration,Opella CRM migration 2024
+CUST01144,Independent Retailer Account 1144,CH,50000,NET60,System migration,Opella CRM migration 2024
+CUST01145,Pharmacy Account 1145,DE,50000,NET30,System migration,Opella CRM migration 2024
+CUST01146,Independent Retailer Account 1146,UK,75000,NET45,System migration,Opella CRM migration 2024
+CUST01147,Hospital Account 1147,FR,150000,NET30,System migration,Opella CRM migration 2024
+CUST01148,Co-op Account 1148,ES,200000,NET30,System migration,Opella CRM migration 2024
+CUST01149,Wholesaler Account 1149,CH,75000,NET30,System migration,Opella CRM migration 2024
+CUST01150,Pharmacy Account 1150,FR,75000,NET45,System migration,Opella CRM migration 2024
+CUST01151,Co-op Account 1151,BE,150000,NET60,System migration,Opella CRM migration 2024
+CUST01152,Hospital Account 1152,ES,100000,NET30,System migration,Opella CRM migration 2024
+CUST01153,Pharmacy Account 1153,DE,150000,NET30,System migration,Opella CRM migration 2024
+CUST01154,Hospital Account 1154,NL,75000,NET60,System migration,Opella CRM migration 2024
+CUST01155,Hospital Account 1155,BE,150000,NET60,System migration,Opella CRM migration 2024
+CUST01156,Co-op Account 1156,AT,250000,NET45,System migration,Opella CRM migration 2024
+CUST01157,Wholesaler Account 1157,FR,300000,NET30,System migration,Opella CRM migration 2024
+CUST01158,Independent Retailer Account 1158,BE,200000,NET45,System migration,Opella CRM migration 2024
+CUST01159,Hospital Account 1159,UK,100000,NET60,System migration,Opella CRM migration 2024
+CUST01160,Pharmacy Account 1160,FR,75000,NET60,System migration,Opella CRM migration 2024
+CUST01161,Wholesaler Account 1161,FR,250000,NET45,System migration,Opella CRM migration 2024
+CUST01162,Wholesaler Account 1162,PL,150000,NET30,System migration,Opella CRM migration 2024
+CUST01163,Pharmacy Account 1163,NL,75000,NET45,System migration,Opella CRM migration 2024
+CUST01164,Pharmacy Account 1164,ES,300000,NET60,System migration,Opella CRM migration 2024
+CUST01165,Independent Retailer Account 1165,DE,250000,NET30,System migration,Opella CRM migration 2024
+CUST01166,Co-op Account 1166,BE,50000,NET60,System migration,Opella CRM migration 2024
+CUST01167,Pharmacy Account 1167,FR,100000,NET60,System migration,Opella CRM migration 2024
+CUST01168,Pharmacy Account 1168,NL,250000,NET60,System migration,Opella CRM migration 2024
+CUST01169,Hospital Account 1169,BE,300000,NET30,System migration,Opella CRM migration 2024
+CUST01170,Hospital Account 1170,UK,75000,NET60,System migration,Opella CRM migration 2024
+CUST01171,Pharmacy Account 1171,NL,200000,NET30,System migration,Opella CRM migration 2024
+CUST01172,Hospital Account 1172,DE,250000,NET45,System migration,Opella CRM migration 2024
+CUST01173,Independent Retailer Account 1173,DE,300000,NET30,System migration,Opella CRM migration 2024
+CUST01174,Wholesaler Account 1174,DE,200000,NET30,System migration,Opella CRM migration 2024
+CUST01175,Hospital Account 1175,NL,50000,NET30,System migration,Opella CRM migration 2024
+CUST01176,Independent Retailer Account 1176,PL,50000,NET30,System migration,Opella CRM migration 2024
+CUST01177,Co-op Account 1177,IT,150000,NET60,System migration,Opella CRM migration 2024
+CUST01178,Independent Retailer Account 1178,BE,300000,NET30,System migration,Opella CRM migration 2024
+CUST01179,Co-op Account 1179,UK,100000,NET30,System migration,Opella CRM migration 2024
+CUST01180,Independent Retailer Account 1180,IT,250000,NET45,System migration,Opella CRM migration 2024
+CUST01181,Wholesaler Account 1181,ES,250000,NET30,System migration,Opella CRM migration 2024
+CUST01182,Independent Retailer Account 1182,PL,100000,NET30,System migration,Opella CRM migration 2024
+CUST01183,Co-op Account 1183,ES,50000,NET30,System migration,Opella CRM migration 2024
+CUST01184,Hospital Account 1184,IT,200000,NET30,System migration,Opella CRM migration 2024
+CUST01185,Wholesaler Account 1185,NL,250000,NET45,System migration,Opella CRM migration 2024
+CUST01186,Wholesaler Account 1186,PL,150000,NET60,System migration,Opella CRM migration 2024
+CUST01187,Wholesaler Account 1187,PL,200000,NET45,System migration,Opella CRM migration 2024
+CUST01188,Co-op Account 1188,PL,300000,NET45,System migration,Opella CRM migration 2024
+CUST01189,Pharmacy Account 1189,FR,150000,NET45,System migration,Opella CRM migration 2024
+CUST01190,Wholesaler Account 1190,AT,250000,NET60,System migration,Opella CRM migration 2024
+CUST01191,Wholesaler Account 1191,NL,150000,NET45,System migration,Opella CRM migration 2024
+CUST01192,Wholesaler Account 1192,ES,250000,NET60,System migration,Opella CRM migration 2024
+CUST01193,Wholesaler Account 1193,UK,300000,NET30,System migration,Opella CRM migration 2024
+CUST01194,Independent Retailer Account 1194,ES,300000,NET30,System migration,Opella CRM migration 2024
+CUST01195,Co-op Account 1195,UK,200000,NET45,System migration,Opella CRM migration 2024
+CUST01196,Pharmacy Account 1196,DE,150000,NET60,System migration,Opella CRM migration 2024
+CUST01197,Co-op Account 1197,CH,300000,NET45,System migration,Opella CRM migration 2024
+CUST01198,Wholesaler Account 1198,PL,150000,NET30,System migration,Opella CRM migration 2024
+CUST01199,Independent Retailer Account 1199,BE,200000,NET30,System migration,Opella CRM migration 2024
+CUST01200,Independent Retailer Account 1200,FR,250000,NET60,System migration,Opella CRM migration 2024
+CUST01201,Wholesaler Account 1201,BE,300000,NET30,System migration,Opella CRM migration 2024
+CUST01202,Wholesaler Account 1202,BE,75000,NET45,System migration,Opella CRM migration 2024
+CUST01203,Pharmacy Account 1203,DE,50000,NET30,System migration,Opella CRM migration 2024
+CUST01204,Co-op Account 1204,IT,150000,NET60,System migration,Opella CRM migration 2024
+CUST01205,Hospital Account 1205,NL,300000,NET30,System migration,Opella CRM migration 2024
+CUST01206,Hospital Account 1206,ES,50000,NET45,System migration,Opella CRM migration 2024
+CUST01207,Hospital Account 1207,NL,150000,NET30,System migration,Opella CRM migration 2024
+CUST01208,Co-op Account 1208,AT,150000,NET30,System migration,Opella CRM migration 2024
+CUST01209,Independent Retailer Account 1209,AT,200000,NET60,System migration,Opella CRM migration 2024
+CUST01210,Co-op Account 1210,ES,200000,NET60,System migration,Opella CRM migration 2024
+CUST01211,Pharmacy Account 1211,BE,250000,NET45,System migration,Opella CRM migration 2024
+CUST01212,Wholesaler Account 1212,FR,75000,NET45,System migration,Opella CRM migration 2024
+CUST01213,Co-op Account 1213,FR,150000,NET60,System migration,Opella CRM migration 2024
+CUST01214,Independent Retailer Account 1214,CH,250000,NET45,System migration,Opella CRM migration 2024
+CUST01215,Hospital Account 1215,AT,200000,NET30,System migration,Opella CRM migration 2024
+CUST01216,Hospital Account 1216,ES,150000,NET30,System migration,Opella CRM migration 2024
+CUST01217,Wholesaler Account 1217,UK,150000,NET30,System migration,Opella CRM migration 2024
+CUST01218,Independent Retailer Account 1218,IT,100000,NET45,System migration,Opella CRM migration 2024
+CUST01219,Pharmacy Account 1219,NL,200000,NET30,System migration,Opella CRM migration 2024
+CUST01220,Pharmacy Account 1220,AT,250000,NET60,System migration,Opella CRM migration 2024
+CUST01221,Co-op Account 1221,BE,100000,NET60,System migration,Opella CRM migration 2024
+CUST01222,Independent Retailer Account 1222,FR,75000,NET45,System migration,Opella CRM migration 2024
+CUST01223,Pharmacy Account 1223,ES,75000,NET60,System migration,Opella CRM migration 2024
+CUST01224,Independent Retailer Account 1224,IT,250000,NET60,System migration,Opella CRM migration 2024
+CUST01225,Independent Retailer Account 1225,NL,300000,NET45,System migration,Opella CRM migration 2024
+CUST01226,Co-op Account 1226,FR,250000,NET30,System migration,Opella CRM migration 2024
+CUST01227,Wholesaler Account 1227,FR,75000,NET60,System migration,Opella CRM migration 2024
+CUST01228,Wholesaler Account 1228,UK,200000,NET60,System migration,Opella CRM migration 2024
+CUST01229,Independent Retailer Account 1229,BE,300000,NET60,System migration,Opella CRM migration 2024
+CUST01230,Co-op Account 1230,BE,200000,NET30,System migration,Opella CRM migration 2024
+CUST01231,Hospital Account 1231,FR,250000,NET30,System migration,Opella CRM migration 2024
+CUST01232,Hospital Account 1232,BE,75000,NET30,System migration,Opella CRM migration 2024
+CUST01233,Hospital Account 1233,CH,200000,NET30,System migration,Opella CRM migration 2024
+CUST01234,Hospital Account 1234,DE,150000,NET30,System migration,Opella CRM migration 2024
+CUST01235,Independent Retailer Account 1235,CH,100000,NET45,System migration,Opella CRM migration 2024
+CUST01236,Wholesaler Account 1236,PL,50000,NET45,System migration,Opella CRM migration 2024
+CUST01237,Hospital Account 1237,CH,75000,NET45,System migration,Opella CRM migration 2024
+CUST01238,Wholesaler Account 1238,ES,300000,NET60,System migration,Opella CRM migration 2024
+CUST01239,Independent Retailer Account 1239,DE,200000,NET60,System migration,Opella CRM migration 2024
+CUST01240,Hospital Account 1240,IT,300000,NET45,System migration,Opella CRM migration 2024
+CUST01241,Wholesaler Account 1241,UK,150000,NET45,System migration,Opella CRM migration 2024
+CUST01242,Hospital Account 1242,UK,75000,NET30,System migration,Opella CRM migration 2024
+CUST01243,Wholesaler Account 1243,AT,50000,NET60,System migration,Opella CRM migration 2024
+CUST01244,Pharmacy Account 1244,NL,300000,NET60,System migration,Opella CRM migration 2024
+CUST01245,Co-op Account 1245,BE,100000,NET30,System migration,Opella CRM migration 2024
+CUST01246,Co-op Account 1246,PL,250000,NET45,System migration,Opella CRM migration 2024
+CUST01247,Independent Retailer Account 1247,IT,300000,NET45,System migration,Opella CRM migration 2024
+CUST01248,Pharmacy Account 1248,AT,250000,NET45,System migration,Opella CRM migration 2024
+CUST01249,Pharmacy Account 1249,FR,250000,NET30,System migration,Opella CRM migration 2024
+CUST01250,Pharmacy Account 1250,UK,100000,NET60,System migration,Opella CRM migration 2024
+CUST01251,Wholesaler Account 1251,PL,200000,NET60,System migration,Opella CRM migration 2024
+CUST01252,Independent Retailer Account 1252,UK,50000,NET45,System migration,Opella CRM migration 2024
+CUST01253,Co-op Account 1253,DE,50000,NET60,System migration,Opella CRM migration 2024
+CUST01254,Pharmacy Account 1254,AT,100000,NET30,System migration,Opella CRM migration 2024
+CUST01255,Hospital Account 1255,UK,200000,NET60,System migration,Opella CRM migration 2024
+CUST01256,Co-op Account 1256,FR,200000,NET30,System migration,Opella CRM migration 2024
+CUST01257,Pharmacy Account 1257,ES,150000,NET60,System migration,Opella CRM migration 2024
+CUST01258,Independent Retailer Account 1258,UK,75000,NET30,System migration,Opella CRM migration 2024
+CUST01259,Wholesaler Account 1259,PL,100000,NET60,System migration,Opella CRM migration 2024
+CUST01260,Hospital Account 1260,UK,200000,NET45,System migration,Opella CRM migration 2024
+CUST01261,Hospital Account 1261,PL,250000,NET30,System migration,Opella CRM migration 2024
+CUST01262,Hospital Account 1262,DE,200000,NET45,System migration,Opella CRM migration 2024
+CUST01263,Pharmacy Account 1263,BE,200000,NET60,System migration,Opella CRM migration 2024
+CUST01264,Independent Retailer Account 1264,BE,200000,NET60,System migration,Opella CRM migration 2024
+CUST01265,Pharmacy Account 1265,IT,50000,NET30,System migration,Opella CRM migration 2024
+CUST01266,Wholesaler Account 1266,PL,200000,NET60,System migration,Opella CRM migration 2024
+CUST01267,Wholesaler Account 1267,AT,250000,NET45,System migration,Opella CRM migration 2024
+CUST01268,Pharmacy Account 1268,DE,100000,NET30,System migration,Opella CRM migration 2024
+CUST01269,Independent Retailer Account 1269,NL,250000,NET45,System migration,Opella CRM migration 2024
+CUST01270,Pharmacy Account 1270,FR,250000,NET45,System migration,Opella CRM migration 2024
+CUST01271,Pharmacy Account 1271,ES,100000,NET45,System migration,Opella CRM migration 2024
+CUST01272,Co-op Account 1272,AT,250000,NET60,System migration,Opella CRM migration 2024
+CUST01273,Hospital Account 1273,FR,50000,NET60,System migration,Opella CRM migration 2024
+CUST01274,Pharmacy Account 1274,UK,200000,NET45,System migration,Opella CRM migration 2024
+CUST01275,Pharmacy Account 1275,FR,100000,NET60,System migration,Opella CRM migration 2024
+CUST01276,Hospital Account 1276,IT,100000,NET60,System migration,Opella CRM migration 2024
+CUST01277,Independent Retailer Account 1277,UK,150000,NET60,System migration,Opella CRM migration 2024
+CUST01278,Pharmacy Account 1278,DE,50000,NET45,System migration,Opella CRM migration 2024
+CUST01279,Pharmacy Account 1279,AT,250000,NET45,System migration,Opella CRM migration 2024
+CUST01280,Pharmacy Account 1280,PL,150000,NET60,System migration,Opella CRM migration 2024
+CUST01281,Wholesaler Account 1281,PL,150000,NET30,System migration,Opella CRM migration 2024
+CUST01282,Independent Retailer Account 1282,DE,100000,NET30,System migration,Opella CRM migration 2024
+CUST01283,Co-op Account 1283,BE,300000,NET45,System migration,Opella CRM migration 2024
+CUST01284,Pharmacy Account 1284,IT,150000,NET60,System migration,Opella CRM migration 2024
+CUST01285,Pharmacy Account 1285,NL,300000,NET30,System migration,Opella CRM migration 2024
+CUST01286,Wholesaler Account 1286,DE,150000,NET60,System migration,Opella CRM migration 2024
+CUST01287,Hospital Account 1287,PL,75000,NET30,System migration,Opella CRM migration 2024
+CUST01288,Co-op Account 1288,DE,300000,NET60,System migration,Opella CRM migration 2024
+CUST01289,Independent Retailer Account 1289,PL,300000,NET45,System migration,Opella CRM migration 2024
+CUST01290,Pharmacy Account 1290,CH,75000,NET45,System migration,Opella CRM migration 2024
+CUST01291,Co-op Account 1291,AT,75000,NET60,System migration,Opella CRM migration 2024
+CUST01292,Wholesaler Account 1292,ES,200000,NET30,System migration,Opella CRM migration 2024
+CUST01293,Hospital Account 1293,IT,200000,NET60,System migration,Opella CRM migration 2024
+CUST01294,Pharmacy Account 1294,FR,300000,NET45,System migration,Opella CRM migration 2024
+CUST01295,Co-op Account 1295,BE,200000,NET30,System migration,Opella CRM migration 2024
+CUST01296,Wholesaler Account 1296,FR,50000,NET45,System migration,Opella CRM migration 2024
+CUST01297,Hospital Account 1297,IT,250000,NET45,System migration,Opella CRM migration 2024
+CUST01298,Hospital Account 1298,ES,300000,NET30,System migration,Opella CRM migration 2024
+CUST01299,Co-op Account 1299,PL,150000,NET30,System migration,Opella CRM migration 2024
+CUST01300,Pharmacy Account 1300,DE,200000,NET30,System migration,Opella CRM migration 2024
+CUST01301,Co-op Account 1301,NL,75000,NET60,System migration,Opella CRM migration 2024
+CUST01302,Independent Retailer Account 1302,UK,50000,NET45,System migration,Opella CRM migration 2024
+CUST01303,Hospital Account 1303,CH,200000,NET45,System migration,Opella CRM migration 2024
+CUST01304,Hospital Account 1304,DE,100000,NET60,System migration,Opella CRM migration 2024
+CUST01305,Pharmacy Account 1305,BE,75000,NET60,System migration,Opella CRM migration 2024
+CUST01306,Hospital Account 1306,PL,300000,NET30,System migration,Opella CRM migration 2024
+CUST01307,Pharmacy Account 1307,FR,50000,NET30,System migration,Opella CRM migration 2024
+CUST01308,Independent Retailer Account 1308,PL,75000,NET30,System migration,Opella CRM migration 2024
+CUST01309,Wholesaler Account 1309,ES,75000,NET60,System migration,Opella CRM migration 2024
