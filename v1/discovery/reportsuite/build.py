@@ -50,8 +50,12 @@ def build_synthesis(raw_payload: dict, *, domain: str = "o2c", live=False, llm=N
         content.fact_store = fs
         content.strategy = strat
         content.planning_assumptions = planning
-        # surface only the NON-EMPTY strategy fields alongside r05's posture (don't blank anything)
-        content.strategy_profile = {**content.strategy_profile,
+        # surface only the NON-EMPTY strategy fields alongside r05's posture (don't blank anything).
+        # Defensive: a live section occasionally emits strategy_profile as a bare string instead of
+        # an object — spreading that would raise "'str' object is not a mapping" and abort the whole
+        # suite. Coerce to a dict (a stray string is discarded; the typed StrategyProfile wins).
+        base = content.strategy_profile if isinstance(content.strategy_profile, dict) else {}
+        content.strategy_profile = {**base,
                                     **{k: v for k, v in strat.to_dict().items() if v}}
     elif live:
         from .. import synthesis
@@ -1243,7 +1247,9 @@ def _from_payload(payload: dict) -> SynthesisContent:
         opportunities=opps, sequencing_rationale=tr.get("sequencing_rationale", ""),
         strategic_readiness=tr.get("strategic_readiness", ""),
         dependency_notes=tr.get("dependency_notes", ""), roadmap=roadmap,
-        strategy_profile=payload.get("strategy_profile", {}),
+        # guard: the model may emit strategy_profile as a string — keep it a dict so downstream
+        # spreads/renders never choke (the live builder overlays the typed StrategyProfile anyway).
+        strategy_profile=sp if isinstance((sp := payload.get("strategy_profile", {})), dict) else {},
         metrics_framework=[MetricItem(name=m["name"], definition=m.get("definition", ""),
                                       target=m.get("target", ""))
                            for m in payload.get("metrics_framework", [])],

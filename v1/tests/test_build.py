@@ -141,6 +141,41 @@ def test_from_payload_tolerates_missing_optional_keys():
     assert content.opportunities == []
 
 
+def test_strategy_profile_as_string_does_not_crash():
+    """Regression: a live run once aborted the WHOLE suite with 'str object is not a mapping' when
+    a section emitted strategy_profile as a bare string instead of an object — the {**profile}
+    spread choked on it. _from_payload must coerce a non-dict strategy_profile to {} so neither the
+    mapper nor the downstream spread crashes."""
+    payload = {
+        "current_state": {"domain_overview": "x"}, "pain_points": [], "opportunities": [],
+        "transformation": {}, "roadmap": [],
+        "strategy_profile": "Acme should prioritise PO compliance.",   # <- a STRING, not an object
+    }
+    content = build._from_payload(payload)
+    assert content.strategy_profile == {}      # coerced, not the offending string
+    # and the dict form still passes through untouched
+    ok = build._from_payload({**payload, "strategy_profile": {"direction_type": "consolidate"}})
+    assert ok.strategy_profile == {"direction_type": "consolidate"}
+
+
+class _FanoutLLMStringProfile(_FanoutLLM):
+    """A fan-out fake whose recommendation section emits strategy_profile as a bare STRING — the
+    exact malformed shape that aborted a live p2p suite before the coercion fix."""
+    _EMITS = {**_FanoutLLM._EMITS,
+              "emit_recommendation": {**_FanoutLLM._EMITS["emit_recommendation"],
+                                      "strategy_profile": "Acme should prioritise PO compliance."}}
+
+
+def test_fanout_survives_string_strategy_profile():
+    """End-to-end through the deep fan-out: even if a section emits strategy_profile as a string,
+    build_synthesis completes (the live builder overlays the typed StrategyProfile)."""
+    reg = {"csv_ids": [], "doc_ids": [], "manifest": {"strategy_profile": {
+        "direction_type": "consolidate", "horizon": "0-6 months"}}}
+    content = build.build_synthesis(_raw(), domain="o2c", live=True,
+                                    llm=_FanoutLLMStringProfile(), doc_keys=[], reg=reg)
+    assert content.strategy_profile.get("direction_type") == "consolidate"  # typed profile wins
+
+
 def test_no_fixture_for_unknown_domain_refuses():
     with pytest.raises(build.NoFixtureForDomain, match="no grounded fixture"):
         build.build_synthesis(_raw(), domain="p2p", live=False)
