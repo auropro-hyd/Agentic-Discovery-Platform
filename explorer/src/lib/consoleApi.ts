@@ -5,16 +5,114 @@ export const API_BASE =
   (import.meta.env.VITE_CONSOLE_API as string | undefined)?.replace(/\/$/, "") ||
   "http://127.0.0.1:8742";
 
+/** Absolute URL for a backend-served archive asset (the curated demo suite). The backend serves
+ * archive/ verbatim at /archive/...; these are the report/preview/audit-trail HTMLs the case
+ * stages iframe or link to. */
+export function archiveUrl(path: string): string {
+  return `${API_BASE}/archive/${path.replace(/^\/+/, "")}`;
+}
+
+/* The 6 case stages. `id` stays stable (the backend/run.py emit these), `label` is Akhilesh's naming. */
 export const STAGES = [
-  { id: "upload", label: "Uploading documents" },
-  { id: "assessment", label: "Assessment" },
-  { id: "discovery_copilot", label: "Discovery copilot" },
-  { id: "analysis", label: "Analysis" },
-  { id: "preview", label: "Preview" },
-  { id: "report_generation", label: "Report generation" },
+  { id: "upload", label: "Ingestion" },
+  { id: "assessment", label: "Domain Analysis" },
+  { id: "discovery_copilot", label: "Discovery Co-pilot" },
+  { id: "analysis", label: "Transformation Journey" },
+  { id: "preview", label: "Findings Review" },
+  { id: "report_generation", label: "Report Generation" },
 ] as const;
 
 export type StageId = (typeof STAGES)[number]["id"];
+
+/* ── Cases (the dashboard + case shell) ─────────────────────────────────────── */
+export interface GapSummary {
+  questions: number;
+  high_resolved: number;
+  clarifications: number;
+  carried_forward: number;
+}
+
+export interface CaseCard {
+  id: string;
+  title: string;
+  domain: string;
+  client: string;
+  run_date: string;
+  duration_minutes: number;
+  stage: StageId;
+  status: string;
+  doc_count: number;
+  gaps: GapSummary;
+  findings: number;
+  opportunities: number;
+}
+
+export interface InputDoc {
+  name: string;
+  kind: string;
+  kb: number;
+}
+
+export interface ReportLink {
+  id: string;
+  title: string;
+  file: string;
+  url: string;
+}
+
+export interface GapLedgerItem {
+  id: string;
+  severity: "high" | "clarification" | "amber";
+  status: string;
+  question: string;
+  decision: string;
+  resolves: string;
+}
+
+export interface CaseDetail extends CaseCard {
+  /** "archive" = a curated, signed-off case with a deliverable suite; "live" = a fresh ingested run
+   *  (no archive deliverable — the case shell shows the live run honestly). */
+  kind?: "archive" | "live";
+  input_docs: InputDoc[];
+  gap_ledger: GapLedgerItem[];
+  reports: ReportLink[];
+  copilot_audit_url: string;
+  preview_url: string;
+}
+
+/** An in-progress run (for the dashboard's "run in progress" indicator). */
+export interface ActiveRun {
+  run_id: string;
+  domain: string;
+  label: string;
+  stage: StageId;
+}
+
+/** A single file staged for ingestion (browser File → name + base64 payload). */
+export interface UploadFile {
+  name: string;
+  content_b64: string;
+}
+
+export async function getCases(): Promise<CaseCard[]> {
+  try {
+    const r = await fetch(`${API_BASE}/api/cases`);
+    if (!r.ok) return [];
+    return ((await r.json()).cases ?? []) as CaseCard[];
+  } catch {
+    return [];
+  }
+}
+
+export async function getCase(id: string): Promise<CaseDetail | null> {
+  try {
+    const r = await fetch(`${API_BASE}/api/case/${id}`);
+    if (!r.ok) return null;
+    return (await r.json()) as CaseDetail;
+  } catch {
+    return null;
+  }
+}
 
 export interface RunEvent {
   type: "stage" | "activity" | "warn" | "feedback" | "error" | "done";
@@ -47,14 +145,56 @@ export async function ping(): Promise<boolean> {
   }
 }
 
-export async function startRun(domain: string, mode: "live" | "golden"): Promise<string> {
+/** Start a genuinely LIVE run (always --fresh on the backend — no mode selector). */
+export async function startRun(domain: string): Promise<string> {
   const r = await fetch(`${API_BASE}/api/run`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ domain, mode }),
+    body: JSON.stringify({ domain }),
   });
   if (!r.ok) throw new Error((await r.json().catch(() => ({})))?.error || `run failed (${r.status})`);
   return (await r.json()).run_id as string;
+}
+
+/** List in-progress runs (drives the dashboard's "run in progress" indicator). */
+export async function getActiveRuns(): Promise<ActiveRun[]> {
+  try {
+    const r = await fetch(`${API_BASE}/api/runs`, { signal: AbortSignal.timeout(2500) });
+    if (!r.ok) return [];
+    return ((await r.json()).runs ?? []) as ActiveRun[];
+  } catch {
+    return [];
+  }
+}
+
+/** Read a browser File into the {name, content_b64} shape the ingest endpoint expects. */
+export function fileToUpload(file: File): Promise<UploadFile> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error(`could not read ${file.name}`));
+    reader.onload = () => {
+      // FileReader.readAsDataURL → "data:<mime>;base64,<payload>"; keep the payload only
+      const b64 = String(reader.result).split(",", 2)[1] ?? "";
+      resolve({ name: file.name, content_b64: b64 });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/** Initiate a new case from uploaded documents: stages them on the backend and starts a LIVE run.
+ *  Returns the new {domain, run_id} so the UI can route into the case and stream the run. */
+export async function ingestDocs(
+  title: string,
+  files: UploadFile[],
+): Promise<{ domain: string; run_id: string }> {
+  const r = await fetch(`${API_BASE}/api/ingest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, files }),
+  });
+  if (!r.ok) throw new Error((await r.json().catch(() => ({})))?.error || `ingest failed (${r.status})`);
+  const j = await r.json();
+  return { domain: j.domain as string, run_id: j.run_id as string };
 }
 
 /** Open the SSE stream; calls onEvent per event. Returns a close() to stop. */

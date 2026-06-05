@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Supporting Artefacts — Opella Europe O2C</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #adb5bd; padding: 40px 0; }
+:root {
+  --navy: #1a2f50; --blue: #2563eb; --blue-mid: #3665a8;
+  --text: #1f2937; --text-sec: #6b7280;
+  --border: #e5e7eb; --bg-light: #f9fafb;
+  --verified: #065f46; --amber-c: #92400e; --gap-c: #991b1b;
+  --tsa: rgba(217,119,6,0.8); --tsa-bg: rgba(217,119,6,0.1);
+}
+.page { width: 794px; min-height: 1123px; background: #fff; margin: 0 auto 32px; box-shadow: 0 3px 14px rgba(0,0,0,0.25); display: flex; flex-direction: column; }
+.ph { height: 34px; background: var(--navy); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; flex-shrink: 0; }
+.ph-left { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; }
+.ph-right { font-size: 9px; color: rgba(255,255,255,0.4); }
+.pc { flex: 1; padding: 28px 36px; display: flex; flex-direction: column; }
+.pf { height: 30px; background: #f9fafb; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; flex-shrink: 0; }
+.pf-note { font-size: 8px; color: #9ca3af; }
+.pf-num { font-size: 8px; color: #9ca3af; }
+
+/* Cover */
+.cover-band { height: 6px; background: var(--navy); }
+.cover-inner { padding: 52px 52px 40px; flex: 1; display: flex; flex-direction: column; }
+.cover-series { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--blue-mid); margin-bottom: 8px; }
+.cover-title { font-size: 32px; font-weight: 900; color: var(--navy); line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 6px; }
+.cover-sub { font-size: 14px; color: var(--text-sec); margin-bottom: 36px; }
+.cover-divider { height: 1px; background: var(--border); margin-bottom: 28px; }
+.cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+.cover-meta { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; }
+.cm-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-sec); margin-bottom: 4px; }
+.cm-value { font-size: 12px; font-weight: 600; color: var(--text); }
+.cover-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; }
+.cover-confid { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #9ca3af; }
+.cover-logo { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--navy); }
+
+/* Typography */
+.sec-title { font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--navy); }
+.art-title { font-size: 13px; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
+.art-ref { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--blue); margin-bottom: 10px; }
+.body-p { font-size: 10px; color: var(--text); line-height: 1.7; margin-bottom: 10px; }
+.caption { font-size: 9px; color: var(--text-sec); margin-top: 6px; text-align: center; font-style: italic; }
+.pg-sec { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--blue); margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 9.5px; margin-bottom: 14px; }
+th { background: var(--navy); color: #fff; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 7px 10px; text-align: left; }
+td { padding: 7px 10px; color: var(--text); border-bottom: 1px solid var(--border); line-height: 1.5; vertical-align: top; }
+tr:nth-child(even) td { background: #f2f4f7; }
+tr:last-child td { border-bottom: none; }
+
+/* Note boxes */
+.note-box { background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.2); border-left: 3px solid var(--blue); border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 12px; }
+.note-box-title { font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--blue); margin-bottom: 5px; }
+.note-box p { font-size: 9.5px; color: var(--text); line-height: 1.6; }
+.ev-quote { background: #f9fafb; border: 1px solid var(--border); border-left: 3px solid var(--text-sec); border-radius: 0 4px 4px 0; padding: 8px 12px; margin-bottom: 8px; font-size: 9px; color: var(--text); line-height: 1.6; font-style: italic; }
+
+/* Badges */
+.badge { display: inline-block; font-size: 8.5px; font-weight: 700; border-radius: 3px; padding: 2px 8px; }
+.badge-verified { background: rgba(5,150,105,0.1); color: #065f46; }
+.badge-amber { background: rgba(217,119,6,0.1); color: #92400e; }
+.badge-gap { background: rgba(220,38,38,0.08); color: #991b1b; }
+.badge-opella { background: rgba(37,99,235,0.1); color: #1d4ed8; }
+.badge-sanofi { background: rgba(217,119,6,0.12); color: #92400e; }
+
+/* TOC */
+.toc-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 5px; }
+.toc-label { font-size: 10px; color: var(--text); flex: 1; }
+.toc-dots { flex: 1; border-bottom: 1px dotted var(--border); margin: 0 4px 3px; }
+.toc-page { font-size: 9.5px; color: var(--text-sec); }
+.toc-section { font-weight: 700; color: var(--navy); }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 — COVER -->
+<div class="page">
+  <div class="cover-band"></div>
+  <div class="cover-inner">
+    <div class="cover-series">Report 06 of 06 — Autonomous Discovery Platform</div>
+    <div class="cover-title">Supporting<br>Artefacts</div>
+    <div class="cover-sub">Process Maps · System Diagrams · Evidence Register · Decision Rationale · O2C Domain · Opella Europe</div>
+    <div class="cover-divider"></div>
+
+    <div class="cover-grid">
+      <div class="cover-meta"><div class="cm-label">Client</div><div class="cm-value">Opella Europe</div></div>
+      <div class="cover-meta"><div class="cm-label">Domain</div><div class="cm-value">Order-to-Cash (O2C)</div></div>
+      <div class="cover-meta"><div class="cm-label">Date</div><div class="cm-value">June 2025</div></div>
+      <div class="cover-meta"><div class="cm-label">Classification</div><div class="cm-value">Confidential</div></div>
+      <div class="cover-meta"><div class="cm-label">Artefacts</div><div class="cm-value">10 (A through J)</div></div>
+      <div class="cover-meta"><div class="cm-label">Purpose</div><div class="cm-value">Evidence layer behind Reports 01–05</div></div>
+    </div>
+
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:14px 18px;margin-bottom:20px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#6b7280;margin-bottom:8px;">About This Report</div>
+      <div style="font-size:10px;color:#374151;line-height:1.7;">This report contains the visual and reference artefacts that underpin every finding, recommendation, and AI use case in Reports 01–05. Each artefact is self-contained and cross-referenced to the report sections it supports. Artefacts include process maps, system diagrams, evidence registers with direct document citations, and decision rationale records. This document is intended as the persistent reference layer for the programme — it should be updated as the transformation progresses.</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;">
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#1a2f50;margin-bottom:3px;">A</div>
+        <div style="font-size:8px;color:#6b7280;line-height:1.4;">O2C Domain Map</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#1a2f50;margin-bottom:3px;">B</div>
+        <div style="font-size:8px;color:#6b7280;line-height:1.4;">EDI Connection Registry</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#1a2f50;margin-bottom:3px;">C</div>
+        <div style="font-size:8px;color:#6b7280;line-height:1.4;">System Architecture</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#1a2f50;margin-bottom:3px;">D</div>
+        <div style="font-size:8px;color:#6b7280;line-height:1.4;">Credit Data Path</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#1a2f50;margin-bottom:3px;">E</div>
+        <div style="font-size:8px;color:#6b7280;line-height:1.4;">Channel Process Flows</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#1a2f50;margin-bottom:3px;">F</div>
+        <div style="font-size:8px;color:#6b7280;line-height:1.4;">O2C RACI Matrix</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#1a2f50;margin-bottom:3px;">G</div>
+        <div style="font-size:8px;color:#6b7280;line-height:1.4;">Evidence Register</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#1a2f50;margin-bottom:3px;">H</div>
+        <div style="font-size:8px;color:#6b7280;line-height:1.4;">Decision Rationale</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#1a2f50;margin-bottom:3px;">I</div>
+        <div style="font-size:8px;color:#6b7280;line-height:1.4;">Corpus Index</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:#1a2f50;margin-bottom:3px;">J</div>
+        <div style="font-size:8px;color:#6b7280;line-height:1.4;">Stakeholder Directory</div>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <div class="cover-confid">Confidential · Opella Internal Use Only</div>
+      <div class="cover-logo">AuroPro</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2 — ARTEFACT A: O2C DOMAIN MAP -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact A — O2C Domain Map</div>
+    <div class="art-title">End-to-End Order-to-Cash Process — Opella Europe</div>
+    <div class="body-p">Full process map showing all six O2C stages, responsible actors, and primary systems. Channel variants (EDI vs Manual) are noted at each stage where the process diverges.</div>
+
+    <!-- Domain map: swim lane SVG -->
+    <svg width="722" height="560" viewBox="0 0 722 560" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 6px;">
+      <defs>
+        <marker id="a-arr" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#9ca3af"/></marker>
+        <marker id="a-arr-b" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#2563eb"/></marker>
+      </defs>
+
+      <!-- Stage header row -->
+      <rect x="0" y="0" width="722" height="28" fill="#1a2f50" rx="0"/>
+      <text x="60" y="18" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Stage 1</text>
+      <text x="60" y="28" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.6)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">ORDER RECEIPT</text>
+      <text x="178" y="18" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Stage 2</text>
+      <text x="178" y="28" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.6)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">CREDIT CHECK</text>
+      <text x="296" y="18" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Stage 3</text>
+      <text x="296" y="28" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.6)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">ORDER PROCESSING</text>
+      <text x="414" y="18" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Stage 4</text>
+      <text x="414" y="28" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.6)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">FULFILMENT</text>
+      <text x="532" y="18" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Stage 5</text>
+      <text x="532" y="28" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.6)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">INVOICE &amp; DISPATCH</text>
+      <text x="650" y="18" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Stage 6</text>
+      <text x="650" y="28" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.6)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">CASH COLLECTION</text>
+      <!-- Stage vertical dividers -->
+      <line x1="118" y1="0" x2="118" y2="560" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+      <line x1="236" y1="0" x2="236" y2="560" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+      <line x1="354" y1="0" x2="354" y2="560" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+      <line x1="472" y1="0" x2="472" y2="560" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+      <line x1="590" y1="0" x2="590" y2="560" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+      <!-- Swim lane labels (left side) -->
+      <!-- Lane 1: Customer (y=28 to 112) -->
+      <rect x="0" y="28" width="722" height="84" fill="rgba(37,99,235,0.04)" stroke="none"/>
+      <rect x="0" y="28" width="722" height="84" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+      <text x="-34" y="75" text-anchor="middle" font-size="8" font-weight="700" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" transform="rotate(-90,0,72)">CUSTOMER</text>
+
+      <!-- Lane 2: Customer Service (y=112 to 210) -->
+      <rect x="0" y="112" width="722" height="98" fill="rgba(26,47,80,0.03)" stroke="none"/>
+      <rect x="0" y="112" width="722" height="98" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+      <text x="-34" y="163" text-anchor="middle" font-size="7.5" font-weight="700" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" transform="rotate(-90,0,161)">CUSTOMER SERVICE</text>
+
+      <!-- Lane 3: Opella Digital (y=210 to 294) -->
+      <rect x="0" y="210" width="722" height="84" fill="rgba(37,99,235,0.04)" stroke="none"/>
+      <rect x="0" y="210" width="722" height="84" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+      <text x="-34" y="255" text-anchor="middle" font-size="7.5" font-weight="700" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" transform="rotate(-90,0,252)">OPELLA DIGITAL</text>
+
+      <!-- Lane 4: Credit Controller (y=294 to 378) -->
+      <rect x="0" y="294" width="722" height="84" fill="rgba(26,47,80,0.03)" stroke="none"/>
+      <rect x="0" y="294" width="722" height="84" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+      <text x="-34" y="338" text-anchor="middle" font-size="7.5" font-weight="700" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" transform="rotate(-90,0,336)">CREDIT CONTROLLER</text>
+
+      <!-- Lane 5: Warehouse (y=378 to 462) -->
+      <rect x="0" y="378" width="722" height="84" fill="rgba(37,99,235,0.04)" stroke="none"/>
+      <rect x="0" y="378" width="722" height="84" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+      <text x="-34" y="421" text-anchor="middle" font-size="7.5" font-weight="700" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" transform="rotate(-90,0,420)">WAREHOUSE OPS</text>
+
+      <!-- Lane 6: Finance (y=462 to 560) -->
+      <rect x="0" y="462" width="722" height="98" fill="rgba(26,47,80,0.03)" stroke="none"/>
+      <rect x="0" y="462" width="722" height="98" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+      <text x="-34" y="510" text-anchor="middle" font-size="7.5" font-weight="700" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" transform="rotate(-90,0,511)">FINANCE / AR</text>
+
+      <!-- ═══ STAGE 1: ORDER RECEIPT ═══ -->
+      <!-- Customer: sends PO -->
+      <rect x="8" y="38" width="102" height="28" rx="4" fill="rgba(37,99,235,0.12)" stroke="rgba(37,99,235,0.3)" stroke-width="1"/>
+      <text x="59" y="50" text-anchor="middle" font-size="8" font-weight="700" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Sends Purchase Order</text>
+      <text x="59" y="61" text-anchor="middle" font-size="7" fill="#3b82f6" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI / Manual / Email / Fax</text>
+      <!-- CS: receives order -->
+      <rect x="8" y="122" width="102" height="28" rx="4" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="59" y="134" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Receives &amp; logs order</text>
+      <text x="59" y="145" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OMS / manual entry</text>
+      <!-- Digital: EDI ack -->
+      <rect x="8" y="220" width="102" height="28" rx="4" fill="rgba(37,99,235,0.06)" stroke="rgba(37,99,235,0.2)" stroke-width="1"/>
+      <text x="59" y="232" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI ack (CONTRL)</text>
+      <text x="59" y="243" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">14 retail connections</text>
+
+      <!-- ═══ STAGE 2: CREDIT CHECK ═══ -->
+      <!-- CS: checks credit (triggers SAP hold) -->
+      <rect x="126" y="122" width="102" height="28" rx="4" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="177" y="134" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit check — SAP ERP</text>
+      <text x="177" y="145" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Auto-hold if over limit</text>
+      <!-- Credit Controller: reviews hold -->
+      <rect x="126" y="304" width="102" height="28" rx="4" fill="rgba(220,38,38,0.06)" stroke="rgba(220,38,38,0.25)" stroke-width="1"/>
+      <text x="177" y="316" text-anchor="middle" font-size="8" font-weight="700" fill="#991b1b" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Reviews credit hold</text>
+      <text x="177" y="327" text-anchor="middle" font-size="7" fill="#b91c1c" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Release / reject / raise limit</text>
+      <!-- gap annotation -->
+      <rect x="126" y="160" width="102" height="40" rx="4" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.3)" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="177" y="175" text-anchor="middle" font-size="7.5" font-weight="700" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">⚠ GAP: CRM credit limit</text>
+      <text x="177" y="187" text-anchor="middle" font-size="7" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">used instead of ERP</text>
+      <text x="177" y="197" text-anchor="middle" font-size="7" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">(PP-01)</text>
+
+      <!-- ═══ STAGE 3: ORDER PROCESSING ═══ -->
+      <rect x="244" y="122" width="102" height="28" rx="4" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="295" y="134" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Order entry — OMS</text>
+      <text x="295" y="145" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP ERP posting</text>
+      <!-- Digital: EDI processing -->
+      <rect x="244" y="220" width="102" height="28" rx="4" fill="rgba(37,99,235,0.06)" stroke="rgba(37,99,235,0.2)" stroke-width="1"/>
+      <text x="295" y="232" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI order routing</text>
+      <text x="295" y="243" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Map &amp; validate ORDERS msg</text>
+      <!-- gap annotation: no SOP/RACI for EDI -->
+      <rect x="244" y="160" width="102" height="40" rx="4" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.3)" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="295" y="175" text-anchor="middle" font-size="7.5" font-weight="700" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">⚠ GAP: EDI excluded</text>
+      <text x="295" y="187" text-anchor="middle" font-size="7" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">from Order Mgmt SOP</text>
+      <text x="295" y="197" text-anchor="middle" font-size="7" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">(PP-02)</text>
+
+      <!-- ═══ STAGE 4: FULFILMENT ═══ -->
+      <rect x="362" y="122" width="102" height="28" rx="4" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="413" y="134" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Pick, pack, dispatch</text>
+      <text x="413" y="145" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">WMS instruction</text>
+      <rect x="362" y="388" width="102" height="28" rx="4" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="413" y="400" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Warehouse fulfilment</text>
+      <text x="413" y="411" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">DC stock pick + ship</text>
+      <!-- Fulfilment rate gap -->
+      <rect x="362" y="256" width="102" height="40" rx="4" fill="rgba(220,38,38,0.06)" stroke="rgba(220,38,38,0.25)" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="413" y="271" text-anchor="middle" font-size="7.5" font-weight="700" fill="#991b1b" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">⚠ 59% EDI fulfilment</text>
+      <text x="413" y="283" text-anchor="middle" font-size="7" fill="#991b1b" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">in seasonal windows</text>
+      <text x="413" y="293" text-anchor="middle" font-size="7" fill="#991b1b" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">(PP-04)</text>
+
+      <!-- ═══ STAGE 5: INVOICE ═══ -->
+      <!-- Customer: receives invoice -->
+      <rect x="480" y="38" width="102" height="28" rx="4" fill="rgba(37,99,235,0.06)" stroke="rgba(37,99,235,0.15)" stroke-width="1"/>
+      <text x="531" y="50" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Receives invoice</text>
+      <text x="531" y="61" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">NET45 (ERP) terms</text>
+      <!-- Finance: raises invoice -->
+      <rect x="480" y="472" width="102" height="28" rx="4" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="531" y="484" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Invoice raised — SAP ERP</text>
+      <text x="531" y="495" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">AR posting</text>
+
+      <!-- ═══ STAGE 6: CASH COLLECTION ═══ -->
+      <!-- Customer: pays -->
+      <rect x="598" y="38" width="116" height="28" rx="4" fill="rgba(37,99,235,0.06)" stroke="rgba(37,99,235,0.15)" stroke-width="1"/>
+      <text x="656" y="50" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Payment remittance</text>
+      <text x="656" y="61" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">30–45 days from invoice</text>
+      <!-- Finance: AR collection -->
+      <rect x="598" y="472" width="116" height="28" rx="4" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="656" y="484" text-anchor="middle" font-size="8" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Payment matching</text>
+      <text x="656" y="495" text-anchor="middle" font-size="7" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">AR cleared · SAP posting</text>
+
+      <!-- Flow arrows (main path, Customer Service row) -->
+      <line x1="110" y1="136" x2="124" y2="136" stroke="#9ca3af" stroke-width="1" marker-end="url(#a-arr)"/>
+      <line x1="228" y1="136" x2="242" y2="136" stroke="#9ca3af" stroke-width="1" marker-end="url(#a-arr)"/>
+      <line x1="346" y1="136" x2="360" y2="136" stroke="#9ca3af" stroke-width="1" marker-end="url(#a-arr)"/>
+      <line x1="464" y1="136" x2="478" y2="136" stroke="#9ca3af" stroke-width="1" marker-end="url(#a-arr)"/>
+      <line x1="582" y1="136" x2="596" y2="136" stroke="#9ca3af" stroke-width="1" marker-end="url(#a-arr)"/>
+
+      <!-- System labels at bottom -->
+      <rect x="8" y="530" width="102" height="22" rx="3" fill="rgba(26,47,80,0.06)" stroke="rgba(26,47,80,0.2)" stroke-width="1"/>
+      <text x="59" y="545" text-anchor="middle" font-size="7.5" fill="#1a2f50" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI Network / OMS</text>
+      <rect x="126" y="530" width="102" height="22" rx="3" fill="rgba(26,47,80,0.06)" stroke="rgba(26,47,80,0.2)" stroke-width="1"/>
+      <text x="177" y="545" text-anchor="middle" font-size="7.5" fill="#1a2f50" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP S/4HANA + CRM</text>
+      <rect x="244" y="530" width="102" height="22" rx="3" fill="rgba(26,47,80,0.06)" stroke="rgba(26,47,80,0.2)" stroke-width="1"/>
+      <text x="295" y="545" text-anchor="middle" font-size="7.5" fill="#1a2f50" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OMS + SAP ERP</text>
+      <rect x="362" y="530" width="102" height="22" rx="3" fill="rgba(26,47,80,0.06)" stroke="rgba(26,47,80,0.2)" stroke-width="1"/>
+      <text x="413" y="545" text-anchor="middle" font-size="7.5" fill="#1a2f50" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">WMS / DC Systems</text>
+      <rect x="480" y="530" width="102" height="22" rx="3" fill="rgba(26,47,80,0.06)" stroke="rgba(26,47,80,0.2)" stroke-width="1"/>
+      <text x="531" y="545" text-anchor="middle" font-size="7.5" fill="#1a2f50" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP ERP</text>
+      <rect x="598" y="530" width="116" height="22" rx="3" fill="rgba(26,47,80,0.06)" stroke="rgba(26,47,80,0.2)" stroke-width="1"/>
+      <text x="656" y="545" text-anchor="middle" font-size="7.5" fill="#1a2f50" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP AR</text>
+    </svg>
+    <div class="caption">Figure A — O2C swim lane map; amber dashed boxes = identified gaps (PP-01, PP-02, PP-04); system tags shown in bottom row</div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">2</div></div>
+</div>
+
+<!-- PAGE 3 — ARTEFACT B: EDI CONNECTION REGISTRY -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact B — EDI Connection Registry</div>
+    <div class="art-title">All 14 Active EDI Connections — Management &amp; TSA Status</div>
+    <div class="body-p">As of April 2025 carve-out, Opella Digital manages 8 connections directly (same-day resolution). The remaining 6 were established by Sanofi Shared Services and are managed by the Sanofi IT Helpdesk pending TSA handover (24–48h resolution). Source: EDI Dispute Resolution Working Notes (Doc 05).</div>
+
+    <svg width="722" height="410" viewBox="0 0 722 410" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 6px;">
+      <!-- Section labels -->
+      <rect x="0" y="0" width="350" height="22" rx="4" fill="#2563eb"/>
+      <text x="175" y="15" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPELLA DIGITAL MANAGED (8 connections)</text>
+      <rect x="362" y="0" width="360" height="22" rx="4" fill="rgba(217,119,6,0.85)"/>
+      <text x="542" y="15" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SANOFI IT MANAGED — TSA (6 connections)</text>
+
+      <!-- Opella Digital connections: 2 columns × 4 rows -->
+      <!-- Col 1 -->
+      <rect x="0" y="30" width="170" height="72" rx="6" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
+      <text x="85" y="48" text-anchor="middle" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Tesco UK</text>
+      <text x="85" y="62" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">UK · Retail · ORDERS/ORDRSP</text>
+      <text x="85" y="76" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: same-day · Opella-native</text>
+      <text x="85" y="90" text-anchor="middle" font-size="8" font-weight="700" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">✓ No TSA dependency</text>
+
+      <rect x="0" y="112" width="170" height="72" rx="6" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
+      <text x="85" y="130" text-anchor="middle" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Mercadona</text>
+      <text x="85" y="144" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">ES · Retail · ORDERS/DESADV</text>
+      <text x="85" y="158" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: same-day · Opella-native</text>
+      <text x="85" y="172" text-anchor="middle" font-size="8" font-weight="700" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">✓ No TSA dependency</text>
+
+      <rect x="0" y="194" width="170" height="72" rx="6" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
+      <text x="85" y="212" text-anchor="middle" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Generic Retail 1</text>
+      <text x="85" y="226" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EU · Pharmacy chain</text>
+      <text x="85" y="240" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: same-day · Opella Digital</text>
+      <text x="85" y="254" text-anchor="middle" font-size="8" font-weight="700" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">✓ No TSA dependency</text>
+
+      <rect x="0" y="276" width="170" height="72" rx="6" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
+      <text x="85" y="294" text-anchor="middle" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Generic Retail 2</text>
+      <text x="85" y="308" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EU · Wholesale distributor</text>
+      <text x="85" y="322" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: same-day · Opella Digital</text>
+      <text x="85" y="336" text-anchor="middle" font-size="8" font-weight="700" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">✓ No TSA dependency</text>
+
+      <!-- Col 2 -->
+      <rect x="178" y="30" width="170" height="72" rx="6" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
+      <text x="263" y="48" text-anchor="middle" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Generic Retail 3</text>
+      <text x="263" y="62" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">DE · Pharmacy chain</text>
+      <text x="263" y="76" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: same-day · Opella Digital</text>
+      <text x="263" y="90" text-anchor="middle" font-size="8" font-weight="700" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">✓ No TSA dependency</text>
+
+      <rect x="178" y="112" width="170" height="72" rx="6" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
+      <text x="263" y="130" text-anchor="middle" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Generic Retail 4</text>
+      <text x="263" y="144" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">FR · Supermarket chain</text>
+      <text x="263" y="158" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: same-day · Opella Digital</text>
+      <text x="263" y="172" text-anchor="middle" font-size="8" font-weight="700" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">✓ No TSA dependency</text>
+
+      <rect x="178" y="194" width="170" height="72" rx="6" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
+      <text x="263" y="212" text-anchor="middle" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Generic Retail 5</text>
+      <text x="263" y="226" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">IT · Regional chain</text>
+      <text x="263" y="240" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: same-day · Opella Digital</text>
+      <text x="263" y="254" text-anchor="middle" font-size="8" font-weight="700" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">✓ No TSA dependency</text>
+
+      <rect x="178" y="276" width="170" height="72" rx="6" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
+      <text x="263" y="294" text-anchor="middle" font-size="10" font-weight="800" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Generic Retail 6</text>
+      <text x="263" y="308" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">NL · Wholesale</text>
+      <text x="263" y="322" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: same-day · Opella Digital</text>
+      <text x="263" y="336" text-anchor="middle" font-size="8" font-weight="700" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">✓ No TSA dependency</text>
+
+      <!-- Divider -->
+      <line x1="354" y1="0" x2="354" y2="410" stroke="#e5e7eb" stroke-width="1.5"/>
+
+      <!-- Sanofi connections: 2 columns × 3 rows — priority ordered -->
+      <!-- Priority 1: Carrefour France -->
+      <rect x="362" y="30" width="170" height="90" rx="6" fill="rgba(220,38,38,0.06)" stroke="rgba(220,38,38,0.35)" stroke-width="2"/>
+      <text x="447" y="50" text-anchor="middle" font-size="10" font-weight="800" fill="#991b1b" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Carrefour France</text>
+      <text x="447" y="64" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">FR · Retail · Priority 1 account</text>
+      <text x="447" y="78" text-anchor="middle" font-size="8" fill="#b91c1c" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: 24–48h · Sanofi IT helpdesk</text>
+      <text x="447" y="92" text-anchor="middle" font-size="8" font-weight="700" fill="#991b1b" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">⚠ Overdue for handover · 3× escalations</text>
+      <text x="447" y="108" text-anchor="middle" font-size="7.5" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Migration target: H2 Phase 1</text>
+
+      <!-- Priority 2: Boots UK -->
+      <rect x="362" y="132" width="170" height="90" rx="6" fill="rgba(220,38,38,0.06)" stroke="rgba(220,38,38,0.25)" stroke-width="1.5"/>
+      <text x="447" y="152" text-anchor="middle" font-size="10" font-weight="800" fill="#991b1b" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Boots UK</text>
+      <text x="447" y="166" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">UK · Pharmacy · Delist threat recorded</text>
+      <text x="447" y="180" text-anchor="middle" font-size="8" fill="#b91c1c" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: 24–48h · Sanofi IT helpdesk</text>
+      <text x="447" y="194" text-anchor="middle" font-size="8" font-weight="700" fill="#991b1b" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">⚠ High commercial risk</text>
+      <text x="447" y="210" text-anchor="middle" font-size="7.5" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Migration target: H2 Phase 2</text>
+
+      <!-- Priority 3: E.Leclerc -->
+      <rect x="362" y="234" width="170" height="76" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="1.5"/>
+      <text x="447" y="252" text-anchor="middle" font-size="10" font-weight="800" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">E.Leclerc</text>
+      <text x="447" y="266" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">FR · Retail · High volume</text>
+      <text x="447" y="280" text-anchor="middle" font-size="8" fill="#b45309" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: 24–48h · Sanofi IT helpdesk</text>
+      <text x="447" y="298" text-anchor="middle" font-size="7.5" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Migration target: H3 Phase 3</text>
+
+      <!-- Col 2 Sanofi: dm, Lidl, Coop -->
+      <rect x="542" y="30" width="172" height="76" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="1.5"/>
+      <text x="628" y="48" text-anchor="middle" font-size="10" font-weight="800" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">dm (Drogerie Markt)</text>
+      <text x="628" y="62" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">DE · Pharmacy chain · DACH cluster</text>
+      <text x="628" y="76" text-anchor="middle" font-size="8" fill="#b45309" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: 24–48h · Sanofi helpdesk</text>
+      <text x="628" y="94" text-anchor="middle" font-size="7.5" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Migration: H3 (with E.Leclerc)</text>
+
+      <rect x="542" y="116" width="172" height="76" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="1.5"/>
+      <text x="628" y="134" text-anchor="middle" font-size="10" font-weight="800" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Lidl Europe</text>
+      <text x="628" y="148" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EU · Retail · Multi-market</text>
+      <text x="628" y="162" text-anchor="middle" font-size="8" fill="#b45309" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: 24–48h · Sanofi helpdesk</text>
+      <text x="628" y="180" text-anchor="middle" font-size="7.5" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Migration: H3 (Lidl + Coop together)</text>
+
+      <rect x="542" y="202" width="172" height="76" rx="6" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="1.5"/>
+      <text x="628" y="220" text-anchor="middle" font-size="10" font-weight="800" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Coop Group</text>
+      <text x="628" y="234" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EU · Retail · CH/Nordic</text>
+      <text x="628" y="248" text-anchor="middle" font-size="8" fill="#b45309" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SLA: 24–48h · Sanofi helpdesk</text>
+      <text x="628" y="266" text-anchor="middle" font-size="7.5" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Migration: H3 (with Lidl)</text>
+
+      <!-- Escalation path note -->
+      <rect x="362" y="322" width="352" height="52" rx="5" fill="rgba(217,119,6,0.06)" stroke="rgba(217,119,6,0.25)" stroke-width="1"/>
+      <text x="538" y="340" text-anchor="middle" font-size="8.5" font-weight="700" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Sanofi IT Helpdesk: +33 1 53 77 40 00 (option 3 — EDI and Integration Support)</text>
+      <text x="538" y="354" text-anchor="middle" font-size="8" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Reference format: Opella / [connection name] / Ticket type: EDI</text>
+      <text x="538" y="368" text-anchor="middle" font-size="8" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">P1 escalation (no response 4h): James Okafor → direct Sanofi EDI team lead line</text>
+
+      <!-- Legend -->
+      <rect x="0" y="380" width="14" height="14" rx="3" fill="rgba(37,99,235,0.08)" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
+      <text x="20" y="391" font-size="8" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Opella Digital managed (same-day SLA)</text>
+      <rect x="200" y="380" width="14" height="14" rx="3" fill="rgba(217,119,6,0.08)" stroke="rgba(217,119,6,0.35)" stroke-width="1.5"/>
+      <text x="220" y="391" font-size="8" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Sanofi IT managed — TSA (24–48h SLA)</text>
+      <rect x="410" y="380" width="14" height="14" rx="3" fill="rgba(220,38,38,0.06)" stroke="rgba(220,38,38,0.35)" stroke-width="2"/>
+      <text x="430" y="391" font-size="8" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Priority — commercial risk / overdue handover</text>
+    </svg>
+    <div class="caption">Figure B — EDI connection registry; red border = highest commercial risk; migration targets from R-03 (Report 03 §2)</div>
+
+    <div class="note-box">
+      <div class="note-box-title">TSA Annex C — Missing Document</div>
+      <p>TSA Annex C (the connection handover schedule) was not available as part of the discovery corpus. James Okafor flagged it as "on the TSA review list." The 6-connection migration sequence in R-03 is based on commercial risk prioritisation — it should be validated against the actual Annex C terms once obtained. This document gap is recorded as a blocking item for R-03 H2 Phase 1.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">3</div></div>
+</div>
+
+<!-- PAGE 4 — ARTEFACT C: SYSTEM ARCHITECTURE -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact C — System Architecture &amp; Data Flow</div>
+    <div class="art-title">O2C System Interconnection Map</div>
+    <div class="body-p">Four core systems process the Opella Europe O2C pipeline. The critical data integrity issue (PP-01) arises in the synchronisation path between SAP S/4HANA and SAP CRM — specifically the credit limit field, which diverged during the April 2025 carve-out and has not been programmatically reconciled since.</div>
+
+    <svg width="722" height="440" viewBox="0 0 722 440" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 6px;">
+      <defs>
+        <marker id="c-arr" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#9ca3af"/></marker>
+        <marker id="c-arr-b" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#2563eb"/></marker>
+        <marker id="c-arr-r" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#dc2626"/></marker>
+        <marker id="c-arr-g" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#059669"/></marker>
+      </defs>
+
+      <!-- SAP S/4HANA — centre-top (authoritative) -->
+      <rect x="261" y="30" width="200" height="100" rx="8" fill="#1a2f50" stroke="#1a2f50" stroke-width="2"/>
+      <text x="361" y="56" text-anchor="middle" font-size="11" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP S/4HANA</text>
+      <text x="361" y="72" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.7)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">ERP · System of Record</text>
+      <line x1="275" y1="84" x2="445" y2="84" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+      <text x="361" y="98" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.6)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Customer master: 340 accounts</text>
+      <text x="361" y="112" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.6)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit limits (authoritative) · AR posting</text>
+      <text x="361" y="124" text-anchor="middle" font-size="8" fill="#60a5fa" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPS-EU-FIN-POL-002 §4.1 — sole SOR</text>
+
+      <!-- SAP CRM — left -->
+      <rect x="30" y="160" width="190" height="90" rx="8" fill="#f9fafb" stroke="rgba(220,38,38,0.5)" stroke-width="2"/>
+      <text x="125" y="184" text-anchor="middle" font-size="10.5" font-weight="800" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP CRM</text>
+      <text x="125" y="200" text-anchor="middle" font-size="9" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Customer relationship mgmt</text>
+      <line x1="44" y1="210" x2="206" y2="210" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="125" y="224" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">318 accounts · Credit fields</text>
+      <text x="125" y="238" text-anchor="middle" font-size="8.5" fill="#dc2626" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">⚠ NOT authoritative for credit</text>
+
+      <!-- OMS — right -->
+      <rect x="502" y="160" width="190" height="90" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="2"/>
+      <text x="597" y="184" text-anchor="middle" font-size="10.5" font-weight="800" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Order Management System</text>
+      <text x="597" y="200" text-anchor="middle" font-size="9" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Order processing · EDI routing</text>
+      <line x1="516" y1="210" x2="678" y2="210" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="597" y="224" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Interfaces: EDI network + SAP ERP</text>
+      <text x="597" y="238" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">8,420 orders processed 2025</text>
+
+      <!-- EDI Network — bottom centre -->
+      <rect x="261" y="320" width="200" height="90" rx="8" fill="#f9fafb" stroke="rgba(37,99,235,0.3)" stroke-width="2"/>
+      <text x="361" y="344" text-anchor="middle" font-size="10.5" font-weight="800" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI Network</text>
+      <text x="361" y="360" text-anchor="middle" font-size="9" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">14 retail connections · EDIFACT</text>
+      <line x1="275" y1="370" x2="445" y2="370" stroke="#e5e7eb" stroke-width="1"/>
+      <text x="361" y="384" text-anchor="middle" font-size="8.5" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">8 Opella Digital · 6 Sanofi IT</text>
+      <text x="361" y="398" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">5,667 EDI orders (67.3% of volume)</text>
+
+      <!-- AR / Finance — bottom left -->
+      <rect x="30" y="320" width="190" height="70" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="2"/>
+      <text x="125" y="344" text-anchor="middle" font-size="10.5" font-weight="800" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">AR System</text>
+      <text x="125" y="360" text-anchor="middle" font-size="9" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Invoice tracking · Payment matching</text>
+      <text x="125" y="376" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Ageing · Credit utilisation reports</text>
+
+      <!-- WMS — bottom right -->
+      <rect x="502" y="320" width="190" height="70" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="2"/>
+      <text x="597" y="344" text-anchor="middle" font-size="10.5" font-weight="800" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Warehouse Mgmt System</text>
+      <text x="597" y="360" text-anchor="middle" font-size="9" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Pick, pack, dispatch instructions</text>
+      <text x="597" y="376" text-anchor="middle" font-size="8.5" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Interfaces OMS + logistics 3PL</text>
+
+      <!-- DATA FLOW ARROWS -->
+      <!-- ERP → CRM: credit sync (broken — red dashed) -->
+      <path d="M261 90 Q180 90 220 165" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#c-arr-r)"/>
+      <text x="192" y="120" text-anchor="middle" font-size="7.5" fill="#dc2626" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">⚠ Credit limit sync</text>
+      <text x="192" y="132" text-anchor="middle" font-size="7" fill="#dc2626" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">BROKEN post-carve-out</text>
+
+      <!-- ERP → OMS: order data -->
+      <path d="M461 90 Q540 90 502 165" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#c-arr-b)"/>
+      <text x="510" y="116" text-anchor="middle" font-size="7.5" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Order data + credit</text>
+      <text x="510" y="128" text-anchor="middle" font-size="7.5" fill="#1d4ed8" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">hold decisions</text>
+
+      <!-- OMS → EDI Network -->
+      <path d="M597 250 Q597 290 461 322" stroke="#9ca3af" stroke-width="1.5" fill="none" marker-end="url(#c-arr)"/>
+      <text x="560" y="292" text-anchor="middle" font-size="7.5" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">ORDERS routing</text>
+
+      <!-- EDI Network → OMS -->
+      <path d="M362 320 Q380 280 502 250" stroke="#9ca3af" stroke-width="1.5" fill="none" marker-end="url(#c-arr)"/>
+      <text x="420" y="278" text-anchor="middle" font-size="7.5" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">CONTRL ack</text>
+
+      <!-- OMS → WMS -->
+      <path d="M597 250 L597 318" stroke="#9ca3af" stroke-width="1.5" fill="none" marker-end="url(#c-arr)"/>
+      <text x="617" y="290" font-size="7.5" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Fulfilment</text>
+
+      <!-- ERP → AR -->
+      <path d="M261 115 Q200 160 220 318" stroke="#059669" stroke-width="1.5" fill="none" marker-end="url(#c-arr-g)"/>
+      <text x="190" y="240" text-anchor="middle" font-size="7.5" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">AR posting</text>
+      <text x="190" y="252" text-anchor="middle" font-size="7.5" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Invoice data</text>
+
+      <!-- CRM → CS (used for credit check — wrong) -->
+      <path d="M220 205 Q200 260 200 290" stroke="#dc2626" stroke-width="1" fill="none" stroke-dasharray="4,3" marker-end="url(#c-arr-r)"/>
+      <text x="180" y="262" text-anchor="middle" font-size="7" fill="#dc2626" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">⚠ CS checks</text>
+      <text x="180" y="274" text-anchor="middle" font-size="7" fill="#dc2626" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">CRM (wrong)</text>
+
+      <!-- Gap callout box -->
+      <rect x="0" y="430" width="722" height="10" fill="none"/>
+    </svg>
+    <div class="caption">Figure C — System interconnection map; red dashed line = broken credit limit sync path (PP-01 root cause); blue arrows = authoritative data flows</div>
+
+    <table style="margin-top:8px;">
+      <tr><th>System</th><th>Record Count</th><th>Primary Function</th><th>Data Quality Status</th><th>Owner</th></tr>
+      <tr><td><strong>SAP S/4HANA (ERP)</strong></td><td>340 customers</td><td>Sole system of record: credit limits, AR, order processing</td><td><span class="badge badge-verified">Verified</span></td><td>Finance / Raj Patel</td></tr>
+      <tr><td><strong>SAP CRM</strong></td><td>318 customers</td><td>Account management, customer relationship data</td><td><span class="badge badge-gap">Diverged</span> post-carve-out</td><td>Sales / Account Managers</td></tr>
+      <tr><td><strong>OMS</strong></td><td>8,420 orders (2025)</td><td>Order processing, channel routing</td><td><span class="badge badge-amber">Amber</span> — EDI error handling undocumented</td><td>Opella Digital / James Okafor</td></tr>
+      <tr><td><strong>EDI Network</strong></td><td>14 connections</td><td>Automated retail order exchange</td><td><span class="badge badge-gap">Partial</span> — 6 connections Sanofi-managed</td><td>Opella Digital + Sanofi IT</td></tr>
+    </table>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">4</div></div>
+</div>
+
+<!-- PAGE 5 — ARTEFACT D: CREDIT DATA PATH + ARTEFACT E: CHANNEL FLOWS -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact D — Credit Data Path</div>
+    <div class="art-title">Credit Limit: Current State vs Target State</div>
+    <div class="body-p">The current state (left) shows how credit limit data reaches a credit decision via two divergent paths. The target state (right) shows the single-path design where ERP is the sole source and CRM is a read-only view.</div>
+
+    <svg width="722" height="200" viewBox="0 0 722 200" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 6px;">
+      <defs>
+        <marker id="d-arr" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#9ca3af"/></marker>
+        <marker id="d-arr-r" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#dc2626"/></marker>
+        <marker id="d-arr-g" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#059669"/></marker>
+      </defs>
+
+      <!-- CURRENT STATE (left half) -->
+      <text x="175" y="14" text-anchor="middle" font-size="9" font-weight="800" fill="#dc2626" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" letter-spacing="0.5">CURRENT STATE (broken)</text>
+
+      <!-- ERP -->
+      <rect x="10" y="26" width="110" height="36" rx="5" fill="#1a2f50"/>
+      <text x="65" y="42" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP S/4HANA</text>
+      <text x="65" y="55" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.6)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit limit: €1,800,000</text>
+
+      <!-- CRM (diverged) -->
+      <rect x="10" y="100" width="110" height="36" rx="5" fill="#f9fafb" stroke="rgba(220,38,38,0.4)" stroke-width="1.5"/>
+      <text x="65" y="116" text-anchor="middle" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP CRM</text>
+      <text x="65" y="129" text-anchor="middle" font-size="7.5" fill="#dc2626" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">⚠ Limit: €2,400,000</text>
+
+      <!-- Credit Decision box -->
+      <rect x="200" y="56" width="130" height="48" rx="5" fill="rgba(220,38,38,0.06)" stroke="rgba(220,38,38,0.4)" stroke-width="1.5"/>
+      <text x="265" y="74" text-anchor="middle" font-size="9" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit Decision</text>
+      <text x="265" y="88" text-anchor="middle" font-size="7.5" fill="#dc2626" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">⚠ AM checks CRM</text>
+      <text x="265" y="100" text-anchor="middle" font-size="7.5" fill="#dc2626" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">→ releases over ERP limit</text>
+
+      <!-- Arrows current state -->
+      <line x1="120" y1="44" x2="198" y2="74" stroke="#1a2f50" stroke-width="1" marker-end="url(#d-arr)"/>
+      <line x1="120" y1="118" x2="198" y2="90" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#d-arr-r)"/>
+      <text x="158" y="68" text-anchor="middle" font-size="7" fill="#1a2f50" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">correct (ignored)</text>
+      <text x="158" y="110" text-anchor="middle" font-size="7" fill="#dc2626" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">wrong source used</text>
+
+      <!-- Delta callout -->
+      <rect x="10" y="155" width="310" height="38" rx="4" fill="rgba(220,38,38,0.06)" stroke="rgba(220,38,38,0.25)" stroke-width="1"/>
+      <text x="165" y="171" text-anchor="middle" font-size="8.5" font-weight="700" fill="#991b1b" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Carrefour France: +€600K overstatement. Boots UK: +€350K. E.Leclerc: +€300K. dm: +€200K.</text>
+      <text x="165" y="185" text-anchor="middle" font-size="8" fill="#991b1b" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Total top-4 blocking exposure: €1.45M. All 8 accounts: €2.25M.</text>
+
+      <!-- Divider -->
+      <line x1="365" y1="0" x2="365" y2="200" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+      <!-- TARGET STATE (right half) -->
+      <text x="547" y="14" text-anchor="middle" font-size="9" font-weight="800" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" letter-spacing="0.5">TARGET STATE (R-01 + OPP-01)</text>
+
+      <rect x="380" y="26" width="110" height="36" rx="5" fill="#1a2f50"/>
+      <text x="435" y="42" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP S/4HANA</text>
+      <text x="435" y="55" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.6)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit limit: €1,800,000</text>
+
+      <rect x="380" y="100" width="110" height="36" rx="5" fill="#f9fafb" stroke="rgba(5,150,105,0.4)" stroke-width="1.5"/>
+      <text x="435" y="116" text-anchor="middle" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">SAP CRM</text>
+      <text x="435" y="129" text-anchor="middle" font-size="7.5" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">✓ Synced: €1,800,000</text>
+
+      <rect x="560" y="56" width="130" height="48" rx="5" fill="rgba(5,150,105,0.06)" stroke="rgba(5,150,105,0.4)" stroke-width="1.5"/>
+      <text x="625" y="74" text-anchor="middle" font-size="9" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit Decision</text>
+      <text x="625" y="88" text-anchor="middle" font-size="7.5" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">ERP limit enforced</text>
+      <text x="625" y="100" text-anchor="middle" font-size="7.5" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">→ consistent outcome</text>
+
+      <line x1="490" y1="44" x2="558" y2="74" stroke="#1a2f50" stroke-width="1.5" marker-end="url(#d-arr-g)"/>
+      <line x1="490" y1="118" x2="558" y2="90" stroke="#059669" stroke-width="1" stroke-dasharray="4,2" marker-end="url(#d-arr-g)"/>
+      <text x="528" y="68" text-anchor="middle" font-size="7" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">sole source</text>
+      <text x="528" y="110" text-anchor="middle" font-size="7" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">read-only view</text>
+
+      <rect x="380" y="155" width="330" height="38" rx="4" fill="rgba(5,150,105,0.06)" stroke="rgba(5,150,105,0.25)" stroke-width="1"/>
+      <text x="545" y="171" text-anchor="middle" font-size="8.5" font-weight="700" fill="#065f46" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-01 detects any future ERP–CRM delta weekly. R-01 enforces policy.</text>
+      <text x="545" y="185" text-anchor="middle" font-size="8" fill="#065f46" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit Controller action required before CRM divergence can persist past 7 days.</text>
+    </svg>
+    <div class="caption">Figure D — Credit data path: current broken state (left) vs R-01 + OPP-01 target state (right)</div>
+
+    <div style="margin-top:12px;" class="art-ref">Artefact E — Channel Process Flows</div>
+    <div class="art-title">EDI vs Manual Order Channel — Side-by-Side</div>
+
+    <table style="margin-top:8px;">
+      <tr>
+        <th style="width:40px;">#</th>
+        <th>EDI Channel (67.3% of volume — 5,667 orders)</th>
+        <th>Manual / Email / Fax Channel (32.7% — 2,753 orders)</th>
+      </tr>
+      <tr><td><strong>1</strong></td><td>Customer system auto-generates ORDERS message; transmitted via EDI network</td><td>Customer emails, faxes, or phones purchase order to CS team</td></tr>
+      <tr><td><strong>2</strong></td><td>EDI network routes to OMS; CONTRL acknowledgement sent within 30 min (target)</td><td>CS agent manually enters order into OMS; acknowledges customer by reply email</td></tr>
+      <tr><td><strong>3</strong></td><td>OMS maps ORDERS message to internal SKUs; rejects if mapping fails (P-03 pattern)</td><td>CS agent verifies product codes and quantities against price list</td></tr>
+      <tr><td><strong>4</strong></td><td>SAP S/4HANA auto-checks credit limit; places on hold if over ERP limit</td><td>CS agent checks credit limit — <span style="color:#dc2626;font-weight:700;">⚠ may use CRM (wrong)</span> — escalates if hold</td></tr>
+      <tr><td><strong>5</strong></td><td>Credit hold: CS notified via SAP; must contact Credit Controller within 4h</td><td>Credit Controller decision: release / reject / temporary increase</td></tr>
+      <tr><td><strong>6</strong></td><td>Order released to WMS for pick, pack, dispatch</td><td>Order confirmed and released to WMS</td></tr>
+      <tr><td><strong>7</strong></td><td>DESADV (dispatch advice) sent to customer via EDI; INVOIC message generated</td><td>Invoice generated in SAP; emailed to customer (PDF)</td></tr>
+      <tr><td><strong>8</strong></td><td>Customer pays per NET45 terms; AR posted in SAP</td><td>Customer pays per NET30 terms; AR posted in SAP</td></tr>
+      <tr><td style="background:#fef2f2;"><strong>GAP</strong></td><td style="background:#fef2f2;color:#991b1b;"><strong>Steps 1–4 have no SOP coverage.</strong> Order Mgmt SOP v2.1 explicitly excludes EDI. No RACI row exists for EDI dispute resolution. (PP-02)</td><td style="background:#fef2f2;">Fully covered by Order Mgmt SOP v2.1 (OPS-EU-CS-SOP-001). Credit hold step uses wrong data source. (PP-01)</td></tr>
+    </table>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">5</div></div>
+</div>
+
+<!-- PAGE 6 — ARTEFACT F: RACI MATRIX -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact F — O2C Process RACI Matrix</div>
+    <div class="art-title">Ownership Across the O2C Domain — Current State</div>
+    <div class="body-p">Derived from the O2C Process RACI Matrix (OPS-EU-CS-RACI-001 v1.0) supplemented by the Order Management SOP (OPS-EU-CS-SOP-001) and EDI working notes (Doc 05). Critical gap: EDI dispute resolution and Sanofi-managed connection management have no RACI rows — these activities operate on informal escalation paths only.</div>
+
+    <table>
+      <tr>
+        <th>Process Step</th>
+        <th>Responsible</th>
+        <th>Accountable</th>
+        <th>Consulted</th>
+        <th>Informed</th>
+        <th>Gap</th>
+      </tr>
+      <tr><td><strong>Customer order receipt (Manual/Email)</strong></td><td>CS Representative</td><td>Sophie Marchetti (VP Comm Ops)</td><td>Account Manager</td><td>Finance Ops</td><td>—</td></tr>
+      <tr><td><strong>Customer order receipt (EDI)</strong></td><td style="color:#dc2626;">⚠ Not documented</td><td style="color:#dc2626;">⚠ Not documented</td><td style="color:#dc2626;">⚠ Not documented</td><td>—</td><td><span class="badge badge-gap">PP-02</span></td></tr>
+      <tr><td><strong>Credit limit check</strong></td><td>CS Representative</td><td>Raj Patel (Credit Controller)</td><td>Account Manager</td><td>Finance Director</td><td><span class="badge badge-amber">PP-01</span> CRM vs ERP</td></tr>
+      <tr><td><strong>Credit hold — trigger &amp; notify</strong></td><td>CS Representative (4h SLA)</td><td>Raj Patel</td><td>—</td><td>Account Manager, Finance Director</td><td>—</td></tr>
+      <tr><td><strong>Credit hold — release decision</strong></td><td>Raj Patel (Credit Controller only)</td><td>Marc Dupont (Finance Director)</td><td>CS Representative</td><td>Account Manager</td><td>—</td></tr>
+      <tr><td><strong>Order processing — OMS entry</strong></td><td>CS Representative</td><td>Alina Kovacs (CS Team Lead)</td><td>Opella Digital</td><td>Warehouse Ops</td><td>—</td></tr>
+      <tr><td><strong>EDI connection management (Opella-managed)</strong></td><td>James Okafor (Opella Digital)</td><td>CIO / Opella Digital</td><td>CS Team Lead</td><td>CS Representative</td><td>—</td></tr>
+      <tr><td><strong>EDI connection management (Sanofi-managed)</strong></td><td style="color:#dc2626;">⚠ Informal (Alina Kovacs)</td><td style="color:#dc2626;">⚠ Not formally assigned</td><td>James Okafor</td><td>Sophie Marchetti</td><td><span class="badge badge-gap">PP-03</span></td></tr>
+      <tr><td><strong>EDI dispute resolution</strong></td><td style="color:#dc2626;">⚠ CS working notes only</td><td style="color:#dc2626;">⚠ Not documented</td><td>James Okafor / Sanofi IT</td><td>—</td><td><span class="badge badge-gap">PP-02</span></td></tr>
+      <tr><td><strong>Warehouse fulfilment</strong></td><td>Warehouse Ops Team</td><td>Supply Chain Director</td><td>CS, Demand Planning</td><td>Finance Ops</td><td>—</td></tr>
+      <tr><td><strong>Invoice generation</strong></td><td>Finance Ops</td><td>Marc Dupont</td><td>CS Representative</td><td>Customer, Account Manager</td><td>—</td></tr>
+      <tr><td><strong>Accounts receivable / cash collection</strong></td><td>Finance Ops / AR Team</td><td>Marc Dupont</td><td>Raj Patel (credit utilisation)</td><td>Account Manager</td><td>—</td></tr>
+      <tr><td><strong>Customer master maintenance (ERP)</strong></td><td>Raj Patel (Credit Controller)</td><td>Marc Dupont</td><td>Account Manager</td><td>CS Representative</td><td><span class="badge badge-amber">PP-05</span> 22 missing</td></tr>
+      <tr><td><strong>Customer master maintenance (CRM)</strong></td><td style="color:#92400e;">Account Managers (informal)</td><td style="color:#dc2626;">⚠ Not formally assigned</td><td>Raj Patel</td><td>CS Team</td><td><span class="badge badge-gap">PP-01 + PP-05</span></td></tr>
+    </table>
+
+    <div class="note-box">
+      <div class="note-box-title">Target State RACI Changes (R-02 Deliverable)</div>
+      <p>R-02 (EDI SOP publication, Week 4) must add RACI rows for: (1) EDI order receipt — Opella Digital-managed connections; (2) EDI order receipt — Sanofi-managed connections with explicit Sanofi helpdesk escalation path; (3) EDI dispute resolution; (4) Sanofi helpdesk P1 escalation. The RACI update is a gate condition for OPP-04 alert routing configuration — alert destinations reference RACI roles by name.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">6</div></div>
+</div>
+
+
+<!-- PAGE 7 — ARTEFACT G: EVIDENCE REGISTER -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact G — Pain Point Evidence Register</div>
+    <div class="art-title">Direct Evidence Citations for All Five Pain Points</div>
+    <div class="body-p">Each pain point is grounded in at least one verbatim extract from the discovery corpus. Confidence tier assigned per the KG schema: Verified (document evidence + system data), Amber (document evidence only), Gap (mentioned but unverifiable or contradicted).</div>
+
+    <table>
+      <tr><th>PP</th><th>Pain Point</th><th>Source Document</th><th>Verbatim Evidence</th><th>Tier</th></tr>
+      <tr>
+        <td><strong>PP-01</strong></td>
+        <td>Credit Data Integrity Risk</td>
+        <td>Credit Mgmt Policy §4.1 (OPS-EU-FIN-POL-002 v1.3)</td>
+        <td class="ev-quote" style="font-style:normal;">"SAP S/4HANA (ERP) is the single authoritative system of record for customer credit limits across Opella Europe… CRM credit figures are NOT authoritative and must NOT be used for credit decisions. Following the legal and operational separation from Sanofi in April 2025, certain customer accounts may show inconsistent credit limit data between the SAP ERP and CRM systems as a result of incomplete data synchronisation during the carve-out migration."</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>PP-01</strong></td>
+        <td>Credit Data Integrity Risk</td>
+        <td>SAP S/4HANA Master (Doc 08) + CRM Export (Doc 09)</td>
+        <td class="ev-quote" style="font-style:normal;">Carrefour France: ERP €1,800,000 vs CRM €2,400,000 (+€600K). Boots UK: ERP €1,200,000 vs CRM €1,550,000 (+€350K) + payment terms conflict NET45 vs NET30. E.Leclerc: ERP €1,100,000 vs CRM €1,400,000 (+€300K). dm: ERP €950,000 vs CRM €1,150,000 (+€200K). [Computed from CSV join — 8 discrepancy accounts, total overstatement €2.25M]</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>PP-02</strong></td>
+        <td>EDI Governance Vacuum</td>
+        <td>Order Mgmt SOP §1.3 Exclusions (OPS-EU-CS-SOP-001 v2.1)</td>
+        <td class="ev-quote" style="font-style:normal;">"This SOP covers the following order channels: Manual orders received by telephone, email, or written purchase order. It does not cover EDI (Electronic Data Interchange) order channels, which are managed separately by Opella Digital."</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>PP-02</strong></td>
+        <td>EDI Governance Vacuum</td>
+        <td>EDI Working Notes (Doc 05 — Alina Kovacs)</td>
+        <td class="ev-quote" style="font-style:normal;">"This is not an official SOP. Our official Order Management SOP does not cover EDI, which is a problem because roughly two-thirds of our order volume comes through EDI. Until someone writes the official version, this document is the closest thing we have to a procedure."</td>
+        <td><span class="badge badge-amber">Amber</span></td>
+      </tr>
+      <tr>
+        <td><strong>PP-03</strong></td>
+        <td>TSA Connection Dependency</td>
+        <td>EDI Working Notes (Doc 05)</td>
+        <td class="ev-quote" style="font-style:normal;">"For the other 6 connections — Carrefour France, Boots UK, dm (Drogerie Markt), E.Leclerc, Lidl Europe, and Coop Group — the connections were established by Sanofi Shared Services and were not yet handed over at the time of carve-out. Opella Digital doesn't manage these yet. If there is an outage or a mapping error on one of those connections, you need to contact the Sanofi IT helpdesk… They will respond but it can take 24 to 48 hours."</td>
+        <td><span class="badge badge-amber">Amber</span></td>
+      </tr>
+      <tr>
+        <td><strong>PP-03</strong></td>
+        <td>TSA Connection Dependency</td>
+        <td>EDI Working Notes (Doc 05)</td>
+        <td class="ev-quote" style="font-style:normal;">"he has told me that every escalation weakens our negotiating position on the TSA handover timeline — but customer impact takes priority."</td>
+        <td><span class="badge badge-amber">Amber</span></td>
+      </tr>
+      <tr>
+        <td><strong>PP-04</strong></td>
+        <td>EDI Channel Instability</td>
+        <td>CS Escalation Log (Doc 06 — 142 cases)</td>
+        <td class="ev-quote" style="font-style:normal;">"third time this quarter for Carrefour FR — escalating to Opella Digital." / "Customer threatened to delist Doliprane if EDI reliability does not improve." / "Boots UK EDI outage — contacted Sanofi IT helpdesk as per internal note." [34 EDI-related cases; 19 stockout complaints]</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>PP-04</strong></td>
+        <td>EDI Channel Instability</td>
+        <td>Order Flow Analysis (Doc 10 — 8,420 orders)</td>
+        <td class="ev-quote" style="font-style:normal;">EDI fulfilment rate: 91% baseline. Drops to 59% during cluster periods (April–May and October–November). 5,667 EDI orders of 8,420 total (67.3%). [Computed from order flow CSV — 32pp degradation in seasonal windows]</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>PP-05</strong></td>
+        <td>Onboarding Data Risk</td>
+        <td>SAP S/4HANA Master (Doc 08) + CRM Export (Doc 09)</td>
+        <td class="ev-quote" style="font-style:normal;">S/4HANA: 340 active accounts. CRM: 318 accounts. Delta: 22 accounts present in ERP but absent from CRM. 6 of the top-8 Sanofi-migrated accounts have migration_source = "Sanofi Legacy System" and migration_date = "2024-05-01". [Computed from CSV join]</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+    </table>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">7</div></div>
+</div>
+
+<!-- PAGE 8 — ARTEFACT H: DECISION RATIONALE -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact H — Decision Rationale Register</div>
+    <div class="art-title">Why Each Recommendation — Evidence Basis &amp; Alternatives Rejected</div>
+    <div class="body-p">For each of the five recommendations and two AI use cases, this register records the primary evidence basis, the specific decision made, and the most significant alternative that was considered and rejected.</div>
+
+    <table>
+      <tr><th>ID</th><th>Decision</th><th>Evidence Basis</th><th>Alternative Considered</th><th>Why Rejected</th></tr>
+      <tr>
+        <td><strong>R-01</strong></td>
+        <td>Mandate SAP S/4HANA as sole credit data SOR; OPP-01 AI weekly reconciliation</td>
+        <td>Policy §4.1 already mandates ERP. 8 accounts diverged. €2.25M overstatement. No existing automated check.</td>
+        <td>Manual monthly reconciliation by Credit Controller (no AI)</td>
+        <td>Weekly manual export-and-compare takes ~4h per run. At scale (340 accounts), monthly cadence is too slow — a new discrepancy could persist for 30 days. AI pipeline runs in &lt;10 min weekly with no marginal effort.</td>
+      </tr>
+      <tr>
+        <td><strong>R-02</strong></td>
+        <td>Author EDI SOP as a Wave 1 Quick Win (Weeks 1–4, no IT dependency)</td>
+        <td>Order Mgmt SOP §1.3 explicitly excludes EDI. RACI has no EDI row. Alina Kovacs's working notes are the only procedure — not official, not accessible to new staff.</td>
+        <td>Wait for OPP-04 monitoring to be live before formalising the SOP (so the SOP could reference alert system)</td>
+        <td>Monitoring without documented procedure creates a circular dependency: alerts fire but CS team has no authoritative reference for how to respond. SOP must precede tooling so the tool enforces the process, not replaces it.</td>
+      </tr>
+      <tr>
+        <td><strong>R-03</strong></td>
+        <td>Phased TSA migration — Carrefour FR first, Boots UK second, remainder in H3</td>
+        <td>34 EDI incidents; "third time this quarter for Carrefour FR." Delist threat from Boots UK. 24–48h Sanofi SLA vs same-day Opella Digital SLA.</td>
+        <td>Negotiate a bulk handover of all 6 connections simultaneously</td>
+        <td>Bulk handover requires Sanofi cooperation on 6 parallel migration workstreams. Risk of any single failure delaying all others. Phased approach delivers value from the highest-risk connection first; each successful handover de-risks the next.</td>
+      </tr>
+      <tr>
+        <td><strong>R-04</strong></td>
+        <td>Deploy OPP-04 EDI monitoring with TSA-aware routing built in from Week 6</td>
+        <td>59% fulfilment rate in seasonal windows. 19 stockout complaints. Detection currently reactive (customer complaints).</td>
+        <td>Use a third-party EDI monitoring SaaS tool (e.g. OpenText, SPS Commerce)</td>
+        <td>Third-party SaaS would not natively distinguish between Opella Digital and Sanofi IT-managed connections, requiring custom configuration. Building OPP-04 on top of existing event data allows exact routing logic without new vendor contract or data egress.</td>
+      </tr>
+      <tr>
+        <td><strong>R-05</strong></td>
+        <td>Dedup customer master: add 22 ERP-only accounts to CRM; consolidate 6 duplicates</td>
+        <td>340 ERP vs 318 CRM accounts. 6 top-8 accounts show Sanofi legacy migration source. Duplicate records identified in Doc 09 source field.</td>
+        <td>Rebuild CRM from ERP as a full data migration</td>
+        <td>Full migration is H3-scale work (weeks of IT effort; UAT required). The gap of 22 accounts and 6 duplicates is a targeted remediation achievable in weeks. Full migration should follow after R-01 enforces ERP as SOR — not precede it.</td>
+      </tr>
+      <tr>
+        <td><strong>OPP-01</strong></td>
+        <td>LLM-powered classification (cause: migration artifact / AM override / drift) with deterministic join step</td>
+        <td>Discrepancy causes are not mechanically determinable from field values alone — need reasoning across migration_source, last_updated_by, and policy rules.</td>
+        <td>Rule-based classifier (if migration_source=Sanofi then "migration artifact")</td>
+        <td>Rule-based misses cases where an AM subsequently overrode a migration discrepancy (mixed cause). LLM reads the full account context and applies the policy, producing more nuanced and useful recommendations.</td>
+      </tr>
+      <tr>
+        <td><strong>OPP-04</strong></td>
+        <td>5-pattern anomaly detection with TSA-aware routing; human-in-the-loop H1</td>
+        <td>34 incidents decompose into 5 distinct failure modes in the CS log. TSA routing is the single most consequential routing decision — mis-routing to Opella Digital for Sanofi connection costs hours.</td>
+        <td>Simple threshold alert on fulfilment rate only (no pattern library)</td>
+        <td>Fulfilment rate alone detects degradation too late — 7-day rolling window means a full connection outage runs for days before the rate threshold is breached. Pattern library detects failure modes within 30 minutes of the triggering event.</td>
+      </tr>
+    </table>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">8</div></div>
+</div>
+
+<!-- PAGE 9 — ARTEFACT I: DISCOVERY CORPUS INDEX -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact I — Discovery Input Corpus</div>
+    <div class="art-title">All 12 Input Documents — Classification, Coverage &amp; Key Findings</div>
+    <div class="body-p">The Autonomous Discovery Platform analysed 12 input artefacts covering four document types: policy documents (PDFs), standard operating procedures (PDFs), structured data (CSVs), and working notes (TXT). Each document's primary finding contribution is listed below.</div>
+
+    <table>
+      <tr><th>Doc</th><th>Reference</th><th>Title</th><th>Type</th><th>Primary Finding Contribution</th><th>Tier</th></tr>
+      <tr>
+        <td><strong>01</strong></td>
+        <td>OPS-EU-CS-SOP-001 v2.1</td>
+        <td>Order Management SOP</td>
+        <td>PDF/SOP</td>
+        <td>§1.3 Exclusion clause: EDI explicitly out of scope. Source of PP-02. Gap: 67% of volume has no SOP coverage.</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>02</strong></td>
+        <td>OPS-EU-FIN-POL-002 v1.3</td>
+        <td>Credit Management Policy</td>
+        <td>PDF/Policy</td>
+        <td>§4.1 mandates ERP as sole SOR; §4.1 Note warns CRM may be diverged post-carve-out. Rules basis for OPP-01 reasoning engine. Source of PP-01 framing.</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>03</strong></td>
+        <td>SCH-OPS-CS-SOP-001</td>
+        <td>Sanofi Order Mgmt SOP (legacy)</td>
+        <td>PDF/SOP</td>
+        <td>Pre-carve-out procedures; provides context for Sanofi EDI operational model before April 2025 separation. Not authoritative for Opella operations.</td>
+        <td><span class="badge badge-amber">Amber</span></td>
+      </tr>
+      <tr>
+        <td><strong>04</strong></td>
+        <td>OPS-EU-CS-RACI-001 v1.0</td>
+        <td>O2C Process RACI Matrix</td>
+        <td>PDF/RACI</td>
+        <td>Confirms 0 RACI rows for EDI (PP-02). Ownership gaps for CRM maintenance (PP-01, PP-05). Source for alert routing owner lookup (OPP-04).</td>
+        <td><span class="badge badge-amber">Amber</span></td>
+      </tr>
+      <tr>
+        <td><strong>05</strong></td>
+        <td>—</td>
+        <td>EDI Dispute Resolution Working Notes (Alina Kovacs)</td>
+        <td>TXT</td>
+        <td>Names all 6 Sanofi-managed connections. Sanofi helpdesk number and escalation procedure. PP-03 and PP-04 primary source. OPP-04 pattern library source. Not official — amber tier.</td>
+        <td><span class="badge badge-amber">Amber</span></td>
+      </tr>
+      <tr>
+        <td><strong>06</strong></td>
+        <td>—</td>
+        <td>CS Escalation Log (142 cases)</td>
+        <td>CSV</td>
+        <td>34 EDI incidents (PP-02, PP-04). 19 stockout complaints (PP-04 seasonal). Verbatim notes: "third time this quarter," "delist Doliprane." OPP-04 training signal.</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>07</strong></td>
+        <td>OPS-EU-CS-GUIDE-001</td>
+        <td>Customer Onboarding Guide</td>
+        <td>PDF/Guide</td>
+        <td>Onboarding process; reveals absence of ERP–CRM sync step in onboarding. Source for PP-05 (accounts migrated from Sanofi without CRM backfill step).</td>
+        <td><span class="badge badge-amber">Amber</span></td>
+      </tr>
+      <tr>
+        <td><strong>08</strong></td>
+        <td>—</td>
+        <td>SAP S/4HANA Customer Master</td>
+        <td>CSV</td>
+        <td>340 accounts. 6 top-8 with migration_source="Sanofi Legacy System". ERP credit limits (authoritative). Primary input for OPP-01 reconciliation engine.</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>09</strong></td>
+        <td>—</td>
+        <td>CRM Customer Export</td>
+        <td>CSV</td>
+        <td>318 accounts (22 fewer than ERP). CRM credit limits higher for all 8 top accounts. last_updated_by field: Account Managers named. Source of PP-01 and PP-05 quantification.</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>10</strong></td>
+        <td>—</td>
+        <td>Order Flow Analysis (8,420 orders)</td>
+        <td>CSV</td>
+        <td>Channel split: EDI 67.3%, Manual 21.4%, Email 9.1%, Fax 2.2%. EDI fulfilment: 91% baseline → 59% in Apr–May + Oct–Nov clusters. OPP-04 baseline and seasonal window calibration.</td>
+        <td><span class="badge badge-verified">Verified</span></td>
+      </tr>
+      <tr>
+        <td><strong>11</strong></td>
+        <td>OPS-EU-IT-REG-001</td>
+        <td>EDI Partner Register</td>
+        <td>PDF</td>
+        <td>14 connections documented. Connection-level metadata (protocol, message types, partner IDs). Confirms 6 Sanofi-managed connections. Source for OPP-04 routing table.</td>
+        <td><span class="badge badge-amber">Amber</span></td>
+      </tr>
+      <tr>
+        <td><strong>12</strong></td>
+        <td>TSA Schedule — Annex C</td>
+        <td>TSA Connection Handover Schedule</td>
+        <td>PDF</td>
+        <td><span style="color:#991b1b;font-weight:700;">MISSING — not provided in discovery corpus.</span> Referenced in EDI working notes as "on the TSA review list." Blocking for R-03 Phase 1 gate condition. Must be obtained from Sanofi Shared Services.</td>
+        <td><span class="badge badge-gap">Gap</span></td>
+      </tr>
+    </table>
+
+    <div class="note-box">
+      <div class="note-box-title">Corpus Completeness Assessment</div>
+      <p>11 of 12 documents were available for analysis. Document completeness score: 91.7%. The missing document (TSA Annex C) is the only blocking gap — it affects R-03 Phase 1 scope definition and is flagged as a pre-condition for the H2 TSA migration workstream. All five pain points are supported by at least two Verified or Amber sources. No pain point relies solely on a single document.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">9</div></div>
+</div>
+
+<!-- PAGE 10 — ARTEFACT J: STAKEHOLDER DIRECTORY -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact J — Stakeholder Directory</div>
+    <div class="art-title">Named Persons — Roles, Responsibilities &amp; Programme Involvement</div>
+    <div class="body-p">All named individuals identified across the 12 discovery documents. Role descriptions are as stated in the source documents. Programme involvement reflects responsibilities assigned in Reports 03–05.</div>
+
+    <table>
+      <tr><th>Name</th><th>Title</th><th>Domain</th><th>Source Doc</th><th>Programme Role</th></tr>
+      <tr>
+        <td><strong>Sophie Marchetti</strong></td>
+        <td>VP Commercial Operations, Europe</td>
+        <td>Commercial / Executive</td>
+        <td>Docs 01, 02, 05</td>
+        <td>Programme Sponsor; horizon gate sign-off; Sanofi executive relationship; approves credit policy deviations; named in EDI escalation path for commercial risk situations</td>
+      </tr>
+      <tr>
+        <td><strong>Marc Dupont</strong></td>
+        <td>Finance Director, Europe</td>
+        <td>Finance</td>
+        <td>Docs 01, 02</td>
+        <td>Finance oversight; receives copy of OPP-01 weekly report; approves H2 AI automation gate; CRM rationalisation decision maker</td>
+      </tr>
+      <tr>
+        <td><strong>Raj Patel</strong></td>
+        <td>Credit Controller, UK &amp; Europe</td>
+        <td>Finance / Credit</td>
+        <td>Docs 02, 05, 09</td>
+        <td>Workstream lead: R-01, R-05, OPP-01. Sole authority to modify ERP credit limits. Primary reviewer of weekly reconciliation report. Peak load: months 2–4. Named in CRM export as last_updated_by on credit limit changes.</td>
+      </tr>
+      <tr>
+        <td><strong>Alina Kovacs</strong></td>
+        <td>Customer Service Lead, Europe</td>
+        <td>Customer Service</td>
+        <td>Doc 05 (author)</td>
+        <td>Workstream lead: R-02 (EDI SOP author). Primary adopter of OPP-04 alert system. CS team training lead for EDI procedures. Author of the working notes that form the unofficial SOP for EDI dispute resolution.</td>
+      </tr>
+      <tr>
+        <td><strong>James Okafor</strong></td>
+        <td>Digital Lead / Opella Digital</td>
+        <td>Technology</td>
+        <td>Docs 05 (named), 11</td>
+        <td>Workstream lead: R-03 (TSA migration), R-04, OPP-04. Manages 8 Opella Digital EDI connections. Direct line to Sanofi EDI team lead for P1 escalations. Provides IT integration for OPP-01 and OPP-04 data extracts.</td>
+      </tr>
+      <tr>
+        <td><strong>Isabelle Fontaine</strong></td>
+        <td>Legal &amp; Compliance, Europe</td>
+        <td>Legal</td>
+        <td>Docs 01, 02</td>
+        <td>FMCH regulatory review for H2 AI automation gate. TSA legal terms review for R-03 Annex C. Informed on credit policy compliance matters.</td>
+      </tr>
+      <tr>
+        <td><strong>Thomas Beaumont</strong></td>
+        <td>Account Manager (France)</td>
+        <td>Commercial / Sales</td>
+        <td>Docs 05, 09</td>
+        <td>Named in CRM export as last_updated_by on French accounts. Owner of Carrefour France and E.Leclerc commercial relationships. Impacted by credit policy enforcement communication (R-01).</td>
+      </tr>
+      <tr>
+        <td><strong>Helena Brandt</strong></td>
+        <td>Account Manager (DACH)</td>
+        <td>Commercial / Sales</td>
+        <td>Doc 05</td>
+        <td>Named in EDI working notes for DACH duplicate order handling. Owner of dm (Drogerie Markt) commercial relationship. Impacted by R-01 credit policy enforcement.</td>
+      </tr>
+      <tr>
+        <td><strong>Sanofi IT Helpdesk (EDI)</strong></td>
+        <td>External — Sanofi Shared Services</td>
+        <td>Technology (external)</td>
+        <td>Doc 05</td>
+        <td>Manages 6 TSA-linked EDI connections until handover. Contact: +33 1 53 77 40 00 option 3. Reference format: Opella / [connection] / EDI. Response SLA: 2h acknowledgement, 24–48h resolution (Priority 1: same-day diagnosis). R-03 programme counterpart for handover negotiation.</td>
+      </tr>
+    </table>
+
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:12px 16px;margin-top:4px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#6b7280;margin-bottom:8px;">Key Capacity Constraint — Programme Risk</div>
+      <div style="font-size:9.5px;color:#374151;line-height:1.7;">Raj Patel is the single named owner of three concurrent H1 workstreams (R-01, R-05, OPP-01). James Okafor is named owner of three concurrent workstreams (R-03, R-04, OPP-04) while also serving as the IT integration contact for both AI use cases. Programme Manager (TBC) must confirm availability and capacity allocation for both before Week 1 activities begin. Risk RK-01 from Report 03 is directly linked to Raj Patel's peak load in months 2–4.</div>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">10</div></div>
+</div>
+
+<!-- PAGE 11 — KEY DATA STATISTICS -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact K — Key Quantitative Data</div>
+    <div class="art-title">Discovery Data Statistics — Source Figures for All Reports</div>
+    <div class="body-p">All quantitative claims across Reports 01–05 trace back to these figures. Sources: SAP S/4HANA Customer Master (Doc 08), CRM Export (Doc 09), Order Flow Analysis (Doc 10), and CS Escalation Log (Doc 06). These are the ground-truth numbers from the synthetic input corpus.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#1a2f50;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #e5e7eb;">Order Volume &amp; Channel Split (Doc 10)</div>
+        <table>
+          <tr><th>Channel</th><th>Orders</th><th>Share</th><th>Fulfilment (normal)</th><th>Fulfilment (seasonal)</th></tr>
+          <tr><td><strong>EDI</strong></td><td>5,667</td><td>67.3%</td><td>91%</td><td style="color:#dc2626;font-weight:700;">59%</td></tr>
+          <tr><td><strong>Manual</strong></td><td>1,802</td><td>21.4%</td><td>82%</td><td>82%</td></tr>
+          <tr><td><strong>Email</strong></td><td>767</td><td>9.1%</td><td>85%</td><td>85%</td></tr>
+          <tr><td><strong>Fax</strong></td><td>184</td><td>2.2%</td><td>78%</td><td>78%</td></tr>
+          <tr style="background:#f2f4f7;"><td><strong>Total</strong></td><td><strong>8,420</strong></td><td><strong>100%</strong></td><td><strong>88%</strong></td><td><strong>75%</strong></td></tr>
+        </table>
+        <div style="font-size:8.5px;color:#6b7280;margin-top:4px;">Seasonal windows: April–May and October–November 2025. EDI-only degradation — other channels unaffected.</div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#1a2f50;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #e5e7eb;">CS Escalation Log (Doc 06 — 142 cases)</div>
+        <table>
+          <tr><th>Category</th><th>Count</th><th>Notes</th></tr>
+          <tr><td><strong>EDI incidents</strong></td><td>34</td><td>PP-04; OPP-04 detection target</td></tr>
+          <tr><td><strong>Stockout complaints</strong></td><td>19</td><td>10 Apr–May; 9 Oct–Nov</td></tr>
+          <tr><td><strong>Other CS cases</strong></td><td>89</td><td>Pricing, delivery, credit queries</td></tr>
+          <tr><td><strong>Total cases</strong></td><td>142</td><td>Jan–Dec 2025</td></tr>
+        </table>
+        <div style="font-size:8.5px;color:#6b7280;margin-top:4px;">EDI resolution time: 4–48h (avg per log data). Sanofi-managed connections: 24–48h. Opella-managed: typically &lt;8h.</div>
+      </div>
+    </div>
+
+    <div style="font-size:10px;font-weight:700;color:#1a2f50;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #e5e7eb;">Credit Discrepancy Register — Top 8 Accounts (Docs 08 + 09)</div>
+    <table>
+      <tr><th>Account</th><th>Country</th><th>ERP Limit (Auth.)</th><th>CRM Limit</th><th>Delta</th><th>ERP Terms</th><th>CRM Terms</th><th>TSA-Migrated</th></tr>
+      <tr><td><strong>Carrefour France</strong></td><td>FR</td><td>€1,800,000</td><td>€2,400,000</td><td style="color:#dc2626;font-weight:700;">+€600,000</td><td>NET45</td><td>NET30</td><td>Yes</td></tr>
+      <tr><td><strong>E.Leclerc</strong></td><td>FR</td><td>€1,100,000</td><td>€1,400,000</td><td style="color:#dc2626;font-weight:700;">+€300,000</td><td>NET45</td><td>NET30</td><td>Yes</td></tr>
+      <tr><td><strong>Boots UK</strong></td><td>UK</td><td>€1,200,000</td><td>€1,550,000</td><td style="color:#dc2626;font-weight:700;">+€350,000</td><td>NET45</td><td>NET30</td><td>Yes</td></tr>
+      <tr><td><strong>Tesco UK</strong></td><td>UK</td><td>€1,000,000</td><td>€1,350,000</td><td style="color:#dc2626;">+€350,000</td><td>NET45</td><td>NET30</td><td>No</td></tr>
+      <tr><td><strong>dm (Drogerie Markt)</strong></td><td>DE</td><td>€950,000</td><td>€1,150,000</td><td style="color:#dc2626;font-weight:700;">+€200,000</td><td>NET45</td><td>NET30</td><td>Yes</td></tr>
+      <tr><td><strong>Lidl Europe</strong></td><td>EU</td><td>€850,000</td><td>€1,000,000</td><td style="color:#dc2626;">+€150,000</td><td>NET45</td><td>NET30</td><td>Yes</td></tr>
+      <tr><td><strong>Coop Group</strong></td><td>EU</td><td>€800,000</td><td>€950,000</td><td style="color:#dc2626;">+€150,000</td><td>NET45</td><td>NET30</td><td>Yes</td></tr>
+      <tr><td><strong>Mercadona</strong></td><td>ES</td><td>€750,000</td><td>€900,000</td><td style="color:#dc2626;">+€150,000</td><td>NET45</td><td>NET30</td><td>No</td></tr>
+      <tr style="background:#fef2f2;"><td colspan="4" style="font-weight:700;">Total overstatement — all 8 accounts</td><td style="color:#991b1b;font-weight:800;">+€2,250,000</td><td colspan="3" style="font-size:8.5px;color:#6b7280;">Top-4 blocking (Sanofi-migrated): €1,450,000</td></tr>
+    </table>
+
+    <div style="font-size:10px;font-weight:700;color:#1a2f50;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #e5e7eb;">Account Master Gap (Docs 08 + 09)</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;text-align:center;">
+        <div style="font-size:20px;font-weight:900;color:#2563eb;">340</div>
+        <div style="font-size:8.5px;color:#6b7280;">ERP accounts (authoritative)</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;text-align:center;">
+        <div style="font-size:20px;font-weight:900;color:#2563eb;">318</div>
+        <div style="font-size:8.5px;color:#6b7280;">CRM accounts</div>
+      </div>
+      <div style="background:#fef2f2;border:1px solid rgba(220,38,38,0.2);border-radius:6px;padding:10px 12px;text-align:center;">
+        <div style="font-size:20px;font-weight:900;color:#dc2626;">22</div>
+        <div style="font-size:8.5px;color:#991b1b;">ERP-only (missing from CRM)</div>
+      </div>
+      <div style="background:#fef2f2;border:1px solid rgba(220,38,38,0.2);border-radius:6px;padding:10px 12px;text-align:center;">
+        <div style="font-size:20px;font-weight:900;color:#dc2626;">6</div>
+        <div style="font-size:8.5px;color:#991b1b;">Duplicate Sanofi-migrated records</div>
+      </div>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">11</div></div>
+</div>
+
+<!-- PAGE 12 — CROSS-REFERENCE INDEX -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="art-ref">Artefact L — Master Cross-Reference Index</div>
+    <div class="art-title">Full Traceability — Input Documents → Pain Points → Recommendations → AI → Roadmap</div>
+    <div class="body-p">Complete end-to-end traceability for all five pain points. Each row traces a single pain point from its evidence sources through to the programme milestones that close it. This is the master reference for verifying that every recommendation is grounded in evidence and every milestone addresses a validated pain point.</div>
+
+    <table>
+      <tr>
+        <th>Pain Point</th><th>Severity</th><th>Source Docs</th><th>Root Cause</th><th>Recommendation</th><th>AI Use Case</th><th>H1 Milestones</th><th>KPI</th>
+      </tr>
+      <tr>
+        <td><strong>PP-01</strong><br>Credit Data Integrity</td>
+        <td><span class="badge badge-gap">HIGH</span></td>
+        <td>Docs 02, 08, 09</td>
+        <td>Carve-out data sync failure; no automated reconciliation check</td>
+        <td>R-01: ERP authority enforced</td>
+        <td>OPP-01: weekly reconciliation engine</td>
+        <td>M-05 (first report W8), M-06 (top-4 reconciled M3)</td>
+        <td>ERP–CRM delta = €0 top-8 by H1</td>
+      </tr>
+      <tr>
+        <td><strong>PP-02</strong><br>EDI Governance Vacuum</td>
+        <td><span class="badge badge-gap">HIGH</span></td>
+        <td>Docs 01, 04, 05</td>
+        <td>SOP and RACI explicitly exclude EDI; Alina Kovacs working notes only informal guidance</td>
+        <td>R-02: EDI SOP &amp; RACI authored</td>
+        <td>—</td>
+        <td>M-02 (SOP published W4)</td>
+        <td>EDI SOP: 5 sections published; RACI updated</td>
+      </tr>
+      <tr>
+        <td><strong>PP-03</strong><br>TSA Connection Dependency</td>
+        <td><span class="badge badge-amber">HIGH/Amber</span></td>
+        <td>Doc 05, Doc 11</td>
+        <td>6 connections not handed over at carve-out; Sanofi IT helpdesk manages them under TSA; Annex C missing</td>
+        <td>R-03: phased TSA migration</td>
+        <td>OPP-04: escalation log for TSA evidence</td>
+        <td>M-09 (TSA schedule agreed M5)</td>
+        <td>Sanofi-managed connections: 6 → 0 by H3</td>
+      </tr>
+      <tr>
+        <td><strong>PP-04</strong><br>EDI Channel Instability</td>
+        <td><span class="badge badge-amber">MEDIUM</span></td>
+        <td>Docs 05, 06, 10</td>
+        <td>No automated monitoring; reactive detection via customer complaints; 59% seasonal fulfilment rate</td>
+        <td>R-04: EDI monitoring + seasonal coverage</td>
+        <td>OPP-04: 5-pattern anomaly detection</td>
+        <td>M-03 (MVP W6), M-07 (full M4), M-10 (seasonal Oct–Nov)</td>
+        <td>Mean detect time &lt;15 min; fulfilment ≥91% year-round</td>
+      </tr>
+      <tr>
+        <td><strong>PP-05</strong><br>Onboarding Data Risk</td>
+        <td><span class="badge badge-amber">MEDIUM</span></td>
+        <td>Docs 07, 08, 09</td>
+        <td>Sanofi migration incomplete; 22 ERP-only accounts; 6 duplicates; no CRM governance for AM-updated records</td>
+        <td>R-05: customer master dedup</td>
+        <td>OPP-01: missing-account detection (feature F3)</td>
+        <td>M-04 (task list W6), M-08 (CRM remediated M4)</td>
+        <td>340 ERP = 340 CRM; zero known duplicates</td>
+      </tr>
+    </table>
+
+    <div style="font-size:10px;font-weight:700;color:#1a2f50;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #e5e7eb;margin-top:8px;">Report Suite Cross-Reference</div>
+    <table>
+      <tr><th>Report</th><th>Title</th><th>Primary Output</th><th>Feeds Into</th></tr>
+      <tr><td><strong>01</strong></td><td>Current State Assessment</td><td>O2C landscape — processes, systems, ownership, channel map</td><td>Reports 02–06 (context layer)</td></tr>
+      <tr><td><strong>02</strong></td><td>Pain Points &amp; Opportunity Report</td><td>5 pain points (PP-01–PP-05); 5 opportunities (OPP-01–OPP-05)</td><td>Reports 03, 04 (opportunity → recommendation → AI)</td></tr>
+      <tr><td><strong>03</strong></td><td>Transformation Recommendation</td><td>5 recommendations (R-01–R-05) with horizons, owners, success criteria</td><td>Reports 04, 05 (implementation context)</td></tr>
+      <tr><td><strong>04</strong></td><td>AI Opportunity Portfolio</td><td>OPP-01 and OPP-04 full specifications — data inputs, AI logic, outputs, governance</td><td>Report 05 (sequencing)</td></tr>
+      <tr><td><strong>05</strong></td><td>Transformation Roadmap</td><td>H1/H2/H3 phased plan — 7 workstreams, milestones, KPIs, governance</td><td>Programme execution (post-approval)</td></tr>
+      <tr><td><strong>06</strong></td><td>Supporting Artefacts</td><td>10 visual/reference artefacts — process maps, evidence register, decision rationale</td><td>Persistent reference layer for programme</td></tr>
+    </table>
+
+    <div class="note-box">
+      <div class="note-box-title">Discovery Platform — End of Report Suite</div>
+      <p>This completes the six-report O2C Discovery Suite for Opella Europe. All findings are grounded in the 12 input documents (11 available; 1 gap: TSA Annex C). Next step: programme sponsor (Sophie Marchetti) accepts the roadmap at the June 5 steering meeting; Programme Manager nominated within 2 weeks; H1 workstream activities begin as per Report 05 §2 Wave 1. This report suite should be updated as the programme progresses — Artefact G (evidence register) and Artefact L (cross-reference) are the living reference documents for the programme governance team.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-06 · Supporting Artefacts · Confidential</div><div class="pf-num">12</div></div>
+</div>
+
+</body>
+</html>

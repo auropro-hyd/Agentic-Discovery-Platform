@@ -1,0 +1,214 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discovery Copilot — Gap Resolution Audit Trail</title>
+<link rel="stylesheet" href="assets/report.css">
+<style>
+/* audit-trail-specific helpers (layered on the shared report design system) */
+.qmeta{ display:grid; grid-template-columns:11rem 1fr; gap:.15rem .9rem; margin:.2rem 0 .9rem;
+        font-size:.86rem; }
+.qmeta .qk{ color:var(--muted); text-transform:uppercase; font-size:.7rem; font-weight:700;
+            letter-spacing:.05em; padding-top:.18rem; }
+.qmeta .qv{ color:var(--ink); }
+.q-about{ font-weight:700; color:var(--navy); }
+.opt-letter{ font-size:.66rem; font-weight:800; border-radius:3px; padding:.12rem .42rem;
+             flex:0 0 auto; height:fit-content; margin-top:.1rem; letter-spacing:.03em; }
+.opt-a{ background:rgba(37,99,235,.12); color:var(--blue-deep); }
+.opt-b{ background:rgba(5,150,105,.12); color:#065f46; }
+.opt-c{ background:rgba(109,40,217,.12); color:var(--purple); }
+.opt-chosen{ outline:2px solid var(--green); outline-offset:1px; }
+/* brief, human SME annotation — distinct from the formal callout boxes */
+.sme-note{ display:flex; gap:.7rem; background:#fffdf5; border:1px solid #efe6c6;
+           border-left:3px solid #d9a441; border-radius:0 6px 6px 0; padding:.7rem .9rem;
+           margin:.85rem 0; }
+.sme-av{ flex:0 0 auto; width:30px; height:30px; border-radius:50%; background:var(--navy);
+         color:#fff; font-size:.6rem; font-weight:800; letter-spacing:.02em; display:flex;
+         align-items:center; justify-content:center; }
+.sme-body{ flex:1; }
+.sme-label{ font-size:.66rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+            color:#9a7b2e; margin-bottom:.18rem; }
+.sme-text{ font-size:.86rem; color:#3a3a3a; line-height:1.55; font-style:italic; }
+.sme-text:before{ content:'\201C'; } .sme-text:after{ content:'\201D'; }
+.cf-skip{ color:var(--muted); font-style:italic; }
+.b-tension{ background:#fffbeb; color:#92400e; border:1px dashed var(--amber); }
+.b-cf{ background:#eef2f7; color:var(--blue-mid); border:1px solid var(--line); }
+.b-resolved{ background:var(--green-bg); color:#065f46; border:1px solid var(--green-bd); }
+.lifecycle{ display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; margin:.3rem 0 .2rem; }
+.lc-step{ font-size:.74rem; font-weight:700; color:var(--blue-mid); background:#eef2f7;
+          border:1px solid var(--line); border-radius:20px; padding:.18rem .7rem; }
+.lc-arrow{ color:var(--muted); font-weight:700; }
+table.cf th:nth-child(1), table.cf td:nth-child(1){ width:7%; }
+table.cf th:nth-child(2), table.cf td:nth-child(2){ width:24%; }
+table.cf th:nth-child(3), table.cf td:nth-child(3){ width:20%; }
+table.cf th:nth-child(4), table.cf td:nth-child(4){ width:29%; }
+table.cf th:nth-child(5), table.cf td:nth-child(5){ width:20%; }
+table.tg{ table-layout:fixed; }
+table.tg th:nth-child(1), table.tg td:nth-child(1){ width:30%; }
+table.tg td{ font-size:.8rem; }
+</style></head><body>
+<nav class="topnav">
+  <span class="brandmark"><svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'><path d='M16 3 L27 26 H19 L16 18 L13 26 H5 Z' fill='#1a2f50'/><path d='M16 3 L21 13 L16 13 Z' fill='#2563eb'/></svg>AuroPro</span>
+  <span class="tn-links"><a class='' href='00-executive-summary.html'><span class='num'>00</span>Executive Summary</a><a class='' href='01-current-state.html'><span class='num'>01</span>Current State Assessment</a><a class='' href='02-pain-points.html'><span class='num'>02</span>Pain Points &amp; Opportunities</a><a class='' href='03-recommendation.html'><span class='num'>03</span>Transformation Recommendation</a><a class='' href='04-opportunity-portfolio.html'><span class='num'>04</span>AI Opportunity Portfolio</a><a class='' href='05-roadmap.html'><span class='num'>05</span>Transformation Roadmap</a><a class='' href='06-supporting-artefacts.html'><span class='num'>06</span>Supporting Artefacts</a><a class='active' href='07-copilot-audit-trail.html'><span class='num'>07</span>Copilot Audit Trail</a></span>
+</nav>
+<section class='cover'><div class='cv-top'></div><div class='cv-brand'><span class='brandmark'><svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'><path d='M16 3 L27 26 H19 L16 18 L13 26 H5 Z' fill='#1a2f50'/><path d='M16 3 L21 13 L16 13 Z' fill='#2563eb'/></svg>AuroPro</span><span class='cv-sub'>Autonomous Discovery Platform</span></div><div class='cv-accent'></div><div class='cv-body'><span class='cv-tag'>Discovery Copilot · Working Record</span><div class='cv-title'>Gap Resolution Audit Trail</div><div class='cv-domain'>Order-to-Cash · Block 2 Gap Gate</div><div class='cv-meta'><div class='cml'>Artefact type</div><div class='cmv'>Internal — SME Working Record</div><div class='cml'>Domain</div><div class='cmv'>Order-to-Cash</div><div class='cml'>Pipeline stage</div><div class='cmv'>Block 2 → Block 3 boundary</div><div class='cml'>Prepared by</div><div class='cmv'>AuroPro · Discovery Copilot</div><div class='cml'>Classification</div><div class='cmv'>Internal — not for client distribution</div></div></div><div class='cv-bottom'><span class='cv-bot-txt'>Order-to-Cash Discovery</span><span class='cv-bot-badge'>Internal</span></div></section>
+<main class="content">
+<div class='report-toc'><h1>Contents</h1><div class='toc'><a class=''><span class='ti-num'>1</span><span class='ti-title'>How the gap gate works</span><span class='ti-dots'></span></a><a class=''><span class='ti-num'>2</span><span class='ti-title'>Resolution ledger at a glance</span><span class='ti-dots'></span></a><a class=''><span class='ti-num'>3</span><span class='ti-title'>High-severity gaps — resolved before generation</span><span class='ti-dots'></span></a><a class=''><span class='ti-num'>4</span><span class='ti-title'>Clarifications needed</span><span class='ti-dots'></span></a><a class=''><span class='ti-num'>5</span><span class='ti-title'>Low-severity open questions — carried forward (amber)</span><span class='ti-dots'></span></a><a class=''><span class='ti-num'>6</span><span class='ti-title'>Source-to-question traceability</span><span class='ti-dots'></span></a></div></div>
+
+<h1>Discovery Copilot — Gap Resolution Audit Trail</h1>
+<p class='lede'>Every open question the platform raised at the Block&nbsp;2 gap gate, the source evidence that surfaced it, the resolutions the Copilot proposed, and the decision the AuroPro SME recorded — the complete chain of judgement that took the Order-to-Cash knowledge graph from <em>raw findings</em> to the clean, verified state the six client reports are generated from.</p>
+
+<div class='note-box'><div class='nb-title'>Why this artefact exists</div><div class='nb-text'>The six client reports are deliberately clean — no conflict flags, no red/amber status, no "gap identified" language. That cleanliness is earned here. This working record is the audit behind it: it shows that nothing was hidden, only <strong>resolved</strong>. It is an internal SME artefact and is not shared with the client.</div></div>
+
+<h2><span class='secnum'>1</span>How the gap gate works</h2>
+<p>Block&nbsp;2 produces findings faster than any human could review them. The gap gate sorts those findings into three lanes and routes only what genuinely needs a human decision to the Discovery Copilot — the single human-in-the-loop surface, operated by the AuroPro SME, never the client.</p>
+<div class='lifecycle'><span class='lc-step'>Finding detected</span><span class='lc-arrow'>&rarr;</span><span class='lc-step'>Classified &amp; routed</span><span class='lc-arrow'>&rarr;</span><span class='lc-step'>Copilot proposes 2–3 resolutions</span><span class='lc-arrow'>&rarr;</span><span class='lc-step'>SME decides</span><span class='lc-arrow'>&rarr;</span><span class='lc-step'>Knowledge graph updates</span><span class='lc-arrow'>&rarr;</span><span class='lc-step'>Gate clears</span></div>
+<div class='stat-row'>
+  <div class='stat-box'><span class='stat-ico'><svg viewBox='0 0 16 16' fill='none' stroke-linecap='round' stroke-linejoin='round'><circle cx='8' cy='8' r='6'/><path d='M8 4.5v3.5l2.2 1.3'/></svg></span><div class='sv blue'>9</div><div class='sl'>open questions raised</div></div>
+  <div class='stat-box'><span class='stat-ico'><svg viewBox='0 0 16 16' fill='none' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 8.5l3 3 6-7'/></svg></span><div class='sv green'>3</div><div class='sl'>high-severity gaps resolved (blocking)</div></div>
+  <div class='stat-box'><span class='stat-ico'><svg viewBox='0 0 16 16' fill='none' stroke-linecap='round' stroke-linejoin='round'><path d='M8 2l6 11H2z'/><path d='M8 7v3M8 11.5v.2'/></svg></span><div class='sv amber'>2</div><div class='sl'>clarifications needed (SME-reviewed)</div></div>
+  <div class='stat-box'><span class='stat-ico'><svg viewBox='0 0 16 16' fill='none' stroke-linecap='round' stroke-linejoin='round'><path d='M2.5 4.5h11M2.5 8h11M2.5 11.5h7'/></svg></span><div class='sv amber'>4</div><div class='sl'>low-severity questions carried forward (amber)</div></div>
+</div>
+<div class='note-box'><div class='nb-title'>Gap gate status</div><div class='nb-text'><strong>CLEARED.</strong> All 3 high-severity blocking gaps resolved. 2 points needing clarification reviewed and accepted by the SME (non-blocking). 4 low-severity questions logged as amber-tiered knowledge-graph nodes and carried into Block&nbsp;3 at reduced confidence. Zero unresolved blockers remain — Block&nbsp;3 domain analysis and Block&nbsp;4 report generation were authorised to proceed.</div></div>
+<p class='prov'>Routing rules per the platform design: high-severity gaps (missing system-of-record, unresolvable contradictions) <strong>block</strong> Block&nbsp;3 and must be cleared; low-severity gaps (ambiguous ownership, minor inconsistencies) <strong>carry forward</strong> automatically as amber nodes; strategic tensions (evidence conflicting with stated direction) are <strong>non-blocking findings</strong> that are flagged as clarifications needed for SME review and never reach the client without it.</p>
+
+<h2><span class='secnum'>2</span>Resolution ledger at a glance</h2>
+<p>Every open question, its classification, what it was about, how it was routed, and what it ultimately unblocked.</p>
+<table class='trace'><thead><tr><th>ID</th><th>Open question about</th><th>Classification</th><th>Severity / routing</th><th>Status</th><th>Resolves to</th></tr></thead><tbody>
+<tr><td><strong>G1</strong></td><td>Credit-limit system of record (CRM vs ERP)</td><td>Contradiction — master-data conflict</td><td><span class='badge b-high'>High · blocking</span></td><td><span class='badge b-resolved'>Resolved</span></td><td>OPP-01 · Report 01</td></tr>
+<tr><td><strong>G2</strong></td><td>EDI order-processing ownership &amp; procedure</td><td>Missing system-of-record — governance gap</td><td><span class='badge b-high'>High · blocking</span></td><td><span class='badge b-resolved'>Resolved</span></td><td>OPP-01 / OPP-02 · Report 01</td></tr>
+<tr><td><strong>G3</strong></td><td>Credit-assessment coverage on the EDI channel</td><td>Control coverage gap</td><td><span class='badge b-high'>High · blocking</span></td><td><span class='badge b-resolved'>Resolved</span></td><td>OPP-03 · Report 03</td></tr>
+<tr><td><strong>T1</strong></td><td>Ownership of 6 EDI connections under Sanofi TSA</td><td>Strategic tension — constraint conflict</td><td><span class='badge b-tension'>Clarification</span></td><td><span class='badge b-resolved'>Accepted</span></td><td>TSA Transfer · Report 05</td></tr>
+<tr><td><strong>T2</strong></td><td>Pace of retail-EDI modernization vs stabilization capacity</td><td>Strategic tension — direction vs capacity</td><td><span class='badge b-tension'>Clarification</span></td><td><span class='badge b-resolved'>Accepted</span></td><td>Roadmap H2/H3 · Report 05</td></tr>
+<tr><td><strong>C1</strong></td><td>Payment-terms system of record (228 accounts)</td><td>Master-data inconsistency</td><td><span class='badge b-cf'>Low · carried fwd</span></td><td><span class='badge b-med'>Amber</span></td><td>OPP-05 · Report 02</td></tr>
+<tr><td><strong>C2</strong></td><td>Fax channel sanctioning status (184 orders)</td><td>Legacy-channel ambiguity</td><td><span class='badge b-cf'>Low · carried fwd</span></td><td><span class='badge b-med'>Amber</span></td><td>Channel rationalization · Report 05</td></tr>
+<tr><td><strong>C3</strong></td><td>Dispute-resolution workflow ownership</td><td>Ambiguous ownership</td><td><span class='badge b-cf'>Low · carried fwd</span></td><td><span class='badge b-med'>Amber</span></td><td>OPP-04 · Report 02</td></tr>
+<tr><td><strong>C4</strong></td><td>Demand-forecast → escalation domain boundary</td><td>Cross-domain boundary question</td><td><span class='badge b-cf'>Low · carried fwd</span></td><td><span class='badge b-med'>Amber</span></td><td>Block 3 context map · Report 06</td></tr>
+</tbody></table>
+
+<h2><span class='secnum'>3</span>High-severity gaps — resolved before generation</h2>
+<p>Each of these blocked Block&nbsp;3. For each, the Copilot proposed candidate resolutions grounded in the ingested evidence; the SME selected one (the chosen option is outlined in green) and the knowledge graph was retiered before the pipeline continued.</p>
+
+<!-- G1 -->
+<div class='rec-card'>
+  <div class='rec-hdr'><div class='rec-id'>G1</div><div><div class='rec-name'>Which system is authoritative for customer credit limits?</div><div class='rec-badges'><span class='badge b-cat'>Contradiction · master data</span><span class='badge b-high'>High Severity</span><span class='badge b-resolved'>Resolved</span></div></div></div>
+  <div class='rec-body'>
+    <div class='qmeta'>
+      <div class='qk'>Open question about</div><div class='qv q-about'>Customer credit-limit system of record — SAP CRM vs SAP S/4HANA</div>
+      <div class='qk'>Why it blocked</div><div class='qv'>Credit decisions, order release and AR collections all read a credit limit. With two systems disagreeing on 267 of 318 accounts, the knowledge graph could not assert a single authoritative value — every downstream credit finding was unsafe to generate.</div>
+    </div>
+    <div class='ev-quote'><div class='eq-text'>"CRM and ERP disagree on credit limits for 267 of 318 accounts, with an aggregate absolute delta of €30.68M (CRM €61.23M vs ERP €58.98M; largest single divergence Carrefour France €0.6M). Which value is authoritative, and are the CRM figures valid?"</div><div class='eq-attr'>Surfaced by: Accounts Receivable Review Notes Q4 2025 · SAP CRM Customer Export · SAP S/4HANA Customer Master Export</div></div>
+    <h4>Candidate resolutions proposed by the Copilot</h4>
+    <ul class='action-list'>
+      <li><span class='opt-letter opt-a'>A</span><span>Treat <strong>CRM</strong> as authoritative — it holds the most recently edited values, so the deltas may be deliberate updates.</span></li>
+      <li class='opt-chosen'><span class='opt-letter opt-b'>B</span><span>Treat <strong>S/4HANA</strong> as authoritative per the Credit Management Policy; classify the CRM deltas as post-carve-out drift to be reconciled. <em>(SME selected)</em></span></li>
+      <li><span class='opt-letter opt-c'>C</span><span>Escalate to the Finance Director for a manual ruling before proceeding.</span></li>
+    </ul>
+    <div class='sme-note'><span class='sme-av'>SME</span><div class='sme-body'><div class='sme-label'>SME note · Option B selected</div><div class='sme-text'>The credit policy names S/4HANA as the sole authoritative source, and the CRM export literally self-labels its biggest delta "manually updated by account manager post-carve-out." That's drift, not a real disagreement — so I'm tiering ERP verified and pushing the 267 mismatches into a reconciliation backlog rather than treating this as a contradiction to argue out.</div></div></div>
+    <div class='kpi-row'><span class='kpi-pill'>S/4HANA → Verified tier</span><span class='kpi-pill'>Seeds OPP-01 — Credit Limit Reconciliation</span><span class='kpi-pill'>Prerequisite for OPP-03</span><span class='kpi-pill'>Unblocks Report 01 ownership map</span></div>
+    <p class='prov'>Source documents: <a href='sources/credit-management-policy-opella-europe.html'>Credit Management Policy — Opella Europe</a>, <a href='sources/sap-s4-customer-master-export.html'>SAP S/4HANA Customer Master Export</a>, <a href='sources/sap-crm-customer-export.html'>SAP CRM Customer Export</a> and <a href='sources/accounts-receivable-review-notes-q4-2025.html'>Accounts Receivable Review Notes Q4 2025</a></p>
+  </div>
+</div>
+
+<!-- G2 -->
+<div class='rec-card'>
+  <div class='rec-hdr'><div class='rec-id'>G2</div><div><div class='rec-name'>Who owns EDI order processing, and is there a controlled procedure?</div><div class='rec-badges'><span class='badge b-cat'>Missing system-of-record</span><span class='badge b-high'>High Severity</span><span class='badge b-resolved'>Resolved</span></div></div></div>
+  <div class='rec-body'>
+    <div class='qmeta'>
+      <div class='qk'>Open question about</div><div class='qv q-about'>EDI order-processing ownership and the authoritative procedure governing it</div>
+      <div class='qk'>Why it blocked</div><div class='qv'>EDI carries 67.3% of order volume (5,667 orders, €59.71M) yet appears in no controlled document. Block&nbsp;3 needs a process owner and procedure to map the dominant channel — without one, the knowledge graph could not tell whether this was a <em>missing input</em> (a document not yet ingested) or a genuine governance <em>gap</em>.</div>
+    </div>
+    <div class='ev-quote'><div class='eq-text'>"EDI is the highest-volume channel but is excluded from the Order Management SOP, the O2C RACI, and the legacy Sanofi SOP — the only guidance is an unofficial customer-service working note. Is an authoritative EDI procedure simply un-ingested, or does none exist?"</div><div class='eq-attr'>Surfaced by: Order Management SOP · O2C Process RACI · EDI Dispute Resolution CS Working Notes · Order Flow Analysis Export 2025</div></div>
+    <h4>Candidate resolutions proposed by the Copilot</h4>
+    <ul class='action-list'>
+      <li><span class='opt-letter opt-a'>A</span><span>A controlled EDI SOP exists but was not ingested — <strong>request the document</strong> and re-run ingestion before proceeding.</span></li>
+      <li class='opt-chosen'><span class='opt-letter opt-b'>B</span><span>No controlled procedure exists; the channel is governed only by an unofficial note — <strong>confirm as a genuine governance gap</strong>. <em>(SME selected)</em></span></li>
+      <li><span class='opt-letter opt-c'>C</span><span>EDI is owned end-to-end by the IT Integration Register, not Customer Service — reassign ownership there.</span></li>
+    </ul>
+    <div class='sme-note'><span class='sme-av'>SME</span><div class='sme-body'><div class='sme-label'>SME note · Option B selected</div><div class='sme-text'>The RACI itself is the tell — it says EDI rows were left out "pending formal documentation, target Q3 2025." So the procedure was never written; it isn't a file we failed to ingest. Okafor owns the connections technically, but nobody owns the order-handling process. Calling it a real governance gap and sending it straight to the opportunity set instead of waiting on a document that doesn't exist.</div></div></div>
+    <div class='kpi-row'><span class='kpi-pill'>EDI process node → Amber (opportunity)</span><span class='kpi-pill'>Seeds OPP-01 / OPP-02</span><span class='kpi-pill'>Unblocks Report 01 process inventory</span></div>
+    <p class='prov'>Source documents: <a href='sources/o2c-process-raci-opella-europe.html'>O2C Process RACI — Opella Europe</a>, <a href='sources/order-management-sop-opella-europe.html'>Order Management SOP — Opella Europe</a>, <a href='sources/edi-dispute-resolution-cs-working-notes.html'>EDI Dispute Resolution — CS Working Notes</a>, <a href='sources/edi-integration-register-opella-europe.html'>EDI Integration Register — Opella Europe</a> and <a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a></p>
+  </div>
+</div>
+
+<!-- G3 -->
+<div class='rec-card'>
+  <div class='rec-hdr'><div class='rec-id'>G3</div><div><div class='rec-name'>Does the credit-assessment control apply to the EDI channel?</div><div class='rec-badges'><span class='badge b-cat'>Control coverage gap</span><span class='badge b-high'>High Severity</span><span class='badge b-resolved'>Resolved</span></div></div></div>
+  <div class='rec-body'>
+    <div class='qmeta'>
+      <div class='qk'>Open question about</div><div class='qv q-about'>Whether the mandated credit check is enforced on retail EDI orders</div>
+      <div class='qk'>Why it blocked</div><div class='qv'>The Credit Management Policy mandates assessment, but order flow shows EDI orders reaching fulfilment with no credit gate. Block&nbsp;3 had to know whether this was a policy exemption (no opportunity) or an unimplemented control (a material opportunity) before scoring credit risk.</div>
+    </div>
+    <div class='ev-quote'><div class='eq-text'>"The Credit Management Policy requires a credit assessment, yet ~67% of EDI orders proceed to fulfilment without one. Is the EDI channel formally exempt, or is the control simply not implemented on the EDI order stream?"</div><div class='eq-attr'>Surfaced by: Credit Management Policy · Retail Customer Onboarding Guide · Order Flow Analysis Export 2025 · Sanofi Consumer Healthcare O2C SOP 2023</div></div>
+    <h4>Candidate resolutions proposed by the Copilot</h4>
+    <ul class='action-list'>
+      <li><span class='opt-letter opt-a'>A</span><span>The EDI channel is <strong>formally exempt</strong> from credit assessment by policy design.</span></li>
+      <li class='opt-chosen'><span class='opt-letter opt-b'>B</span><span>The policy applies universally, but <strong>no system-level credit gate exists</strong> on the EDI stream — confirmed coverage gap. <em>(SME selected)</em></span></li>
+      <li><span class='opt-letter opt-c'>C</span><span>Manual credit review by the Credit team already covers EDI accounts adequately.</span></li>
+    </ul>
+    <div class='sme-note'><span class='sme-av'>SME</span><div class='sme-body'><div class='sme-label'>SME note · Option B selected</div><div class='sme-text'>The onboarding guide aligns credit assessment to the policy for every account — there's no EDI carve-out anywhere in the documents. The control was just never wired onto the retail EDI stream the business now runs on. So it's an unimplemented control over ~5,665 orders a year, not an exemption. This is the anchor for the credit-agent opportunity.</div></div></div>
+    <div class='kpi-row'><span class='kpi-pill'>Coverage gap → Verified finding</span><span class='kpi-pill'>Seeds OPP-03 — TSA Connection Migration</span><span class='kpi-pill'>Unblocks Report 03 sequencing</span></div>
+    <p class='prov'>Source documents: <a href='sources/credit-management-policy-opella-europe.html'>Credit Management Policy — Opella Europe</a>, <a href='sources/retail-customer-onboarding-guide-opella-europe.html'>Retail Customer Onboarding Guide — Opella Europe</a>, <a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a> and <a href='sources/sanofi-consumer-healthcare-o2c-sop-2023.html'>Sanofi Consumer Healthcare O2C SOP 2023</a></p>
+  </div>
+</div>
+
+<h2><span class='secnum'>4</span>Clarifications needed</h2>
+<p>Points where discovered evidence sits in tension with the locked StrategyProfile (<code>direction_type: consolidate + modernize</code>; H1 for AI opportunities, H3 for app rationalization) and needs an SME call before it can be framed for the client. These are <strong>findings, not missing data</strong> — they are non-blocking. For each, the SME chooses one of three interpretations: the direction needs revisiting, the finding needs verification, or the point is known and accepted. None of these reach the client without this review.</p>
+
+<!-- T1 -->
+<div class='rec-card'>
+  <div class='rec-hdr'><div class='rec-id'>T1</div><div><div class='rec-name'>Autonomy goal vs 6 EDI connections still managed by Sanofi</div><div class='rec-badges'><span class='badge b-cat'>Strategic tension · TSA constraint</span><span class='badge b-tension'>Clarification</span><span class='badge b-resolved'>Accepted</span></div></div></div>
+  <div class='rec-body'>
+    <div class='qmeta'>
+      <div class='qk'>Open question about</div><div class='qv q-about'>Ownership of the 6 EDI connections under Sanofi Shared Services TSA</div>
+      <div class='qk'>The tension</div><div class='qv'>The stated direction is to consolidate and modernize toward autonomous operation, but the EDI Integration Register shows 6 of 14 connections (connections 9–14) remain under Sanofi Shared Services management — Opella cannot operate the dominant channel fully independently while they sit outside its control.</div>
+    </div>
+    <div class='ev-quote'><div class='eq-text'>"8 connections under Opella Digital management, 6 under Sanofi Shared Services TSA … Connections 9–14 remain Sanofi Shared Services managed." For 6 EDI connections, exception recovery routes to the Sanofi IT helpdesk with a stated 24–48 hour turnaround.</div><div class='eq-attr'>Surfaced by: EDI Integration Register — Opella Europe · EDI Dispute Resolution CS Working Notes</div></div>
+    <div class='sme-note'><span class='sme-av'>SME</span><div class='sme-body'><div class='sme-label'>SME note · known and accepted</div><div class='sme-text'>The TSA dependency is no surprise — it's written into the StrategyProfile as a constraint, so I'm not reopening the direction over it. The 6 connections become a planned ownership-transfer initiative in H1, which also clears the way for the exception pipeline to run autonomously. The client should see a roadmap item here, not a red flag.</div></div></div>
+    <div class='kpi-row'><span class='kpi-pill'>Routed to Roadmap H1</span><span class='kpi-pill'>Enables OPP-02 autonomy</span><span class='kpi-pill'>Appears in Report 05 as planned initiative</span></div>
+    <p class='prov'>Source documents: <a href='sources/edi-integration-register-opella-europe.html'>EDI Integration Register — Opella Europe</a> and <a href='sources/edi-dispute-resolution-cs-working-notes.html'>EDI Dispute Resolution — CS Working Notes</a></p>
+  </div>
+</div>
+
+<!-- T2 -->
+<div class='rec-card'>
+  <div class='rec-hdr'><div class='rec-id'>T2</div><div><div class='rec-name'>Modernize the dominant retail-EDI channel now, vs limited stabilization capacity</div><div class='rec-badges'><span class='badge b-cat'>Strategic tension · direction vs capacity</span><span class='badge b-tension'>Clarification</span><span class='badge b-resolved'>Accepted</span></div></div></div>
+  <div class='rec-body'>
+    <div class='qmeta'>
+      <div class='qk'>Open question about</div><div class='qv q-about'>The pace of EDI middleware modernization within the stabilization window</div>
+      <div class='qk'>The tension</div><div class='qv'>Evidence shows retail EDI is now the dominant channel and structurally under-served — pulling toward immediate modernization. But the StrategyProfile constrains change capacity during stabilization and places app rationalization at H3. Pursue middleware modernization now, or defer?</div>
+    </div>
+    <div class='ev-quote'><div class='eq-text'>"67.3% of order volume now flows through retail EDI (Carrefour, Boots, dm, Lidl, Mercadona, Coop), against an O2C process originally designed for pharma-distributor relationships — a structural shift the controlled procedures have not caught up with."</div><div class='eq-attr'>Surfaced by: Order Flow Analysis Export 2025 · EDI Integration Register · Retail Customer Onboarding Guide</div></div>
+    <div class='sme-note'><span class='sme-av'>SME</span><div class='sme-body'><div class='sme-label'>SME note · known and accepted</div><div class='sme-text'>The horizon split already settles this. Low-disruption exception automation (OPP-02) goes in H1; the heavier middleware modernization waits for H2/H3 so we respect the limited change capacity during stabilization. The direction holds — only the sequencing bends to the constraint, so there's nothing here to flag to the client as a conflict.</div></div></div>
+    <div class='kpi-row'><span class='kpi-pill'>OPP-02 → H1 (low disruption)</span><span class='kpi-pill'>Middleware modernization → H2/H3</span><span class='kpi-pill'>Respects stabilization constraint</span></div>
+    <p class='prov'>Source documents: <a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a>, <a href='sources/edi-integration-register-opella-europe.html'>EDI Integration Register — Opella Europe</a> and <a href='sources/retail-customer-onboarding-guide-opella-europe.html'>Retail Customer Onboarding Guide — Opella Europe</a></p>
+  </div>
+</div>
+
+<h2><span class='secnum'>5</span>Low-severity open questions — carried forward (amber)</h2>
+<p>These did not block Block&nbsp;3. Each was logged as an amber-tiered knowledge-graph node and carried forward automatically — Block&nbsp;3 runs against them at reduced confidence, and each maps to a downstream opportunity or artefact. No SME decision was required to clear the gate. The SME annotated the ones worth a steer and left the self-explanatory ones to carry on their own — so the <em>SME note</em> column below is deliberately partial.</p>
+<table class='cf'><thead><tr><th>ID</th><th>Open question about</th><th>Classification</th><th>SME note</th><th>Source documents</th></tr></thead><tbody>
+<tr><td><strong>C1</strong></td><td>Payment-terms system of record — 228 accounts differ between CRM and ERP</td><td>Master-data inconsistency</td><td>Same dual-maintenance root cause as G1, just lower exposure — no point raising it on its own. Folding it into the OPP-01 reconciliation scope.</td><td><a href='sources/sap-crm-customer-export.html'>SAP CRM Customer Export</a>, <a href='sources/sap-s4-customer-master-export.html'>SAP S/4HANA Customer Master Export</a>, <a href='sources/accounts-receivable-review-notes-q4-2025.html'>AR Review Notes Q4 2025</a></td></tr>
+<tr><td><strong>C2</strong></td><td>Whether fax remains a sanctioned channel — 184 orders, 40 not fulfilled</td><td>Legacy-channel ambiguity</td><td class='cf-skip'>— auto-carried as amber; status is documented (derogation), no SME steer needed</td><td><a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a>, <a href='sources/sanofi-consumer-healthcare-o2c-sop-2023.html'>Sanofi Consumer Healthcare O2C SOP 2023</a>, <a href='sources/order-management-sop-opella-europe.html'>Order Management SOP — Opella Europe</a></td></tr>
+<tr><td><strong>C3</strong></td><td>Who owns the dispute-resolution workflow — resolution times range 3–67 hrs</td><td>Ambiguous ownership</td><td>Owner exists on paper but there's no standard workflow — that's an ownership question, not missing data. Leaving it amber; OPP-04 will define the monitoring; ownership defined in R-02 RACI.</td><td><a href='sources/customer-service-escalation-log-2025.html'>Customer Service Escalation Log 2025</a>, <a href='sources/o2c-process-raci-opella-europe.html'>O2C Process RACI — Opella Europe</a></td></tr>
+<tr><td><strong>C4</strong></td><td>Is demand forecasting inside the O2C bounded context? (forecast miss → escalation spike 12–15 days later)</td><td>Cross-domain boundary question</td><td class='cf-skip'>— auto-carried as a boundary note for the Block 3 context map; out of O2C scope</td><td><a href='sources/customer-service-escalation-log-2025.html'>Customer Service Escalation Log 2025</a>, <a href='sources/order-flow-analysis-export-2025.html'>Order Flow Analysis Export 2025</a></td></tr>
+</tbody></table>
+
+<h2><span class='secnum'>6</span>Source-to-question traceability</h2>
+<p>Which of the 12 synthetic O2C inputs surfaced which open questions. Every question rests on ingested evidence — nothing was invented at the gate. Source pages mirror the originals in <code>synthetic-inputs/output/o2c/</code>.</p>
+<table class='tg'><thead><tr><th>Source document (synthetic-inputs/output/o2c)</th><th>Open questions surfaced</th></tr></thead><tbody>
+<tr><td><a href='sources/credit-management-policy-opella-europe.html'>credit-management-policy-opella-europe</a></td><td>G1 (S/4HANA named sole authoritative source) · G3 (mandates assessment)</td></tr>
+<tr><td><a href='sources/sap-crm-customer-export.html'>sap-crm-customer-export</a></td><td>G1 (CRM totals; "manually updated post-carve-out") · C1 (payment-terms drift)</td></tr>
+<tr><td><a href='sources/sap-s4-customer-master-export.html'>sap-s4-customer-master-export</a></td><td>G1 (ERP credit-limit totals) · C1 (228 payment-terms mismatches)</td></tr>
+<tr><td><a href='sources/accounts-receivable-review-notes-q4-2025.html'>accounts-receivable-review-notes-q4-2025</a></td><td>G1 (267 mismatches; €30.68M delta; Carrefour FR) · C1</td></tr>
+<tr><td><a href='sources/order-management-sop-opella-europe.html'>order-management-sop-opella-europe</a></td><td>G2 (EDI not covered by this SOP) · C2 (channel scope)</td></tr>
+<tr><td><a href='sources/o2c-process-raci-opella-europe.html'>o2c-process-raci-opella-europe</a></td><td>G2 (EDI rows excluded, target Q3 2025) · C3 (process owner vs workflow)</td></tr>
+<tr><td><a href='sources/edi-dispute-resolution-cs-working-notes.html'>edi-dispute-resolution-cs-working-notes</a></td><td>G2 (unofficial note; ~67% of volume) · T1 (Sanofi helpdesk, 24–48h)</td></tr>
+<tr><td><a href='sources/edi-integration-register-opella-europe.html'>edi-integration-register-opella-europe</a></td><td>G2 (technical ownership, J. Okafor) · T1 (6 of 14 under TSA) · T2</td></tr>
+<tr><td><a href='sources/order-flow-analysis-export-2025.html'>order-flow-analysis-export-2025</a></td><td>G2 / G3 (EDI 67.3% volume) · T2 · C2 (fax 184/40) · C4</td></tr>
+<tr><td><a href='sources/retail-customer-onboarding-guide-opella-europe.html'>retail-customer-onboarding-guide-opella-europe</a></td><td>G3 (credit assessment aligned for all accounts) · T2</td></tr>
+<tr><td><a href='sources/sanofi-consumer-healthcare-o2c-sop-2023.html'>sanofi-consumer-healthcare-o2c-sop-2023</a></td><td>G3 (legacy pharma-distributor design) · C2 (fax under derogation)</td></tr>
+<tr><td><a href='sources/customer-service-escalation-log-2025.html'>customer-service-escalation-log-2025</a></td><td>C3 (resolution times 3–67h) · C4 (escalation-spike pattern)</td></tr>
+</tbody></table>
+
+<div class='note-box'><div class='nb-title'>Clean-state guarantee</div><div class='nb-text'>By the time Block&nbsp;4 generated the six client reports, every entry above was resolved or consciously carried as amber by the SME. That is why Reports 00–06 carry no conflict flags or diagnostic language: the judgement happened here, in the open, and is auditable end to end.</div></div>
+
+</main></body></html>
