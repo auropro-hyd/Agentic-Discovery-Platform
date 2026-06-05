@@ -288,8 +288,10 @@ def opp_seeds_from_pain_points(payload: dict) -> list[dict]:
 def run_report_fanout(llm, raw_payload: dict, reg: dict, strategy: StrategyProfile | None = None,
                       doc_keys=None, model=None):
     """Top-level live deep synthesis: build the grounded fact-store, fan out per report, expand one
-    opportunity per pain point, and return (merged_payload, planning, fact_store, strategy). The
-    caller maps merged_payload via build._from_payload and attaches fact_store/strategy/planning."""
+    opportunity per pain point, and return (merged_payload, planning, fact_store, strategy, omitted).
+    `omitted` lists the section labels that could not be produced (transient/grounding failures) so
+    the caller can warn or, on --save-golden, refuse a short deliverable. The caller maps
+    merged_payload via build._from_payload and attaches fact_store/strategy/planning."""
     from .synthesis import allowed_numbers
     fs = factstore.build_fact_store(raw_payload, reg)
     strat = strategy or factstore.strategy_from_manifest(reg.get("manifest"))
@@ -298,14 +300,17 @@ def run_report_fanout(llm, raw_payload: dict, reg: dict, strategy: StrategyProfi
     # the AUTHORITATIVE grounding allow-list for this run (tool numbers + finding values + derived
     # ratios) — same source the monolith gate uses; the fact-store slice only shapes the prompt.
     allow = allowed_numbers(raw_payload)
-    # first pass for the pain points (report 02) so we can seed one opportunity per pain point
-    pp_only, _ = run_synthesis_fanout(llm, fs, strat, dk, allow=allow,
-                                      report_specs={"02-pain-points": specs["02-pain-points"]})
+    # first pass for the pain points (report 02) so we can seed one opportunity per pain point.
+    # This MUST precede seed derivation — it is the one hard barrier in the fan-out (the full pass
+    # below parallelises everything after it). The pre-pass's own omissions don't matter (02 is
+    # re-run in the full pass and folded with first-write-wins below), so we ignore them here.
+    pp_only, _, _ = run_synthesis_fanout(llm, fs, strat, dk, allow=allow,
+                                         report_specs={"02-pain-points": specs["02-pain-points"]})
     seeds = opp_seeds_from_pain_points(pp_only)
-    merged, planning = run_synthesis_fanout(llm, fs, strat, dk, allow=allow, report_specs=specs,
-                                            opp_seeds=seeds)
+    merged, planning, omitted = run_synthesis_fanout(
+        llm, fs, strat, dk, allow=allow, report_specs=specs, opp_seeds=seeds)
     # fold the first-pass pain points in (report_specs ran them again in the full pass too; merge
     # keeps the first, so they are consistent)
     for k, v in pp_only.items():
         merged.setdefault(k, v)
-    return merged, planning, fs, strat
+    return merged, planning, fs, strat, omitted

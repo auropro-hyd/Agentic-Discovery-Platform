@@ -708,6 +708,10 @@ class SynthesisContent:                    # everything reports 00-06 render
     fact_store: "FactStore | None" = None
     strategy: "StrategyProfile | None" = None
     planning_assumptions: list[PlanningAssumption] = field(default_factory=list)
+    # Operator signal only (NOT serialized to the client JSON): section labels the fan-out could not
+    # produce this run (transient/grounding failures). run.py warns on these and refuses --save-golden
+    # if any are present, so a polished snapshot is never silently short a section.
+    omitted_sections: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {"current_state": self.current_state.to_dict(),

@@ -198,6 +198,21 @@ def main(argv=None) -> int:
             print("  Re-run with a working model. NOT rendering wrong-domain content.")
             return 1
 
+    # ---- omitted-section signal (adaptive to transient/rate-limit failures) ----
+    # The parallel fan-out omits a section rather than aborting the suite when a transient provider
+    # failure (rate limit / overload) outlives the SDK's retries. Surface that loudly so a short
+    # deliverable is never silent — and refuse to bake a golden snapshot that is missing sections.
+    omitted = getattr(result.synthesis, "omitted_sections", []) or []
+    if omitted:
+        print(f"! WARNING: {len(omitted)} section(s) could not be generated this run "
+              f"(transient/grounding): {', '.join(omitted)}.")
+        print("  The suite is rendered without them. Re-run to fill the gaps "
+              "(often a rate limit — DISCOVERY_MAX_WORKERS=1 avoids bursting the API).")
+        if args.save_golden:
+            print("! refusing --save-golden: a golden snapshot must be complete, not missing "
+                  "sections. Re-run until all sections generate, then --save-golden.")
+            return 1
+
     # ---- render -----------------------------------------------------------
     OUT.mkdir(exist_ok=True)
     suite_dir = OUT / args.domain  # the 6-report client suite (the deliverable)

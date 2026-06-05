@@ -186,7 +186,7 @@ def test_fanout_assembles_reports_opportunities_and_planning():
          "planning_assumptions": [{"statement": "owner: CS Lead", "kind": "owner"}]},
     ]
     llm = FakeLLM(script)
-    merged, planning = run_synthesis_fanout(
+    merged, planning, _ = run_synthesis_fanout(
         llm, fs, m.StrategyProfile(), doc_keys={"flow"},
         report_specs=_specs(), opp_seeds=[{"id": "OPP1", "title": "Exception handling",
                                            "topic": "edi"}])
@@ -204,7 +204,7 @@ def test_fanout_skips_report_with_no_spec_and_omits_failed_opp():
                     "business_impact": {"quantified": [{"value": 5, "unit": "x", "text": "5"}]}},
                    {"id": "OPP9", "title": "t", "overview": "o",
                     "business_impact": {"quantified": [{"value": 5, "unit": "x", "text": "5"}]}}])
-    merged, planning = run_synthesis_fanout(
+    merged, planning, _ = run_synthesis_fanout(
         llm, fs, m.StrategyProfile(), doc_keys={"flow"},
         report_specs={"04-opportunity-portfolio": {}},
         opp_seeds=[{"id": "OPP9", "title": "t", "topic": ""}])
@@ -232,8 +232,8 @@ def test_fanout_omits_a_report_that_raises(monkeypatch):
                               "instruction": "y"},
     }
     llm = FakeLLM([{"sequencing_rationale": "OPP1 first"}])    # only r03 will reach the LLM
-    merged, planning = run_synthesis_fanout(llm, fs, m.StrategyProfile(), doc_keys={"flow"},
-                                            report_specs=specs)
+    merged, planning, _ = run_synthesis_fanout(llm, fs, m.StrategyProfile(), doc_keys={"flow"},
+                                               report_specs=specs)
     assert "pain_points" not in merged                        # r02 omitted (raised), suite survived
     assert merged.get("sequencing_rationale") == "OPP1 first"  # r03 still assembled
 
@@ -247,9 +247,9 @@ def test_fanout_omits_an_opportunity_that_raises(monkeypatch):
             raise ValueError("bad opp shape")
         return real(*a, **k)
     monkeypatch.setattr(fanout, "synth_section", flaky)
-    merged, _ = run_synthesis_fanout(FakeLLM([]), fs, m.StrategyProfile(), doc_keys={"flow"},
-                                     report_specs={"04-opportunity-portfolio": {}},
-                                     opp_seeds=[{"id": "OPP1", "title": "t", "topic": ""}])
+    merged, _, _ = run_synthesis_fanout(FakeLLM([]), fs, m.StrategyProfile(), doc_keys={"flow"},
+                                        report_specs={"04-opportunity-portfolio": {}},
+                                        opp_seeds=[{"id": "OPP1", "title": "t", "topic": ""}])
     assert "opportunities" not in merged                      # the raising opp omitted, no crash
 
 
@@ -265,8 +265,129 @@ def test_fanout_determinism_same_inputs_same_output():
     fs = _fs()
     specs = {"03-recommendation": {"tool": "emit_r03", "schema": {"type": "object", "properties": {}},
                                    "instruction": "rec"}}
-    out1, _ = run_synthesis_fanout(FakeLLM([{"sequencing_rationale": "x"}]), fs,
-                                   m.StrategyProfile(), doc_keys={"flow"}, report_specs=specs)
-    out2, _ = run_synthesis_fanout(FakeLLM([{"sequencing_rationale": "x"}]), fs,
-                                   m.StrategyProfile(), doc_keys={"flow"}, report_specs=specs)
+    out1, _, _ = run_synthesis_fanout(FakeLLM([{"sequencing_rationale": "x"}]), fs,
+                                      m.StrategyProfile(), doc_keys={"flow"}, report_specs=specs)
+    out2, _, _ = run_synthesis_fanout(FakeLLM([{"sequencing_rationale": "x"}]), fs,
+                                      m.StrategyProfile(), doc_keys={"flow"}, report_specs=specs)
     assert out1 == out2
+
+
+# ── parallelization: order-independence, omission signal, worker count ────────────────────────────
+import threading  # noqa: E402
+
+
+class _ConcurrentLLM:
+    """Thread-safe fake: returns a fixed emit keyed by the offered tool name (no mutable per-call
+    state), and records how many calls were IN FLIGHT simultaneously so we can prove the pool really
+    ran sections concurrently (not silently serialized)."""
+
+    def __init__(self, by_tool, barrier_n=0):
+        self._by_tool = by_tool
+        self._lock = threading.Lock()
+        self.max_inflight = 0
+        self._inflight = 0
+        # an optional barrier forces N calls to overlap, proving real concurrency
+        self._barrier = threading.Barrier(barrier_n) if barrier_n else None
+
+    def messages_with_tools(self, *, system, messages, tools, model=None, max_tokens=4096):
+        with self._lock:
+            self._inflight += 1
+            self.max_inflight = max(self.max_inflight, self._inflight)
+        if self._barrier:
+            try:
+                self._barrier.wait(timeout=5)
+            except threading.BrokenBarrierError:
+                pass
+        try:
+            name = tools[0]["name"]
+            return ToolTurn(content=[{"type": "tool_use", "id": "e", "name": name,
+                                      "input": self._by_tool.get(name, {})}], stop_reason="tool_use")
+        finally:
+            with self._lock:
+                self._inflight -= 1
+
+
+_MULTI_SPECS = {
+    "00-executive-summary": {"tool": "emit_r00", "schema": {"type": "object", "properties": {}},
+                             "instruction": "exec"},
+    "03-recommendation": {"tool": "emit_r03", "schema": {"type": "object", "properties": {}},
+                          "instruction": "rec"},
+    "05-roadmap": {"tool": "emit_r05", "schema": {"type": "object", "properties": {}},
+                   "instruction": "road"},
+}
+_MULTI_EMITS = {
+    "emit_r00": {"target_state": "t"},
+    "emit_r03": {"sequencing_rationale": "seq"},
+    "emit_r05": {"strategic_readiness": "ready"},
+    "emit_opportunity": {"id": "OPPx", "title": "t", "overview": "o"},
+}
+
+
+def test_max_workers_env_parsing(monkeypatch):
+    monkeypatch.setenv("DISCOVERY_MAX_WORKERS", "3"); assert fanout._max_workers() == 3
+    monkeypatch.setenv("DISCOVERY_MAX_WORKERS", "0"); assert fanout._max_workers() == 1   # floored
+    monkeypatch.setenv("DISCOVERY_MAX_WORKERS", "nonsense"); assert fanout._max_workers() == 4  # fallback
+    monkeypatch.delenv("DISCOVERY_MAX_WORKERS", raising=False); assert fanout._max_workers() == 4
+
+
+def test_fanout_output_identical_at_workers_1_and_4(monkeypatch):
+    """The whole point: byte-identical merged/planning regardless of worker count (submission-order
+    consume). Same fixed emits, run serial then parallel — outputs must be equal."""
+    def run(n):
+        monkeypatch.setenv("DISCOVERY_MAX_WORKERS", str(n))
+        return run_synthesis_fanout(_ConcurrentLLM(_MULTI_EMITS), _fs(), m.StrategyProfile(),
+                                    doc_keys={"flow"}, report_specs=_MULTI_SPECS,
+                                    opp_seeds=[{"id": "OPPx", "title": "t", "topic": ""}])
+    m1, p1, o1 = run(1)
+    m4, p4, o4 = run(4)
+    assert m1 == m4 and o1 == o4 == []
+    assert [str(x.statement) for x in p1] == [str(x.statement) for x in p4]
+
+
+def test_fanout_actually_runs_concurrently():
+    """Prove the pool overlaps calls (not silently serialized): 3 sections + a 3-way barrier; if any
+    call ran alone the barrier would time out, so reaching max_inflight==3 proves real concurrency."""
+    llm = _ConcurrentLLM(_MULTI_EMITS, barrier_n=3)
+    run_synthesis_fanout(llm, _fs(), m.StrategyProfile(), doc_keys={"flow"},
+                         report_specs=_MULTI_SPECS)
+    assert llm.max_inflight == 3
+
+
+def test_fanout_reports_omitted_sections():
+    """A section that fails grounding twice is omitted AND reported in the third return value, so
+    run.py can warn / refuse --save-golden."""
+    fs = _fs()
+    # opp grounds-fails (a measured number not in allow) on both attempts -> omitted
+    bad_opp = {"id": "OPP9", "title": "t", "overview": "o",
+               "business_impact": {"quantified": [{"value": 999, "unit": "x", "text": "999"}]}}
+    llm = _ConcurrentLLM({**_MULTI_EMITS, "emit_opportunity": bad_opp})
+    _, _, omitted = run_synthesis_fanout(llm, fs, m.StrategyProfile(), doc_keys={"flow"},
+                                         report_specs={"04-opportunity-portfolio": {}},
+                                         opp_seeds=[{"id": "OPP9", "title": "t", "topic": ""}])
+    assert omitted == ["OPP9"]   # labelled by the seed id, surfaced for the operator
+
+
+def test_fanout_placeholder_report_not_flagged_omitted():
+    """A report spec with an EMPTY instruction is a structural placeholder (the 04 portfolio's
+    content comes from opp seeds). Its None return must NOT be reported as a missing section —
+    otherwise the operator gets a false-positive warning and --save-golden is wrongly blocked."""
+    fs = _fs()
+    # report 04 has an empty instruction AND its emit grounds-empty -> returns None, but it's a
+    # placeholder so it must NOT appear in `omitted`. A substantive report (03) succeeds normally.
+    specs = {
+        "03-recommendation": {"tool": "emit_r03", "schema": {"type": "object", "properties": {}},
+                              "instruction": "rec"},
+        "04-opportunity-portfolio": {"tool": "emit_portfolio",
+                                     "schema": {"type": "object", "properties": {}},
+                                     "instruction": ""},   # <- placeholder
+    }
+    # emit_portfolio grounds-fails (a measured number not in `allow`) on both attempts -> the worker
+    # returns None for it. Because its instruction is empty (placeholder), that None must NOT be
+    # tracked. The opp seed still produces the real portfolio content.
+    bad_portfolio = {"numbers": [{"value": 12345, "unit": "x", "text": "12,345 widgets"}]}
+    llm = _ConcurrentLLM({**_MULTI_EMITS, "emit_portfolio": bad_portfolio})
+    merged, _, omitted = run_synthesis_fanout(
+        llm, fs, m.StrategyProfile(), doc_keys={"flow"}, report_specs=specs,
+        opp_seeds=[{"id": "OPPx", "title": "t", "topic": ""}])
+    assert "04-opportunity-portfolio" not in omitted   # placeholder None is expected, not flagged
+    assert merged["opportunities"][0]["id"] == "OPPx"  # portfolio content came from the opp seed

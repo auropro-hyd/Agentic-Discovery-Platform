@@ -20,15 +20,26 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import threading
 from pathlib import Path
 from typing import Any
 
 DEFAULT_ANTHROPIC_MODEL = "claude-opus-4-8"
 CACHE_DIR = Path(__file__).resolve().parent.parent / ".cache"
+# Scratch dir for atomic cache writes — a SIBLING of .cache/ (same filesystem so os.replace is
+# atomic), and deliberately OUTSIDE .cache/ so a crash-orphaned temp file can never be captured by
+# --save-golden's copytree of .cache/. See _write_cache.
+_CACHE_SCRATCH = CACHE_DIR.parent / ".cache.tmp"
 
 
 class LLMError(RuntimeError):
     pass
+
+
+class LLMRetryableError(LLMError):
+    """A transient provider failure (rate limit / overload / connection) that one section may
+    safely retry-or-omit without it being a hard, run-aborting error. Auth/config failures stay a
+    plain LLMError so they still surface loudly instead of silently omitting a report section."""
 
 
 class LLMClient:
@@ -46,6 +57,9 @@ class LLMClient:
         # offline — a fresh run by definition needs the network.
         self.no_cache = os.environ.get("DISCOVERY_NO_CACHE", "0") == "1" and not self.offline
         self._client = None  # lazily created
+        # Guards the lazy self._client init when sections run on multiple threads (the synthesis
+        # fan-out). The constructed SDK client is itself thread-safe; only its construction races.
+        self._client_lock = threading.Lock()
 
     # ---- caching -----------------------------------------------------------
     def _cache_key(self, system: str, prompt: str, model: str) -> str:
@@ -69,13 +83,22 @@ class LLMClient:
         return None
 
     def _write_cache(self, key: str, system: str, prompt: str, response: str) -> None:
-        self._cache_path(key).write_text(
+        # Atomic write: a plain write_text truncates-then-writes, so two threads writing the SAME
+        # key (the grounding-retry loop re-issues identical turns) could tear the file → a corrupt
+        # JSON or a torn golden artifact. Write to a unique temp in a sibling scratch dir on the
+        # same filesystem, then os.replace (atomic same-FS rename) into .cache/. The scratch dir is
+        # OUTSIDE .cache/ so a crash-orphaned temp is never copied into a --save-golden snapshot.
+        _CACHE_SCRATCH.mkdir(parents=True, exist_ok=True)
+        tmp = _CACHE_SCRATCH / f"{key}.{os.getpid()}.{threading.get_ident()}.tmp"
+        tmp.write_text(
             json.dumps(
                 {"system": system, "prompt": prompt, "response": response},
                 indent=2,
                 ensure_ascii=False,
-            )
+            ),
+            encoding="utf-8",
         )
+        os.replace(tmp, self._cache_path(key))
 
     # ---- public API --------------------------------------------------------
     def complete(self, system: str, prompt: str, *, model: str | None = None,
@@ -145,17 +168,26 @@ class LLMClient:
         deprecated = ("claude-opus-4-8",)
         return {} if any(model.startswith(d) for d in deprecated) else {"temperature": 0}
 
+    # SDK exception classes (and signals) that mean "transient — safe to retry or omit one section"
+    # rather than "the run is misconfigured". Kept as names so we don't hard-import the SDK here.
+    _RETRYABLE_NAMES = frozenset({
+        "RateLimitError", "APIConnectionError", "APITimeoutError",
+        "InternalServerError", "APIStatusError", "ServiceUnavailableError", "OverloadedError",
+    })
+
     @staticmethod
     def _provider_error(provider: str, e: Exception) -> LLMError:
-        """Turn any provider-SDK failure into one clean, actionable LLMError (no traceback leak).
+        """Turn any provider-SDK failure into one clean, actionable error (no traceback leak).
 
-        The most common first-run failure is no/invalid credentials: the Anthropic SDK raises a
-        TypeError ("Could not resolve authentication method") when no key is set, or an
-        AuthenticationError on a bad key. Either way, point the operator at the real fix instead of
-        surfacing a stack trace or the misleading 'offline / use golden' message."""
+        Returns an LLMRetryableError for TRANSIENT failures (rate limit / overload / connection) —
+        the synthesis fan-out may omit just that one section for these. Returns a plain LLMError for
+        everything else (auth/config), which stays a HARD, run-aborting error: the most common
+        first-run failure is no/invalid credentials, and that must surface loudly, never be silently
+        swallowed into an empty report."""
         name = type(e).__name__
         msg = str(e) or name
-        auth = "authentication" in msg.lower() or "api_key" in msg.lower() or name in (
+        low = msg.lower()
+        auth = "authentication" in low or "api_key" in low or name in (
             "AuthenticationError", "PermissionDeniedError")
         if auth:
             keyvar = "AZURE_OPENAI_API_KEY" if provider == "azure" else "ANTHROPIC_API_KEY"
@@ -163,18 +195,32 @@ class LLMClient:
                 f"{provider} credentials rejected or missing ({name}). Check {keyvar} in v1/.env "
                 "(verify with: uv run python scripts/doctor.py), or run with --golden for the "
                 "offline demo.")
+        # transient? — by SDK class name, or by a 429/529/overloaded signal in the message
+        transient = (name in LLMClient._RETRYABLE_NAMES
+                     or "429" in msg or "529" in msg or "overloaded" in low or "rate limit" in low)
+        if transient:
+            return LLMRetryableError(f"{provider} transient failure ({name}): {msg}")
         return LLMError(f"{provider} call failed ({name}): {msg}")
+
+    def _anthropic_client(self):
+        """Lazily build the shared Anthropic client under a lock (the fan-out calls this from many
+        threads). max_retries=2 lets the SDK absorb a transient 429/529 before we degrade a section;
+        capped low so a rate-limit storm can't wedge every pool slot in backoff for minutes."""
+        if self._client is None:
+            with self._client_lock:
+                if self._client is None:           # double-checked: only construct once
+                    import anthropic
+                    self._client = anthropic.Anthropic(max_retries=2)
+        return self._client
 
     def _call_anthropic_tools(self, system, messages, tools, model, max_tokens):
         try:
-            import anthropic
+            client = self._anthropic_client()
         except ImportError as e:  # pragma: no cover
             raise LLMError("pip install anthropic") from e
-        if self._client is None:
-            self._client = anthropic.Anthropic()
         try:
             # we never stream, so .create() returns a Message (not a Stream); narrow for the checker
-            msg: Any = self._client.messages.create(
+            msg: Any = client.messages.create(
                 model=model, max_tokens=max_tokens, **self._temp_kwargs(model),
                 system=system, tools=tools, tool_choice={"type": "auto"},
                 messages=messages,
@@ -204,13 +250,11 @@ class LLMClient:
 
     def _call_anthropic(self, system: str, prompt: str, model: str, max_tokens: int) -> str:
         try:
-            import anthropic
+            client = self._anthropic_client()  # locked lazy init; reads ANTHROPIC_API_KEY
         except ImportError as e:  # pragma: no cover
             raise LLMError("pip install anthropic") from e
-        if self._client is None:
-            self._client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY
         try:
-            msg: Any = self._client.messages.create(   # non-streaming -> Message; narrow for the checker
+            msg: Any = client.messages.create(   # non-streaming -> Message; narrow for the checker
                 model=model,
                 max_tokens=max_tokens,
                 **self._temp_kwargs(model),

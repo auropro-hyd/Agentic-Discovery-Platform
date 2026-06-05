@@ -101,7 +101,7 @@ def test_fanout_assembles_reference_depth_synthesis_content(monkeypatch):
     llm = Fake()
     reg = {"csv_ids": ["flow"], "doc_ids": [], "manifest": {}}
     raw = {"_tool_numbers": [1196], "findings": []}
-    merged, planning, fs, strat = fspec.run_report_fanout(
+    merged, planning, fs, strat, _ = fspec.run_report_fanout(
         llm, raw, reg, strategy=m.StrategyProfile(direction_type="consolidate"),
         doc_keys={"flow"})
     c = _from_payload(merged)
@@ -161,6 +161,6 @@ def test_fanout_determinism(monkeypatch):
     monkeypatch.setattr(fspec.factstore, "build_fact_store", lambda raw, reg: _fs())
     reg = {"csv_ids": ["flow"], "doc_ids": [], "manifest": {}}
     raw = {"_tool_numbers": [1196], "findings": []}
-    a, _, _, _ = fspec.run_report_fanout(Fake(), raw, reg, doc_keys={"flow"})
-    b, _, _, _ = fspec.run_report_fanout(Fake(), raw, reg, doc_keys={"flow"})
+    a, _, _, _, _ = fspec.run_report_fanout(Fake(), raw, reg, doc_keys={"flow"})
+    b, _, _, _, _ = fspec.run_report_fanout(Fake(), raw, reg, doc_keys={"flow"})
     assert a == b
