@@ -44,12 +44,13 @@ def build_synthesis(raw_payload: dict, *, domain: str = "o2c", live=False, llm=N
     grounded fact-store; it falls back to the legacy path when absent."""
     if live and fanout and reg is not None:
         from .. import fanout_specs
-        merged, planning, fs, strat = fanout_specs.run_report_fanout(
+        merged, planning, fs, strat, omitted = fanout_specs.run_report_fanout(
             llm, raw_payload, reg, doc_keys=doc_keys, model=model)
         content = _from_payload(merged)
         content.fact_store = fs
         content.strategy = strat
         content.planning_assumptions = planning
+        content.omitted_sections = omitted
         # surface only the NON-EMPTY strategy fields alongside r05's posture (don't blank anything).
         # Defensive: a live section occasionally emits strategy_profile as a bare string instead of
         # an object — spreading that would raise "'str' object is not a mapping" and abort the whole

@@ -17,6 +17,7 @@ v1/.venv/
 
 # ── v1 runtime cache (regenerated; noisy) ─────────────────────────
 v1/.cache/
+v1/.cache.tmp/
 
 # ── coverage artifacts (regenerated) ──────────────────────────────
 .coverage

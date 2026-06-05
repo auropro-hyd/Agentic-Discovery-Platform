@@ -19,9 +19,13 @@ rather than aborting the suite.
 """
 from __future__ import annotations
 
+import os
 import re
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any
 
 from .agent_loop import GroundingError, _close
+from .llm import LLMRetryableError
 from .models import FactStore, PlanningAssumption, StrategyProfile
 from .synthesis import _STRUCTURAL, _SOURCED_TABLE_KEYS, assert_factual
 
@@ -179,6 +183,48 @@ def _facts_brief(fs: FactStore) -> str:
 
 
 # ── orchestrator: build the fact-store, fan out per report (+ per opportunity), assemble ────────
+def _max_workers() -> int:
+    """Concurrency for the synthesis fan-out. Default 4 (≈24K output tokens in flight at 6K/section
+    — safe under a standard Opus OTPM tier even with the attempts=2 grounding-retry burst). Set
+    DISCOVERY_MAX_WORKERS=1 to revert to fully serial (the regression baseline)."""
+    try:
+        return max(1, int(os.environ.get("DISCOVERY_MAX_WORKERS", "4")))
+    except ValueError:
+        return 4
+
+
+# A section worker runs on a pool thread and is fully self-contained: it does its own slice + the
+# exact per-section kwargs INSIDE the guard, so a malformed spec or a transient provider blip omits
+# just that one section (returns None) instead of propagating to the main thread and aborting the
+# suite. Note the catch is narrow: LLMRetryableError (transient) is omitted, but a plain LLMError
+# (auth/config) is NOT caught here — it propagates so a misconfigured run fails loudly, never
+# silently produces an empty report.
+_SECTION_OMIT = (AttributeError, TypeError, KeyError, ValueError, LLMRetryableError)
+
+
+def _safe_report(llm, key, spec, fact_store, allow, strategy, doc_keys, model):
+    try:
+        fs = fact_store.slice_for(*spec["slice"]) if spec.get("slice") else fact_store
+        return synth_section(
+            llm, tool_name=spec["tool"], schema=spec["schema"], fact_store=fs, allow=allow,
+            strategy=strategy if key in _STRATEGIC else None,
+            instruction=spec["instruction"], doc_keys=doc_keys,
+            factual=key in _FACTUAL, max_tokens=spec.get("max_tokens", 6000), model=model)
+    except _SECTION_OMIT:
+        return None
+
+
+def _safe_opp(llm, seed, spec, fact_store, allow, doc_keys, model):
+    try:
+        return synth_section(
+            llm, tool_name="emit_opportunity", schema=spec.get("opp_schema", _MIN_OPP_SCHEMA),
+            fact_store=fact_store.slice_for(*([seed["topic"]] if seed.get("topic") else [])),
+            allow=allow, strategy=None, instruction=_opp_instruction(seed), doc_keys=doc_keys,
+            max_tokens=spec.get("opp_max_tokens", 6000), model=model)
+    except _SECTION_OMIT:
+        return None
+
+
 # Each report owns a slice of SynthesisContent fields; the orchestrator merges the per-report emits.
 # (Phase 1 wires the control flow + gate + planning channel; Phase 2 fills the per-report schemas to
 # reference depth.) The seed names a small number of opportunities to expand individually for r04.
@@ -201,43 +247,48 @@ def run_synthesis_fanout(llm, fact_store: FactStore, strategy: StrategyProfile, 
     if allow is None:
         allow = fact_store.numbers_allow()
 
-    for key in REPORT_KEYS:
-        spec = report_specs.get(key)
-        if not spec:
-            continue
-        fs = fact_store.slice_for(*spec.get("slice", [])) if spec.get("slice") else fact_store
-        # a malformed/oddly-shaped emit from ONE report must omit just that report, never abort the
-        # suite (the live model can return an unexpected shape; resilience over all-or-nothing).
-        try:
-            section = synth_section(
-                llm, tool_name=spec["tool"], schema=spec["schema"], fact_store=fs, allow=allow,
-                strategy=strategy if key in _STRATEGIC else None,
-                instruction=spec["instruction"], doc_keys=doc_keys,
-                factual=key in _FACTUAL, max_tokens=spec.get("max_tokens", 6000), model=model)
-            planning += collect_planning(section)
-            _merge(merged, section)
-        except (AttributeError, TypeError, KeyError, ValueError):
-            continue
+    # Fan the independent sections out across a small thread pool (the calls are I/O-bound LLM
+    # round-trips, so threads give real wall-clock parallelism). Reports and per-opportunity
+    # generations are mutually independent here — the only ordering dependency (pain-points pre-pass
+    # → opportunity seeds) is enforced by the CALLER (fanout_specs.run_report_fanout), not here.
+    #
+    # Determinism is preserved by consuming futures in SUBMISSION ORDER (never as_completed):
+    # _merge's first-write-wins / list-extend semantics and the planning-list order then reproduce
+    # exactly what the old sequential loops produced, independent of thread scheduling. Each call's
+    # cache key is content-derived and order-independent, so --golden replay is byte-identical too.
+    report_jobs = [key for key in REPORT_KEYS if report_specs.get(key)]
+    ospec = report_specs.get("04-opportunity-portfolio", {})
+    omitted: list[str] = []
+    futures: list[tuple[str, str, bool, Any]] = []   # (kind, label, track_omission, future)
+    with ThreadPoolExecutor(max_workers=_max_workers()) as pool:
+        for key in report_jobs:                                   # submit reports first…
+            # A report with no instruction is a structural placeholder (the 04 portfolio's content
+            # comes from the per-opportunity seeds, not its report spec) — its None is EXPECTED, so
+            # don't track it as a missing deliverable (avoids a false-positive omission warning).
+            track = bool((report_specs[key].get("instruction") or "").strip())
+            futures.append(("report", key, track, pool.submit(
+                _safe_report, llm, key, report_specs[key], fact_store, allow, strategy, doc_keys, model)))
+        for i, seed in enumerate(opp_seeds):                      # …then opps → one combined wave
+            label = str(seed.get("id") or seed.get("title") or f"opp-{i}")
+            futures.append(("opp", label, True, pool.submit(
+                _safe_opp, llm, seed, ospec, fact_store, allow, doc_keys, model)))
 
-    # per-opportunity deep generation for the centrepiece portfolio (report 04)
     opps = []
-    for seed in opp_seeds:
-        spec = report_specs.get("04-opportunity-portfolio", {})
-        try:
-            opp = synth_section(
-                llm, tool_name="emit_opportunity", schema=spec.get("opp_schema", _MIN_OPP_SCHEMA),
-                fact_store=fact_store.slice_for(*([seed.get("topic")] if seed.get("topic") else [])),
-                allow=allow, strategy=None, instruction=_opp_instruction(seed), doc_keys=doc_keys,
-                max_tokens=spec.get("opp_max_tokens", 6000), model=model)
-        except (AttributeError, TypeError, KeyError, ValueError):
-            opp = None
-        if opp is not None:
-            planning += collect_planning(opp)
-            opps.append(opp)
+    for kind, label, track, fut in futures:        # SUBMISSION ORDER — deterministic merge/planning
+        section = fut.result()                     # never raises: the worker swallowed _SECTION_OMIT
+        if section is None:
+            if track:                              # genuine missing content (placeholders excluded)
+                omitted.append(label)
+            continue
+        planning += collect_planning(section)      # single-threaded, on the main thread
+        if kind == "report":
+            _merge(merged, section)                # single-threaded → deterministic ownership order
+        else:
+            opps.append(section)
     if opps:
         merged.setdefault("opportunities", [])
         merged["opportunities"] = opps + merged.get("opportunities", [])
-    return merged, planning
+    return merged, planning, omitted
 
 
 def _merge(into: dict, section: dict | None) -> None:
