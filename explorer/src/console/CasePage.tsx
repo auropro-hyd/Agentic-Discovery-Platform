@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Logo } from "../layout/Logo";
+import { AppShell } from "./AppShell";
 import { cx } from "../lib/cx";
 import {
   STAGES,
@@ -59,14 +59,14 @@ export default function CasePage() {
 
   if (notFound) {
     return (
-      <div className="case">
-        <div className="dl-empty">
-          Case not found. <Link to="/">← Back to dashboard</Link>
+      <AppShell title="Case not found" crumb="Discovery cases">
+        <div className="board-empty">
+          That case doesn’t exist. <Link to="/">← Back to dashboard</Link>
         </div>
-      </div>
+      </AppShell>
     );
   }
-  if (!detail) return <div className="loading">Loading case…</div>;
+  if (!detail) return <AppShell title="Loading…" crumb="Discovery cases"><div className="board-empty">Loading case…</div></AppShell>;
 
   // a saved case is complete; during a live run the stage state is driven by the SSE stream
   const stageStatus = (id: StageId): StageState => {
@@ -119,23 +119,21 @@ export default function CasePage() {
   }
 
   return (
-    <div className="case">
-      <header className="case-top">
-        <div className="brand-inline">
-          <Logo size={24} />
-          <div>
-            <div className="ci-name">AUROPRO</div>
-            <div className="ci-sub">Discovery Console</div>
-          </div>
-        </div>
-        <div className="spacer" />
-        <Link to="/" className="ghost-link">← All cases</Link>
-      </header>
-
+    <AppShell
+      title={detail.title}
+      crumb="Discovery cases"
+      actions={
+        running ? (
+          <span className="rx-running">● Live re-run — {fmt(elapsed)}</span>
+        ) : (
+          <button className="rx-link" onClick={onRunLive}>↻ Re-run live</button>
+        )
+      }
+    >
       <section className="case-meta panel">
         <div className="cm-main">
           <div className="eyebrow">{detail.domain.toUpperCase()} · Discovery case</div>
-          <h1>{detail.title}</h1>
+          <h2 className="cm-h">{detail.title}</h2>
           <div className="cm-sub">{detail.client}</div>
         </div>
         <dl className="cm-facts">
@@ -145,16 +143,6 @@ export default function CasePage() {
           <div><dt>Status</dt><dd className="ok">{running ? "Running…" : detail.status}</dd></div>
         </dl>
       </section>
-
-      {/* Live re-execution is available but deliberately understated — the demo reads as a
-          polished, completed platform first. */}
-      <div className="case-reexec">
-        {running ? (
-          <span className="rx-running">● Live re-run in progress — {fmt(elapsed)}</span>
-        ) : (
-          <button className="rx-link" onClick={onRunLive}>↻ Re-run this discovery live</button>
-        )}
-      </div>
 
       {/* ── the stage navigator (clickable progress bar) ── */}
       <nav className="case-stepper" aria-label="discovery stages">
@@ -192,7 +180,7 @@ export default function CasePage() {
         )}
         {active === "report_generation" && <ReportStage detail={detail} />}
       </section>
-    </div>
+    </AppShell>
   );
 }
 
