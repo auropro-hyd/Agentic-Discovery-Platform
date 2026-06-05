@@ -60,8 +60,18 @@ export interface ReportLink {
   url: string;
 }
 
+export interface GapLedgerItem {
+  id: string;
+  severity: "high" | "clarification" | "amber";
+  status: string;
+  question: string;
+  decision: string;
+  resolves: string;
+}
+
 export interface CaseDetail extends CaseCard {
   input_docs: InputDoc[];
+  gap_ledger: GapLedgerItem[];
   reports: ReportLink[];
   copilot_audit_url: string;
   preview_url: string;

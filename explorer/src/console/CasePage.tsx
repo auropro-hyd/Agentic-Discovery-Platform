@@ -239,20 +239,54 @@ function DomainAnalysisStage({
   );
 }
 
+const SEV_LABEL: Record<string, string> = {
+  high: "High · blocking", clarification: "Clarification", amber: "Low · carried forward",
+};
+
 function CopilotStage({ detail }: { detail: CaseDetail }) {
   const g = detail.gaps;
+  const ledger = detail.gap_ledger ?? [];
   return (
     <div className="panel stage-panel">
       <StageHead n={3} title="Discovery Co-pilot"
-        blurb="The single human-in-the-loop surface. The platform raised every open question at the gap gate; the AuroPro SME recorded a decision on each. This working record is frozen — a read-only audit of the judgement behind the clean reports." />
+        blurb="The single human-in-the-loop surface. The platform routed every open question to the AuroPro SME, who recorded a decision on each — the chain of judgement that cleared the gap gate before any report was generated." />
       <div className="copilot-stats">
         <Stat n={g.questions} l="open questions" />
         <Stat n={g.high_resolved} l="high-severity gaps resolved" tone="ok" />
         <Stat n={g.clarifications} l="clarifications reviewed" tone="warn" />
         <Stat n={g.carried_forward} l="carried forward (amber)" tone="amber" />
       </div>
-      <iframe className="stage-frame tall" title="Discovery Co-pilot — gap resolution audit trail"
-        src={archiveUrl(detail.copilot_audit_url.replace(/^\/archive\//, ""))} />
+
+      <div className="gate-banner">
+        <span className="gate-dot" /> Gap gate <strong>CLEARED</strong> — all blocking gaps resolved;
+        Block 3 &amp; report generation authorised.
+      </div>
+
+      {/* native SME decision ledger — this is the governance surface, not a report */}
+      <ul className="decisions">
+        {ledger.map((d) => (
+          <li key={d.id} className={cx("decision", d.severity)}>
+            <div className="dz-l">
+              <span className="dz-id">{d.id}</span>
+              <span className={cx("dz-sev", d.severity)}>{SEV_LABEL[d.severity] ?? d.severity}</span>
+            </div>
+            <div className="dz-body">
+              <div className="dz-q">{d.question}</div>
+              <div className="dz-decision">
+                <span className="dz-tag">SME decision</span> {d.decision}
+              </div>
+              <div className="dz-resolves">→ feeds {d.resolves}</div>
+            </div>
+            <span className={cx("dz-status", d.severity)}>{d.status}</span>
+          </li>
+        ))}
+      </ul>
+
+      <details className="record-toggle">
+        <summary>View the full gap-resolution working record (SME audit trail) ↗</summary>
+        <iframe className="stage-frame tall" title="Discovery Co-pilot — gap resolution audit trail"
+          src={archiveUrl(detail.copilot_audit_url.replace(/^\/archive\//, ""))} />
+      </details>
     </div>
   );
 }
@@ -286,31 +320,48 @@ function FindingsReviewStage({
   return (
     <div className="panel stage-panel">
       <StageHead n={5} title="Findings Review"
-        blurb="The generated preview suite, ready for the BU lead to review before sign-off. Approve to lock it, or send it back with comments for a re-run." />
-      <iframe className="stage-frame tall" title="Findings review — preview suite"
-        src={archiveUrl(detail.preview_url.replace(/^\/archive\//, ""))} />
-      <div className="review-actions">
-        {approved ? (
-          <div className="review-approved ok">✓ Approved — signed off for report generation.</div>
-        ) : (
-          <>
-            <button className="approve" onClick={() => setApproved(true)}>Approve &amp; sign off</button>
-            <div className="rerun-box">
-              <textarea placeholder="Re-run with comments — note what to revisit…"
-                value={note} onChange={(e) => setNote(e.target.value)} />
-              <button disabled={!note.trim()}
-                onClick={() => { onComment(note.trim()); setNote(""); }}>
-                Send back for re-run
-              </button>
-            </div>
-          </>
-        )}
-        {comments.length > 0 && (
-          <ul className="comment-log">
-            {comments.map((c, i) => <li key={i}>{c}</li>)}
+        blurb="The sign-off gate. The BU lead reviews the assembled suite and either approves it for final generation or sends it back with comments. This is the decision point — the reports below are the evidence under review." />
+
+      {/* the approval gate — the distinctive content of THIS stage */}
+      <div className="review-gate">
+        <div className="rg-summary">
+          <div className="rg-line">Under review for sign-off:</div>
+          <ul className="rg-items">
+            <li><strong>{detail.reports.length}</strong> report suite</li>
+            <li><strong>{detail.findings}</strong> validated findings</li>
+            <li><strong>{detail.opportunities}</strong> opportunities mapped</li>
+            <li><strong>{detail.gaps.high_resolved}</strong> blocking gaps resolved</li>
           </ul>
-        )}
+        </div>
+        <div className="rg-action">
+          {approved ? (
+            <div className="review-approved ok">✓ Approved &amp; signed off — released to report generation.</div>
+          ) : (
+            <>
+              <button className="approve" onClick={() => setApproved(true)}>Approve &amp; sign off</button>
+              <div className="rerun-box">
+                <textarea placeholder="…or send back with comments for a re-run"
+                  value={note} onChange={(e) => setNote(e.target.value)} />
+                <button disabled={!note.trim()}
+                  onClick={() => { onComment(note.trim()); setNote(""); }}>
+                  Send back
+                </button>
+              </div>
+            </>
+          )}
+          {comments.length > 0 && (
+            <ul className="comment-log">
+              {comments.map((c, i) => <li key={i}>{c}</li>)}
+            </ul>
+          )}
+        </div>
       </div>
+
+      <details className="record-toggle" open>
+        <summary>Review the full preview suite ↗</summary>
+        <iframe className="stage-frame tall" title="Findings review — preview suite"
+          src={archiveUrl(detail.preview_url.replace(/^\/archive\//, ""))} />
+      </details>
     </div>
   );
 }
@@ -324,14 +375,16 @@ function ReportStage({ detail }: { detail: CaseDetail }) {
       <div className="report-grid">
         {detail.reports.map((r) => (
           <div key={r.id} className="report-card">
-            <span className="rc-id">{r.id}</span>
-            <span className="rc-title">{r.title}</span>
-            <span className="rc-actions">
-              <a href={urlOf(r)} target="_blank" rel="noreferrer">Open ↗</a>
+            <div className="rc-head">
+              <span className="rc-id">{r.id}</span>
+              <span className="rc-title">{r.title}</span>
+            </div>
+            <div className="rc-actions">
+              <a className="rc-open" href={urlOf(r)} target="_blank" rel="noreferrer">Open ↗</a>
               {/* ?download=1 → backend sets Content-Disposition: attachment (the <a download>
                   attribute is ignored cross-origin, so we force it server-side) */}
-              <a href={`${urlOf(r)}?download=1`}>Download</a>
-            </span>
+              <a className="rc-dl" href={`${urlOf(r)}?download=1`}>Download</a>
+            </div>
           </div>
         ))}
       </div>

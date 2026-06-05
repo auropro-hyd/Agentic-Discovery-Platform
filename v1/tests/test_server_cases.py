@@ -34,6 +34,21 @@ def test_case_gap_counts_mirror_audit_trail():
     assert g == {"questions": 9, "high_resolved": 3, "clarifications": 2, "carried_forward": 4}
 
 
+def test_gap_ledger_matches_the_summary_counts():
+    """The native decision ledger (rendered by the Co-pilot stage) must agree with the gap-gate
+    summary counts, and every row must carry the fields the UI binds to."""
+    ledger = server.OPELLA_GAP_LEDGER
+    g = server.OPELLA_CASE["gaps"]
+    assert len(ledger) == g["questions"]
+    by_sev = {s: sum(1 for r in ledger if r["severity"] == s) for s in ("high", "clarification", "amber")}
+    assert by_sev["high"] == g["high_resolved"]
+    assert by_sev["clarification"] == g["clarifications"]
+    assert by_sev["amber"] == g["carried_forward"]
+    for r in ledger:
+        assert {"id", "severity", "status", "question", "decision", "resolves"} <= set(r)
+        assert r["severity"] in {"high", "clarification", "amber"}
+
+
 def test_archive_artefacts_exist_on_disk():
     """Every archive/ path a stage points at must exist — otherwise the iframe/link 404s."""
     assert (server.ARCHIVE / "preview" / "07-copilot-audit-trail.html").is_file()

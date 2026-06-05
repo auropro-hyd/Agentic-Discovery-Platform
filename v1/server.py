@@ -78,6 +78,47 @@ OPELLA_REPORTS = [
     {"id": "05", "title": "Transformation Roadmap", "file": "report-05-roadmap.html"},
     {"id": "06", "title": "Supporting Artefacts", "file": "report-06-artefacts.html"},
 ]
+# The gap-resolution ledger the Discovery Co-pilot stage renders NATIVELY (so it reads as an SME
+# decision console, not a re-shown report). Mirrors archive/preview/07-copilot-audit-trail.html
+# row-for-row; the full working record is still iframed below for the complete chain of evidence.
+OPELLA_GAP_LEDGER = [
+    {"id": "G1", "severity": "high", "status": "Resolved",
+     "question": "Which system is authoritative for customer credit limits — SAP CRM or S/4HANA?",
+     "decision": "S/4HANA per the Credit Management Policy; CRM deltas classed as post-carve-out drift.",
+     "resolves": "OPP-01 · Report 01"},
+    {"id": "G2", "severity": "high", "status": "Resolved",
+     "question": "Who owns EDI order processing, and under what documented procedure?",
+     "decision": "Confirmed ungoverned — EDI excluded from the O2C SOP/RACI; logged as the core gap.",
+     "resolves": "OPP-01 / OPP-02 · Report 01"},
+    {"id": "G3", "severity": "high", "status": "Resolved",
+     "question": "Is a credit assessment run on the EDI channel?",
+     "decision": "No systematic credit check on EDI; flagged as a control-coverage gap.",
+     "resolves": "OPP-03 · Report 03"},
+    {"id": "T1", "severity": "clarification", "status": "Accepted",
+     "question": "Ownership of the 6 EDI connections still under the Sanofi TSA.",
+     "decision": "SME accepted: TSA transfer tracked as a roadmap dependency (non-blocking).",
+     "resolves": "TSA Transfer · Report 05"},
+    {"id": "T2", "severity": "clarification", "status": "Accepted",
+     "question": "Pace of retail-EDI modernisation vs. stabilisation capacity.",
+     "decision": "SME accepted: sequenced across roadmap H2/H3.",
+     "resolves": "Roadmap H2/H3 · Report 05"},
+    {"id": "C1", "severity": "amber", "status": "Carried fwd",
+     "question": "Payment-terms system of record across 228 accounts.",
+     "decision": "Low severity — carried into Block 3 as an amber node.",
+     "resolves": "OPP-05 · Report 02"},
+    {"id": "C2", "severity": "amber", "status": "Carried fwd",
+     "question": "Fax-channel sanctioning status (184 orders).",
+     "decision": "Low severity — carried forward for channel rationalisation.",
+     "resolves": "Channel rationalisation · Report 05"},
+    {"id": "C3", "severity": "amber", "status": "Carried fwd",
+     "question": "Dispute-resolution workflow ownership.",
+     "decision": "Ambiguous ownership — carried forward as amber.",
+     "resolves": "OPP-04 · Report 02"},
+    {"id": "C4", "severity": "amber", "status": "Carried fwd",
+     "question": "Demand-forecast → escalation domain boundary.",
+     "decision": "Cross-domain boundary — carried into the Block 3 context map.",
+     "resolves": "Context map · Report 06"},
+]
 OPELLA_CASE = {
     "id": "opella-o2c",
     "title": "Opella · Order-to-Cash",
@@ -284,6 +325,7 @@ class Handler(BaseHTTPRequestHandler):
         return self._json(200, {
             **_case_card(c),
             "input_docs": OPELLA_INPUT_DOCS,
+            "gap_ledger": OPELLA_GAP_LEDGER,   # rendered natively by the Co-pilot stage
             "reports": [{**r, "url": f"/archive/output/{r['file']}"} for r in OPELLA_REPORTS],
             # stage content lives in the self-contained archive/ suite, served via /archive/
             "copilot_audit_url": "/archive/preview/07-copilot-audit-trail.html",
