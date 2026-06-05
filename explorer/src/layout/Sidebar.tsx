@@ -65,7 +65,7 @@ export function Sidebar({
           <Item key={it.to} domain={domain} item={it} />
         ))}
         <Link to="/" className="console-back">
-          ← Discovery console
+          ← All discovery cases
         </Link>
       </nav>
     </aside>

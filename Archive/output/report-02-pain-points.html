@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pain Points &amp; Opportunity Report — Opella Europe O2C | AuroPro</title>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   AuroPro Autonomous Discovery Platform
+   Report 02 of 06 — Pain Points & Opportunity Report
+   Opella Europe · Order-to-Cash
+═══════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:     #1a2f50;
+  --blue:     #2563eb;
+  --blue-mid: #3665a8;
+  --text:     #111827;
+  --text-sec: #6b7280;
+  --border:   #d1d5db;
+  --bg-light: #f9fafb;
+  --bg-alt:   #f2f4f7;
+  --note-bg:  #eff6ff;
+}
+
+body {
+  font-family: 'Helvetica Neue', Arial, 'Liberation Sans', sans-serif;
+  background: #adb5bd;
+  color: var(--text);
+  padding: 32px 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── PAGE SHELL ─────────────────────────────────────────── */
+.page {
+  width: 794px;
+  min-height: 1123px;
+  background: #fff;
+  margin: 0 auto 28px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ph {
+  height: 34px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 42px;
+  flex-shrink: 0;
+}
+.ph-l { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-sec); }
+.ph-r { font-size: 8px; color: var(--text-sec); letter-spacing: 0.3px; }
+
+.pc {
+  padding: 24px 52px 18px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.pf {
+  height: 30px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 42px;
+  flex-shrink: 0;
+}
+.pf-l { font-size: 8px; color: var(--text-sec); }
+.pf-r { font-size: 8px; color: var(--text-sec); }
+
+/* ── COVER PAGE ─────────────────────────────────────────── */
+.page-cover {
+  width: 794px;
+  min-height: 1123px;
+  background: #fff;
+  margin: 0 auto 28px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.cv-top { height: 10px; background: var(--navy); flex-shrink: 0; }
+.cv-brand {
+  height: 52px; background: var(--navy);
+  display: flex; align-items: center; padding: 0 52px; gap: 16px;
+  flex-shrink: 0;
+}
+.cv-brand-name { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #fff; }
+.cv-brand-div  { width: 1px; height: 20px; background: rgba(255,255,255,0.3); }
+.cv-brand-sub  { font-size: 10px; color: rgba(255,255,255,0.65); letter-spacing: 0.5px; }
+.cv-accent { height: 4px; background: var(--blue); flex-shrink: 0; }
+
+.cv-body { flex: 1; padding: 64px 52px 40px; display: flex; flex-direction: column; }
+.cv-tag {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px; color: var(--blue);
+  border: 1.5px solid var(--blue); border-radius: 3px;
+  padding: 4px 12px; margin-bottom: 20px; width: fit-content;
+}
+.cv-title { font-size: 34px; font-weight: 800; line-height: 1.15; color: var(--navy); letter-spacing: -0.8px; margin-bottom: 6px; }
+.cv-domain { font-size: 14px; color: var(--text-sec); margin-bottom: 48px; }
+.cv-rule  { height: 1px; background: var(--border); margin-bottom: 36px; }
+
+.cv-meta { display: grid; grid-template-columns: 180px 1fr; row-gap: 0; margin-bottom: 48px; }
+.cml { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-sec); padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+.cmv { font-size: 11px; color: var(--text); padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+
+.cv-bottom {
+  height: 80px; background: var(--navy); margin-top: auto;
+  flex-shrink: 0; display: flex; align-items: center;
+  padding: 0 52px; gap: 32px;
+}
+.cv-bot-txt { font-size: 9px; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.8px; }
+.cv-bot-badge {
+  font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.8);
+  border: 1px solid rgba(255,255,255,0.3); border-radius: 3px;
+  padding: 3px 10px; text-transform: uppercase; letter-spacing: 0.8px;
+}
+
+/* ── TYPOGRAPHY ─────────────────────────────────────────── */
+.h1 {
+  font-size: 15px; font-weight: 800; color: var(--navy);
+  letter-spacing: -0.3px;
+  border-bottom: 2px solid var(--navy);
+  padding-bottom: 5px; margin-bottom: 14px;
+}
+.h2 { font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 7px; margin-top: 14px; }
+.h3 { font-size: 10px; font-weight: 700; color: var(--blue-mid); margin-bottom: 5px; margin-top: 10px; }
+.body { font-size: 10px; line-height: 1.7; color: var(--text); margin-bottom: 12px; }
+
+/* ── TABLES ─────────────────────────────────────────────── */
+.tbl { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+.tbl thead th {
+  background: var(--navy); color: #fff;
+  font-size: 8px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.7px;
+  padding: 7px 10px; text-align: left;
+}
+.tbl tbody td {
+  padding: 7px 10px; color: var(--text);
+  border-bottom: 1px solid #eaecf0;
+  font-size: 9.5px; vertical-align: top; line-height: 1.5;
+}
+.tbl tbody tr:nth-child(even) td { background: var(--bg-alt); }
+.tbl tbody tr:last-child td { border-bottom: none; }
+.tbl .section-row td {
+  background: var(--navy) !important; color: #fff;
+  font-size: 8px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.7px;
+  padding: 5px 10px;
+}
+
+/* ── BADGES ─────────────────────────────────────────────── */
+.badge {
+  display: inline-block; font-size: 8px; font-weight: 700;
+  border-radius: 3px; padding: 2px 7px;
+  text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
+}
+.b-high  { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+.b-med   { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+.b-pdf   { background: #fef2f2; color: #b91c1c; }
+.b-csv   { background: #f0fdf4; color: #166534; }
+.b-txt   { background: #fafafa; color: #6b7280; border: 1px solid #e5e7eb; }
+.b-ai    { background: rgba(37,99,235,0.1); color: var(--blue); }
+.b-proc  { background: rgba(5,150,105,0.1); color: #065f46; }
+.b-data  { background: rgba(139,92,246,0.1); color: #6d28d9; }
+.b-strat { background: rgba(249,115,22,0.1); color: #c2410c; }
+.b-dg    { background: #f3f0ff; color: #5b21b6; border: 1px solid #c4b5fd; }
+.b-pc    { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+.b-tp    { background: #fff7ed; color: #9a3412; border: 1px solid #fdba74; }
+.b-or    { background: #fafafa; color: #374151; border: 1px solid #d1d5db; }
+.b-block { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+.b-amb   { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+
+/* ── STAT BOXES ─────────────────────────────────────────── */
+.stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px; }
+.stat-box { background: #f9fafb; border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; text-align: center; }
+.sv { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; color: var(--navy); }
+.sl { font-size: 9px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; }
+.sv.red    { color: #dc2626; }
+.sv.amber  { color: #d97706; }
+.sv.blue   { color: var(--blue); }
+.sv.green  { color: #059669; }
+
+/* ── NOTE / CALLOUT BOXES ───────────────────────────────── */
+.note-box { background: var(--note-bg); border-left: 3px solid var(--blue); border-radius: 0 4px 4px 0; padding: 10px 14px; margin-bottom: 12px; }
+.nb-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--blue); margin-bottom: 5px; }
+.nb-text  { font-size: 9.5px; line-height: 1.6; color: #374151; }
+
+.high-box { background: #fef2f2; border-left: 3px solid #ef4444; border-radius: 0 4px 4px 0; padding: 10px 14px; margin-bottom: 12px; }
+.hb-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #dc2626; margin-bottom: 5px; }
+.hb-text  { font-size: 9.5px; line-height: 1.6; color: #374151; }
+
+.med-box  { background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 0 4px 4px 0; padding: 10px 14px; margin-bottom: 12px; }
+.mb-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #b45309; margin-bottom: 5px; }
+.mb-text  { font-size: 9.5px; line-height: 1.6; color: #374151; }
+
+.ev-quote {
+  background: #f9fafb; border: 1px solid var(--border);
+  border-left: 3px solid var(--text-sec);
+  border-radius: 0 4px 4px 0; padding: 9px 14px; margin-bottom: 12px;
+}
+.eq-text { font-size: 9.5px; line-height: 1.6; color: #374151; font-style: italic; }
+.eq-attr { font-size: 8.5px; color: var(--text-sec); margin-top: 5px; font-style: normal; font-weight: 700; }
+
+/* ── PP HEADER ──────────────────────────────────────────── */
+.pp-hdr {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin-bottom: 12px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.pp-id {
+  background: var(--navy); color: #fff; font-size: 10px; font-weight: 800;
+  padding: 6px 10px; border-radius: 4px; text-align: center;
+  white-space: nowrap; flex-shrink: 0; line-height: 1.4;
+}
+.pp-body { flex: 1; }
+.pp-name { font-size: 14px; font-weight: 800; color: var(--navy); line-height: 1.2; margin-bottom: 6px; }
+.pp-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ── MINI STATS ─────────────────────────────────────────── */
+.mini-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.mini { background: var(--bg-light); border: 1px solid var(--border); border-radius: 4px; padding: 8px 12px; text-align: center; flex: 1; }
+.mval { font-size: 17px; font-weight: 800; color: var(--navy); line-height: 1; margin-bottom: 2px; }
+.mlbl { font-size: 8px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; }
+.mval.red   { color: #dc2626; }
+.mval.amber { color: #d97706; }
+.mval.blue  { color: var(--blue); }
+
+/* ── OPPORTUNITY ROWS ───────────────────────────────────── */
+.opp-card {
+  display: flex; gap: 12px; margin-bottom: 10px;
+  padding: 12px 14px; background: var(--bg-light);
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.opp-id {
+  background: var(--blue); color: #fff; font-size: 9px; font-weight: 800;
+  padding: 5px 9px; border-radius: 3px; white-space: nowrap; flex-shrink: 0;
+  height: fit-content;
+}
+.opp-body { flex: 1; }
+.opp-title { font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.opp-meta  { font-size: 8.5px; color: var(--text-sec); margin-bottom: 6px; }
+.opp-desc  { font-size: 9.5px; line-height: 1.6; color: var(--text); }
+.opp-tags  { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.score-tag {
+  font-size: 8px; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; border: 1px solid var(--border);
+  background: #fff; color: var(--text-sec); white-space: nowrap;
+}
+.score-tag.hi { background: rgba(37,99,235,0.1); color: var(--blue); border-color: rgba(37,99,235,0.3); }
+.score-tag.md { background: rgba(217,119,6,0.1); color: #d97706; border-color: rgba(217,119,6,0.3); }
+
+/* ── TOC ────────────────────────────────────────────────── */
+.toc-item { display: flex; align-items: baseline; margin-bottom: 5px; }
+.ti-num   { font-size: 10px; font-weight: 700; color: var(--navy); width: 36px; flex-shrink: 0; }
+.ti-title { font-size: 10px; color: var(--text); flex: 1; }
+.ti-dots  { flex: 1; border-bottom: 1px dotted var(--border); margin: 0 6px 3px; }
+.ti-page  { font-size: 10px; color: var(--text-sec); width: 18px; text-align: right; flex-shrink: 0; }
+.ti-sub   { padding-left: 22px; }
+.ti-sub .ti-title { font-size: 9.5px; color: var(--text-sec); }
+
+/* ── FIGURE CAPTION ─────────────────────────────────────── */
+.fig-cap { font-size: 9px; color: var(--text-sec); text-align: center; margin-top: 6px; margin-bottom: 14px; font-style: italic; }
+
+/* ── HELPERS ─────────────────────────────────────────────── */
+.spacer { flex: 1; }
+.mt6 { margin-top: 6px; }
+.mt12 { margin-top: 12px; }
+.mt18 { margin-top: 18px; }
+.mt24 { margin-top: 24px; }
+.mb6  { margin-bottom: 6px; }
+.mb12 { margin-bottom: 12px; }
+.mb18 { margin-bottom: 18px; }
+.rule { height: 1px; background: var(--border); margin: 14px 0; }
+.svg-wrap { display: flex; justify-content: center; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 1 — COVER
+══════════════════════════════════════════════════════════ -->
+<div class="page-cover">
+  <div class="cv-top"></div>
+  <div class="cv-brand">
+    <span class="cv-brand-name">AuroPro</span>
+    <span class="cv-brand-div"></span>
+    <span class="cv-brand-sub">Autonomous Discovery Platform</span>
+  </div>
+  <div class="cv-accent"></div>
+
+  <div class="cv-body">
+    <div class="cv-tag">Report 02 of 06</div>
+    <div class="cv-title">Pain Points &amp; Opportunity<br>Report</div>
+    <div class="cv-domain">Order-to-Cash · Opella Europe · June 2026</div>
+
+    <div class="cv-rule"></div>
+
+    <div class="cv-meta">
+      <div class="cml">Report Reference</div>
+      <div class="cmv">RPT-OE-O2C-02</div>
+
+      <div class="cml">Domain</div>
+      <div class="cmv">Order-to-Cash — Opella Europe</div>
+
+      <div class="cml">Version</div>
+      <div class="cmv">1.0</div>
+
+      <div class="cml">Discovery Date</div>
+      <div class="cmv">June 2026</div>
+
+      <div class="cml">Prepared By</div>
+      <div class="cmv">AuroPro</div>
+
+      <div class="cml">Engagement Lead</div>
+      <div class="cmv">Sophie Marchetti, VP Commercial Operations, Europe</div>
+
+      <div class="cml">Document Status</div>
+      <div class="cmv">Draft for Review</div>
+
+      <div class="cml">Classification</div>
+      <div class="cmv">CONFIDENTIAL — Opella Internal Use Only</div>
+    </div>
+  </div>
+
+  <div class="cv-bottom">
+    <span class="cv-bot-txt">Opella Europe · Order-to-Cash Discovery</span>
+    <span class="cv-bot-badge">Confidential</span>
+    <span class="cv-bot-badge">Draft</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 2 — DOCUMENT CONTROL
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">AuroPro Autonomous Discovery Platform — RPT-OE-O2C-02</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="h1">Document Control</div>
+
+    <div class="h2">Document Information</div>
+    <table class="tbl">
+      <tbody>
+        <tr><td style="width:160px;font-weight:700;color:var(--text-sec);font-size:9px;text-transform:uppercase;letter-spacing:.5px">Report Title</td><td>Pain Points &amp; Opportunity Report — Opella Europe O2C</td></tr>
+        <tr><td style="font-weight:700;color:var(--text-sec);font-size:9px;text-transform:uppercase;letter-spacing:.5px">Report Reference</td><td>RPT-OE-O2C-02</td></tr>
+        <tr><td style="font-weight:700;color:var(--text-sec);font-size:9px;text-transform:uppercase;letter-spacing:.5px">Domain</td><td>Order-to-Cash — Opella Europe</td></tr>
+        <tr><td style="font-weight:700;color:var(--text-sec);font-size:9px;text-transform:uppercase;letter-spacing:.5px">Prepared By</td><td>AuroPro</td></tr>
+        <tr><td style="font-weight:700;color:var(--text-sec);font-size:9px;text-transform:uppercase;letter-spacing:.5px">Engagement Lead</td><td>Sophie Marchetti, VP Commercial Operations, Europe</td></tr>
+        <tr><td style="font-weight:700;color:var(--text-sec);font-size:9px;text-transform:uppercase;letter-spacing:.5px">Version</td><td>1.0 — Draft for Review</td></tr>
+        <tr><td style="font-weight:700;color:var(--text-sec);font-size:9px;text-transform:uppercase;letter-spacing:.5px">Discovery Date</td><td>June 2026</td></tr>
+        <tr><td style="font-weight:700;color:var(--text-sec);font-size:9px;text-transform:uppercase;letter-spacing:.5px">Classification</td><td>CONFIDENTIAL — Opella Internal Use Only</td></tr>
+      </tbody>
+    </table>
+
+    <div class="h2">Input Document Corpus (12 Documents)</div>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Document Reference</th><th>Title</th><th>Type</th><th>Key Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>01</td><td>OPS-EU-CS-SOP-001</td><td>Order Management SOP — Opella Europe v2.1</td><td><span class="badge b-pdf">PDF</span></td><td>PP-02: EDI explicitly excluded from scope</td></tr>
+        <tr><td>02</td><td>OPS-EU-FIN-POL-002</td><td>Credit Management Policy — Opella Europe v1.3</td><td><span class="badge b-pdf">PDF</span></td><td>PP-01: SAP S/4HANA sole authoritative system</td></tr>
+        <tr><td>03</td><td>OPS-EU-CS-RACI-001</td><td>O2C Process RACI Matrix — Opella Europe v1.0</td><td><span class="badge b-pdf">PDF</span></td><td>PP-02: Zero EDI accountability rows</td></tr>
+        <tr><td>04</td><td>OPS-EU-IT-REG-001</td><td>EDI Integration Register — Opella Europe v1.1</td><td><span class="badge b-pdf">PDF</span></td><td>PP-03: 6 connections Sanofi-managed, TSA Annex C</td></tr>
+        <tr><td>05</td><td>OPS-EU-CS-GUIDE-001</td><td>Retail Customer Onboarding Guide v1.2</td><td><span class="badge b-pdf">PDF</span></td><td>PP-05: "our systems" — no named system authority</td></tr>
+        <tr><td>06</td><td>SCH-OPS-CS-SOP-001</td><td>Sanofi Consumer Healthcare O2C SOP 2023 v4.0</td><td><span class="badge b-pdf">PDF</span></td><td>PP-02: EDI fully documented in predecessor document</td></tr>
+        <tr><td>07</td><td>OPS-EU-IT-WN-001</td><td>EDI Dispute Resolution — CS Working Notes (A. Kovacs)</td><td><span class="badge b-txt">TXT</span></td><td>PP-02, PP-03: Informal EDI procedure; Sanofi SLA gaps</td></tr>
+        <tr><td>08</td><td>AR-REVIEW-Q4-2025</td><td>Accounts Receivable Review Notes Q4 2025 (R. Patel)</td><td><span class="badge b-txt">TXT</span></td><td>PP-01: Credit discrepancy escalation; no system-of-record</td></tr>
+        <tr><td>09</td><td>—</td><td>Customer Service Escalation Log 2025</td><td><span class="badge b-csv">CSV</span></td><td>PP-03, PP-04: 34 EDI incidents; 19 stockout complaints</td></tr>
+        <tr><td>10</td><td>—</td><td>SAP S/4HANA Customer Master Export</td><td><span class="badge b-csv">CSV</span></td><td>PP-01, PP-05: 340 accounts; ERP credit limits authoritative</td></tr>
+        <tr><td>11</td><td>—</td><td>SAP CRM Customer Export</td><td><span class="badge b-csv">CSV</span></td><td>PP-01, PP-05: 318 accounts; inflated limits, NET30 terms</td></tr>
+        <tr><td>12</td><td>—</td><td>Order Flow Analysis Export 2025</td><td><span class="badge b-csv">CSV</span></td><td>PP-04: EDI fulfilment degradation to 59% in cluster periods</td></tr>
+      </tbody>
+    </table>
+
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 2 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 3 — TABLE OF CONTENTS
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">AuroPro Autonomous Discovery Platform — RPT-OE-O2C-02</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="h1">Contents</div>
+
+    <div class="toc-item"><span class="ti-num">§1</span><span class="ti-title">Executive Summary</span><span class="ti-dots"></span><span class="ti-page">4</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">1.1</span><span class="ti-title">Discovery Context</span><span class="ti-dots"></span><span class="ti-page">4</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">1.2</span><span class="ti-title">Pain Point Summary</span><span class="ti-dots"></span><span class="ti-page">4</span></div>
+
+    <div class="mt12"></div>
+    <div class="toc-item"><span class="ti-num">§2</span><span class="ti-title">Pain Point Catalogue</span><span class="ti-dots"></span><span class="ti-page">5</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">PP-01</span><span class="ti-title">Credit Data Integrity Risk</span><span class="ti-dots"></span><span class="ti-page">5</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">PP-02</span><span class="ti-title">EDI Process Governance Vacuum</span><span class="ti-dots"></span><span class="ti-page">6</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">PP-03</span><span class="ti-title">TSA-Managed Connection Dependency</span><span class="ti-dots"></span><span class="ti-page">7</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">PP-04</span><span class="ti-title">EDI Channel Instability</span><span class="ti-dots"></span><span class="ti-page">8</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">PP-05</span><span class="ti-title">Onboarding Data Integrity Risk</span><span class="ti-dots"></span><span class="ti-page">8</span></div>
+
+    <div class="mt12"></div>
+    <div class="toc-item"><span class="ti-num">§3</span><span class="ti-title">Root Cause Analysis</span><span class="ti-dots"></span><span class="ti-page">9</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">3.1</span><span class="ti-title">Structural Origin</span><span class="ti-dots"></span><span class="ti-page">9</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">3.2</span><span class="ti-title">Figure 1 — Root Cause Map</span><span class="ti-dots"></span><span class="ti-page">9</span></div>
+
+    <div class="mt12"></div>
+    <div class="toc-item"><span class="ti-num">§4</span><span class="ti-title">Opportunity Inventory</span><span class="ti-dots"></span><span class="ti-page">10</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">OPP-01</span><span class="ti-title">Automated Credit Limit Reconciliation</span><span class="ti-dots"></span><span class="ti-page">10</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">OPP-02</span><span class="ti-title">EDI SOP &amp; RACI Authoring</span><span class="ti-dots"></span><span class="ti-page">10</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">OPP-03</span><span class="ti-title">TSA Connection Migration Programme</span><span class="ti-dots"></span><span class="ti-page">10</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">OPP-04</span><span class="ti-title">EDI Monitoring &amp; Anomaly Detection</span><span class="ti-dots"></span><span class="ti-page">10</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">OPP-05</span><span class="ti-title">Customer Master Deduplication</span><span class="ti-dots"></span><span class="ti-page">10</span></div>
+
+    <div class="mt12"></div>
+    <div class="toc-item"><span class="ti-num">§5</span><span class="ti-title">Priority Assessment</span><span class="ti-dots"></span><span class="ti-page">11</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">5.1</span><span class="ti-title">Scoring Framework</span><span class="ti-dots"></span><span class="ti-page">11</span></div>
+    <div class="toc-item ti-sub"><span class="ti-num">5.2</span><span class="ti-title">Figure 2 — Priority Matrix</span><span class="ti-dots"></span><span class="ti-page">11</span></div>
+
+    <div class="mt12"></div>
+    <div class="toc-item"><span class="ti-num">App A</span><span class="ti-title">Evidence Register</span><span class="ti-dots"></span><span class="ti-page">12</span></div>
+
+    <div class="spacer"></div>
+
+    <div class="note-box">
+      <div class="nb-title">Severity Framework</div>
+      <div class="nb-text">
+        <strong>High:</strong> Direct financial exposure, customer-facing operational impact, or compliance risk. Requires SME resolution before or alongside Block 3 analysis.<br>
+        <strong>Medium:</strong> Operational inefficiency or governance gap without immediate P&amp;L impact. Carried forward as amber-confidence KG nodes for Block 3 consideration.
+      </div>
+    </div>
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 3 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 4 — §1 EXECUTIVE SUMMARY
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">§1 Executive Summary</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="h1">§1 &nbsp; Executive Summary</div>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="sv">5</div><div class="sl">Pain Points</div></div>
+      <div class="stat-box"><div class="sv red">3</div><div class="sl">High Severity</div></div>
+      <div class="stat-box"><div class="sv blue">5</div><div class="sl">Opportunities</div></div>
+      <div class="stat-box"><div class="sv amber">34</div><div class="sl">EDI Incidents 2025</div></div>
+    </div>
+
+    <div class="h2">1.1 &nbsp; Discovery Context</div>
+    <p class="body">
+      AuroPro's autonomous discovery analysis of 12 input documents — spanning process SOPs, credit policy, RACI documentation, EDI integration registers, AR review notes, and four structured data exports totalling 8,420 order records and 340 customer master entries — has identified five structured pain points within Opella Europe's Order-to-Cash domain.
+    </p>
+    <p class="body">
+      All five findings share a common structural origin: the April 2025 legal and operational separation from Sanofi was executed on a timeline that prioritised legal independence over data governance and process completeness. Three patterns recur across the findings: data inheritance without a defined system-of-record protocol; process documentation adapted from Sanofi predecessors with material sections removed; and operational dependencies on Sanofi infrastructure that remain unresolved fourteen months after carve-out. These patterns constitute what this report terms <em>carve-out inheritance debt</em> — latent risks embedded in the operating model that will compound unless addressed as part of a coordinated programme.
+    </p>
+
+    <div class="h2">1.2 &nbsp; Pain Point Summary</div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:50px">ID</th>
+          <th>Pain Point</th>
+          <th style="width:80px">Severity</th>
+          <th style="width:120px">Category</th>
+          <th style="width:60px">Opportunity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>PP-01</strong></td>
+          <td>Credit Data Integrity Risk — irreconcilable ERP/CRM credit limit discrepancies across four major accounts, with no defined system-of-record</td>
+          <td><span class="badge b-high">High</span></td>
+          <td><span class="badge b-dg">Data Governance</span></td>
+          <td>OPP-01</td>
+        </tr>
+        <tr>
+          <td><strong>PP-02</strong></td>
+          <td>EDI Process Governance Vacuum — 67.3% of order volume operates outside the authoritative SOP and RACI; process managed via informal working notes</td>
+          <td><span class="badge b-high">High</span></td>
+          <td><span class="badge b-pc">Process Coverage</span></td>
+          <td>OPP-02</td>
+        </tr>
+        <tr>
+          <td><strong>PP-03</strong></td>
+          <td>TSA-Managed Connection Dependency — 6 of 14 EDI connections remain under Sanofi Shared Services management, with 24–48 hour incident resolution SLAs on key accounts</td>
+          <td><span class="badge b-high">High</span></td>
+          <td><span class="badge b-tp">Third-Party Risk</span></td>
+          <td>OPP-03</td>
+        </tr>
+        <tr>
+          <td><strong>PP-04</strong></td>
+          <td>EDI Channel Instability — EDI fulfilment rate degrades from ~91% to ~59% during April-May and October-November, correlating with 19 stockout complaints</td>
+          <td><span class="badge b-med">Medium</span></td>
+          <td><span class="badge b-or">Operational Resilience</span></td>
+          <td>OPP-04</td>
+        </tr>
+        <tr>
+          <td><strong>PP-05</strong></td>
+          <td>Onboarding Data Integrity Risk — 22-account gap between ERP (340) and CRM (318) master records; 6 Sanofi-migrated accounts carry duplicate records with no reconciliation</td>
+          <td><span class="badge b-med">Medium</span></td>
+          <td><span class="badge b-dg">Data Governance</span></td>
+          <td>OPP-05</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="high-box">
+      <div class="hb-title">Block 3 Routing — Discovery Copilot</div>
+      <div class="hb-text">PP-01 and PP-02 are classified as high-severity blocking gaps: they introduce material uncertainty into the knowledge graph confidence tier assignments and must be resolved (or formally risk-accepted) before the transformation recommendation can be finalised. PP-03 through PP-05 carry forward as amber-confidence nodes, flagged for SME review in the transformation scoping phase.</div>
+    </div>
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 4 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 5 — PP-01 CREDIT DATA INTEGRITY RISK
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">§2 Pain Point Catalogue — PP-01</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="h1">§2 &nbsp; Pain Point Catalogue</div>
+
+    <div class="pp-hdr">
+      <div class="pp-id">PP<br>01</div>
+      <div class="pp-body">
+        <div class="pp-name">Credit Data Integrity Risk</div>
+        <div class="pp-badges">
+          <span class="badge b-high">High Severity</span>
+          <span class="badge b-block">Blocking — Discovery Copilot</span>
+          <span class="badge b-dg">Data Governance</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="body">
+      Four of Opella Europe's highest-revenue trading accounts carry irreconcilable credit limit discrepancies between SAP S/4HANA — the sole authoritative system of record per Credit Management Policy OPS-EU-FIN-POL-002, §4.1 — and SAP CRM, where limits and payment terms were manually updated by account managers following the April 2025 carve-out without documented approval. The Credit Controller (Raj Patel) escalated this formally in his Q4 2025 Accounts Receivable Review, noting that for Carrefour France, the account is "currently operating against the CRM limit" and that "our credit policy does not define which system is authoritative."
+    </p>
+
+    <div class="mini-row">
+      <div class="mini"><div class="mval red">4</div><div class="mlbl">Accounts Affected</div></div>
+      <div class="mini"><div class="mval red">€1.45M</div><div class="mlbl">Total CRM Overstatement</div></div>
+      <div class="mini"><div class="mval amber">+€600K</div><div class="mlbl">Largest Single Gap (Carrefour FR)</div></div>
+      <div class="mini"><div class="mval blue">2</div><div class="mlbl">Payment Terms Conflicts</div></div>
+    </div>
+
+    <div class="h3">Credit Limit Discrepancy Register — Top Accounts</div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Country</th>
+          <th>ERP Limit (S/4HANA)</th>
+          <th>CRM Limit</th>
+          <th>Variance</th>
+          <th>ERP Terms</th>
+          <th>CRM Terms</th>
+          <th>Migrated from Sanofi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Carrefour France</strong></td><td>FR</td>
+          <td>€1,800,000</td><td>€2,400,000</td>
+          <td style="color:#dc2626;font-weight:700">+€600,000 (+33%)</td>
+          <td>NET 45</td><td>NET 30</td><td>Yes</td>
+        </tr>
+        <tr>
+          <td><strong>Boots UK</strong></td><td>UK</td>
+          <td>€1,200,000</td><td>€1,550,000</td>
+          <td style="color:#dc2626;font-weight:700">+€350,000 (+29%)</td>
+          <td>NET 45</td><td>NET 30</td><td>Yes</td>
+        </tr>
+        <tr>
+          <td><strong>E.Leclerc</strong></td><td>FR</td>
+          <td>€1,100,000</td><td>€1,400,000</td>
+          <td style="color:#dc2626;font-weight:700">+€300,000 (+27%)</td>
+          <td>NET 45</td><td>NET 30</td><td>Yes</td>
+        </tr>
+        <tr>
+          <td><strong>dm (Drogerie Markt)</strong></td><td>DE</td>
+          <td>€950,000</td><td>€1,150,000</td>
+          <td style="color:#dc2626;font-weight:700">+€200,000 (+21%)</td>
+          <td>NET 45</td><td>NET 30</td><td>Yes</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ev-quote">
+      <div class="eq-text">"The CRM figure appears to have been manually updated at some point after the carve-out — the audit trail shows 'manually updated by account manager post-carve-out' but no approval record. Our credit policy does not define which system is authoritative. As a result, Carrefour FR is currently operating against the CRM limit."</div>
+      <div class="eq-attr">— Raj Patel, Credit Controller UK &amp; Europe · Accounts Receivable Review Notes Q4 2025 (2026-01-08)</div>
+    </div>
+
+    <div class="h3">Business Impact</div>
+    <p class="body">
+      The aggregate CRM overstatement of €1,450,000 represents credit extended beyond Opella's policy-approved limits for four of its largest retail partners. For Boots UK and Carrefour France, the concurrent payment terms conflict (CRM: NET30 vs. ERP: NET45) creates an additional risk: commercial teams may be invoicing on terms that do not match the contractual standard, potentially generating invoice disputes and accelerating cash flow obligations that the credit policy does not sanction. The Credit Management Policy (§4.2) requires written Credit Controller approval before any limit change takes effect — this approval is absent for all four accounts.
+    </p>
+
+    <div class="high-box">
+      <div class="hb-title">Policy Breach — OPS-EU-FIN-POL-002</div>
+      <div class="hb-text">Section 4.2 of the Credit Management Policy explicitly states that "only the Credit Controller has authority to create or modify customer credit limits in SAP S/4HANA." CRM updates made by account managers post-carve-out, without Credit Controller documented approval, constitute a material policy breach that must be remediated before Q1 2026 close.</div>
+    </div>
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 5 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 6 — PP-02 EDI GOVERNANCE VACUUM
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">§2 Pain Point Catalogue — PP-02</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="pp-hdr">
+      <div class="pp-id">PP<br>02</div>
+      <div class="pp-body">
+        <div class="pp-name">EDI Process Governance Vacuum</div>
+        <div class="pp-badges">
+          <span class="badge b-high">High Severity</span>
+          <span class="badge b-block">Blocking — Discovery Copilot</span>
+          <span class="badge b-pc">Process Coverage</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="body">
+      Electronic Data Interchange — the channel processing 67.3% of Opella Europe's order volume (5,667 of 8,420 orders in 2025) — is explicitly excluded from the authoritative Order Management SOP (OPS-EU-CS-SOP-001 v2.1) and carries zero accountability rows in the O2C RACI Matrix (OPS-EU-CS-RACI-001 v1.0). The entire governance of Opella's dominant order channel relies on informal working notes authored and maintained by a single individual, the Customer Service Team Lead (Alina Kovacs), which she explicitly describes as "not an official SOP." A formal EDI SOP was committed for Q3 2025 in both documents; as of November 2025 it had not been published.
+    </p>
+
+    <div class="mini-row">
+      <div class="mini"><div class="mval red">67.3%</div><div class="mlbl">Volume via EDI</div></div>
+      <div class="mini"><div class="mval red">0</div><div class="mlbl">EDI Steps in SOP</div></div>
+      <div class="mini"><div class="mval red">0</div><div class="mlbl">EDI Rows in RACI</div></div>
+      <div class="mini"><div class="mval amber">Q3 2025</div><div class="mlbl">SOP Target (Missed)</div></div>
+    </div>
+
+    <div class="h3">Document-Level Evidence</div>
+    <table class="tbl">
+      <thead><tr><th>Document</th><th>Reference</th><th>EDI Treatment</th><th>Verbatim Finding</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Order Management SOP v2.1</strong></td>
+          <td>OPS-EU-CS-SOP-001<br>§1.3 Exclusions</td>
+          <td><span class="badge b-high">Excluded</span></td>
+          <td style="font-style:italic;font-size:9px">"EDI represents a material share of total order volume but formal process documentation is under development."</td>
+        </tr>
+        <tr>
+          <td><strong>O2C RACI Matrix v1.0</strong></td>
+          <td>OPS-EU-CS-RACI-001<br>RACI Scope Note</td>
+          <td><span class="badge b-high">Zero Rows</span></td>
+          <td style="font-style:italic;font-size:9px">"This RACI covers Manual (telephone) and Email order channels only. EDI channel process steps are not included in this version of the RACI."</td>
+        </tr>
+        <tr>
+          <td><strong>RACI Version History</strong></td>
+          <td>OPS-EU-CS-RACI-001<br>v1.0 Notes</td>
+          <td><span class="badge b-amb">Deferred</span></td>
+          <td style="font-style:italic;font-size:9px">"EDI-related rows excluded pending formal EDI process documentation (target: Q3 2025 per OPS-EU-CS-SOP-001 Section 1.3)."</td>
+        </tr>
+        <tr>
+          <td><strong>EDI Working Notes</strong></td>
+          <td>OPS-EU-IT-WN-001</td>
+          <td><span class="badge b-amb">Informal</span></td>
+          <td style="font-style:italic;font-size:9px">"This is not an official SOP… Until someone writes the official version, this document is the closest thing we have to a procedure." — A. Kovacs, Nov 2025</td>
+        </tr>
+        <tr>
+          <td><strong>Sanofi O2C SOP v4.0</strong></td>
+          <td>SCH-OPS-CS-SOP-001<br>§11 (EDI)</td>
+          <td><span class="badge b-proc">Fully Documented</span></td>
+          <td style="font-size:9px">EDI has a full dedicated section in the Sanofi predecessor document — removed when the SOP was adapted for Opella in April 2025.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ev-quote">
+      <div class="eq-text">"I have raised all of these gaps with Sophie Marchetti. They are known. They are not yet fixed."</div>
+      <div class="eq-attr">— Alina Kovacs, Customer Service Lead Europe · EDI Dispute Resolution Working Notes (OPS-EU-IT-WN-001, November 2025)</div>
+    </div>
+
+    <div class="h3">Operational Consequence</div>
+    <p class="body">
+      With no documented accountability, any EDI incident — connection failure, mapping error, duplicate order, or credit-hold interaction — is handled ad hoc. The escalation log records 34 EDI-related customer service cases in 2025, each requiring manual intervention. Resolution times range from 4 hours (Opella Digital-managed connections) to 48 hours (Sanofi TSA-managed connections, compounded by the absence of a clear escalation protocol). The Sanofi predecessor SOP (SCH-OPS-CS-SOP-001 v4.0) covered EDI with a full dedicated section; Opella's adaptation removed it entirely, creating an immediate governance gap at the date of carve-out.
+    </p>
+
+    <div class="high-box">
+      <div class="hb-title">Risk Amplifier</div>
+      <div class="hb-text">Because the EDI SOP and RACI were explicitly deferred to Q3 2025 and remain unpublished as of November 2025, any audit of the O2C process would identify that Opella's primary order channel — representing 5,667 orders and the majority of annual revenue — operates without formal accountability documentation. This creates audit, compliance, and business continuity risk simultaneously.</div>
+    </div>
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 6 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 7 — PP-03 TSA CONNECTION DEPENDENCY
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">§2 Pain Point Catalogue — PP-03</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="pp-hdr">
+      <div class="pp-id">PP<br>03</div>
+      <div class="pp-body">
+        <div class="pp-name">TSA-Managed Connection Dependency</div>
+        <div class="pp-badges">
+          <span class="badge b-high">High Severity</span>
+          <span class="badge b-amb">Amber — SME Review</span>
+          <span class="badge b-tp">Third-Party Risk</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="body">
+      Six of Opella Europe's 14 active EDI connections — serving Carrefour France, Boots UK (legacy), dm (Drogerie Markt), E.Leclerc, Lidl Europe, and Coop Group — remain managed by Sanofi Shared Services under TSA Schedule Annex C, fourteen months after the April 2025 carve-out. These six connections serve accounts that collectively represent the highest revenue concentration in the O2C domain. Opella's own EDI platform (IBM Sterling B2B Integrator, Frankfurt) carries a P1 response SLA of 30 minutes and resolution within 4 business hours. TSA-managed connections carry a 24–48 hour resolution window — a 6× to 12× SLA degradation on the accounts most critical to commercial continuity.
+    </p>
+
+    <div class="mini-row">
+      <div class="mini"><div class="mval red">6</div><div class="mlbl">TSA-Managed Connections</div></div>
+      <div class="mini"><div class="mval red">24–48h</div><div class="mlbl">TSA Incident SLA</div></div>
+      <div class="mini"><div class="mval blue">30 min</div><div class="mlbl">Opella Digital P1 SLA</div></div>
+      <div class="mini"><div class="mval amber">Q3 2026</div><div class="mlbl">Final Migration Target</div></div>
+    </div>
+
+    <div class="h3">TSA-Managed Connection Status Register</div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>#</th><th>Customer</th><th>Country</th><th>Message Types</th>
+          <th>Migration Target</th><th>Migration Lead</th><th>Current Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>9</td><td><strong>Carrefour France</strong></td><td>FR</td><td>ORDERS / ORDRSP / INVOIC</td><td style="color:#d97706;font-weight:700">Q4 2025</td><td>J. Okafor</td><td>Technical scoping in progress</td></tr>
+        <tr><td>10</td><td><strong>Boots UK (legacy)</strong></td><td>UK</td><td>ORDERS / ORDRSP / INVOIC</td><td>Q1 2026</td><td>J. Okafor</td><td>Decommission pending; new connection live</td></tr>
+        <tr><td>11</td><td><strong>dm (Drogerie Markt)</strong></td><td>DE</td><td>ORDERS / ORDRSP</td><td>Q1 2026</td><td>J. Okafor</td><td>Awaiting Sanofi handover documentation</td></tr>
+        <tr><td>12</td><td><strong>E.Leclerc</strong></td><td>FR</td><td>ORDERS / ORDRSP / DESADV</td><td>Q2 2026</td><td>TBD</td><td>Not yet scoped — volume complexity</td></tr>
+        <tr><td>13</td><td><strong>Lidl Europe</strong></td><td>EU</td><td>ORDERS / ORDRSP</td><td>Q2 2026</td><td>TBD</td><td>Not yet scoped — multi-country routing</td></tr>
+        <tr><td>14</td><td><strong>Coop Group (legacy)</strong></td><td>EU</td><td>ORDERS / INVOIC</td><td>Q3 2026</td><td>TBD</td><td>Planned decommission; new connection live</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note-box">
+      <div class="nb-title">TSA Schedule Annex C — Missing Document</div>
+      <div class="nb-text">TSA Schedule Annex C — which defines the service terms, SLAs, incident response obligations, and migration timeline for connections 9–14 — is referenced repeatedly across the EDI Integration Register (OPS-EU-IT-REG-001) but is not included in the 12-document discovery input pack. This means the precise contractual SLAs governing these six connections cannot be independently verified. The 24–48 hour figures cited in the CS Working Notes are operational estimates, not contractual commitments. The absence of Annex C is itself a governance signal: Opella's CS and Commercial Operations teams are not operating with full visibility of the TSA obligations governing their primary customers' EDI connectivity.</div>
+    </div>
+
+    <div class="ev-quote">
+      <div class="eq-text">"He will not be happy about it — he has told me that every escalation weakens our negotiating position on the TSA handover timeline — but customer impact takes priority."</div>
+      <div class="eq-attr">— Alina Kovacs, on escalating to James Okafor for TSA-managed connection incidents · EDI Working Notes (OPS-EU-IT-WN-001)</div>
+    </div>
+
+    <p class="body">
+      The Carrefour France connection (connection #9) had a Q4 2025 migration target that has not been met — it is in "technical scoping" as of the register's September 2025 update. Connections 12 (E.Leclerc), 13 (Lidl), and 14 (Coop Group legacy) are not yet scoped with migration targets extending to Q2–Q3 2026, more than 18 months post-carve-out.
+    </p>
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 7 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 8 — PP-04 + PP-05
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">§2 Pain Point Catalogue — PP-04 / PP-05</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="pp-hdr">
+      <div class="pp-id">PP<br>04</div>
+      <div class="pp-body">
+        <div class="pp-name">EDI Channel Instability</div>
+        <div class="pp-badges">
+          <span class="badge b-med">Medium Severity</span>
+          <span class="badge b-amb">Amber — Carry Forward</span>
+          <span class="badge b-or">Operational Resilience</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="body">
+      Order flow analysis across 8,420 orders reveals systematic EDI fulfilment rate degradation during two recurring calendar windows — April–May and October–November 2025 — from a baseline of approximately 91% to approximately 59%. During these same periods, the customer service escalation log records 19 stockout-related customer complaints from Carrefour France, E.Leclerc, Boots UK, and Tesco UK, with notes including "Customer threatened to delist Doliprane if EDI reliability does not improve." The co-occurrence of EDI channel degradation and stockout complaints across both periods is consistent with a cross-domain supply-demand alignment failure amplified by EDI instability, rather than a pure channel issue.
+    </p>
+
+    <div class="mini-row">
+      <div class="mini"><div class="mval blue">~91%</div><div class="mlbl">Baseline EDI Fulfilment</div></div>
+      <div class="mini"><div class="mval red">~59%</div><div class="mlbl">Cluster-Period Fulfilment</div></div>
+      <div class="mini"><div class="mval amber">19</div><div class="mlbl">Stockout Complaints</div></div>
+      <div class="mini"><div class="mval red">34</div><div class="mlbl">Total EDI Incidents 2025</div></div>
+    </div>
+
+    <div class="med-box">
+      <div class="mb-title">Cross-Domain Signal</div>
+      <div class="mb-text">The April–May and October–November degradation windows align with typical FMCG seasonal demand peaks (spring promotions, pre-Christmas replenishment). The pattern suggests that demand surges are either not being communicated to the supply chain or are being absorbed by EDI channel overload. This warrants cross-domain investigation into supply planning and demand sensing maturity — outside the direct O2C scope but flagged as a structural vulnerability. The 19 stockout cases represent a direct commercial relationship risk; one complaint escalation note references the threat of a customer delist.</div>
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="pp-hdr" style="margin-top:8px">
+      <div class="pp-id">PP<br>05</div>
+      <div class="pp-body">
+        <div class="pp-name">Onboarding Data Integrity Risk</div>
+        <div class="pp-badges">
+          <span class="badge b-med">Medium Severity</span>
+          <span class="badge b-amb">Amber — Carry Forward</span>
+          <span class="badge b-dg">Data Governance</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="body">
+      SAP S/4HANA contains 340 active customer records; SAP CRM contains 318 — a difference of 22 accounts that exist in the ERP but not in CRM. Six accounts migrated from the Sanofi legacy customer master in May 2024 exist as active records in both systems, each carrying different credit limits and payment terms (as documented under PP-01). The Retail Customer Onboarding Guide (OPS-EU-CS-GUIDE-001, §5.2, Step 2) instructs the CS Team Lead to "Create the customer record in all systems… Ensure consistency of data across all systems" — without naming which systems constitute the authoritative set or defining a hierarchy when records diverge.
+    </p>
+
+    <div class="mini-row">
+      <div class="mini"><div class="mval blue">340</div><div class="mlbl">Accounts in ERP (S/4HANA)</div></div>
+      <div class="mini"><div class="mval amber">318</div><div class="mlbl">Accounts in CRM</div></div>
+      <div class="mini"><div class="mval red">22</div><div class="mlbl">ERP-Only Accounts</div></div>
+      <div class="mini"><div class="mval red">6</div><div class="mlbl">Duplicate Migrated Records</div></div>
+    </div>
+
+    <div class="ev-quote">
+      <div class="eq-text">"The underlying root cause is that we inherited two active customer data systems from Sanofi and have not yet decided how to consolidate them. Until that decision is made, credit exposure for our top accounts cannot be accurately assessed from any single source."</div>
+      <div class="eq-attr">— Raj Patel, Credit Controller UK &amp; Europe · AR Review Notes Q4 2025 (2026-01-08)</div>
+    </div>
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 8 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 9 — §3 ROOT CAUSE ANALYSIS + FIGURE 1
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">§3 Root Cause Analysis</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="h1">§3 &nbsp; Root Cause Analysis</div>
+
+    <div class="h2">3.1 &nbsp; Structural Origin — Carve-Out Inheritance Debt</div>
+    <p class="body">
+      All five pain points share a common structural origin: the April 2025 legal separation from Sanofi was completed on a schedule that prioritised legal independence over operational governance completeness. Three recurring patterns emerge across the evidence:
+    </p>
+    <p class="body">
+      <strong>Pattern A — Data inheritance without governance:</strong> Credit limits, customer records, and payment terms were migrated from Sanofi systems into both SAP ERP and SAP CRM simultaneously, without a defined system-of-record decision. Both datasets were live at carve-out and neither was formally reconciled. Account managers subsequently updated CRM without triggering ERP alignment, creating the discrepancies documented in PP-01 and PP-05.
+    </p>
+    <p class="body">
+      <strong>Pattern B — Process documentation adapted with sections removed:</strong> The Opella Order Management SOP was derived directly from the Sanofi Consumer Healthcare SOP v4.0 (Jan 2023). The Sanofi predecessor contained a full EDI section (§11). This section was removed in the Opella adaptation, with a commitment to produce a standalone EDI SOP by Q3 2025. That commitment was not met (PP-02).
+    </p>
+    <p class="body">
+      <strong>Pattern C — Operational infrastructure dependency unresolved:</strong> Six EDI connections that could not be technically transferred at carve-out were placed under TSA governance as an interim arrangement. Fourteen months later, four of six have no migration lead assigned and no scoping underway, with target dates extending to Q3 2026 (PP-03, PP-04).
+    </p>
+
+    <div class="h2">3.2 &nbsp; Figure 1 — Root Cause Map</div>
+    <div class="svg-wrap">
+      <!-- Root Cause Map SVG -->
+      <svg width="660" height="388" viewBox="0 0 660 388" xmlns="http://www.w3.org/2000/svg" font-family="'Helvetica Neue',Arial,sans-serif">
+        <defs>
+          <!-- Marker: dark gray arrow end -->
+          <marker id="rc-ae" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <polygon points="0 0, 7 3.5, 0 7" fill="#6b7280"/>
+          </marker>
+          <!-- Marker: blue arrow end -->
+          <marker id="rc-ab" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <polygon points="0 0, 7 3.5, 0 7" fill="#1a2f50"/>
+          </marker>
+          <!-- Marker: amber arrow end -->
+          <marker id="rc-am" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <polygon points="0 0, 7 3.5, 0 7" fill="#d97706"/>
+          </marker>
+          <!-- Marker: red arrow end -->
+          <marker id="rc-ar" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <polygon points="0 0, 7 3.5, 0 7" fill="#dc2626"/>
+          </marker>
+        </defs>
+
+        <!-- ── Background ── -->
+        <rect x="0" y="0" width="660" height="388" rx="6" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+
+        <!-- ── CARVE-OUT SOURCE node (centre-left) ── -->
+        <rect x="18" y="150" width="148" height="70" rx="6" fill="#1a2f50"/>
+        <text x="92" y="172" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" text-transform="uppercase" letter-spacing="0.5">April 2025</text>
+        <text x="92" y="186" text-anchor="middle" fill="#93c5fd" font-size="9">Carve-out from Sanofi</text>
+        <text x="92" y="200" text-anchor="middle" fill="#93c5fd" font-size="9">Inheritance Event</text>
+        <text x="92" y="214" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8">Root structural origin</text>
+
+        <!-- ── PATTERN NODES (middle column) ── -->
+        <!-- Pattern A: Data Governance -->
+        <rect x="208" y="18" width="178" height="62" rx="5" fill="#f3f0ff" stroke="#c4b5fd" stroke-width="1.5"/>
+        <text x="297" y="38" text-anchor="middle" fill="#5b21b6" font-size="9" font-weight="800" text-transform="uppercase" letter-spacing="0.5">Pattern A</text>
+        <text x="297" y="52" text-anchor="middle" fill="#374151" font-size="9.5" font-weight="700">Data Inheritance</text>
+        <text x="297" y="65" text-anchor="middle" fill="#374151" font-size="9">Without Governance</text>
+
+        <!-- Pattern B: Process Documentation -->
+        <rect x="208" y="163" width="178" height="62" rx="5" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+        <text x="297" y="183" text-anchor="middle" fill="#065f46" font-size="9" font-weight="800" text-transform="uppercase" letter-spacing="0.5">Pattern B</text>
+        <text x="297" y="197" text-anchor="middle" fill="#374151" font-size="9.5" font-weight="700">Process Documentation</text>
+        <text x="297" y="210" text-anchor="middle" fill="#374151" font-size="9">Sections Removed</text>
+
+        <!-- Pattern C: TSA Dependency -->
+        <rect x="208" y="308" width="178" height="62" rx="5" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+        <text x="297" y="328" text-anchor="middle" fill="#9a3412" font-size="9" font-weight="800" text-transform="uppercase" letter-spacing="0.5">Pattern C</text>
+        <text x="297" y="342" text-anchor="middle" fill="#374151" font-size="9.5" font-weight="700">Operational Infrastructure</text>
+        <text x="297" y="355" text-anchor="middle" fill="#374151" font-size="9">Dependency Unresolved</text>
+
+        <!-- ── ARROWS from source to patterns ── -->
+        <line x1="166" y1="175" x2="206" y2="49" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#rc-ae)"/>
+        <line x1="166" y1="185" x2="206" y2="194" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#rc-ae)"/>
+        <line x1="166" y1="198" x2="206" y2="339" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#rc-ae)"/>
+
+        <!-- ── PAIN POINT NODES (right column) ── -->
+        <!-- PP-01 -->
+        <rect x="432" y="8" width="214" height="48" rx="4" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+        <rect x="432" y="8" width="36" height="48" rx="4" fill="#dc2626"/>
+        <rect x="452" y="8" width="16" height="48" fill="#dc2626"/>
+        <text x="450" y="30" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">PP</text>
+        <text x="450" y="44" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">01</text>
+        <text x="476" y="26" fill="#b91c1c" font-size="9" font-weight="800">Credit Data Integrity Risk</text>
+        <text x="476" y="39" fill="#6b7280" font-size="8">ERP vs CRM discrepancy · €1.45M exposure</text>
+        <rect x="598" y="12" width="42" height="14" rx="3" fill="#dc2626"/>
+        <text x="619" y="22" text-anchor="middle" fill="#fff" font-size="7.5" font-weight="700">HIGH</text>
+
+        <!-- PP-02 -->
+        <rect x="432" y="74" width="214" height="48" rx="4" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+        <rect x="432" y="74" width="36" height="48" rx="4" fill="#dc2626"/>
+        <rect x="452" y="74" width="16" height="48" fill="#dc2626"/>
+        <text x="450" y="96" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">PP</text>
+        <text x="450" y="110" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">02</text>
+        <text x="476" y="92" fill="#b91c1c" font-size="9" font-weight="800">EDI Governance Vacuum</text>
+        <text x="476" y="105" fill="#6b7280" font-size="8">67.3% volume · 0 SOP steps · 0 RACI rows</text>
+        <rect x="598" y="78" width="42" height="14" rx="3" fill="#dc2626"/>
+        <text x="619" y="88" text-anchor="middle" fill="#fff" font-size="7.5" font-weight="700">HIGH</text>
+
+        <!-- PP-05 -->
+        <rect x="432" y="140" width="214" height="48" rx="4" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+        <rect x="432" y="140" width="36" height="48" rx="4" fill="#d97706"/>
+        <rect x="452" y="140" width="16" height="48" fill="#d97706"/>
+        <text x="450" y="162" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">PP</text>
+        <text x="450" y="176" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">05</text>
+        <text x="476" y="158" fill="#92400e" font-size="9" font-weight="800">Onboarding Data Integrity Risk</text>
+        <text x="476" y="171" fill="#6b7280" font-size="8">340 vs 318 accounts · 22 ERP-only records</text>
+        <rect x="598" y="144" width="42" height="14" rx="3" fill="#d97706"/>
+        <text x="619" y="154" text-anchor="middle" fill="#fff" font-size="7.5" font-weight="700">MEDIUM</text>
+
+        <!-- PP-03 -->
+        <rect x="432" y="258" width="214" height="48" rx="4" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+        <rect x="432" y="258" width="36" height="48" rx="4" fill="#dc2626"/>
+        <rect x="452" y="258" width="16" height="48" fill="#dc2626"/>
+        <text x="450" y="280" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">PP</text>
+        <text x="450" y="294" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">03</text>
+        <text x="476" y="276" fill="#b91c1c" font-size="9" font-weight="800">TSA Connection Dependency</text>
+        <text x="476" y="289" fill="#6b7280" font-size="8">6 connections · 24–48h SLA · Q3 2026 migration</text>
+        <rect x="598" y="262" width="42" height="14" rx="3" fill="#dc2626"/>
+        <text x="619" y="272" text-anchor="middle" fill="#fff" font-size="7.5" font-weight="700">HIGH</text>
+
+        <!-- PP-04 -->
+        <rect x="432" y="324" width="214" height="48" rx="4" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+        <rect x="432" y="324" width="36" height="48" rx="4" fill="#d97706"/>
+        <rect x="452" y="324" width="16" height="48" fill="#d97706"/>
+        <text x="450" y="346" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">PP</text>
+        <text x="450" y="360" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">04</text>
+        <text x="476" y="342" fill="#92400e" font-size="9" font-weight="800">EDI Channel Instability</text>
+        <text x="476" y="355" fill="#6b7280" font-size="8">91% → 59% fulfilment · 19 stockout cases</text>
+        <rect x="598" y="328" width="42" height="14" rx="3" fill="#d97706"/>
+        <text x="619" y="338" text-anchor="middle" fill="#fff" font-size="7.5" font-weight="700">MEDIUM</text>
+
+        <!-- ── ARROWS from patterns to PPs ── -->
+        <!-- Pattern A → PP-01 -->
+        <line x1="386" y1="40" x2="430" y2="32" stroke="#5b21b6" stroke-width="1.5" marker-end="url(#rc-ae)"/>
+        <!-- Pattern A → PP-02 -->
+        <line x1="386" y1="58" x2="430" y2="98" stroke="#5b21b6" stroke-width="1.5" marker-end="url(#rc-ae)"/>
+        <!-- Pattern A → PP-05 -->
+        <line x1="386" y1="68" x2="430" y2="164" stroke="#5b21b6" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#rc-ae)"/>
+        <!-- Pattern B → PP-02 -->
+        <line x1="386" y1="190" x2="430" y2="100" stroke="#059669" stroke-width="1.5" marker-end="url(#rc-ae)"/>
+        <!-- Pattern C → PP-03 -->
+        <line x1="386" y1="330" x2="430" y2="282" stroke="#d97706" stroke-width="1.5" marker-end="url(#rc-ae)"/>
+        <!-- Pattern C → PP-04 -->
+        <line x1="386" y1="348" x2="430" y2="348" stroke="#d97706" stroke-width="1.5" marker-end="url(#rc-ae)"/>
+      </svg>
+    </div>
+    <div class="fig-cap">Figure 1 — Root Cause Map: three carve-out inheritance patterns giving rise to five O2C pain points</div>
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 9 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 10 — §4 OPPORTUNITY INVENTORY
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">§4 Opportunity Inventory</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="h1">§4 &nbsp; Opportunity Inventory</div>
+    <p class="body">
+      Each pain point maps to a primary remediation opportunity. Opportunities are classified by type (AI/Automation, Process, Strategic Programme, or Data), scored for business impact and implementation effort, and tagged for AI potential — those with high AI potential will be developed into full specifications in Report 04 (AI Opportunity Portfolio).
+    </p>
+
+    <div class="opp-card">
+      <div class="opp-id">OPP<br>01</div>
+      <div class="opp-body">
+        <div class="opp-title">Automated Credit Limit Reconciliation</div>
+        <div class="opp-meta">Addresses: PP-01, PP-05 &nbsp;|&nbsp; Type: AI + Data &nbsp;|&nbsp; AI Potential: High</div>
+        <div class="opp-desc">Design and deploy an automated reconciliation pipeline that extracts credit limit and payment terms data from both SAP S/4HANA (authoritative) and SAP CRM on a scheduled basis, identifies discrepancies beyond a defined materiality threshold, and routes divergences to the Credit Controller for approval or CRM correction. AI can assist in identifying the "true" intended limit from audit trail patterns, correspondence, and approval history. The pipeline also enforces the policy principle that only the Credit Controller can authorise CRM updates, by flagging unauthorised manual changes in real time.</div>
+        <div class="opp-tags">
+          <span class="score-tag hi">Impact: 5/5</span>
+          <span class="score-tag md">Effort: 3/5</span>
+          <span class="score-tag hi">AI Potential: High</span>
+          <span class="badge b-ai">AI Opportunity</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-id">OPP<br>02</div>
+      <div class="opp-body">
+        <div class="opp-title">EDI SOP &amp; RACI Authoring</div>
+        <div class="opp-meta">Addresses: PP-02 &nbsp;|&nbsp; Type: Process &nbsp;|&nbsp; AI Potential: Partial</div>
+        <div class="opp-desc">Author the formal EDI Order Management SOP and RACI addendum that were committed in Q3 2025 and remain unpublished. The Sanofi Consumer Healthcare O2C SOP v4.0 (SCH-OPS-CS-SOP-001, §11) and the existing CS Working Notes (OPS-EU-IT-WN-001) provide the procedural basis. AI can accelerate drafting by synthesising the working notes, Sanofi SOP section, and EDI Integration Register into a structured draft that the CS Team Lead reviews and approves. This is the highest-impact, lowest-effort opportunity: it closes a governance gap affecting two-thirds of order volume with minimal technical investment.</div>
+        <div class="opp-tags">
+          <span class="score-tag hi">Impact: 4/5</span>
+          <span class="score-tag hi">Effort: 1/5</span>
+          <span class="score-tag md">AI Potential: Partial</span>
+          <span class="badge b-proc">Process Quick Win</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-id">OPP<br>03</div>
+      <div class="opp-body">
+        <div class="opp-title">TSA Connection Migration Programme</div>
+        <div class="opp-meta">Addresses: PP-03, PP-04 &nbsp;|&nbsp; Type: Strategic Programme &nbsp;|&nbsp; AI Potential: Low</div>
+        <div class="opp-desc">Establish a formal programme to accelerate migration of the 6 Sanofi-managed EDI connections to Opella Digital management, aligned with the IBM Sterling B2B Integrator platform. Priority order: Connection #9 (Carrefour France — Q4 2025 target already missed), then #10/#11 (Boots UK legacy and dm — Q1 2026 targets at risk). Assign named migration leads for connections 12–14. Secure TSA Schedule Annex C from the Opella TSA Programme Office and incorporate its SLA terms into the operational risk register. This is the highest-effort opportunity but directly addresses the most commercially consequential external dependency.</div>
+        <div class="opp-tags">
+          <span class="score-tag hi">Impact: 4/5</span>
+          <span class="score-tag">Effort: 5/5</span>
+          <span class="score-tag">AI Potential: Low</span>
+          <span class="badge b-strat">Strategic Programme</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-id">OPP<br>04</div>
+      <div class="opp-body">
+        <div class="opp-title">EDI Monitoring &amp; Anomaly Detection</div>
+        <div class="opp-meta">Addresses: PP-04 &nbsp;|&nbsp; Type: AI/Automation &nbsp;|&nbsp; AI Potential: High</div>
+        <div class="opp-desc">Deploy real-time EDI channel monitoring with AI-powered anomaly detection to identify connection failures, mapping errors, duplicate orders, and fulfilment rate degradation before they generate customer escalations. The system should ingest the EDI event stream from Opella Digital's IBM Sterling platform and alert the CS Team Lead within minutes of an anomaly. Pattern detection across seasonal demand windows (April–May, October–November) can trigger proactive manual order coverage protocols before fulfilment rates decline. This directly addresses the 34-incident escalation pattern and the stockout correlation identified in PP-04.</div>
+        <div class="opp-tags">
+          <span class="score-tag hi">Impact: 3/5</span>
+          <span class="score-tag hi">Effort: 2/5</span>
+          <span class="score-tag hi">AI Potential: High</span>
+          <span class="badge b-ai">AI Opportunity</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-id">OPP<br>05</div>
+      <div class="opp-body">
+        <div class="opp-title">Customer Master Deduplication &amp; Governance</div>
+        <div class="opp-meta">Addresses: PP-05 &nbsp;|&nbsp; Type: Data &nbsp;|&nbsp; AI Potential: Partial</div>
+        <div class="opp-desc">Conduct a full reconciliation of the 22 accounts present in SAP S/4HANA but absent from SAP CRM, and resolve the 6 duplicate records for Sanofi-migrated accounts. Establish a governance protocol (approved workflow + approval record in SAP) for any future CRM credit limit update, aligned with the requirements of Credit Management Policy §4.2. AI can assist in record matching across systems and in identifying which record variant represents the most recently verified data. Target: top 50 accounts reconciled before end of Q1 2026, as recommended by Raj Patel in the AR Review Notes.</div>
+        <div class="opp-tags">
+          <span class="score-tag hi">Impact: 3/5</span>
+          <span class="score-tag md">Effort: 3/5</span>
+          <span class="score-tag md">AI Potential: Partial</span>
+          <span class="badge b-data">Data Initiative</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 10 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 11 — §5 PRIORITY ASSESSMENT + FIGURE 2
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">§5 Priority Assessment</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="h1">§5 &nbsp; Priority Assessment</div>
+
+    <div class="h2">5.1 &nbsp; Scoring Framework &amp; Summary</div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>ID</th><th>Opportunity</th><th>Addresses</th>
+          <th>Impact (1–5)</th><th>Effort (1–5)</th><th>AI Potential</th><th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>OPP-01</strong></td>
+          <td>Automated Credit Limit Reconciliation</td>
+          <td>PP-01, PP-05</td>
+          <td><strong style="color:#059669">5</strong></td>
+          <td>3</td>
+          <td><span class="badge b-ai">High</span></td>
+          <td><span class="badge b-ai">AI</span></td>
+        </tr>
+        <tr>
+          <td><strong>OPP-02</strong></td>
+          <td>EDI SOP &amp; RACI Authoring</td>
+          <td>PP-02</td>
+          <td><strong style="color:#059669">4</strong></td>
+          <td style="color:#059669;font-weight:700">1</td>
+          <td><span class="badge b-amb">Partial</span></td>
+          <td><span class="badge b-proc">Process</span></td>
+        </tr>
+        <tr>
+          <td><strong>OPP-03</strong></td>
+          <td>TSA Connection Migration Programme</td>
+          <td>PP-03, PP-04</td>
+          <td><strong style="color:#059669">4</strong></td>
+          <td style="color:#dc2626;font-weight:700">5</td>
+          <td><span class="badge b-txt">Low</span></td>
+          <td><span class="badge b-strat">Strategic</span></td>
+        </tr>
+        <tr>
+          <td><strong>OPP-04</strong></td>
+          <td>EDI Monitoring &amp; Anomaly Detection</td>
+          <td>PP-04</td>
+          <td>3</td>
+          <td>2</td>
+          <td><span class="badge b-ai">High</span></td>
+          <td><span class="badge b-ai">AI</span></td>
+        </tr>
+        <tr>
+          <td><strong>OPP-05</strong></td>
+          <td>Customer Master Deduplication</td>
+          <td>PP-05</td>
+          <td>3</td>
+          <td>3</td>
+          <td><span class="badge b-amb">Partial</span></td>
+          <td><span class="badge b-data">Data</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="h2">5.2 &nbsp; Figure 2 — Priority Matrix</div>
+    <div class="svg-wrap">
+      <svg width="620" height="320" viewBox="0 0 620 320" xmlns="http://www.w3.org/2000/svg" font-family="'Helvetica Neue',Arial,sans-serif">
+        <defs>
+          <linearGradient id="pm-g1" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#f9fafb"/>
+            <stop offset="100%" stop-color="#f3f0ff" stop-opacity="0.5"/>
+          </linearGradient>
+          <linearGradient id="pm-g2" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#f0fdf4" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#eff6ff" stop-opacity="0.5"/>
+          </linearGradient>
+        </defs>
+
+        <!-- border -->
+        <rect x="0" y="0" width="620" height="320" rx="6" fill="#f9fafb" stroke="#d1d5db" stroke-width="1"/>
+
+        <!-- chart area -->
+        <!-- x: 80 to 580 (500px wide), y: 20 to 280 (260px tall) -->
+        <!-- Quadrant fills -->
+        <!-- Top-left: Quick Wins (high impact, low effort) -->
+        <rect x="80" y="20" width="250" height="130" rx="0" fill="rgba(5,150,105,0.05)" stroke="none"/>
+        <!-- Top-right: Strategic Investments -->
+        <rect x="330" y="20" width="250" height="130" rx="0" fill="rgba(37,99,235,0.05)" stroke="none"/>
+        <!-- Bottom-left: Fill-ins -->
+        <rect x="80" y="150" width="250" height="130" rx="0" fill="rgba(249,249,249,0.9)" stroke="none"/>
+        <!-- Bottom-right: Reconsider -->
+        <rect x="330" y="150" width="250" height="130" rx="0" fill="rgba(220,38,38,0.03)" stroke="none"/>
+
+        <!-- Axis lines -->
+        <line x1="80" y1="20" x2="80" y2="290" stroke="#9ca3af" stroke-width="1.5"/>
+        <line x1="80" y1="290" x2="590" y2="290" stroke="#9ca3af" stroke-width="1.5"/>
+        <!-- Midlines -->
+        <line x1="330" y1="20" x2="330" y2="290" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="80" y1="155" x2="590" y2="155" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- Axis labels -->
+        <!-- Y-axis label -->
+        <text transform="rotate(-90,20,155)" x="20" y="155" text-anchor="middle" fill="#6b7280" font-size="9" font-weight="700" text-transform="uppercase" letter-spacing="0.5">Business Impact</text>
+        <text x="64" y="28" text-anchor="middle" fill="#6b7280" font-size="8">High</text>
+        <text x="64" y="290" text-anchor="middle" fill="#6b7280" font-size="8">Low</text>
+        <!-- X-axis label -->
+        <text x="335" y="312" text-anchor="middle" fill="#6b7280" font-size="9" font-weight="700" text-transform="uppercase" letter-spacing="0.5">Implementation Effort</text>
+        <text x="85" y="305" text-anchor="start" fill="#6b7280" font-size="8">Low</text>
+        <text x="575" y="305" text-anchor="end" fill="#6b7280" font-size="8">High</text>
+
+        <!-- Quadrant Labels -->
+        <text x="205" y="40" text-anchor="middle" fill="#059669" font-size="9" font-weight="700">QUICK WINS</text>
+        <text x="455" y="40" text-anchor="middle" fill="#2563eb" font-size="9" font-weight="700">STRATEGIC INVESTMENTS</text>
+        <text x="205" y="175" text-anchor="middle" fill="#9ca3af" font-size="9">FILL-INS</text>
+        <text x="455" y="175" text-anchor="middle" fill="#f87171" font-size="9">RECONSIDER</text>
+
+        <!--
+          Coordinate mapping:
+          x: effort 1=100, 2=200, 3=300, 4=400, 5=500 → map to chart 80-590
+          y: impact 1=270, 2=240, 3=210, 4=170, 5=135 → high impact = low y
+
+          OPP-01: impact=5, effort=3 → x=300, y=48
+          OPP-02: impact=4, effort=1 → x=155, y=85
+          OPP-03: impact=4, effort=5 → x=530, y=85
+          OPP-04: impact=3, effort=2 → x=205, y=125
+          OPP-05: impact=3, effort=3 → x=300, y=125
+        -->
+
+        <!-- OPP-01 -->
+        <circle cx="300" cy="52" r="24" fill="#2563eb" fill-opacity="0.15" stroke="#2563eb" stroke-width="1.5"/>
+        <text x="300" y="48" text-anchor="middle" fill="#1d4ed8" font-size="9" font-weight="800">OPP</text>
+        <text x="300" y="62" text-anchor="middle" fill="#1d4ed8" font-size="9" font-weight="800">01</text>
+        <rect x="310" y="35" width="82" height="30" rx="3" fill="white" fill-opacity="0.85"/>
+        <text x="314" y="48" fill="#374151" font-size="7.5" font-weight="700">Credit Reconciliation</text>
+        <text x="314" y="59" fill="#6b7280" font-size="7">Impact 5/5 · Effort 3/5</text>
+
+        <!-- OPP-02 -->
+        <circle cx="155" cy="90" r="24" fill="#059669" fill-opacity="0.15" stroke="#059669" stroke-width="2"/>
+        <text x="155" y="86" text-anchor="middle" fill="#065f46" font-size="9" font-weight="800">OPP</text>
+        <text x="155" y="100" text-anchor="middle" fill="#065f46" font-size="9" font-weight="800">02</text>
+        <rect x="90" y="119" width="70" height="28" rx="3" fill="white" fill-opacity="0.85"/>
+        <text x="125" y="131" text-anchor="middle" fill="#374151" font-size="7.5" font-weight="700">EDI SOP &amp; RACI</text>
+        <text x="125" y="142" text-anchor="middle" fill="#6b7280" font-size="7">Impact 4 · Effort 1</text>
+
+        <!-- OPP-03 -->
+        <circle cx="530" cy="90" r="24" fill="#f97316" fill-opacity="0.12" stroke="#f97316" stroke-width="1.5"/>
+        <text x="530" y="86" text-anchor="middle" fill="#c2410c" font-size="9" font-weight="800">OPP</text>
+        <text x="530" y="100" text-anchor="middle" fill="#c2410c" font-size="9" font-weight="800">03</text>
+        <rect x="460" y="119" width="82" height="28" rx="3" fill="white" fill-opacity="0.85"/>
+        <text x="501" y="131" text-anchor="middle" fill="#374151" font-size="7.5" font-weight="700">TSA Migration</text>
+        <text x="501" y="142" text-anchor="middle" fill="#6b7280" font-size="7">Impact 4 · Effort 5</text>
+
+        <!-- OPP-04 -->
+        <circle cx="205" cy="210" r="22" fill="#6366f1" fill-opacity="0.1" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="205" y="206" text-anchor="middle" fill="#4338ca" font-size="9" font-weight="800">OPP</text>
+        <text x="205" y="220" text-anchor="middle" fill="#4338ca" font-size="9" font-weight="800">04</text>
+        <rect x="140" y="236" width="78" height="28" rx="3" fill="white" fill-opacity="0.85"/>
+        <text x="179" y="248" text-anchor="middle" fill="#374151" font-size="7.5" font-weight="700">EDI Monitoring</text>
+        <text x="179" y="259" text-anchor="middle" fill="#6b7280" font-size="7">Impact 3 · Effort 2</text>
+
+        <!-- OPP-05 -->
+        <circle cx="300" cy="210" r="22" fill="#8b5cf6" fill-opacity="0.1" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="300" y="206" text-anchor="middle" fill="#6d28d9" font-size="9" font-weight="800">OPP</text>
+        <text x="300" y="220" text-anchor="middle" fill="#6d28d9" font-size="9" font-weight="800">05</text>
+        <rect x="310" y="198" width="72" height="28" rx="3" fill="white" fill-opacity="0.85"/>
+        <text x="346" y="210" text-anchor="middle" fill="#374151" font-size="7.5" font-weight="700">Master Data</text>
+        <text x="346" y="221" text-anchor="middle" fill="#6b7280" font-size="7">Impact 3 · Effort 3</text>
+      </svg>
+    </div>
+    <div class="fig-cap">Figure 2 — Opportunity Priority Matrix: business impact (vertical) vs implementation effort (horizontal)</div>
+
+    <p class="body">
+      OPP-02 (EDI SOP &amp; RACI Authoring) sits clearly in the Quick Wins quadrant: it delivers the highest governance impact for the lowest effort, requiring no technology investment. OPP-01 (Credit Reconciliation) and OPP-04 (EDI Monitoring) combine meaningful AI leverage with manageable implementation scope. OPP-03 (TSA Migration) is a Strategic Investment: high impact but program-scale effort that must be managed as a multi-quarter initiative rather than a project sprint.
+    </p>
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 11 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 12 — APPENDIX A: EVIDENCE REGISTER
+══════════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="ph">
+    <span class="ph-l">Appendix A — Evidence Register</span>
+    <span class="ph-r">Opella Europe · Order-to-Cash · CONFIDENTIAL</span>
+  </div>
+  <div class="pc">
+    <div class="h1">Appendix A &nbsp; Evidence Register</div>
+    <p class="body">The table below links each pain point finding to its primary source documents and the specific evidence elements that substantiate the finding. Confidence tiers follow the KG convention: Verified = document evidence confirmed; Amber = document evidence only, or working notes; Gap = asserted in source but not independently verifiable from the document pack.</p>
+
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:45px">Finding</th>
+          <th>Source Document(s)</th>
+          <th>Evidence Type</th>
+          <th>Key Data Point or Quote</th>
+          <th style="width:70px">Confidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="section-row"><td colspan="5">PP-01 — Credit Data Integrity Risk</td></tr>
+        <tr>
+          <td>PP-01a</td>
+          <td>Credit Management Policy v1.3<br>(OPS-EU-FIN-POL-002, §4.1)</td>
+          <td>Policy document — authoritative</td>
+          <td>"SAP S/4HANA is the single authoritative system of record for customer credit limits."</td>
+          <td><span class="badge b-proc">Verified</span></td>
+        </tr>
+        <tr>
+          <td>PP-01b</td>
+          <td>SAP S/4HANA Customer Master Export; SAP CRM Customer Export</td>
+          <td>Structured data — cross-system reconciliation</td>
+          <td>4 accounts with ERP/CRM credit limit variance; Carrefour France: ERP €1.8M vs CRM €2.4M. 2 accounts with payment terms conflict (NET45 vs NET30).</td>
+          <td><span class="badge b-proc">Verified</span></td>
+        </tr>
+        <tr>
+          <td>PP-01c</td>
+          <td>AR Review Notes Q4 2025<br>(Raj Patel, 2026-01-08)</td>
+          <td>Operational review note — internal escalation</td>
+          <td>"Carrefour FR is currently operating against the CRM limit… Our credit policy does not define which system is authoritative."</td>
+          <td><span class="badge b-amb">Amber</span></td>
+        </tr>
+        <tr class="section-row"><td colspan="5">PP-02 — EDI Governance Vacuum</td></tr>
+        <tr>
+          <td>PP-02a</td>
+          <td>Order Management SOP v2.1<br>(OPS-EU-CS-SOP-001, §1.3)</td>
+          <td>SOP exclusion — explicit in scope clause</td>
+          <td>"EDI order processing is outside the scope of this SOP."</td>
+          <td><span class="badge b-proc">Verified</span></td>
+        </tr>
+        <tr>
+          <td>PP-02b</td>
+          <td>O2C RACI Matrix v1.0<br>(OPS-EU-CS-RACI-001, RACI scope note)</td>
+          <td>RACI — explicit scope limitation</td>
+          <td>"EDI channel process steps are not included in this version of the RACI."</td>
+          <td><span class="badge b-proc">Verified</span></td>
+        </tr>
+        <tr>
+          <td>PP-02c</td>
+          <td>EDI Dispute Resolution Working Notes<br>(OPS-EU-IT-WN-001)</td>
+          <td>Working notes — informal operational reference</td>
+          <td>"This is not an official SOP." Written Nov 2025, after Q3 2025 target missed.</td>
+          <td><span class="badge b-amb">Amber</span></td>
+        </tr>
+        <tr>
+          <td>PP-02d</td>
+          <td>Order Flow Analysis Export 2025</td>
+          <td>Structured data — channel analysis</td>
+          <td>5,667 of 8,420 orders (67.3%) processed via EDI in 2025.</td>
+          <td><span class="badge b-proc">Verified</span></td>
+        </tr>
+        <tr class="section-row"><td colspan="5">PP-03 — TSA-Managed Connection Dependency</td></tr>
+        <tr>
+          <td>PP-03a</td>
+          <td>EDI Integration Register v1.1<br>(OPS-EU-IT-REG-001, §3, §4)</td>
+          <td>Technical register — authoritative connection listing</td>
+          <td>6 of 14 connections (Carrefour FR, Boots UK legacy, dm, E.Leclerc, Lidl, Coop Group legacy) marked "Sanofi Shared Services / See TSA Schedule Annex C."</td>
+          <td><span class="badge b-proc">Verified</span></td>
+        </tr>
+        <tr>
+          <td>PP-03b</td>
+          <td>TSA Schedule Annex C</td>
+          <td>Governing contract — not in document pack</td>
+          <td>Annex C referenced in EDI Register and Working Notes but not provided. SLA figures (24–48h) sourced from informal working notes only.</td>
+          <td><span class="badge" style="background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5">Gap</span></td>
+        </tr>
+        <tr class="section-row"><td colspan="5">PP-04 — EDI Channel Instability</td></tr>
+        <tr>
+          <td>PP-04a</td>
+          <td>Order Flow Analysis Export 2025</td>
+          <td>Structured data — fulfilment rate analysis</td>
+          <td>EDI fulfilment: ~91% baseline; ~59% in Apr–May and Oct–Nov 2025 cluster windows.</td>
+          <td><span class="badge b-proc">Verified</span></td>
+        </tr>
+        <tr>
+          <td>PP-04b</td>
+          <td>Customer Service Escalation Log 2025</td>
+          <td>Structured data — incident log</td>
+          <td>19 stockout complaints in Apr–May and Oct–Nov periods. "Customer threatened to delist Doliprane if EDI reliability does not improve."</td>
+          <td><span class="badge b-proc">Verified</span></td>
+        </tr>
+        <tr class="section-row"><td colspan="5">PP-05 — Onboarding Data Integrity Risk</td></tr>
+        <tr>
+          <td>PP-05a</td>
+          <td>SAP S/4HANA Customer Master Export;<br>SAP CRM Customer Export</td>
+          <td>Structured data — record count comparison</td>
+          <td>ERP: 340 records. CRM: 318 records. Difference: 22 accounts present in ERP but absent from CRM.</td>
+          <td><span class="badge b-proc">Verified</span></td>
+        </tr>
+        <tr>
+          <td>PP-05b</td>
+          <td>Retail Customer Onboarding Guide v1.2<br>(OPS-EU-CS-GUIDE-001, §5.2)</td>
+          <td>Process guide — ambiguous instruction</td>
+          <td>"Create the customer record in our systems… Ensure consistency of data across all systems." — No named authoritative system.</td>
+          <td><span class="badge b-amb">Amber</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="spacer"></div>
+    <div class="note-box" style="margin-top:auto">
+      <div class="nb-title">Report Completeness</div>
+      <div class="nb-text">This report reflects findings from the 12-document O2C discovery input pack as listed in the Document Control section. TSA Schedule Annex C is referenced in multiple source documents but was not included in the discovery pack; its absence is flagged as a Gap-tier finding (PP-03b). All other findings are substantiated by at least one Verified-tier source. No findings in this report are based on assumption or inference without document evidence.</div>
+    </div>
+  </div>
+  <div class="pf">
+    <span class="pf-l">RPT-OE-O2C-02 | Pain Points &amp; Opportunity Report</span>
+    <span class="pf-r">Page 12 of 12 | CONFIDENTIAL</span>
+  </div>
+</div>
+
+</body>
+</html>

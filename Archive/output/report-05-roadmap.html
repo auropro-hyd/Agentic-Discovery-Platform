@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Transformation Roadmap — Opella Europe O2C</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #adb5bd; padding: 40px 0; }
+:root {
+  --navy: #1a2f50; --blue: #2563eb; --blue-mid: #3665a8;
+  --text: #1f2937; --text-sec: #6b7280;
+  --border: #e5e7eb; --bg-light: #f9fafb;
+  --now: #2563eb; --now-bg: rgba(37,99,235,0.08); --now-bdr: rgba(37,99,235,0.25);
+  --next: #059669; --next-bg: rgba(5,150,105,0.08); --next-bdr: rgba(5,150,105,0.25);
+  --later: #7c3aed; --later-bg: rgba(124,58,237,0.08); --later-bdr: rgba(124,58,237,0.25);
+  --ai: #6d28d9;
+}
+.page { width: 794px; min-height: 1123px; background: #fff; margin: 0 auto 32px; box-shadow: 0 3px 14px rgba(0,0,0,0.25); display: flex; flex-direction: column; }
+.ph { height: 34px; background: var(--navy); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; flex-shrink: 0; }
+.ph-left { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; }
+.ph-right { font-size: 9px; color: rgba(255,255,255,0.4); }
+.pc { flex: 1; padding: 28px 36px; display: flex; flex-direction: column; }
+.pf { height: 30px; background: #f9fafb; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; flex-shrink: 0; }
+.pf-note { font-size: 8px; color: #9ca3af; }
+.pf-num { font-size: 8px; color: #9ca3af; }
+
+/* Cover */
+.cover-band { height: 6px; background: linear-gradient(90deg,var(--now) 0%,var(--next) 50%,var(--later) 100%); }
+.cover-inner { padding: 52px 52px 40px; flex: 1; display: flex; flex-direction: column; }
+.cover-series { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--next); margin-bottom: 8px; }
+.cover-title { font-size: 32px; font-weight: 900; color: var(--navy); line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 6px; }
+.cover-sub { font-size: 14px; color: var(--text-sec); margin-bottom: 36px; }
+.cover-divider { height: 1px; background: var(--border); margin-bottom: 28px; }
+.cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+.cover-meta { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; }
+.cm-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-sec); margin-bottom: 4px; }
+.cm-value { font-size: 12px; font-weight: 600; color: var(--text); }
+.cover-horizons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+.hz-box { border-radius: 8px; padding: 14px 16px; text-align: center; }
+.hz-box.now { background: var(--now-bg); border: 1px solid var(--now-bdr); }
+.hz-box.next { background: var(--next-bg); border: 1px solid var(--next-bdr); }
+.hz-box.later { background: var(--later-bg); border: 1px solid var(--later-bdr); }
+.hz-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.hz-box.now .hz-label { color: var(--now); }
+.hz-box.next .hz-label { color: var(--next); }
+.hz-box.later .hz-label { color: var(--later); }
+.hz-range { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.hz-count { font-size: 9px; color: var(--text-sec); }
+.cover-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; }
+.cover-confid { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #9ca3af; }
+.cover-logo { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--navy); }
+
+/* Typography */
+.sec-title { font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--navy); }
+.sub-title { font-size: 12px; font-weight: 700; color: var(--text); margin: 14px 0 8px; }
+.body-p { font-size: 10px; color: var(--text); line-height: 1.7; margin-bottom: 10px; }
+.caption { font-size: 9px; color: var(--text-sec); margin-top: 6px; text-align: center; font-style: italic; }
+.pg-sec { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--blue); margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 9.5px; margin-bottom: 14px; }
+th { background: var(--navy); color: #fff; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 7px 10px; text-align: left; }
+td { padding: 7px 10px; color: var(--text); border-bottom: 1px solid var(--border); line-height: 1.5; vertical-align: top; }
+tr:nth-child(even) td { background: #f2f4f7; }
+tr:last-child td { border-bottom: none; }
+
+/* Stats */
+.stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+.stat-box { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; text-align: center; }
+.stat-val { font-size: 22px; font-weight: 900; color: var(--blue); line-height: 1; margin-bottom: 3px; }
+.stat-lbl { font-size: 8.5px; color: var(--text-sec); line-height: 1.4; }
+
+/* Horizon phase bars */
+.hz-section { border-radius: 6px; overflow: hidden; margin-bottom: 14px; }
+.hz-hdr { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+.hz-hdr.now { background: var(--now); }
+.hz-hdr.next { background: var(--next); }
+.hz-hdr.later { background: var(--later); }
+.hz-name { font-size: 12px; font-weight: 800; color: #fff; }
+.hz-period { font-size: 9.5px; color: rgba(255,255,255,0.7); }
+.hz-body { background: var(--bg-light); border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; padding: 12px 14px; }
+
+/* Workstream rows */
+.ws-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: flex-start; }
+.ws-tag { font-size: 8px; font-weight: 800; padding: 3px 8px; border-radius: 3px; flex-shrink: 0; white-space: nowrap; margin-top: 1px; }
+.ws-gov { background: rgba(26,47,80,0.12); color: var(--navy); }
+.ws-ai { background: rgba(109,40,217,0.12); color: var(--ai); }
+.ws-tsa { background: rgba(217,119,6,0.12); color: #92400e; }
+.ws-body { flex: 1; }
+.ws-title { font-size: 10px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.ws-desc { font-size: 9px; color: var(--text-sec); line-height: 1.55; }
+
+/* Note boxes */
+.note-box { background: var(--now-bg); border: 1px solid var(--now-bdr); border-left: 3px solid var(--now); border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 12px; }
+.note-box.green { background: var(--next-bg); border-color: var(--next-bdr); border-left-color: var(--next); }
+.note-box.purple { background: var(--later-bg); border-color: var(--later-bdr); border-left-color: var(--later); }
+.note-box.amber { background: #fefce8; border-color: #fde68a; border-left-color: #d97706; }
+.note-box-title { font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; }
+.note-box.now .note-box-title, .note-box .note-box-title { color: var(--now); }
+.note-box.green .note-box-title { color: var(--next); }
+.note-box.purple .note-box-title { color: var(--later); }
+.note-box.amber .note-box-title { color: #92400e; }
+.note-box p { font-size: 9.5px; color: var(--text); line-height: 1.6; }
+
+/* Milestone list */
+.milestone-list { list-style: none; }
+.milestone-list li { display: flex; gap: 10px; margin-bottom: 8px; align-items: flex-start; font-size: 9.5px; line-height: 1.55; color: var(--text); }
+.ms-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.ms-dot.now { background: var(--now); }
+.ms-dot.next { background: var(--next); }
+.ms-dot.later { background: var(--later); }
+
+/* TOC */
+.toc-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 5px; }
+.toc-label { font-size: 10px; color: var(--text); flex: 1; }
+.toc-dots { flex: 1; border-bottom: 1px dotted var(--border); margin: 0 4px 3px; }
+.toc-page { font-size: 9.5px; color: var(--text-sec); }
+.toc-section { font-weight: 700; color: var(--navy); }
+.toc-sub { padding-left: 16px; }
+
+/* Badges */
+.badge { display: inline-block; font-size: 8.5px; font-weight: 700; border-radius: 3px; padding: 2px 8px; }
+.badge-now { background: var(--now-bg); color: var(--now); }
+.badge-next { background: var(--next-bg); color: var(--next); }
+.badge-later { background: var(--later-bg); color: var(--later); }
+.badge-red { background: rgba(220,38,38,0.08); color: #991b1b; }
+.badge-amber { background: rgba(217,119,6,0.1); color: #92400e; }
+
+/* KPI pills */
+.kpi-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.kpi-pill { font-size: 8.5px; padding: 3px 10px; border-radius: 10px; border: 1px solid var(--border); background: #fff; color: var(--text-sec); }
+.kpi-pill.blue { background: var(--now-bg); color: var(--now); border-color: var(--now-bdr); }
+.kpi-pill.green { background: var(--next-bg); color: var(--next); border-color: var(--next-bdr); }
+.kpi-pill.purple { background: var(--later-bg); color: var(--later); border-color: var(--later-bdr); }
+
+/* Stakeholder grid */
+.sh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.sh-card { background: var(--bg-light); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; }
+.sh-name { font-size: 10px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.sh-role { font-size: 8.5px; color: var(--text-sec); margin-bottom: 6px; }
+.sh-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.sh-pill { font-size: 8px; padding: 2px 7px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-sec); background: #fff; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 — COVER -->
+<div class="page">
+  <div class="cover-band"></div>
+  <div class="cover-inner">
+    <div class="cover-series">Report 05 of 06 — Autonomous Discovery Platform</div>
+    <div class="cover-title">Transformation<br>Roadmap</div>
+    <div class="cover-sub">Now · Next · Later — Phased Delivery Plan · O2C Domain · Opella Europe</div>
+    <div class="cover-divider"></div>
+
+    <div class="cover-grid">
+      <div class="cover-meta"><div class="cm-label">Client</div><div class="cm-value">Opella Europe</div></div>
+      <div class="cover-meta"><div class="cm-label">Domain</div><div class="cm-value">Order-to-Cash (O2C)</div></div>
+      <div class="cover-meta"><div class="cm-label">Date</div><div class="cm-value">June 2025</div></div>
+      <div class="cover-meta"><div class="cm-label">Classification</div><div class="cm-value">Confidential</div></div>
+      <div class="cover-meta"><div class="cm-label">Workstreams</div><div class="cm-value">7 (R-01–R-05 + OPP-01 + OPP-04)</div></div>
+      <div class="cover-meta"><div class="cm-label">Full horizon</div><div class="cm-value">H1 → H3 (0–24+ months)</div></div>
+    </div>
+
+    <div class="cover-horizons">
+      <div class="hz-box now">
+        <div class="hz-label">Now — H1</div>
+        <div class="hz-range">Months 0–6</div>
+        <div class="hz-count">5 workstreams · Foundation sprint</div>
+      </div>
+      <div class="hz-box next">
+        <div class="hz-label">Next — H2</div>
+        <div class="hz-range">Months 6–18</div>
+        <div class="hz-count">6 workstreams · Stabilisation</div>
+      </div>
+      <div class="hz-box later">
+        <div class="hz-label">Later — H3</div>
+        <div class="hz-range">Months 18–36+</div>
+        <div class="hz-count">3 workstreams · Transformation</div>
+      </div>
+    </div>
+
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:14px 18px;margin-bottom:20px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#6b7280;margin-bottom:6px;">How to Read This Report</div>
+      <div style="font-size:10px;color:#374151;line-height:1.7;">This is the master programme view that synthesises Reports 02–04 into a sequenced delivery plan. It consolidates the five recommendations from Report 03 and the two AI use cases from Report 04 into a single timeline with explicit dependencies, gate conditions, and owner assignments. It does not add new recommendations — it sequences those already agreed. The programme governance model and change management plan are in §6.</div>
+    </div>
+
+    <div class="cover-footer">
+      <div class="cover-confid">Confidential · Opella Internal Use Only</div>
+      <div class="cover-logo">AuroPro</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2 — DOCUMENT CONTROL -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="sec-title">Document Control</div>
+    <table>
+      <tr><th>Field</th><th>Details</th></tr>
+      <tr><td>Document Title</td><td>Transformation Roadmap — Order-to-Cash, Opella Europe</td></tr>
+      <tr><td>Document Reference</td><td>ADP-O2C-RPT-05</td></tr>
+      <tr><td>Report in Series</td><td>Report 05 of 06</td></tr>
+      <tr><td>Source Reports</td><td>Report 02 (Pain Points) · Report 03 (Transformation Recommendation) · Report 04 (AI Opportunity Portfolio)</td></tr>
+      <tr><td>Workstreams Sequenced</td><td>R-01 · R-02 · R-03 · R-04 · R-05 · OPP-01 · OPP-04</td></tr>
+      <tr><td>Strategy Profile (Locked)</td><td>Direction: Consolidate + Modernise · H1 AI/governance · H3 app rationalisation · TSA constraints binding</td></tr>
+      <tr><td>Prepared by</td><td>AuroPro Autonomous Discovery Platform</td></tr>
+      <tr><td>Review by</td><td>Sophie Marchetti (VP Commercial Ops) · Marc Dupont (Finance Director) · James Okafor (Digital)</td></tr>
+      <tr><td>Programme Sponsor</td><td>Sophie Marchetti</td></tr>
+    </table>
+
+    <div class="sub-title" style="margin-top:4px;">Workstream Register</div>
+    <table>
+      <tr><th>ID</th><th>Workstream</th><th>Type</th><th>Priority</th><th>Owner</th><th>Horizon</th></tr>
+      <tr><td><strong>R-01</strong></td><td>SAP S/4HANA as Sole Credit Data Authority</td><td><span style="font-size:8.5px;color:#1a2f50;font-weight:700;">Governance</span></td><td><span class="badge badge-red">Critical</span></td><td>Raj Patel</td><td>H1→H2</td></tr>
+      <tr><td><strong>R-02</strong></td><td>Author EDI SOP &amp; RACI</td><td><span style="font-size:8.5px;color:#1a2f50;font-weight:700;">Process</span></td><td><span class="badge badge-red">Critical</span></td><td>Alina Kovacs</td><td>H1 (Quick Win)</td></tr>
+      <tr><td><strong>R-03</strong></td><td>TSA Connection Migration Programme</td><td><span style="font-size:8.5px;color:#92400e;font-weight:700;">Programme</span></td><td><span class="badge badge-amber">High</span></td><td>James Okafor</td><td>H1→H3</td></tr>
+      <tr><td><strong>R-04</strong></td><td>EDI Monitoring + Seasonal Coverage</td><td><span style="font-size:8.5px;color:#1a2f50;font-weight:700;">Operations</span></td><td><span class="badge badge-amber">Medium</span></td><td>James Okafor</td><td>H1</td></tr>
+      <tr><td><strong>R-05</strong></td><td>Customer Master Deduplication</td><td><span style="font-size:8.5px;color:#1a2f50;font-weight:700;">Data</span></td><td><span class="badge badge-amber">Medium</span></td><td>Raj Patel</td><td>H1</td></tr>
+      <tr><td><strong>OPP-01</strong></td><td>Credit Limit Reconciliation Engine (AI)</td><td><span style="font-size:8.5px;color:#6d28d9;font-weight:700;">AI</span></td><td><span class="badge badge-red">Critical</span></td><td>Raj Patel / AuroPro</td><td>H1→H2</td></tr>
+      <tr><td><strong>OPP-04</strong></td><td>EDI Anomaly Detection (AI)</td><td><span style="font-size:8.5px;color:#6d28d9;font-weight:700;">AI</span></td><td><span class="badge badge-amber">High</span></td><td>James Okafor / AuroPro</td><td>H1→H2</td></tr>
+    </table>
+
+    <div class="note-box amber">
+      <div class="note-box-title">Demo Scope Boundary — June 5</div>
+      <p>The June 5 Opella demo covers the discovery output only — this roadmap is a deliverable, not a commitment. No workstream has been formally resourced or approved at the time of publication. The programme governance model in §6 defines the steps required to move from discovery output to approved programme.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">2</div></div>
+</div>
+
+<!-- PAGE 3 — TOC -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="sec-title">Contents</div>
+    <div style="margin-bottom:24px;">
+      <div class="toc-row"><span class="toc-label toc-section">§1 Roadmap Overview</span><span class="toc-dots"></span><span class="toc-page">4</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§2 Now — H1 Foundation Sprint (Months 0–6)</span><span class="toc-dots"></span><span class="toc-page">5</span></div>
+      <div class="toc-row toc-sub"><span class="toc-label">2.1 Workstream sequencing &amp; gate conditions</span><span class="toc-dots"></span><span class="toc-page">5</span></div>
+      <div class="toc-row toc-sub"><span class="toc-label">2.2 H1 milestone calendar</span><span class="toc-dots"></span><span class="toc-page">6</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§3 Next — H2 Stabilisation (Months 6–18)</span><span class="toc-dots"></span><span class="toc-page">7</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§4 Later — H3 Transformation (Months 18–36+)</span><span class="toc-dots"></span><span class="toc-page">8</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§5 Master Dependency Map</span><span class="toc-dots"></span><span class="toc-page">9</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§6 Programme Governance &amp; Change Management</span><span class="toc-dots"></span><span class="toc-page">10</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">§7 Success Measures &amp; KPI Dashboard</span><span class="toc-dots"></span><span class="toc-page">11</span></div>
+      <div class="toc-row"><span class="toc-label toc-section">Appendix A — Decision Log &amp; Alternatives Considered</span><span class="toc-dots"></span><span class="toc-page">12</span></div>
+    </div>
+
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:14px 18px;margin-bottom:14px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#6b7280;margin-bottom:8px;">Sequencing Principles</div>
+      <div style="font-size:9.5px;color:#374151;line-height:1.7;">Three principles govern the ordering of all workstreams in this roadmap:<br><br>
+      <strong>1. Governance before automation.</strong> R-02 (EDI SOP) and R-01 (credit data authority) must establish clear rules before AI tools (OPP-01, OPP-04) operate on that data. An AI tool that enforces the wrong rule is worse than no AI tool.<br><br>
+      <strong>2. Quick wins fund credibility.</strong> R-02 (EDI SOP, weeks 1–4) and OPP-04 MVP (weeks 3–6) deliver visible results early. These create the organisational confidence that makes the heavier H2 and H3 investments easier to approve.<br><br>
+      <strong>3. TSA constraints are non-negotiable.</strong> R-03 (TSA Migration) is phased around Sanofi cooperation and contractual timelines — not around Opella's preferred delivery speed. No workstream can force the TSA handover faster than the TSA agreement allows.
+      </div>
+    </div>
+
+    <div class="note-box">
+      <div class="note-box-title">Dependency Shorthand Used in This Report</div>
+      <p><strong>Enables:</strong> workstream A must be at least partially complete before workstream B can begin its gate-locked phase. <strong>Informs:</strong> workstream A produces an artefact (data, document, rule) that improves workstream B's accuracy or scope, but B can proceed without waiting. <strong>Blocks:</strong> workstream B cannot proceed at all until workstream A is complete.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">3</div></div>
+</div>
+
+<!-- PAGE 4 — OVERVIEW -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§1 Roadmap Overview</div>
+
+    <div class="body-p">The O2C transformation programme addresses the consequences of Opella's April 2025 carve-out from Sanofi across three time horizons. H1 is a foundation sprint that establishes governance, launches AI tooling in human-supervised mode, and closes the most acute data quality gaps. H2 stabilises the improvements — refining AI accuracy, completing the customer master, and initiating the first TSA connection handovers. H3 completes the structural transformation: the remaining TSA connections are migrated, SAP CRM is rationalised against ERP, and AI tooling is assessed for supervised automation where governance evidence supports it.</div>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-val">7</div><div class="stat-lbl">workstreams across 3 horizons</div></div>
+      <div class="stat-box" style="border-color:var(--now-bdr);"><div class="stat-val" style="color:var(--now);">5</div><div class="stat-lbl">H1 workstreams active simultaneously (peak: months 2–4)</div></div>
+      <div class="stat-box" style="border-color:var(--next-bdr);"><div class="stat-val" style="color:var(--next);">6</div><div class="stat-lbl">H2 activities (4 continuing + 2 new)</div></div>
+      <div class="stat-box" style="border-color:var(--later-bdr);"><div class="stat-val" style="color:var(--later);">3</div><div class="stat-lbl">H3 transformation workstreams</div></div>
+    </div>
+
+    <div class="sub-title">Master Programme Summary</div>
+    <svg width="722" height="340" viewBox="0 0 722 340" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 6px;">
+      <defs>
+        <marker id="rm-arr" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#9ca3af"/></marker>
+      </defs>
+      <!-- Background bands -->
+      <rect x="60" y="0" width="222" height="340" fill="rgba(37,99,235,0.04)" rx="0"/>
+      <rect x="282" y="0" width="220" height="340" fill="rgba(5,150,105,0.04)" rx="0"/>
+      <rect x="502" y="0" width="220" height="340" fill="rgba(124,58,237,0.04)" rx="0"/>
+      <!-- Horizon labels -->
+      <text x="171" y="14" text-anchor="middle" font-size="9" font-weight="800" fill="#2563eb" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" letter-spacing="0.5">NOW · H1 · Months 0–6</text>
+      <text x="392" y="14" text-anchor="middle" font-size="9" font-weight="800" fill="#059669" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" letter-spacing="0.5">NEXT · H2 · Months 6–18</text>
+      <text x="612" y="14" text-anchor="middle" font-size="9" font-weight="800" fill="#7c3aed" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" letter-spacing="0.5">LATER · H3 · Months 18–36+</text>
+      <!-- Dividers -->
+      <line x1="282" y1="0" x2="282" y2="340" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,3"/>
+      <line x1="502" y1="0" x2="502" y2="340" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,3"/>
+      <!-- Row labels -->
+      <text x="50" y="46" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-02</text>
+      <text x="50" y="90" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-05</text>
+      <text x="50" y="134" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-04</text>
+      <text x="50" y="178" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-01</text>
+      <text x="50" y="222" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-01</text>
+      <text x="50" y="266" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-04</text>
+      <text x="50" y="310" text-anchor="end" font-size="8.5" font-weight="700" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-03</text>
+      <!-- R-02: W1-W4 quick win -->
+      <rect x="62" y="32" width="88" height="18" rx="4" fill="#1a2f50"/>
+      <text x="106" y="45" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI SOP authored</text>
+      <circle cx="154" cy="41" r="5" fill="#fff" stroke="#1a2f50" stroke-width="2"/>
+      <!-- R-05: W3-W12 -->
+      <rect x="106" y="76" width="154" height="18" rx="4" fill="#1a2f50"/>
+      <text x="183" y="89" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Customer master dedup (22 + 6 records)</text>
+      <circle cx="264" cy="85" r="5" fill="#fff" stroke="#1a2f50" stroke-width="2"/>
+      <!-- OPP-04: W3-W16 H1; W17-H2 mature -->
+      <rect x="106" y="120" width="154" height="18" rx="4" fill="#6d28d9"/>
+      <text x="183" y="133" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI monitoring MVP → Full (P1–P5)</text>
+      <rect x="284" y="120" width="130" height="18" rx="4" fill="rgba(109,40,217,0.4)"/>
+      <text x="349" y="133" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-04 mature + auto assess</text>
+      <!-- OPP-01: W5-W24 H1; H2 mature -->
+      <rect x="150" y="164" width="110" height="18" rx="4" fill="#6d28d9"/>
+      <text x="205" y="177" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit engine MVP</text>
+      <rect x="284" y="164" width="130" height="18" rx="4" fill="rgba(109,40,217,0.4)"/>
+      <text x="349" y="177" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-01 mature + CRM proposal</text>
+      <!-- R-01: W12-H2 -->
+      <rect x="195" y="208" width="87" height="18" rx="4" fill="#1a2f50"/>
+      <text x="238" y="221" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit authority Phase 1</text>
+      <rect x="284" y="208" width="218" height="18" rx="4" fill="rgba(26,47,80,0.4)"/>
+      <text x="393" y="221" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-01 full — ERP authority enforced + automated pipeline</text>
+      <!-- R-04: W9-H1 -->
+      <rect x="150" y="252" width="130" height="18" rx="4" fill="#1a2f50"/>
+      <text x="215" y="265" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI seasonal coverage (Oct–Nov)</text>
+      <!-- R-03: H1 phase 1 start; H2; H3 -->
+      <rect x="195" y="296" width="65" height="18" rx="4" fill="rgba(217,119,6,0.7)"/>
+      <text x="228" y="309" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">TSA inventory</text>
+      <rect x="284" y="296" width="218" height="18" rx="4" fill="rgba(217,119,6,0.5)"/>
+      <text x="393" y="309" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Carrefour FR + Boots UK handover (Phase 1–2)</text>
+      <rect x="504" y="296" width="216" height="18" rx="4" fill="rgba(217,119,6,0.35)"/>
+      <text x="612" y="309" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">E.Leclerc · dm · Lidl · Coop (Phase 3)</text>
+      <!-- H3 R-01 automation -->
+      <rect x="504" y="208" width="216" height="18" rx="4" fill="rgba(124,58,237,0.5)"/>
+      <text x="612" y="221" text-anchor="middle" font-size="7.5" fill="#fff" font-weight="700" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">AI write-back (if gating criteria met)</text>
+      <!-- Legend -->
+      <rect x="62" y="328" width="10" height="8" rx="2" fill="#1a2f50"/>
+      <text x="78" y="336" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Governance / Process</text>
+      <rect x="180" y="328" width="10" height="8" rx="2" fill="#6d28d9"/>
+      <text x="196" y="336" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">AI Use Case</text>
+      <rect x="280" y="328" width="10" height="8" rx="2" fill="rgba(217,119,6,0.7)"/>
+      <text x="296" y="336" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">TSA Programme</text>
+      <circle cx="382" cy="332" r="5" fill="#fff" stroke="#1a2f50" stroke-width="2"/>
+      <text x="394" y="336" font-size="8" fill="#6b7280" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Phase gate milestone</text>
+    </svg>
+    <div class="caption">Figure 1 — Master programme Gantt across all three horizons; vertical dashed lines mark H1→H2 and H2→H3 transitions</div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">4</div></div>
+</div>
+
+<!-- PAGE 5 — NOW H1 PART 1 -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§2 Now — H1 Foundation Sprint (Months 0–6)</div>
+
+    <div class="body-p">H1 is the most intensive period of the programme. Five workstreams run concurrently at peak (months 2–4). The sequencing is deliberate: R-02 launches first because it has no dependencies and delivers immediate value; OPP-04 and OPP-01 launch on staggered 6-week cycles to spread IT integration demand; R-05 runs in parallel because it requires only data exports, not system access; R-01 begins in month 3 once OPP-01 has produced its first reconciliation report and identified the full discrepancy set.</div>
+
+    <div class="sub-title">2.1 H1 Workstream Sequencing</div>
+
+    <div class="hz-section">
+      <div class="hz-hdr now"><div class="hz-name">Wave 1 — Weeks 1–4: No-dependency Quick Wins</div><div class="hz-period">Parallel start · Zero IT integration required</div></div>
+      <div class="hz-body">
+        <div class="ws-row">
+          <span class="ws-tag ws-gov">R-02</span>
+          <div class="ws-body">
+            <div class="ws-title">EDI SOP &amp; RACI — Author and publish</div>
+            <div class="ws-desc">Alina Kovacs (CS Lead) leads drafting using Doc 05 working notes as source. Four required SOP sections: EDI channel management, Sanofi-managed connection escalation, duplicate order handling, mapping error response. Raj Patel adds credit hold guidance (§4 of working notes). Publish to SharePoint by Week 4. Gate: Sophie Marchetti approval before publication.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-gov">R-05</span>
+          <div class="ws-body">
+            <div class="ws-title">Customer Master Dedup — Data export &amp; gap analysis</div>
+            <div class="ws-desc">Raj Patel runs ERP vs CRM comparison using the same SFTP extracts needed for OPP-01. Identifies 22 ERP-only accounts for CRM backfill and 6 duplicate records for consolidation. No system change in Wave 1 — output is a remediation task list. Gate: Credit Controller sign-off on list before any CRM changes.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hz-section">
+      <div class="hz-hdr now"><div class="hz-name">Wave 2 — Weeks 3–8: AI MVP Launches</div><div class="hz-period">Staggered 6-week offset · IT integration required</div></div>
+      <div class="hz-body">
+        <div class="ws-row">
+          <span class="ws-tag ws-ai">OPP-04</span>
+          <div class="ws-body">
+            <div class="ws-title">EDI Monitoring MVP — P-01 + P-02 patterns live by Week 6</div>
+            <div class="ws-desc">James Okafor confirms EDI event stream access (Week 1–2). AuroPro builds P-01 (ack timeout) and P-02 (duplicate order) detection with TSA-aware routing. CS team UAT in Week 5. Alert delivery via email to CS team. Gate: James Okafor signs off routing table — confirms 6 Sanofi vs 8 Opella Digital connections are correctly flagged.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-ai">OPP-01</span>
+          <div class="ws-body">
+            <div class="ws-title">Credit Reconciliation Engine MVP — First report by Week 8</div>
+            <div class="ws-desc">SAP S/4HANA + CRM SFTP extracts confirmed (Week 1–2). AuroPro builds join → classify → policy check → recommend pipeline. First weekly report delivered to Raj Patel in Week 8. Gate: Raj Patel validates classification accuracy on all 8 known discrepancy accounts before report cadence continues.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hz-section">
+      <div class="hz-hdr now"><div class="hz-name">Wave 3 — Weeks 9–24: Full H1 Build-out</div><div class="hz-period">Builds on Wave 1 + 2 foundations</div></div>
+      <div class="hz-body">
+        <div class="ws-row">
+          <span class="ws-tag ws-gov">R-05</span>
+          <div class="ws-body">
+            <div class="ws-title">Customer Master remediation — CRM backfill + dedup execution</div>
+            <div class="ws-desc">22 missing accounts added to CRM. 6 duplicate records consolidated by Raj Patel. Target: 340 ERP = 340 CRM by end H1. Informs OPP-01 accuracy (fewer ID-mismatch false negatives).</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-ai">OPP-04</span>
+          <div class="ws-body">
+            <div class="ws-title">EDI Monitoring Full — P-03 through P-05 + seasonal setup by Week 16</div>
+            <div class="ws-desc">Mapping error cluster (P-03), fulfilment rate degradation (P-04), credit hold cross-reference (P-05). Seasonal parameters enabled for Oct–Nov window. Dashboard live for James Okafor.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-gov">R-01</span>
+          <div class="ws-body">
+            <div class="ws-title">Credit Data Authority Phase 1 — Top-4 account manual reconciliation</div>
+            <div class="ws-desc">Driven by OPP-01 report output. Raj Patel manually updates CRM for Carrefour FR, Boots UK, E.Leclerc, dm — the four Sanofi-migrated accounts with blocking discrepancies. Credit policy enforcement communication to all Account Managers. Gate: all 4 top accounts at £0 ERP–CRM delta before Phase 2 begins.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-tsa">R-03</span>
+          <div class="ws-body">
+            <div class="ws-title">TSA Connection Inventory — Formal handover priority list</div>
+            <div class="ws-desc">James Okafor formalises the 6-connection migration priority order and engages Sanofi Shared Services for TSA Annex C review. OPP-04 escalation log provides negotiation evidence. Deliverable: signed-off migration schedule with Sanofi. This is a dependency for H2 Phase 1 TSA handover.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">5</div></div>
+</div>
+
+<!-- PAGE 6 — NOW H1 PART 2: MILESTONE CALENDAR -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§2 Now — H1 Foundation Sprint (continued)</div>
+
+    <div class="sub-title">2.2 H1 Milestone Calendar</div>
+    <table>
+      <tr><th>Milestone</th><th>Target</th><th>Workstream</th><th>Owner</th><th>Gate Condition</th></tr>
+      <tr>
+        <td><strong>M-01</strong> Data access confirmed</td><td>Week 2</td>
+        <td><span class="badge badge-now">OPP-01 + OPP-04</span></td>
+        <td>James Okafor</td>
+        <td>SFTP extracts received + EDI event API access scoped in test environment</td>
+      </tr>
+      <tr>
+        <td><strong>M-02</strong> EDI SOP v1.0 published</td><td>Week 4</td>
+        <td><span class="badge badge-now">R-02</span></td>
+        <td>Alina Kovacs</td>
+        <td>Sophie Marchetti approval; SOP covers all 5 required sections; RACI updated with EDI row</td>
+      </tr>
+      <tr>
+        <td><strong>M-03</strong> OPP-04 MVP live</td><td>Week 6</td>
+        <td><span class="badge badge-now">OPP-04</span></td>
+        <td>James Okafor</td>
+        <td>P-01 and P-02 patterns detecting correctly in UAT on 3 weeks' historical data; TSA routing validated</td>
+      </tr>
+      <tr>
+        <td><strong>M-04</strong> Dedup task list approved</td><td>Week 6</td>
+        <td><span class="badge badge-now">R-05</span></td>
+        <td>Raj Patel</td>
+        <td>22 missing + 6 duplicate accounts confirmed; Credit Controller sign-off on remediation plan</td>
+      </tr>
+      <tr>
+        <td><strong>M-05</strong> OPP-01 first report delivered</td><td>Week 8</td>
+        <td><span class="badge badge-now">OPP-01</span></td>
+        <td>Raj Patel</td>
+        <td>Raj Patel confirms ≥90% classification accuracy on all 8 known discrepancy accounts</td>
+      </tr>
+      <tr>
+        <td><strong>M-06</strong> Top-4 accounts reconciled</td><td>Month 3</td>
+        <td><span class="badge badge-now">R-01</span></td>
+        <td>Raj Patel</td>
+        <td>Carrefour FR, Boots UK, E.Leclerc, dm — ERP = CRM for credit limit and payment terms; documented in credit management log</td>
+      </tr>
+      <tr>
+        <td><strong>M-07</strong> OPP-04 Full live</td><td>Month 4</td>
+        <td><span class="badge badge-now">OPP-04</span></td>
+        <td>James Okafor</td>
+        <td>All 5 patterns active; dashboard reviewed by James; seasonal parameters enabled; false-positive rate &lt;20%</td>
+      </tr>
+      <tr>
+        <td><strong>M-08</strong> CRM master remediated</td><td>Month 4</td>
+        <td><span class="badge badge-now">R-05</span></td>
+        <td>Raj Patel</td>
+        <td>340 ERP accounts = 340 CRM accounts; zero known duplicates; OPP-01 false-negative rate improved</td>
+      </tr>
+      <tr>
+        <td><strong>M-09</strong> TSA schedule agreed with Sanofi</td><td>Month 5</td>
+        <td><span class="badge badge-now">R-03</span></td>
+        <td>James Okafor</td>
+        <td>Priority migration order confirmed; Carrefour FR handover date agreed in writing with Sanofi Shared Services</td>
+      </tr>
+      <tr>
+        <td><strong>M-10</strong> Seasonal window (Oct–Nov) monitored live</td><td>Month 5–6</td>
+        <td><span class="badge badge-now">OPP-04 + R-04</span></td>
+        <td>James Okafor</td>
+        <td>EDI fulfilment rate ≥85% maintained through October cluster; &lt;5 stockout complaints equivalent</td>
+      </tr>
+    </table>
+
+    <div class="note-box amber">
+      <div class="note-box-title">H1 Capacity Constraint — Known Risk</div>
+      <p>Raj Patel (Credit Controller) is the single owner of R-01, R-05, and OPP-01. Weeks 8–12 represent the peak load: first OPP-01 report validation (M-05), top-4 account reconciliation (M-06), and dedup execution (M-08) overlap. The programme sponsor (Sophie Marchetti) should confirm Raj Patel's availability before this window — a 3-week slip here delays H2 R-01 completion by a full quarter. Risk: RK-01 from Report 03.</p>
+    </div>
+
+    <div class="sub-title">H1 End State — What "Done" Looks Like</div>
+    <ul class="milestone-list">
+      <li><span class="ms-dot now"></span>EDI SOP is published, referenced in onboarding, and the O2C RACI has an EDI row (R-02 complete)</li>
+      <li><span class="ms-dot now"></span>340 ERP accounts = 340 CRM accounts, zero known duplicates (R-05 complete)</li>
+      <li><span class="ms-dot now"></span>OPP-04 monitoring is live across all 14 EDI connections with TSA-aware routing (OPP-04 Full complete)</li>
+      <li><span class="ms-dot now"></span>OPP-01 weekly report has run for ≥8 weeks; top-4 account discrepancies closed (R-01 Phase 1 + OPP-01 MVP complete)</li>
+      <li><span class="ms-dot now"></span>TSA handover schedule agreed with Sanofi; Carrefour FR handover date confirmed (R-03 Phase 0 complete)</li>
+    </ul>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">6</div></div>
+</div>
+
+<!-- PAGE 7 — NEXT H2 -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§3 Next — H2 Stabilisation (Months 6–18)</div>
+
+    <div class="body-p">H2 converts H1 foundations into durable operating capability. The governance structures established in H1 are tested and refined. AI accuracy is formally assessed. The first TSA connection handovers begin — these are the highest-risk activities in the programme because they depend on Sanofi cooperation. H2 ends with Opella in control of at least two of the six Sanofi-managed EDI connections.</div>
+
+    <div class="hz-section">
+      <div class="hz-hdr next"><div class="hz-name">H2 Workstreams — Months 6–18</div><div class="hz-period">Continuing from H1 + new TSA handover activity</div></div>
+      <div class="hz-body">
+        <div class="ws-row">
+          <span class="ws-tag ws-gov">R-01</span>
+          <div class="ws-body">
+            <div class="ws-title">Credit Data Authority — Full enforcement + automated pipeline</div>
+            <div class="ws-desc">Phases 2–4 of R-01: expand reconciliation from top-4 to all 340 accounts; implement automated data sync between ERP and CRM (coordinated with Opella Digital); Credit Controller pipeline review becomes monthly rather than weekly for low-risk accounts. Milestone: zero manual credit decisions based on CRM-only data by month 12.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-ai">OPP-01</span>
+          <div class="ws-body">
+            <div class="ws-title">Credit Engine Mature — 3-month accuracy review + CRM auto-update proposal</div>
+            <div class="ws-desc">Formal accuracy review at month 9: if ≥95% classification accuracy sustained over 3 consecutive months, prepare business case for supervised CRM auto-update (the H2 automation gate from Report 04 §6). Marc Dupont and Raj Patel review. Legal/compliance review of FMCH requirements. Auto-update proposal is a proposal — not a commitment.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-ai">OPP-04</span>
+          <div class="ws-body">
+            <div class="ws-title">EDI Monitoring Mature — Apr–May seasonal window + escalation log mining</div>
+            <div class="ws-desc">April–May is the first full seasonal window after OPP-04 Full deployment. Threshold tightening protocol active (85% fulfilment rate floor). Escalation log mined for TSA migration evidence: all Sanofi-managed connection escalations since deployment compiled into a negotiation dossier for James Okafor's TSA review meetings.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-tsa">R-03</span>
+          <div class="ws-body">
+            <div class="ws-title">TSA Phase 1 — Carrefour France handover</div>
+            <div class="ws-desc">Carrefour France is the highest-priority connection (overdue per Report 02; "third time this quarter" escalation in CS log). Handover transfers EDI connection management from Sanofi IT helpdesk to Opella Digital. James Okafor leads technical migration. Same-day response replaces 24–48h Sanofi SLA. Post-handover: 90-day stabilisation period before declaring success.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-tsa">R-03</span>
+          <div class="ws-body">
+            <div class="ws-title">TSA Phase 2 — Boots UK legacy decommission</div>
+            <div class="ws-desc">Boots UK decommissions the legacy Sanofi EDI connection and establishes a direct Opella Digital connection. Boots UK is the second-largest account by credit limit (€1.2M ERP) and has recorded stockout and delist threat escalations. Phase 2 target: month 15, subject to Sanofi cooperation on Annex C handover terms.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-gov">R-01 + R-02</span>
+          <div class="ws-body">
+            <div class="ws-title">SOP &amp; credit governance audit</div>
+            <div class="ws-desc">6-month post-publication SOP effectiveness review (month 10): how many EDI incidents were resolved using the SOP? How many still required ad-hoc escalation? Outputs feed into SOP v2.0. Credit policy compliance audit: are all credit hold releases documented? Are all limit changes logged in the credit management log?</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-title">H2 End State — What "Done" Looks Like</div>
+    <ul class="milestone-list">
+      <li><span class="ms-dot next"></span>All 340 accounts have a consistent ERP = CRM credit record; automated sync prevents recurrence (R-01 complete)</li>
+      <li><span class="ms-dot next"></span>OPP-01 accuracy formally assessed; CRM auto-update proposal submitted or deferred with rationale (OPP-01 mature)</li>
+      <li><span class="ms-dot next"></span>Apr–May seasonal window managed with ≥91% EDI fulfilment rate; escalation dossier delivered to TSA programme (OPP-04 mature)</li>
+      <li><span class="ms-dot next"></span>Carrefour France EDI connection managed by Opella Digital (R-03 Phase 1 complete)</li>
+      <li><span class="ms-dot next"></span>Boots UK migration in progress or complete (R-03 Phase 2 underway)</li>
+      <li><span class="ms-dot next"></span>SOP v2.0 published following audit; credit governance audit complete (R-01 + R-02 audit)</li>
+    </ul>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">7</div></div>
+</div>
+
+<!-- PAGE 8 — LATER H3 -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§4 Later — H3 Transformation (Months 18–36+)</div>
+
+    <div class="body-p">H3 is the structural transformation horizon. The governance and AI tooling established in H1–H2 are mature enough to support more ambitious changes: completing the TSA migration (4 remaining connections), rationalising the SAP CRM architecture, and potentially enabling supervised AI automation where the H2 gating criteria are met. H3 is the least certain horizon — timelines depend on Sanofi's TSA cooperation, Opella's technology investment decisions, and the AI accuracy evidence from H2.</div>
+
+    <div class="hz-section">
+      <div class="hz-hdr later"><div class="hz-name">H3 Workstreams — Months 18–36+</div><div class="hz-period">Contingent on H2 outcomes · Sanofi TSA cooperation required</div></div>
+      <div class="hz-body">
+        <div class="ws-row">
+          <span class="ws-tag ws-tsa">R-03</span>
+          <div class="ws-body">
+            <div class="ws-title">TSA Phase 3 — E.Leclerc, dm, Lidl Europe, Coop Group</div>
+            <div class="ws-desc">The four remaining Sanofi-managed connections migrate to Opella Digital in priority order: E.Leclerc (France, proximity to Carrefour FR infrastructure), dm (DACH cluster), Lidl Europe and Coop Group together (EU generic). Full TSA migration completion target: Q3 2026 (month 24). At completion: all 14 EDI connections managed by Opella Digital — no Sanofi dependency for EDI operations.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-gov">R-01</span>
+          <div class="ws-body">
+            <div class="ws-title">SAP CRM rationalisation decision</div>
+            <div class="ws-desc">By month 18, the credit data authority is fully enforced via ERP. The SAP CRM system's credit-related fields are either (a) reliably auto-synced from ERP (lower cost, lower risk), or (b) candidates for removal if OPP-01 automation is approved. Technology leadership (James Okafor + Marc Dupont) makes the rationalisation decision based on H2 AI accuracy evidence and IT cost analysis. This is a decision gate — not a committed workstream.</div>
+          </div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-tag ws-ai">OPP-01 + OPP-04</span>
+          <div class="ws-body">
+            <div class="ws-title">AI supervised automation assessment</div>
+            <div class="ws-desc">If both OPP-01 and OPP-04 have met the H2 gating criteria (≥95% accuracy over 3+ months; business owner sign-off; FMCH compliance review complete), H3 scopes supervised automation: OPP-01 writes CRM updates directly (Credit Controller reviews exceptions only); OPP-04 dispatches Sanofi helpdesk tickets automatically for P2/P3 alerts (CS team reviews P1 only). Scope is narrow and reversible. Full automation remains out of scope.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-title">H3 Contingencies and Decision Points</div>
+    <table>
+      <tr><th>Decision Point</th><th>Owner</th><th>Trigger</th><th>Options</th></tr>
+      <tr>
+        <td><strong>TSA Phase 3 scope</strong><br><span style="font-size:8.5px;color:#6b7280;">Proceed with remaining 4 connections</span></td>
+        <td>James Okafor, Sophie Marchetti</td>
+        <td>Boots UK Phase 2 complete; Sanofi cooperation confirmed for Annex C renewal</td>
+        <td>Proceed as planned · Defer individual connections · Negotiate accelerated exit from TSA</td>
+      </tr>
+      <tr>
+        <td><strong>CRM rationalisation</strong><br><span style="font-size:8.5px;color:#6b7280;">Remove or retain CRM credit fields</span></td>
+        <td>Marc Dupont, James Okafor</td>
+        <td>Month 18 IT architecture review; OPP-01 automation gate outcome</td>
+        <td>Auto-sync (retain CRM, sync from ERP) · Remove credit fields from CRM · Full CRM replacement (H4+)</td>
+      </tr>
+      <tr>
+        <td><strong>AI automation gate</strong><br><span style="font-size:8.5px;color:#6b7280;">OPP-01 CRM write-back / OPP-04 auto-dispatch</span></td>
+        <td>Raj Patel (OPP-01), James Okafor (OPP-04), Isabelle Fontaine (compliance)</td>
+        <td>≥95% accuracy sustained; legal review complete; business owner sign-off</td>
+        <td>Approve narrow automation · Approve with additional controls · Defer to next review cycle</td>
+      </tr>
+    </table>
+
+    <div class="note-box purple">
+      <div class="note-box-title">H3 is a Horizon, Not a Commitment</div>
+      <p>H3 workstreams are contingent on H1 and H2 outcomes. If TSA cooperation delays Phase 1 beyond month 12, Phase 3 timelines shift accordingly. If OPP-01 accuracy does not meet the gating criteria by month 15, the automation assessment is deferred — not abandoned. The programme sponsor (Sophie Marchetti) reviews H3 scope at the month 18 checkpoint and re-plans based on H2 actuals.</p>
+    </div>
+
+    <div class="sub-title">H3 End State — What "Done" Looks Like</div>
+    <ul class="milestone-list">
+      <li><span class="ms-dot later"></span>All 14 EDI connections managed by Opella Digital — zero Sanofi IT dependencies for EDI operations (R-03 complete)</li>
+      <li><span class="ms-dot later"></span>SAP CRM credit data rationalised — all records auto-synced from ERP or credit fields removed (R-01 + CRM decision)</li>
+      <li><span class="ms-dot later"></span>AI automation scope approved (or formally deferred) based on H2 accuracy evidence (OPP-01 + OPP-04 gate)</li>
+      <li><span class="ms-dot later"></span>O2C domain operates without carve-out inheritance debt — no Sanofi-era workarounds, no undocumented processes</li>
+    </ul>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">8</div></div>
+</div>
+
+<!-- PAGE 9 — DEPENDENCY MAP -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§5 Master Dependency Map</div>
+
+    <div class="body-p">Nine dependency relationships govern the sequencing of the seven workstreams. Five are hard enables (one workstream must reach a specific milestone before another can proceed to its gate-locked phase). Four are soft informs (one workstream's output improves another's accuracy or scope, but does not block it).</div>
+
+    <svg width="722" height="380" viewBox="0 0 722 380" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 6px;">
+      <defs>
+        <marker id="dep-hard" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#1a2f50"/></marker>
+        <marker id="dep-soft" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#9ca3af"/></marker>
+        <marker id="dep-ai" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#6d28d9"/></marker>
+      </defs>
+
+      <!-- Workstream nodes -->
+      <!-- R-02 -->
+      <rect x="10" y="60" width="90" height="36" rx="6" fill="#1a2f50"/>
+      <text x="55" y="75" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-02</text>
+      <text x="55" y="88" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.7)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI SOP &amp; RACI</text>
+
+      <!-- R-05 -->
+      <rect x="10" y="130" width="90" height="36" rx="6" fill="#1a2f50"/>
+      <text x="55" y="145" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-05</text>
+      <text x="55" y="158" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.7)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Customer Master</text>
+
+      <!-- OPP-04 -->
+      <rect x="200" y="30" width="100" height="36" rx="6" fill="#6d28d9"/>
+      <text x="250" y="45" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-04</text>
+      <text x="250" y="58" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.7)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI Monitoring AI</text>
+
+      <!-- OPP-01 -->
+      <rect x="200" y="120" width="100" height="36" rx="6" fill="#6d28d9"/>
+      <text x="250" y="135" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">OPP-01</text>
+      <text x="250" y="148" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.7)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit Engine AI</text>
+
+      <!-- R-04 -->
+      <rect x="200" y="210" width="100" height="36" rx="6" fill="#1a2f50"/>
+      <text x="250" y="225" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-04</text>
+      <text x="250" y="238" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.7)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">EDI Seasonal Ops</text>
+
+      <!-- R-01 -->
+      <rect x="420" y="90" width="100" height="36" rx="6" fill="#1a2f50"/>
+      <text x="470" y="105" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-01</text>
+      <text x="470" y="118" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.7)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Credit Authority</text>
+
+      <!-- R-03 -->
+      <rect x="420" y="210" width="100" height="36" rx="6" fill="rgba(217,119,6,0.8)"/>
+      <text x="470" y="225" text-anchor="middle" font-size="9" font-weight="800" fill="#fff" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">R-03</text>
+      <text x="470" y="238" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.85)" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">TSA Migration</text>
+
+      <!-- AI Gate H2 -->
+      <rect x="610" y="90" width="104" height="36" rx="6" fill="rgba(124,58,237,0.15)" stroke="rgba(124,58,237,0.5)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="662" y="105" text-anchor="middle" font-size="9" font-weight="800" fill="#7c3aed" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">H2 AI Gate</text>
+      <text x="662" y="118" text-anchor="middle" font-size="7.5" fill="#7c3aed" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Automation assess.</text>
+
+      <!-- TSA Complete H3 -->
+      <rect x="610" y="210" width="104" height="36" rx="6" fill="rgba(217,119,6,0.1)" stroke="rgba(217,119,6,0.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="662" y="225" text-anchor="middle" font-size="9" font-weight="800" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">H3 TSA Done</text>
+      <text x="662" y="238" text-anchor="middle" font-size="7.5" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">All 6 handed over</text>
+
+      <!-- HARD enables (navy solid arrows) -->
+      <!-- R-02 → OPP-04 (routing logic) -->
+      <path d="M100 78 Q150 48 198 48" stroke="#1a2f50" stroke-width="1.5" fill="none" marker-end="url(#dep-hard)"/>
+      <text x="148" y="44" text-anchor="middle" font-size="7.5" fill="#1a2f50" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-style="italic">enables routing</text>
+
+      <!-- OPP-01 → R-01 (report drives action) -->
+      <path d="M300 138 Q360 108 418 108" stroke="#6d28d9" stroke-width="1.5" fill="none" marker-end="url(#dep-hard)"/>
+      <text x="360" y="104" text-anchor="middle" font-size="7.5" fill="#6d28d9" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-style="italic">enables decisions</text>
+
+      <!-- OPP-04 → R-03 (escalation log evidence) -->
+      <path d="M300 58 Q380 150 418 218" stroke="#6d28d9" stroke-width="1.5" fill="none" marker-end="url(#dep-ai)"/>
+      <text x="375" y="145" text-anchor="middle" font-size="7.5" fill="#6d28d9" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-style="italic">informs evidence</text>
+
+      <!-- OPP-04 → R-04 (monitoring enables seasonal) -->
+      <path d="M250 66 L250 208" stroke="#6d28d9" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#dep-soft)"/>
+      <text x="220" y="145" text-anchor="middle" font-size="7.5" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-style="italic">informs</text>
+
+      <!-- R-05 → OPP-01 (cleaner data) -->
+      <path d="M100 148 Q150 148 198 138" stroke="#9ca3af" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#dep-soft)"/>
+      <text x="148" y="144" text-anchor="middle" font-size="7.5" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-style="italic">informs accuracy</text>
+
+      <!-- R-01 → H2 AI Gate -->
+      <path d="M520 108 L608 108" stroke="#1a2f50" stroke-width="1.5" fill="none" marker-end="url(#dep-hard)"/>
+      <text x="566" y="104" text-anchor="middle" font-size="7.5" fill="#1a2f50" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-style="italic">enables</text>
+
+      <!-- OPP-01 + OPP-04 → H2 AI Gate -->
+      <path d="M300 130 Q460 90 608 102" stroke="#6d28d9" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#dep-soft)"/>
+      <text x="450" y="80" text-anchor="middle" font-size="7.5" fill="#6d28d9" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-style="italic">accuracy evidence</text>
+
+      <!-- R-03 → H3 TSA Done -->
+      <path d="M520 228 L608 228" stroke="rgba(217,119,6,0.8)" stroke-width="1.5" fill="none" marker-end="url(#dep-hard)"/>
+      <text x="566" y="224" text-anchor="middle" font-size="7.5" fill="#92400e" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-style="italic">completes</text>
+
+      <!-- R-04 → R-03 (seasonal data informs TSA priority) -->
+      <path d="M300 228 Q360 228 418 228" stroke="#9ca3af" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#dep-soft)"/>
+      <text x="360" y="224" text-anchor="middle" font-size="7.5" fill="#9ca3af" font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-style="italic">informs priority</text>
+
+      <!-- Legend -->
+      <line x1="10" y1="310" x2="60" y2="310" stroke="#1a2f50" stroke-width="1.5" marker-end="url(#dep-hard)"/>
+      <text x="70" y="314" font-size="8" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Hard enables (must-complete gate)</text>
+      <line x1="10" y1="330" x2="60" y2="330" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#dep-soft)"/>
+      <text x="70" y="334" font-size="8" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Soft informs (improves but does not block)</text>
+      <line x1="10" y1="350" x2="60" y2="350" stroke="#6d28d9" stroke-width="1.5" marker-end="url(#dep-ai)"/>
+      <text x="70" y="354" font-size="8" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">AI use case dependency</text>
+      <rect x="300" y="300" width="12" height="12" rx="3" fill="#1a2f50"/>
+      <text x="318" y="311" font-size="8" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">Governance / Process workstream</text>
+      <rect x="300" y="320" width="12" height="12" rx="3" fill="#6d28d9"/>
+      <text x="318" y="331" font-size="8" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">AI use case workstream</text>
+      <rect x="300" y="340" width="12" height="12" rx="3" fill="rgba(217,119,6,0.8)"/>
+      <text x="318" y="351" font-size="8" fill="#374151" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">TSA programme workstream</text>
+    </svg>
+    <div class="caption">Figure 2 — Master dependency map; dashed border nodes = H2/H3 gate outcomes, not active workstreams</div>
+
+    <div class="sub-title">Critical Path</div>
+    <div class="body-p">The critical path is: <strong>Data access (W1–2) → OPP-01 MVP (W8) → R-01 Phase 1 (M3) → R-01 Full (H2 M12) → H2 AI Gate (M15) → H3 automation scope (M18)</strong>. Any slip in Raj Patel's capacity in weeks 8–12 cascades through R-01 into the H2 AI gate. The TSA programme has its own parallel critical path governed by Sanofi cooperation, not Opella delivery speed.</div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">9</div></div>
+</div>
+
+<!-- PAGE 10 — GOVERNANCE & CHANGE MANAGEMENT -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§6 Programme Governance &amp; Change Management</div>
+
+    <div class="sub-title">Programme Structure</div>
+    <table>
+      <tr><th>Role</th><th>Person</th><th>Accountability</th><th>Cadence</th></tr>
+      <tr><td><strong>Programme Sponsor</strong></td><td>Sophie Marchetti (VP Commercial Ops)</td><td>Budget approval; horizon gate sign-off; Sanofi executive relationship for TSA</td><td>Monthly steering</td></tr>
+      <tr><td><strong>Programme Manager</strong></td><td>TBC — to be nominated by Sophie Marchetti</td><td>Day-to-day delivery tracking; workstream coordination; risk escalation</td><td>Weekly</td></tr>
+      <tr><td><strong>Credit Workstream Lead</strong></td><td>Raj Patel (Credit Controller)</td><td>R-01, R-05, OPP-01 — all credit data workstreams</td><td>Weekly check-in</td></tr>
+      <tr><td><strong>Digital Workstream Lead</strong></td><td>James Okafor (Opella Digital)</td><td>R-03, R-04, OPP-04 — all EDI and TSA workstreams</td><td>Weekly check-in</td></tr>
+      <tr><td><strong>Process Lead</strong></td><td>Alina Kovacs (CS Lead Europe)</td><td>R-02 — SOP authorship and CS team adoption</td><td>Fortnightly</td></tr>
+      <tr><td><strong>Finance Oversight</strong></td><td>Marc Dupont (Finance Director)</td><td>Credit policy governance; H2 AI gate approval; CRM rationalisation decision</td><td>Monthly</td></tr>
+      <tr><td><strong>Legal &amp; Compliance</strong></td><td>Isabelle Fontaine</td><td>FMCH regulatory review for H2 automation gate; TSA legal terms review</td><td>As required (milestones M-06, H2 gate)</td></tr>
+    </table>
+
+    <div class="sub-title">Governance Rhythm</div>
+    <div class="spec-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">
+        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#6b7280;margin-bottom:6px;">Weekly (Workstream Leads)</div>
+        <ul style="list-style:none;">
+          <li style="font-size:9px;color:#374151;line-height:1.6;padding-left:10px;position:relative;margin-bottom:3px;"><span style="position:absolute;left:0;color:#3665a8;">–</span>Milestone progress vs plan</li>
+          <li style="font-size:9px;color:#374151;line-height:1.6;padding-left:10px;position:relative;margin-bottom:3px;"><span style="position:absolute;left:0;color:#3665a8;">–</span>Blockers and capacity flags</li>
+          <li style="font-size:9px;color:#374151;line-height:1.6;padding-left:10px;position:relative;margin-bottom:3px;"><span style="position:absolute;left:0;color:#3665a8;">–</span>AI alert false-positive rate (OPP-04)</li>
+          <li style="font-size:9px;color:#374151;line-height:1.6;padding-left:10px;position:relative;"><span style="position:absolute;left:0;color:#3665a8;">–</span>Credit reconciliation exceptions (OPP-01)</li>
+        </ul>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;">
+        <div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#6b7280;margin-bottom:6px;">Monthly (Steering with Sophie Marchetti)</div>
+        <ul style="list-style:none;">
+          <li style="font-size:9px;color:#374151;line-height:1.6;padding-left:10px;position:relative;margin-bottom:3px;"><span style="position:absolute;left:0;color:#3665a8;">–</span>Horizon milestone status (RAG)</li>
+          <li style="font-size:9px;color:#374151;line-height:1.6;padding-left:10px;position:relative;margin-bottom:3px;"><span style="position:absolute;left:0;color:#3665a8;">–</span>KPI dashboard (§7) review</li>
+          <li style="font-size:9px;color:#374151;line-height:1.6;padding-left:10px;position:relative;margin-bottom:3px;"><span style="position:absolute;left:0;color:#3665a8;">–</span>TSA programme update from James Okafor</li>
+          <li style="font-size:9px;color:#374151;line-height:1.6;padding-left:10px;position:relative;"><span style="position:absolute;left:0;color:#3665a8;">–</span>Risk register review</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sub-title">Change Management — Stakeholder Impact</div>
+    <div class="sh-grid">
+      <div class="sh-card">
+        <div class="sh-name">Raj Patel — Credit Controller</div>
+        <div class="sh-role">Highest change impact: new weekly AI report to review; manual reconciliation task in M3; CRM update discipline enforced</div>
+        <div class="sh-pills">
+          <span class="sh-pill">New tool: OPP-01 report</span>
+          <span class="sh-pill">Policy enforcement role</span>
+          <span class="sh-pill">Peak W8–12 capacity demand</span>
+        </div>
+      </div>
+      <div class="sh-card">
+        <div class="sh-name">Alina Kovacs — CS Lead Europe</div>
+        <div class="sh-role">SOP author (R-02) and first adopter of OPP-04 alert system; CS team training required before alert go-live</div>
+        <div class="sh-pills">
+          <span class="sh-pill">SOP author + publisher</span>
+          <span class="sh-pill">Alert triage training needed</span>
+          <span class="sh-pill">Seasonal protocol owner</span>
+        </div>
+      </div>
+      <div class="sh-card">
+        <div class="sh-name">James Okafor — Opella Digital</div>
+        <div class="sh-role">Integration work for both AI use cases + TSA negotiation lead; risk of competing demands between OPP-04 build and R-03 TSA engagement</div>
+        <div class="sh-pills">
+          <span class="sh-pill">EDI API access provider</span>
+          <span class="sh-pill">TSA programme lead</span>
+          <span class="sh-pill">OPP-04 technical owner</span>
+        </div>
+      </div>
+      <div class="sh-card">
+        <div class="sh-name">Account Managers (Thomas Beaumont, et al.)</div>
+        <div class="sh-role">Must stop using CRM credit limits as authoritative source — the most visible behavioural change for the commercial team. Requires clear communication from Sophie Marchetti and Marc Dupont.</div>
+        <div class="sh-pills">
+          <span class="sh-pill">Credit policy enforcement</span>
+          <span class="sh-pill">CRM usage guidance change</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-box amber">
+      <div class="note-box-title">From Discovery to Approved Programme</div>
+      <p>This roadmap is a discovery output. To become an approved programme it requires: (1) Sophie Marchetti formally accepts the roadmap at the June 5 demo steering meeting; (2) Programme Manager nominated within 2 weeks; (3) H1 workstream budgets confirmed (primarily internal time + AuroPro AI platform licence); (4) IT access for SFTP extracts confirmed by James Okafor. These four steps are the pre-conditions for Week 1 activities to begin on schedule.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">10</div></div>
+</div>
+
+<!-- PAGE 11 — SUCCESS MEASURES -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">§7 Success Measures &amp; KPI Dashboard</div>
+
+    <div class="body-p">The programme KPIs are organised by the pain point they address. Each KPI has a baseline (from the discovery data), an H1 target (achievable within the foundation sprint), and an H2+ target (the end-state ambition). All baselines are sourced from the 12 synthetic input documents analysed during discovery.</div>
+
+    <table>
+      <tr>
+        <th>KPI</th><th>Pain Point</th><th>Baseline</th><th>H1 Target</th><th>H2+ Target</th><th>Workstream</th>
+      </tr>
+      <tr>
+        <td><strong>ERP–CRM credit limit delta — top 8 accounts</strong></td>
+        <td>PP-01</td>
+        <td style="color:#991b1b;font-weight:700;">€2.25M overstatement</td>
+        <td>€0 for top 4 (€1.45M) by M3</td>
+        <td>€0 across all 340 accounts</td>
+        <td>R-01 + OPP-01</td>
+      </tr>
+      <tr>
+        <td><strong>Weekly credit discrepancy detection rate</strong></td>
+        <td>PP-01</td>
+        <td style="color:#991b1b;font-weight:700;">Manual, ad-hoc (0% automated)</td>
+        <td>100% automated detection from Week 8</td>
+        <td>100% sustained; 0 manual checks needed</td>
+        <td>OPP-01</td>
+      </tr>
+      <tr>
+        <td><strong>EDI SOP coverage</strong></td>
+        <td>PP-02</td>
+        <td style="color:#991b1b;font-weight:700;">0 SOP steps covering EDI; 0 RACI rows</td>
+        <td>EDI SOP v1.0 published (Week 4); RACI updated</td>
+        <td>SOP v2.0 post-audit; 100% CS team trained</td>
+        <td>R-02</td>
+      </tr>
+      <tr>
+        <td><strong>EDI incident mean time to detect</strong></td>
+        <td>PP-04</td>
+        <td style="color:#991b1b;font-weight:700;">24–48h (reactive, customer-reported)</td>
+        <td>&lt;15 min (P-01 + P-02 patterns, Week 6)</td>
+        <td>&lt;15 min across all 5 patterns year-round</td>
+        <td>OPP-04</td>
+      </tr>
+      <tr>
+        <td><strong>EDI fulfilment rate</strong></td>
+        <td>PP-04</td>
+        <td style="color:#991b1b;font-weight:700;">59% during cluster periods (Apr–May, Oct–Nov)</td>
+        <td>≥85% in first monitored seasonal window (Oct–Nov)</td>
+        <td>≥91% year-round</td>
+        <td>OPP-04 + R-04</td>
+      </tr>
+      <tr>
+        <td><strong>Stockout complaints (seasonal windows)</strong></td>
+        <td>PP-04</td>
+        <td style="color:#991b1b;font-weight:700;">19 in 2025 (10 Apr–May + 9 Oct–Nov)</td>
+        <td>&lt;5 equivalent in first post-deployment window</td>
+        <td>&lt;2 per seasonal window</td>
+        <td>OPP-04 + R-04</td>
+      </tr>
+      <tr>
+        <td><strong>Sanofi-managed EDI connections remaining</strong></td>
+        <td>PP-03</td>
+        <td style="color:#991b1b;font-weight:700;">6 of 14 connections (43%)</td>
+        <td>TSA schedule agreed; Carrefour FR handover in H2</td>
+        <td>0 Sanofi-managed connections by end H3</td>
+        <td>R-03</td>
+      </tr>
+      <tr>
+        <td><strong>EDI alert mis-routing rate</strong></td>
+        <td>PP-03</td>
+        <td style="color:#991b1b;font-weight:700;">Not measured (no alert system exists)</td>
+        <td>0% mis-routing from Week 6 go-live</td>
+        <td>0% sustained; auto-updated as connections hand over</td>
+        <td>OPP-04</td>
+      </tr>
+      <tr>
+        <td><strong>CRM vs ERP account count parity</strong></td>
+        <td>PP-05</td>
+        <td style="color:#991b1b;font-weight:700;">340 ERP vs 318 CRM (22 missing; 6 duplicate)</td>
+        <td>340 ERP = 340 CRM by Month 4</td>
+        <td>Automated parity check weekly via OPP-01</td>
+        <td>R-05 + OPP-01</td>
+      </tr>
+      <tr>
+        <td><strong>OPP-01 classification accuracy</strong></td>
+        <td>PP-01 + PP-05</td>
+        <td>Baseline set at Week 8 launch</td>
+        <td>≥90% (Credit Controller validates at launch)</td>
+        <td>≥95% sustained ×3 months (H2 automation gate)</td>
+        <td>OPP-01</td>
+      </tr>
+      <tr>
+        <td><strong>OPP-04 false positive rate</strong></td>
+        <td>PP-04</td>
+        <td>Baseline set at Week 6 launch</td>
+        <td>&lt;20% (threshold for alert fatigue)</td>
+        <td>&lt;10% with tuned thresholds by M6</td>
+        <td>OPP-04</td>
+      </tr>
+    </table>
+
+    <div class="note-box green">
+      <div class="note-box-title">KPI Review Cadence</div>
+      <p>All KPIs are reviewed monthly at the steering meeting. EDI fulfilment rate and OPP-04 false-positive rate are reviewed weekly by James Okafor. OPP-01 classification accuracy is reviewed by Raj Patel on each weekly report receipt. Quarterly: full KPI dashboard presented to Sophie Marchetti with trend analysis and H2/H3 reforecast.</p>
+    </div>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">11</div></div>
+</div>
+
+<!-- PAGE 12 — APPENDIX -->
+<div class="page">
+  <div class="ph"><div class="ph-left">AuroPro · Autonomous Discovery Platform</div><div class="ph-right">Opella Europe · O2C · Confidential</div></div>
+  <div class="pc">
+    <div class="pg-sec">Appendix A — Decision Log &amp; Alternatives Considered</div>
+
+    <div class="sub-title">A.1 Sequencing Decisions</div>
+    <table>
+      <tr><th>Decision</th><th>Choice Made</th><th>Alternative Considered</th><th>Rationale</th></tr>
+      <tr>
+        <td>R-02 before OPP-04</td>
+        <td>R-02 (SOP) launches in Week 1; OPP-04 in Week 3</td>
+        <td>Launch OPP-04 first — faster time-to-value on EDI monitoring</td>
+        <td>OPP-04 alert routing references RACI roles not yet documented. Routing without RACI creates ambiguity on who owns Sanofi-managed escalation alerts.</td>
+      </tr>
+      <tr>
+        <td>OPP-01 before R-01 Phase 1</td>
+        <td>OPP-01 MVP launches Week 8; R-01 remediation begins Month 3</td>
+        <td>Run manual reconciliation first, then build AI tool on clean data</td>
+        <td>The discrepancy set is not fully known without the AI tool. Manual-first would require a manual export and comparison — slower and more error-prone than the AI pipeline. OPP-01 report identifies the complete remediation task list.</td>
+      </tr>
+      <tr>
+        <td>H1 human-in-the-loop for both AI use cases</td>
+        <td>No automated write-back or alert dispatch in H1</td>
+        <td>Enable CRM auto-update immediately once OPP-01 accuracy is validated</td>
+        <td>FMCH compliance review not complete. Institutional confidence in AI accuracy not yet established. Legal sign-off required (Isabelle Fontaine). H2 gate process ensures this is revisited with evidence.</td>
+      </tr>
+      <tr>
+        <td>Carrefour France as first TSA handover</td>
+        <td>Carrefour FR (connection already overdue)</td>
+        <td>Start with dm (DACH) — smaller account, lower risk</td>
+        <td>CS escalation log records "third time this quarter for Carrefour FR." Commercial risk from the highest-value French connection outweighs migration complexity. Boots UK is second on the same rationale (delist threat recorded).</td>
+      </tr>
+    </table>
+
+    <div class="sub-title">A.2 Out-of-Scope Decisions</div>
+    <table>
+      <tr><th>Item</th><th>Excluded From</th><th>Rationale</th></tr>
+      <tr><td>Multi-domain discovery (supply chain, finance)</td><td>All horizons</td><td>Demo scope: one working end-to-end pipeline against 12 O2C inputs. Multi-domain is H4+ pending separate business case.</td></tr>
+      <tr><td>Web UI for OPP-01 or OPP-04</td><td>H1, H2</td><td>Email delivery and dashboard sufficient for H1–H2. Web UI adds build complexity without proportionate H1 value. Review at H2 end-state.</td></tr>
+      <tr><td>Sanofi TSA renegotiation (accelerated exit)</td><td>R-03 scope</td><td>TSA exit terms are a legal matter requiring Marc Dupont + Isabelle Fontaine + Sophie Marchetti. Not within programme manager remit. Flagged as a separate workstream if Sanofi non-cooperation risk (RK-02) materialises.</td></tr>
+      <tr><td>Full ERP/CRM system replacement</td><td>H1, H2, H3</td><td>Strategy profile is Consolidate + Modernise, not Replace. SAP S/4HANA is the designated system of record. CRM rationalisation is a H3 decision gate, not a programme workstream.</td></tr>
+    </table>
+
+    <div class="sub-title">A.3 Full Traceability — Pain Points to Programme Milestones</div>
+    <table>
+      <tr><th>Pain Point</th><th>Report 02</th><th>Report 03 Rec.</th><th>Report 04 AI</th><th>Report 05 Milestone</th></tr>
+      <tr><td>PP-01 Credit Data Integrity</td><td>HIGH/Blocking</td><td>R-01</td><td>OPP-01</td><td>M-05 (first report), M-06 (top-4 reconciled)</td></tr>
+      <tr><td>PP-02 EDI Governance Vacuum</td><td>HIGH/Blocking</td><td>R-02</td><td>—</td><td>M-02 (SOP published Week 4)</td></tr>
+      <tr><td>PP-03 TSA Connection Dependency</td><td>HIGH/Amber</td><td>R-03</td><td>OPP-04 (evidence)</td><td>M-09 (TSA schedule agreed Month 5)</td></tr>
+      <tr><td>PP-04 EDI Channel Instability</td><td>Medium</td><td>R-04</td><td>OPP-04</td><td>M-03 (OPP-04 MVP Week 6), M-07 (full), M-10 (seasonal)</td></tr>
+      <tr><td>PP-05 Onboarding Data Risk</td><td>Medium</td><td>R-05</td><td>OPP-01 (accuracy)</td><td>M-04 (task list), M-08 (CRM remediated Month 4)</td></tr>
+    </table>
+  </div>
+  <div class="pf"><div class="pf-note">ADP-O2C-RPT-05 · Transformation Roadmap · Confidential</div><div class="pf-num">12</div></div>
+</div>
+
+</body>
+</html>

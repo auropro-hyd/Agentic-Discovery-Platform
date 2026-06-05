@@ -8,6 +8,7 @@ v1/.env
 
 # ── Claude / tooling local state ──────────────────────────────────
 .claude/
+.playwright-mcp/
 
 # ── Python runtime ────────────────────────────────────────────────
 __pycache__/

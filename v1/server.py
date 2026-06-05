@@ -6,15 +6,21 @@ streams them to the browser as Server-Sent Events (SSE). No new Python dependenc
 + subprocess only, so the engine stays dependency-light.
 
 Endpoints
-  POST /api/run        {domain, mode}  -> start a run; returns {run_id}. mode: "live" | "golden".
+  GET  /api/cases                      -> the saved case list (one: Opella O2C) for the dashboard.
+  GET  /api/case/:id                   -> full stage metadata + archive/ URLs for a case.
+  POST /api/run        {domain}        -> start a genuinely LIVE run (--fresh); returns {run_id}.
   GET  /api/stream/:id                 -> SSE stream of phase/activity/done events for that run.
   POST /api/feedback   {run_id, note}  -> record SME (discovery-copilot) feedback for the run.
   GET  /api/reports/:domain            -> the synthesis JSON (post-render) if present.
   GET  /reports/:domain/...            -> static report HTML/assets from out/<domain>/.
+  GET  /archive/...                    -> the curated demo suite (preview/output/input), verbatim.
   GET  /healthz                        -> ok.
 
-The phase model mirrors run.py's stdout and Akhilesh's 6-stage flow:
-  upload -> assessment -> discovery_copilot -> analysis -> preview -> report_generation
+A triggered run is always live and takes the real time it needs; the displayed case deliverable is
+the curated archive/ suite. The phase model mirrors run.py's stdout and Akhilesh's 6-stage flow:
+  ingestion -> domain analysis -> discovery copilot -> transformation journey -> findings review
+  -> report generation   (stage ids kept stable: upload/assessment/discovery_copilot/analysis/
+  preview/report_generation; the UI renders the new labels.)
 """
 from __future__ import annotations
 
@@ -28,8 +34,65 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+REPO = ROOT.parent                       # repo root (v1/ lives one level down)
 OUT = ROOT / "out"
 PORT = int(os.environ.get("DISCOVERY_UI_PORT", "8742"))
+
+
+def _find_archive() -> Path:
+    """Locate the curated demo-artefacts dir at the repo root. Resolved case-INSENSITIVELY so it
+    works whether the dir is `archive` or `Archive` and on case-sensitive filesystems (Linux CI)."""
+    for child in REPO.iterdir():
+        if child.is_dir() and child.name.lower() == "archive":
+            return child
+    return REPO / "Archive"              # sensible default if absent (routes will 404 cleanly)
+
+
+ARCHIVE = _find_archive()                # Akhilesh's curated demo artefacts (input/preview/output)
+
+# ── The saved case shown on the dashboard ─────────────────────────────────────
+# A single, pre-executed demo case. Its STAGE CONTENT is the curated archive/ suite (served as-is,
+# never re-parsed). The fields below are presentation metadata for the dashboard card + stage shells
+# — the gap-gate counts mirror the Copilot audit trail (archive/preview/07-copilot-audit-trail.html);
+# the duration is a deliberately-realistic figure for the "discovery took ~34 min" narrative.
+OPELLA_INPUT_DOCS = [
+    {"name": "accounts-receivable-review-notes-q4-2025.txt", "kind": "txt", "kb": 3},
+    {"name": "credit-management-policy-opella-europe.pdf", "kind": "pdf", "kb": 28},
+    {"name": "customer-service-escalation-log-2025.csv", "kind": "csv", "kb": 20},
+    {"name": "edi-dispute-resolution-cs-working-notes.txt", "kind": "txt", "kb": 6},
+    {"name": "edi-integration-register-opella-europe.pdf", "kind": "pdf", "kb": 19},
+    {"name": "o2c-process-raci-opella-europe.pdf", "kind": "pdf", "kb": 14},
+    {"name": "order-flow-analysis-export-2025.csv", "kind": "csv", "kb": 737},
+    {"name": "order-management-sop-opella-europe.pdf", "kind": "pdf", "kb": 45},
+    {"name": "retail-customer-onboarding-guide-opella-europe.pdf", "kind": "pdf", "kb": 23},
+    {"name": "sanofi-consumer-healthcare-o2c-sop-2023.pdf", "kind": "pdf", "kb": 34},
+    {"name": "sap-crm-customer-export.csv", "kind": "csv", "kb": 29},
+    {"name": "sap-s4-customer-master-export.csv", "kind": "csv", "kb": 21},
+]
+# the 6 client-facing report deliverables (archive/output/), in suite order
+OPELLA_REPORTS = [
+    {"id": "01", "title": "Current State Assessment", "file": "report-01-current-state.html"},
+    {"id": "02", "title": "Pain Points & Opportunities", "file": "report-02-pain-points.html"},
+    {"id": "03", "title": "Transformation Recommendation", "file": "report-03-transformation.html"},
+    {"id": "04", "title": "AI Opportunity Portfolio", "file": "report-04-ai-opportunity.html"},
+    {"id": "05", "title": "Transformation Roadmap", "file": "report-05-roadmap.html"},
+    {"id": "06", "title": "Supporting Artefacts", "file": "report-06-artefacts.html"},
+]
+OPELLA_CASE = {
+    "id": "opella-o2c",
+    "title": "Opella · Order-to-Cash",
+    "domain": "o2c",
+    "client": "Opella (Sanofi Consumer Healthcare)",
+    "run_date": "2026-06-04",
+    "duration_minutes": 34,           # presentation figure for the discovery-took-~34-min narrative
+    "stage": "report_generation",     # the case is fully complete, signed off
+    "status": "Signed off",
+    "doc_count": len(OPELLA_INPUT_DOCS),
+    # gap-gate summary — mirrors archive/preview/07-copilot-audit-trail.html
+    "gaps": {"questions": 9, "high_resolved": 3, "clarifications": 2, "carried_forward": 4},
+    "findings": 5,
+    "opportunities": 5,
+}
 
 # ── phase map: (id, label) in Akhilesh's order. Stages light up as run.py emits its signals. ──
 STAGES = [
@@ -56,10 +119,9 @@ _PHASE_SIGNALS: list[tuple[str, str]] = [
 class Run:
     """One pipeline run: its subprocess, an event queue per subscriber, and shared feedback."""
 
-    def __init__(self, domain: str, mode: str) -> None:
+    def __init__(self, domain: str) -> None:
         self.id = uuid.uuid4().hex[:12]
         self.domain = domain
-        self.mode = mode  # "live" | "golden"
         self.events: list[dict] = []  # full history (so a late subscriber can replay)
         self.subscribers: list[queue.Queue] = []
         self.done = False
@@ -85,12 +147,11 @@ RUNS: dict[str, Run] = {}
 
 
 def _spawn(run: Run) -> None:
-    """Launch run.py and translate its stdout into phase/activity events."""
-    cmd = ["uv", "run", "python", "run.py", "--domain", run.domain, "--agent", "--auto-resolve"]
-    if run.mode == "golden":
-        cmd.append("--golden")          # offline cached replay — instant, $0
-    else:
-        cmd.append("--fresh")           # genuinely live — bypass the read-cache, hit the provider
+    """Launch run.py and translate its stdout into phase/activity events. Always LIVE (--fresh):
+    a triggered run executes the real pipeline for the real time it takes. The displayed case
+    deliverable is the curated archive/ suite regardless — the live run proves the engine runs."""
+    cmd = ["uv", "run", "python", "run.py", "--domain", run.domain, "--agent", "--auto-resolve",
+           "--fresh"]               # genuinely live — bypass the read-cache, hit the provider
     env = {**os.environ, "PYTHONUNBUFFERED": "1"}
     run.emit({"type": "stage", "stage": "upload", "state": "active"})
     try:
@@ -169,10 +230,9 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/run":
             body = self._read_json()
             domain = str(body.get("domain", "o2c")).strip() or "o2c"
-            mode = "golden" if str(body.get("mode", "live")) == "golden" else "live"
             if not (ROOT / "inputs" / domain).is_dir():
                 return self._json(400, {"error": f"unknown domain '{domain}'"})
-            run = Run(domain, mode)
+            run = Run(domain)          # always live (--fresh); no mode selector
             RUNS[run.id] = run
             threading.Thread(target=_spawn, args=(run,), daemon=True).start()
             return self._json(200, {"run_id": run.id, "stages": [
@@ -202,9 +262,31 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, f.read_bytes(), "application/json")
         if self.path.startswith("/api/findings/"):
             return self._findings(self.path.rsplit("/", 1)[-1])
+        if self.path == "/api/cases":
+            return self._json(200, {"cases": [_case_card(OPELLA_CASE)]})
+        if self.path.startswith("/api/case/"):
+            return self._case(self.path[len("/api/case/"):])
         if self.path.startswith("/reports/"):
             return self._static(self.path[len("/reports/"):])
+        if self.path.startswith("/archive/"):
+            return self._archive(self.path[len("/archive/"):])
         self._json(404, {"error": "not found"})
+
+    def _case(self, case_id: str) -> None:
+        """Full stage metadata for a case — the dashboard card plus everything the stage shells need
+        (the ingested doc list, the gap-gate summary, and the archive/ URLs each stage iframes)."""
+        case_id = case_id.split("?", 1)[0].rstrip("/")
+        if case_id != OPELLA_CASE["id"]:
+            return self._json(404, {"error": f"unknown case '{case_id}'"})
+        c = OPELLA_CASE
+        return self._json(200, {
+            **_case_card(c),
+            "input_docs": OPELLA_INPUT_DOCS,
+            "reports": [{**r, "url": f"/archive/output/{r['file']}"} for r in OPELLA_REPORTS],
+            # stage content lives in the self-contained archive/ suite, served via /archive/
+            "copilot_audit_url": "/archive/preview/07-copilot-audit-trail.html",
+            "preview_url": "/archive/preview/index.html",
+        })
 
     def _stream(self, run_id: str) -> None:
         run = RUNS.get(run_id)
@@ -257,15 +339,33 @@ class Handler(BaseHTTPRequestHandler):
             })
         return self._json(200, {"domain": domain, "findings": items})
 
-    def _static(self, rel: str) -> None:
-        # serve out/<rel>; guard against path traversal
-        target = (OUT / rel).resolve()
-        if not str(target).startswith(str(OUT.resolve())) or not target.is_file():
+    # MIME map shared by the static servers (archive/ adds pdf/csv/txt for the ingested docs)
+    _CTYPES = {".html": "text/html", ".css": "text/css", ".js": "text/javascript",
+               ".json": "application/json", ".svg": "image/svg+xml", ".pdf": "application/pdf",
+               ".csv": "text/csv", ".txt": "text/plain", ".png": "image/png"}
+
+    def _serve_under(self, base: Path, rel: str) -> None:
+        """Serve base/<rel> as a static file, guarding against path traversal outside base."""
+        rel = rel.split("?", 1)[0].split("#", 1)[0]
+        target = (base / rel).resolve()
+        if not str(target).startswith(str(base.resolve())) or not target.is_file():
             return self._json(404, {"error": "not found"})
-        ext = target.suffix.lower()
-        ctype = {".html": "text/html", ".css": "text/css", ".js": "text/javascript",
-                 ".json": "application/json", ".svg": "image/svg+xml"}.get(ext, "text/plain")
+        ctype = self._CTYPES.get(target.suffix.lower(), "application/octet-stream")
         self._send(200, target.read_bytes(), ctype)
+
+    def _static(self, rel: str) -> None:
+        self._serve_under(OUT, rel)
+
+    def _archive(self, rel: str) -> None:
+        # the curated demo suite (preview/output/input) — self-contained, served verbatim
+        self._serve_under(ARCHIVE, rel)
+
+
+def _case_card(c: dict) -> dict:
+    """The dashboard-card view of a case (the list row + summary fields)."""
+    return {k: c[k] for k in (
+        "id", "title", "domain", "client", "run_date", "duration_minutes",
+        "stage", "status", "doc_count", "gaps", "findings", "opportunities")}
 
 
 class _Server(ThreadingHTTPServer):
